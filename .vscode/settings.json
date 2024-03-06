@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+        "bfloat",
+        "cuda",
+        "CUDA",
+        "cudnn",
+        "cupy",
+        "cupyx",
+        "cutensor",
+        "libcudart",
+        "Mila",
+        "Narval",
+        "nccl",
+        "NCCL",
+        "pkgs",
+        "sbatch",
+        "setattr",
+        "slurm",
+        "SLURM",
+        "venv",
+        "virtualenv",
+        "vllm",
+        "VLLM"
+    ]
+}
