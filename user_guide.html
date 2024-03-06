@@ -1,0 +1,393 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API Reference" href="api.html" /><link rel="prev" title="Vector AI Engineering template repository" href="index.html" />
+
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+        <title>User Guide - Vector AI Engineering template repository</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #faad1a;
+  --color-brand-content: #eb088a;
+  --color-foreground-secondary: #52c7de;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #faad1a;
+  --color-brand-content: #eb088a;
+  --color-foreground-secondary: #52c7de;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Vector AI Engineering template repository</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">Vector AI Engineering template repository</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">User Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/api/aieng_template.html">aieng_template namespace</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of aieng_template namespace</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/api/aieng_template.bar.html">aieng_template.bar module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/api/aieng_template.foo.html">aieng_template.foo module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="user-guide">
+<span id="id1"></span><h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">#</a></h1>
+<section id="pyproject-toml-file-and-dependency-management">
+<h2>pyproject.toml file and dependency management<a class="headerlink" href="#pyproject-toml-file-and-dependency-management" title="Link to this heading">#</a></h2>
+<p>If your project doesn’t have a pyproject.toml file, simply copy the one from the
+template and update file according to your project.</p>
+<p>For managing dependencies, <a class="reference external" href="https://python-poetry.org/">Poetry</a> is the recommended tool
+for our team. Hence, install Poetry to setup the development virtual environment. Poetry
+supports <a class="reference external" href="https://python-poetry.org/docs/managing-dependencies/#optional-groups">optional dependency groups</a>
+which help manage dependencies for different parts of development such as <code class="docutils literal notranslate"><span class="pre">documentation</span></code>,
+<code class="docutils literal notranslate"><span class="pre">testing</span></code>, etc. The core dependencies are installed using the command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Additional dependency groups can be installed using the <code class="docutils literal notranslate"><span class="pre">--with</span></code> flag. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>docs,test
+</pre></div>
+</div>
+<div class="important admonition">
+<p class="admonition-title">mypy configuration options</p>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">mypy</span></code> configuration in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> disallows subclassing
+the <code class="docutils literal notranslate"><span class="pre">Any</span></code> type - <code class="docutils literal notranslate"><span class="pre">allow_subclassing_any</span> <span class="pre">=</span> <span class="pre">false</span></code>. In cases where the type checker
+is not able to determine the types of objects in some external library (e.g. <code class="docutils literal notranslate"><span class="pre">PyTorch</span></code>),
+it will treat them as <code class="docutils literal notranslate"><span class="pre">Any</span></code> and raise errors. If your codebase has many of such
+cases, you can set <code class="docutils literal notranslate"><span class="pre">allow_subclassing_any</span> <span class="pre">=</span> <span class="pre">true</span></code> in the <code class="docutils literal notranslate"><span class="pre">mypy</span></code> configuration or
+remove it entirely to use the default value (which is <code class="docutils literal notranslate"><span class="pre">true</span></code>). For example, in
+a <code class="docutils literal notranslate"><span class="pre">PyTorch</span></code> project, subclassing <code class="docutils literal notranslate"><span class="pre">nn.Module</span></code> will raise errors if <code class="docutils literal notranslate"><span class="pre">allow_subclassing_any</span></code>
+is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+</div>
+</section>
+<section id="pre-commit">
+<h2>pre-commit<a class="headerlink" href="#pre-commit" title="Link to this heading">#</a></h2>
+<p>You can use <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to run pre-commit hooks (code checks,
+liniting, etc.) when you run <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> and commit your code. Simply copy the
+<code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code> file to the root of the repository and install the test
+dependencies which installs pre-commit. Then run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>If you prefer to not enforce using pre-commit every time you run <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code>,
+you will have to run <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code> from the command line before you
+commit your code.</p>
+<div class="important admonition">
+<p class="admonition-title">hook configuration</p>
+<p>Some of the pre-commit hooks use <a class="reference external" href="https://pre-commit.com/hooks.html">supported hooks</a>
+from the web.</p>
+<p>For some others, they are locally installed and hence use the python virtual environment
+locally. If <code class="docutils literal notranslate"><span class="pre">language</span></code> is set to <code class="docutils literal notranslate"><span class="pre">python</span></code>, each time the hook is installed, a separate
+python virtual environment is created and you can specify dependencies needed using
+<code class="docutils literal notranslate"><span class="pre">additional_dependencies</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">language</span></code> is set to <code class="docutils literal notranslate"><span class="pre">system</span></code>, the activated python virtual environment is used and
+and hence you have to ensure that the required dependencies and their versions are
+correctly installed.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest</span>
+<span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3 -m pytest -m &quot;not integration_test&quot;</span>
+<span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python/system</span><span class="w"> </span><span class="c1"># set according to your project needs</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="documentation">
+<h2>documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h2>
+<p>If your project doesn’t have documentation, copy the directory named <code class="docutils literal notranslate"><span class="pre">docs</span></code> to the root
+directory of your repository. The provided source files use <a class="reference external" href="https://pradyunsg.me/furo/">Furo</a>,
+a clean and customisable Sphinx documentation theme.</p>
+<p>In order to build the documentation, install the documentation dependencies as mentioned
+in the previous section, navigate to the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder and run the command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>You can configure the documentation by updating the <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>. The markdown
+files in <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> can be updated to reflect the project’s documentation.</p>
+</section>
+<section id="github-actions">
+<h2>github actions<a class="headerlink" href="#github-actions" title="Link to this heading">#</a></h2>
+<p>The template consists of some github action continuous integration workflows that you
+can add to your repository.</p>
+<p>The available workflows are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/code_checks.yml">code checks</a>: Static code analysis, code formatting and unit tests</p></li>
+<li><p><a class="reference external" href="https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/docs_deploy.yml">documentation</a>: Project documentation including example API reference</p></li>
+<li><p><a class="reference external" href="https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/integration_tests.yml">integration tests</a>: Integration tests</p></li>
+<li><p><a class="reference external" href="https://github.com/VectorInstitute/aieng-template/blob/main/.github/workflows/publish.yml">publish</a>:
+Publishing python package to PyPI. Create a <code class="docutils literal notranslate"><span class="pre">PYPI_API_TOKEN</span></code> and add it to the
+repository’s actions <a class="reference external" href="https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions">secret variables</a>
+in order to publish PyPI packages when new software releases are created on Github.</p></li>
+</ul>
+<p>The test workflows also compute coverage and upload code coverage metrics to
+<a class="reference external" href="https://app.codecov.io/gh/VectorInstitute/aieng-template">codecov.io</a>. Create a
+<code class="docutils literal notranslate"><span class="pre">CODECOV_TOKEN</span></code> and add it to the repository’s actions <a class="reference external" href="https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions">secret variables</a>.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="api.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Vector AI Engineering
+            </div>
+            <!--
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+            -->
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/VectorInstitute/aieng-template" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">User Guide</a><ul>
+<li><a class="reference internal" href="#pyproject-toml-file-and-dependency-management">pyproject.toml file and dependency management</a></li>
+<li><a class="reference internal" href="#pre-commit">pre-commit</a></li>
+<li><a class="reference internal" href="#documentation">documentation</a></li>
+<li><a class="reference internal" href="#github-actions">github actions</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=ccdb6887"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>
