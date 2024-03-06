@@ -1,0 +1,48 @@
+name: code checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/code_checks.yml
+      - '**.py'
+      - poetry.lock
+      - pyproject.toml
+      - '**.ipynb'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/code_checks.yml
+      - '**.py'
+      - poetry.lock
+      - pyproject.toml
+      - '**.ipynb'
+
+jobs:
+  run-code-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - uses: actions/setup-python@v5.0.0
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+      - name: Install dependencies and check code
+        run: |
+          poetry env use '3.10'
+          source .venv/bin/activate
+          poetry install --with test --all-extras
+          pre-commit run --all-files
+      - name: pip-audit (gh-action-pip-audit)
+        uses: pypa/gh-action-pip-audit@v1.0.8
+        with:
+          virtual-environment: .venv/

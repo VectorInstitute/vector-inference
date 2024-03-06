@@ -1,0 +1,137 @@
+[tool.poetry]
+name = "aieng-template"
+version = "1.0.0"
+description = "A template for AI Engineering projects at the Vector Institute"
+authors = ["Vector AI Engineering <ai_engineering@vectorinstitute.ai>"]
+license = "Apache-2.0"
+repository = "https://github.com/VectorInstitute/aieng-template"
+documentation = "https://vectorinstitute.github.io/aieng-template/"
+packages = [
+    { include = "aieng_template" },
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9, <3.13"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.1.1"
+pre-commit = "^2.17.0"
+pytest-cov = "^3.0.0"
+codecov = "^2.1.13"
+mypy = "^1.7.0"
+ruff = "^0.2.0"
+nbqa = { version = "^1.7.0", extras = ["toolchain"] }
+pip-audit = "^2.7.1"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+numpydoc = "^1.2"
+sphinx = "^7.2.5"
+sphinxcontrib-apidoc = "^0.4.0"
+sphinx-autodoc-typehints = "^1.24.0"
+myst-parser = "^2.0.0"
+sphinx-design = "^0.5.0"
+sphinx-copybutton = "^0.5.0"
+sphinx-autoapi = "^2.0.0"
+nbsphinx = "^0.9.3"
+ipython = "^8.8.0"
+ipykernel = "^6.23.0"
+furo = "^2024.01.29"
+
+[tool.mypy]
+ignore_missing_imports = true
+install_types = true
+pretty = true
+namespace_packages = true
+explicit_package_bases = true
+non_interactive = true
+warn_unused_configs = true
+allow_any_generics = false
+allow_subclassing_any = false
+allow_untyped_calls = false
+allow_untyped_defs = false
+allow_incomplete_defs = false
+check_untyped_defs = true
+allow_untyped_decorators = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+implicit_reexport = false
+strict_equality = true
+extra_checks = true
+
+[tool.ruff]
+include = ["*.py", "pyproject.toml", "*.ipynb"]
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "COM", # flake8-commas
+    "C4", # flake8-comprehensions
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "ICN", # flake8-import-conventions
+    "Q", # flake8-quotes
+    "RSE", # flake8-raise
+    "D", # pydocstyle
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "W", # pycodestyle
+    "N", # pep8-naming
+    "ERA", # eradicate
+    "PL", # pylint
+]
+fixable = ["A", "B", "COM", "C4", "RET", "SIM", "ICN", "Q", "RSE", "D", "E", "F", "I", "W", "N", "ERA", "PL"]
+ignore = [
+    "B905", # `zip()` without an explicit `strict=` parameter
+    "E501", # line too long
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "PLR2004", # Replace magic number with named constant
+    "PLR0913", # Too many arguments
+    "COM812", # Missing trailing comma
+]
+
+# Ignore import violations in all `__init__.py` files.
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "F811"]
+
+[tool.ruff.lint.pep8-naming]
+ignore-names = ["X*", "setUp"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+[tool.pytest.ini_options]
+markers = [
+    "integration_test: marks tests as integration tests",
+]
+
+[tool.coverage]
+    [tool.coverage.run]
+    source=["aieng_template"]
+    omit=["tests/*", "*__init__.py"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

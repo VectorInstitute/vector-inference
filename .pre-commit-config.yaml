@@ -1,0 +1,57 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Use the ref you want to point at
+    hooks:
+    - id: trailing-whitespace
+    - id: check-ast
+    - id: check-builtin-literals
+    - id: check-docstring-first
+    - id: check-executables-have-shebangs
+    - id: debug-statements
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+      args: [--fix=lf]
+    - id: requirements-txt-fixer
+    - id: check-yaml
+    - id: check-toml
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.2.2'
+    hooks:
+    - id: ruff
+      args: [--fix, --exit-non-zero-on-fix]
+      types_or: [python, jupyter]
+    - id: ruff-format
+      types_or: [python, jupyter]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+    - id: mypy
+      entry: python3 -m mypy --config-file pyproject.toml
+      language: system
+      types: [python]
+      exclude: "tests"
+
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.7.1
+    hooks:
+    - id: nbqa-ruff
+      args: [--fix, --exit-non-zero-on-fix]
+
+  - repo: local
+    hooks:
+    - id: doctest
+      name: doctest
+      entry: python3 -m doctest -o NORMALIZE_WHITESPACE
+      files: "^aieng_template/"
+      language: system
+
+  - repo: local
+    hooks:
+    - id: pytest
+      name: pytest
+      entry: python3 -m pytest -m "not integration_test"
+      language: system
+      pass_filenames: false
+      always_run: true
