@@ -131,4 +131,10 @@ dmypy.json
 # pycharm
 .idea/
 
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
 logs/
