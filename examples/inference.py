@@ -11,7 +11,6 @@ client = OpenAI(base_url=base_url, api_key="EMPTY")
 completion = client.completions.create(
     model="/model-weights/Llama-2-7b-hf",
     prompt="Where is the capital of Canada?",
-    temperature=0.01,
     max_tokens=20,
 )
 

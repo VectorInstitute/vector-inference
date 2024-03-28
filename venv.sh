@@ -1,6 +1,6 @@
 #!bin/bash
 
-# Load python module on Vector cluster and install poetry
+# Load python module if you are on Vector cluster and install poetry
 module load python/3.10.12
 pip install poetry
 

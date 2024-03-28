@@ -8,17 +8,15 @@ export MODEL_NAME="llama2"
 export MODEL_VARIANT="7b"
 export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_api_base_url"
  
-# Variables specific to your working environment
-export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
+# Variables specific to your working environment, below are examples for the Vector cluster
+export VENV_BASE=/ssd005/projects/llm/vllm-ray-env
 export VLLM_MODEL_WEIGHTS=/model-weights/Llama-2-${MODEL_VARIANT}-hf
+export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
 export JOB_NAME="vllm/${MODEL_NAME}-${MODEL_VARIANT}"
 export NUM_GPUS=1
 export JOB_PARTITION="a40"
-
-# Configuration for Vector cluster
-export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # ======================================= Optional Settings ========================================
 

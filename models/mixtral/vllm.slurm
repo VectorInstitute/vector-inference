@@ -3,10 +3,10 @@
 #SBATCH --qos=m3
 #SBATCH --mem=64G
 
-# Note to users: 
-# instead of invoking this script directly via 
-# sbatch, use `bash openai_entrypoint.sh`
+# NOTE: Instead of invoking this script directly via sbatch, use `bash openai_entrypoint.sh`
 # to keep track of environment configurations.
+
+# Load CUDA, change to the cuda version on your environment if different
 module load cuda-12.3
 
 source ${VENV_BASE}/bin/activate
