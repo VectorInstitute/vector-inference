@@ -141,4 +141,7 @@ dmypy.json
 *.out
 *.err
 
+# Server url files
+.vllm_api_base_url
+
 logs/

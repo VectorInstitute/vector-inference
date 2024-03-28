@@ -6,7 +6,7 @@
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
 export MODEL_NAME="llama2"
 export MODEL_VARIANT="7b"
-export VLLM_BASE_URL_FILENAME="$(pwd)/.vllm_api_base_url"
+export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_api_base_url"
  
 # Variables specific to your working environment
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
@@ -80,6 +80,6 @@ echo Data Type: ${VLLM_DATA_TYPE}
 sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
     --gres gpu:${NUM_GPUS} \
-    --output vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out\
-    --error vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err\
-    vllm.slurm
+    --output $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out\
+    --error $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err\
+    $(dirname $(realpath "$0"))/vllm.slurm
