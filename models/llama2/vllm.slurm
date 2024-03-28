@@ -1,11 +1,14 @@
 #!/bin/bash
-#SBATCH --output logs/slurm.log
-#SBATCH --error logs/slurm.log
+#SBATCH --cpus-per-task=16
+#SBATCH --qos=m3
+#SBATCH --mem=32G
 
 # Note to users: 
 # instead of invoking this script directly via 
 # sbatch, use `bash openai_entrypoint.sh`
 # to keep track of environment configurations.
+module load cuda-12.3
+
 source ${VENV_BASE}/bin/activate
 
 
@@ -26,7 +29,7 @@ echo ${vllm_base_url} > ${VLLM_BASE_URL_FILENAME}
 export 
 cd ~
 python3 -m vllm.entrypoints.openai.api_server \
---model ${VLLM_MODEL_NAME} \
+--model ${VLLM_MODEL_WEIGHTS} \
 --host "0.0.0.0" \
 --port ${vllm_port_number} \
 --tensor-parallel-size ${NUM_GPUS} \
