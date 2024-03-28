@@ -67,6 +67,11 @@ fi
 
 # ========================================= Launch Server ==========================================
 
+# Create a file to store the API server URL if it doesn't exist
+if [ -f ${VLLM_BASE_URL_FILENAME} ]; then
+    touch ${VLLM_BASE_URL_FILENAME}
+fi
+
 echo Job Name: ${JOB_NAME}
 echo Partition: ${JOB_PARTITION}
 echo Generic Resource Scheduling: gpu:${NUM_GPUS}

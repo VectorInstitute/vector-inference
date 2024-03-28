@@ -137,4 +137,8 @@ dmypy.json
 # MacOS
 .DS_Store
 
+# Slurm logs
+*.out
+*.err
+
 logs/
