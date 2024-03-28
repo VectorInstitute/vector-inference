@@ -17,14 +17,16 @@ export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/
 export JOB_NAME="vllm/${MODEL_NAME}-${MODEL_VARIANT}"
 export NUM_GPUS=1
 export JOB_PARTITION="a40"
+export QOS="m3"
 
 # ======================================= Optional Settings ========================================
 
-while getopts p:n:t:e:v flag
+while getopts p:n:q:t:e:v flag
 do 
     case "${flag}" in
         p) partition=${OPTARG};;
         n) num_gpus=${OPTARG};;
+        q) qos=${OPTARG};;
         t) data_type=${OPTARG};;
         e) virtual_env=${OPTARG};;
         v) model_variant=${OPTARG};;
@@ -37,6 +39,10 @@ fi
 
 if [ -n "$num_gpus" ]; then
     export NUM_GPUS=$num_gpus
+fi
+
+if [ -n "$qos" ]; then
+    export QOS=$qos
 fi
 
 if [ -n "$data_type" ]; then
@@ -78,6 +84,7 @@ echo Data Type: ${VLLM_DATA_TYPE}
 sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
     --gres gpu:${NUM_GPUS} \
+    --qos ${QOS} \
     --output $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out\
     --error $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err\
     $(dirname $(realpath "$0"))/vllm.slurm

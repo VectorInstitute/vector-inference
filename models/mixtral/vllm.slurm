@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --cpus-per-task=16
-#SBATCH --qos=m3
 #SBATCH --mem=64G
 
 # NOTE: Instead of invoking this script directly via sbatch, use `bash openai_entrypoint.sh`
