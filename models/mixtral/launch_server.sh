@@ -77,6 +77,6 @@ sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
-    --output $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out\
-    --error $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err\
+    --output $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}.%j.out\
+    --error $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}.%j.err\
     $(dirname $(realpath "$0"))/vllm.slurm

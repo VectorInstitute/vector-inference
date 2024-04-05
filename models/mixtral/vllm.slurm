@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
+#SBATCH --time=04:00:00
 
 # NOTE: Instead of invoking this script directly via sbatch, use `bash openai_entrypoint.sh`
 # to keep track of environment configurations.
