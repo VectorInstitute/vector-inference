@@ -1,110 +1,42 @@
-# VLLM for the Vector Cluster
+# Vector Inference: Easy inference on Slurm clusters
+This repository provides an easy and simple solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters. All scripts in this repository runs natively on the Vector Institute cluster environment, and can be easily adapted to other environments.  
 
 ## Installation
+If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, you can skip this step and go to the next section. Otherwise, you might need up to 10GB of storage to setup your own virtual environment. The following steps needs to be run only once for each user.
 
-On the Vector Cluster, we've provided a read-only reference virtual environment with vLLM pre-installed at `/ssd005/projects/llm/vllm-ray-env`. Unless you plan to install custom packages in the same virtual environment or set up the environment on a different cluster, you may skip ahead to the "Launching" section.
-
-If you want to setup the vLLM virtual environment on your own, you might need up to 10GB of storage. The following steps needs to be run only once for each user.
-
-### Virtual Env
-
+1. Setup the virtual environment for running inference servers, run 
 ```bash
-module load python/3.10
-python3 -m venv env
-echo "module unload python" >> env/bin/activate
-source env/bin/activate
+bash venv.sh
+```
+More details can be found in [venv.sh](venv.sh), make sure to adjust the commands to your environment if you're not using the Vector cluter.
 
+2. Locate your virtual environment by running
+```bash
+poetry env info --path
 ```
 
-After creating a virtual environment, be sure to un-load the python module to install to the virtual environment and not user default path.
-
-Verify that the virtual environment is actually selected using the following one-line command:
-
+## Launch an inference server
+We will use the Llama 2 model as example, to launch an inference server for Llama 2-7b, run
 ```bash
-python3 -c 'import sys; print(sys.prefix)'  # should print virtual-env path
-python3 -c 'import sys; print(sys.base_prefix)' # /pkgs/python-3.10.12
-pip3 install -U --require-virtualenv pip
+bash models/llama2/launch_server.sh
 ```
+You should see an output like the following:
+> Job Name: vllm/llama2-7b
+> 
+> Partition: a40
+> 
+> Generic Resource Scheduling: gpu:1
+> 
+> Data Type: auto
+> 
+> Submitted batch job 12217446
 
-### Nvidia Packages and Libraries
-
-VLLM tensor parallelism invokes NCCL (the Nvidia CUDA communication library) via cupy.
-More info here: [link](https://github.com/vllm-project/vllm/blob/22de45235/vllm/model_executor/parallel_utils/cupy_utils.py#L78-L80)
-
-Overall steps:
-
-- Module-Load CUDA shared objects (from the cluster).
-- Pip-Install cupy wheel, pinned to a specific version where setattr is allowed.
-- Install NCCL libraries with cupy
-
-Module-Load CUDA shared objects (libcudart.so.11.0, etc.) from the cluster. Add these to the virtualenv activate script so the shared objects are added to PATH automatically next time.
-
+If you want to use your own virtual environment, you can run this instead:
 ```bash
-deactivate
-# TODO: Update this line when the cluster adds a cuda-12 shared object package.
-echo "module load cuda-11.8" >> env/bin/activate
-source env/bin/activate
+bash models/llama2/launch_server.sh -e $(poetry env info --path)
 ```
+By default, the `launch_server.sh` script in Llama 2 folder uses the 7b variant, you can switch to other variants with the `-v` flag, and make sure to change the requested resource accordingly. More information about the flags and customizations can be found in the [`models`](models) folder. The inference server is compatible with the OpenAI `Completion` and `ChatCompletion` API. You can inspect the Slurm output files to see whether inference server is ready.
 
-Install cupy wheel. Because vLLM requires bfloat16 while cupy does not support bfloat16, vLLM leveraged some workarounds that require `setattr` access. This workaround works only for certain cupy versions.
-[cupy bfloat16](https://github.com/cupy/cupy/blob/2fd0b819b/cupy/_core/dlpack.pyx#L319)
-[vllm cupy bfloat16 workarounds](https://github.com/vllm-project/vllm/blob/22de45235/vllm/model_executor/parallel_utils/cupy_utils.py#L104-L110)
-
-For entertainment purposes, here's the particular commit which seems to break the vLLM workaround. ([link](https://github.com/cupy/cupy/commit/80dade7b33ded1f50fb5297ac466d00dfcf3f2c5), [blame](https://github.com/cupy/cupy/blame/main/cupy/_core/core.pyx#L126), [issue](https://github.com/cupy/cupy/issues/7883) requesting that this workaround should be broken).
-
-To install the wheel for a cupy version where this workaround is not intentionally broken, run the following:
-
-```bash
-pip install -U --require-virtualenv "cupy-cuda11x==12.1.0"
-```
-
-Install NVIDIA packages via cupy:
-
-```bash
-python -m cupyx.tools.install_library --cuda "11.x" --library nccl
-python -m cupyx.tools.install_library --cuda "11.x" --library cutensor
-python -m cupyx.tools.install_library --cuda "11.x" --library cudnn
-```
-
-### Packages
-
-Install vLLM and dependency packages:
-
-- vLLM, via pre-built wheels
-- ray, for multi-gpu tensor parallelism.
-
-```bash
-pip3 install -U --require-virtualenv ray vllm
-```
-
-## Launching and Testing
-
-The `openai_entrypoint.sh` script provides a convenient way to launch a multi-GPU vLLM server as a SLURM job. The inference server is compatible with the OpenAI `Completion` and `ChatCompletion` API.
-
-Note that there is no direct way to obtain the address of the worker node until SLURM assigns the job. To communicate API base URL back to you, the script provides to option to write that information to a file specified in `VLLM_BASE_URL_FILENAME` in the config. Refer to [configs.md](configs.md#VLLM_BASE_URL_FILENAME) for more info.
-
-Edit configurations in slurm.env as needed. We provide example configurations for the following clusters:
-
-- Vector (Vaughan)
-- Mila
-- Compute Canada (Narval)
-
-Instead of invoking the SLURM script directly with sbatch, you might want to invoke openai_entrypoint.sh to apply your custom configurations.
-
-```bash
-source slurm.env
-bash openai_entrypoint.sh
-```
-
-After the job has started, invoke test.sh to the API status.
-
-```bash
-source slurm.env  # load VLLM_BASE_URL_FILENAME
-bash test.sh
-```
-
-Example output:
-
-> API_BASE_URL: http://gpu105:19568/v1
->
-> {"id":"cmpl-e01cb03c3f05436a9f2e6a000420b461","object":"chat.completion","created":1072630,"model":"google/gemma-2b-it","choices":[{"index":0,"message":{"role":"assistant","content":"The sky appears blue due to Rayleigh scattering. Rayleigh scattering is the scattering of light by molecules in the Earth's atmosphere. Blue light has a shorter wavelength than other colors of light, so it is scattered more strongly. This is why the sky appears blue to us."},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":17,"total_tokens":72,"completion_tokens":55}}
+## Send inference requests
+Once the inference server is ready, you can start sending in inference requests. We provide example [Python](examples/inference.py) and [Bash](examples/inference.sh) scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model name and location in the scripts. You can run either `python examples/inference.py` or `bash examples/inference.sh`, and you should expect to see an output like the following:
+> {"id":"cmpl-bdf43763adf242588af07af88b070b62","object":"text_completion","created":2983960,"model":"/model-weights/Llama-2-7b-hf","choices":[{"index":0,"text":"\nCanada is close to the actual continent of North America. Aside from the Arctic islands","logprobs":null,"finish_reason":"length"}],"usage":{"prompt_tokens":8,"total_tokens":28,"completion_tokens":20}}

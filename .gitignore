@@ -131,4 +131,17 @@ dmypy.json
 # pycharm
 .idea/
 
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Slurm logs
+*.out
+*.err
+
+# Server url files
+.vllm_api_base_url
+
 logs/
