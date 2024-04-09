@@ -8,11 +8,16 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 bash venv.sh
 ```
-More details can be found in [venv.sh](venv.sh), make sure to adjust the commands to your environment if you're not using the Vector cluter.
+More details can be found in [venv.sh](venv.sh), make sure to adjust the commands to your environment if you're not using the Vector cluster.
 
 2. Locate your virtual environment by running
 ```bash
 poetry env info --path
+```
+
+3. OPTIONAL: If you want to enable [FlashAttention](https://github.com/Dao-AILab/flash-attention), run the following installtion command inside your environment:
+```bash
+pip install flash-attn --no-build-isolation
 ```
 
 ## Launch an inference server
