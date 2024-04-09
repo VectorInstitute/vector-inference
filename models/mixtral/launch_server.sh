@@ -5,7 +5,7 @@
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
 export MODEL_NAME="mixtral"
-export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_api_base_url"
+export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_mixtral_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
@@ -20,35 +20,40 @@ export QOS="m3"
 
 # ======================================= Optional Settings ========================================
 
-while getopts p:n:q:t:e flag
-do 
+while getopts "p:n:q:t:e:v:" flag; do 
     case "${flag}" in
         p) partition=${OPTARG};;
         n) num_gpus=${OPTARG};;
         q) qos=${OPTARG};;
         t) data_type=${OPTARG};;
         e) virtual_env=${OPTARG};;
+        *) echo "Invalid option: $flag" ;;
     esac
 done
 
 if [ -n "$partition" ]; then
     export JOB_PARTITION=$partition
+    echo "Partition set to: ${JOB_PARTITION}"
 fi
 
 if [ -n "$num_gpus" ]; then
     export NUM_GPUS=$num_gpus
+    echo "Number of GPUs set to: ${NUM_GPUS}"
 fi
 
 if [ -n "$qos" ]; then
     export QOS=$qos
+    echo "QOS set to: ${QOS}"
 fi
 
 if [ -n "$data_type" ]; then
     export VLLM_DATA_TYPE=$data_type
+    echo "Data type set to: ${VLLM_DATA_TYPE}"
 fi
 
 if [ -n "$virtual_env" ]; then
     export VENV_BASE=$virtual_env
+    echo "Virtual environment set to: ${VENV_BASE}"
 fi
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs

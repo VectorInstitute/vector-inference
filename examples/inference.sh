@@ -1,15 +1,10 @@
-# Did you modify this line in openai_entrypoint.sh?
-# If so, modify it here accordingly.
-model_type="llama2"
-top_directory=$(dirname $(dirname $(realpath "$0")))
-VLLM_BASE_URL_FILENAME=${top_directory}/models/${model_type}/.vllm_api_base_url
-
-API_BASE_URL=$(cat ${VLLM_BASE_URL_FILENAME})
+# The url is located in the .vllm_model-variant_url file in the corresponding model directory.
+export API_BASE_URL=http://gpuXXX:XXXXX/v1
 
 curl ${API_BASE_URL}/completions \
    -H "Content-Type: application/json" \
    -d '{
-       "model": "/model-weights/Llama-2-7b-hf",
+       "model": "/model-weights/Llama-2-13b-hf",
        "prompt": "What is the capital of Canada?",
        "max_tokens": 20
    }'
