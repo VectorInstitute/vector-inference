@@ -15,7 +15,7 @@ More details can be found in [venv.sh](venv.sh), make sure to adjust the command
 poetry env info --path
 ```
 
-3. OPTIONAL: If you want to enable [FlashAttention](https://github.com/Dao-AILab/flash-attention), run the following installtion command inside your environment:
+3. OPTIONAL: If you want to enable [FlashAttention](https://github.com/Dao-AILab/flash-attention) backend, run the following installtion command inside your environment:
 ```bash
 pip install flash-attn --no-build-isolation
 ```
