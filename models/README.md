@@ -3,7 +3,7 @@ The following environment variables all have default values that's suitable for 
 
 * **MODEL_NAME**: Name of model family, supported model families inlcude: **llama2**, **mixtral**.
 * **MODEL_VARIANT**: Variant of the model, the variants available are listed in respective model folders.
-* **VLLM_BASE_URL_FILENAME**: The file to store the inference server URL, this file would be generated after launching an inference server, and it would be located in the corresponding model folder with the name `.vllm_api_base_url`.
+* **VLLM_BASE_URL_FILENAME**: The file to store the inference server URL, this file would be generated after launching an inference server, and it would be located in the corresponding model folder with the name `.vllm_{model-name}-{model-variant}_url`.
 * **VENV_BASE**: Location of the virtual environment.
 * **VLLM_MODEL_WEIGHTS**: Location of the model weights.
 * **VLLM_DATA_TYPE**: Model data type.
