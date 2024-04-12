@@ -3,7 +3,7 @@
 
 | Variant | Suggested resource allocation |
 |:----------:|:----------:|
-| [`7b`](https://huggingface.co/meta-llama/Llama-2-7b-hf) | 1x a40 | 
+| [**`7b`**](https://huggingface.co/meta-llama/Llama-2-7b-hf) | 1x a40 | 
 | [`7b-chat`](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) | 1x a40 | 
 | [`13b`](https://huggingface.co/meta-llama/Llama-2-13b-hf) | 2x a40 | 
 | [`13b-chat`](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) | 2x a40 |
