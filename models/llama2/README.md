@@ -1,4 +1,4 @@
-# [Meta Llama 2](https://huggingface.co/meta-llama) 
+# [Meta: Llama 2](https://huggingface.co/meta-llama) 
 * Supported model variants:
 
 | Variant | Suggested resource allocation |
