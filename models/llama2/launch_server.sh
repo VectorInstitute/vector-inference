@@ -4,10 +4,10 @@
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_NAME="llama2"
+export MODEL_NAME="Llama2"
 export MODEL_VARIANT="7b"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
-export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vllm_${MODEL_NAME}-${MODEL_VARIANT}_url"
+export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
@@ -15,7 +15,7 @@ export VLLM_MODEL_WEIGHTS=/model-weights/Llama-2-${MODEL_VARIANT}-hf
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
-export JOB_NAME="vllm/${MODEL_NAME}-${MODEL_VARIANT}"
+export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
 export NUM_GPUS=1
 export JOB_PARTITION="a40"
 export QOS="m3"
@@ -64,8 +64,8 @@ if [ -n "$model_variant" ]; then
     echo "Model variant set to: ${MODEL_VARIANT}"
 
     export VLLM_MODEL_WEIGHTS=/model-weights/Llama-2-${MODEL_VARIANT}-hf
-    export JOB_NAME="vllm/${MODEL_NAME}-${MODEL_VARIANT}"
-    export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_${MODEL_NAME}-${MODEL_VARIANT}_url"
+    export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
+    export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs

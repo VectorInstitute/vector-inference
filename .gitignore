@@ -142,6 +142,6 @@ dmypy.json
 *.err
 
 # Server url files
-.vllm*
+.vLLM*
 
 logs/

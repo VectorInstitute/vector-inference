@@ -66,4 +66,5 @@ python3 -m vllm.entrypoints.openai.api_server \
 --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
 --dtype ${VLLM_DATA_TYPE} \
 --load-format safetensors \
---trust-remote-code 
+--trust-remote-code \
+--max-model-len 22192

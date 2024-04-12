@@ -6,15 +6,15 @@
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
 export MODEL_NAME="dbrx-instruct"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
-export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vllm_${MODEL_NAME}_url"
+export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
-export VLLM_MODEL_WEIGHTS=/model-weights/dbrx-instruct
+export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
-export JOB_NAME="vllm/${MODEL_NAME}"
+export JOB_NAME="vLLM/${MODEL_NAME}"
 export NUM_NODES=2
 export NUM_GPUS=4
 export JOB_PARTITION="a40"
