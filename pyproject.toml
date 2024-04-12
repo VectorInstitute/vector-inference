@@ -12,6 +12,9 @@ vllm = "^0.4.0"
 ray = "^2.9.3"
 cupy-cuda12x = "12.1.0"
 
+[tool.poetry.group.test]
+optional = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
