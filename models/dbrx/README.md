@@ -1,4 +1,4 @@
-# [Databricks DBRX](https://huggingface.co/databricks) 
+# [Databricks: DBRX](https://huggingface.co/databricks) 
 * Supported model variants:
 
 | Variant | Suggested resource allocation |
