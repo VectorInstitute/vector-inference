@@ -5,7 +5,8 @@
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
 export MODEL_NAME="mixtral"
-export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vllm_mixtral_url"
+export MODEL_DIR="$(dirname $(realpath "$0"))"
+export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vllm_mixtral_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
@@ -20,7 +21,7 @@ export QOS="m3"
 
 # ======================================= Optional Settings ========================================
 
-while getopts "p:n:q:t:e:v:" flag; do 
+while getopts "p:n:q:t:e:" flag; do 
     case "${flag}" in
         p) partition=${OPTARG};;
         n) num_gpus=${OPTARG};;
@@ -78,10 +79,18 @@ echo Partition: ${JOB_PARTITION}
 echo Generic Resource Scheduling: gpu:${NUM_GPUS}
 echo Data Type: ${VLLM_DATA_TYPE}
 
-sbatch --job-name ${JOB_NAME} \
+echo "sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
     --output $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}.%j.out\
     --error $(dirname $(realpath "$0"))/vllm-${MODEL_NAME}.%j.err\
-    $(dirname $(realpath "$0"))/vllm.slurm
+    $(dirname $(dirname $(realpath "$0")))/vllm.slurm"
+
+sbatch --job-name ${JOB_NAME} \
+    --partition ${JOB_PARTITION} \
+    --gres gpu:${NUM_GPUS} \
+    --qos ${QOS} \
+    --output ${MODEL_DIR}/vllm-${MODEL_NAME}.%j.out\
+    --error ${MODEL_DIR}/vllm-${MODEL_NAME}.%j.err\
+    $(dirname ${MODEL_DIR})/vllm.slurm
