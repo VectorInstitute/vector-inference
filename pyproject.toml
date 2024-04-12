@@ -12,7 +12,10 @@ vllm = "^0.4.0"
 ray = "^2.9.3"
 cupy-cuda12x = "12.1.0"
 
-[tool.poetry.group.test]
+[tool.poetry.group.test.dependencies]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
 optional = true
 
 [build-system]
