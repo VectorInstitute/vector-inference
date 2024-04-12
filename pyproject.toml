@@ -12,11 +12,13 @@ vllm = "^0.4.0"
 ray = "^2.9.3"
 cupy-cuda12x = "12.1.0"
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.test]
 optional = true
+dependencies = []
 
-[tool.poetry.group.docs.dependencies]
+[tool.poetry.group.docs]
 optional = true
+dependencies = []
 
 [build-system]
 requires = ["poetry-core"]
