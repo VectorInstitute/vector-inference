@@ -10,9 +10,9 @@ The following environment variables all have default values that's suitable for 
 * **VLLM_DATA_TYPE**: Model data type.
 * **LD_LIBRARY_PATH**: Include custom locations for dynamically linked library files in a Unix-like operating system. In the script, we tell the dynamic linker to also look at the CUDA and cuDNN directories.
 * **JOB_NAME**: Slurm job name.
-* **NUM_NODES**: Numeber of nodes scheduled.
-* **NUM_GPUS**: Number of GPUs scheduled.
-* **JOB_PARTITION**: Type of compute partition.
+* **NUM_NODES**: Numeber of nodes scheduled. Default to suggested resource allocation.
+* **NUM_GPUS**: Number of GPUs scheduled. Default to suggested resource allocation.
+* **JOB_PARTITION**: Type of compute partition. Default to suggested resource allocation.
 * **QOS**: Quality of Service
 
 # Flags
