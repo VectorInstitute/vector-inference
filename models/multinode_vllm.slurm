@@ -67,4 +67,5 @@ python3 -m vllm.entrypoints.openai.api_server \
 --dtype ${VLLM_DATA_TYPE} \
 --load-format safetensors \
 --trust-remote-code \
---max-model-len 22192
+--max-model-len 22192 \
+--max-logprobs ${VLLM_MAX_LOGPROBS} 

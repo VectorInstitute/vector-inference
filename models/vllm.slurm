@@ -27,4 +27,5 @@ python3 -m vllm.entrypoints.openai.api_server \
 --host "0.0.0.0" \
 --port ${vllm_port_number} \
 --tensor-parallel-size ${NUM_GPUS} \
---dtype ${VLLM_DATA_TYPE}
+--dtype ${VLLM_DATA_TYPE} \
+--max-logprobs ${VLLM_MAX_LOGPROBS} 

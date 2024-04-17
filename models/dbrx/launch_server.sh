@@ -20,6 +20,8 @@ export NUM_GPUS=4
 export JOB_PARTITION="a40"
 export QOS="m3"
 
+# Model configuration
+export VLLM_MAX_LOGPROBS=100352
 # ======================================= Optional Settings ========================================
 
 while getopts "q:t:e:" flag; do 
