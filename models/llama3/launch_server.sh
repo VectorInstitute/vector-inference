@@ -4,14 +4,14 @@
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_NAME="Llama-2"
-export MODEL_VARIANT="7b"
+export MODEL_NAME="Meta-Llama-3"
+export MODEL_VARIANT="8B-Instruct"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
-export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}-hf
+export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
