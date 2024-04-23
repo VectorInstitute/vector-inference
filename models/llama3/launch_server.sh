@@ -5,7 +5,7 @@
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
 export MODEL_NAME="Meta-Llama-3"
-export MODEL_VARIANT="8B-Instruct"
+export MODEL_VARIANT="8B"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
@@ -65,7 +65,7 @@ if [ -n "$model_variant" ]; then
     export MODEL_VARIANT=$model_variant
     echo "Model variant set to: ${MODEL_VARIANT}"
 
-    export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}-hf"
+    export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
     export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
     export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
