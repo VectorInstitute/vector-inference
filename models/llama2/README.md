@@ -1,5 +1,4 @@
-# [Meta: Llama 2](https://huggingface.co/meta-llama) 
-* Supported model variants:
+# [Meta: Llama 2](https://huggingface.co/collections/meta-llama/llama-2-family-661da1f90a9d678b6f55773b) 
 
 | Variant | Suggested resource allocation |
 |:----------:|:----------:|
@@ -9,5 +8,3 @@
 | [`13b-chat`](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) | 2x a40 |
 | [`70b`](https://huggingface.co/meta-llama/Llama-2-70b-hf) | 4x a40 |
 | [`70b-chat`](https://huggingface.co/meta-llama/Llama-2-70b-chat-hf) | 4x a40 |
-
-* Profiling: COMING SOON
