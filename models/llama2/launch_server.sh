@@ -65,7 +65,7 @@ if [ -n "$model_variant" ]; then
     export MODEL_VARIANT=$model_variant
     echo "Model variant set to: ${MODEL_VARIANT}"
 
-    export VLLM_MODEL_WEIGHTS=/model-weights/Llama-2-${MODEL_VARIANT}-hf
+    export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}-hf"
     export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
     export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
@@ -96,6 +96,6 @@ sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
-    --output ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out\
-    --error ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err\
+    --output ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
+    --error ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
     $(dirname ${MODEL_DIR})/vllm.slurm
