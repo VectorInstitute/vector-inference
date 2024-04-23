@@ -4,17 +4,18 @@
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_NAME="dbrx-instruct"
+export MODEL_NAME="dbrx"
+export MODEL_VARIANT="instruct"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
-export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}_url"
+export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
-export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}
+export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
-export JOB_NAME="vLLM/${MODEL_NAME}"
+export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
 export NUM_NODES=2
 export NUM_GPUS=4
 export JOB_PARTITION="a40"
@@ -75,6 +76,6 @@ sbatch --job-name ${JOB_NAME} \
     --nodes ${NUM_NODES} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
-    --output ${MODEL_DIR}/vllm-${MODEL_NAME}.%j.out\
-    --error ${MODEL_DIR}/vllm-${MODEL_NAME}.%j.err\
+    --output ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
+    --error ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
     $(dirname ${MODEL_DIR})/multinode_vllm.slurm

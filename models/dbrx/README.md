@@ -1,8 +1,5 @@
 # [Databricks: DBRX](https://huggingface.co/databricks) 
-* Supported model variants:
 
-| Variant | Suggested resource allocation |
-|:----------:|:----------:|
-|[**`dbrx-instruct`**](https://huggingface.co/databricks/dbrx-instruct)| 8x a40 (2 nodes, 4 a40/node) |
-
-* Profiling: COMING SOON
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+|[**`dbrx-instruct`**](https://huggingface.co/databricks/dbrx-instruct)| 8x a40 (2 nodes, 4 a40/node) | 107 tokens/s | 904 tokens/s |
