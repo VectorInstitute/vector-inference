@@ -1,4 +1,4 @@
-# [Databricks: DBRX](https://huggingface.co/databricks) 
+# [Databricks: DBRX](https://huggingface.co/collections/databricks/dbrx-6601c0852a0cdd3c59f71962) 
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
