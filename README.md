@@ -26,12 +26,12 @@ pip install flash-attn --no-build-isolation
 ```
 
 ## Launch an inference server
-We will use the Llama 2 model as example, to launch an inference server for Llama 2-7b, run
+We will use the Llama 2 model as example, to launch an inference server for Llama 3 8B, run
 ```bash
-bash models/llama2/launch_server.sh
+bash models/llama3/launch_server.sh
 ```
 You should see an output like the following:
-> Job Name: vllm/llama2-7b
+> Job Name: vLLM/Meta-Llama-3-8B
 > 
 > Partition: a40
 > 
@@ -43,9 +43,30 @@ You should see an output like the following:
 
 If you want to use your own virtual environment, you can run this instead:
 ```bash
-bash models/llama2/launch_server.sh -e $(poetry env info --path)
+bash models/llama3/launch_server.sh -e $(poetry env info --path)
 ```
-By default, the `launch_server.sh` script in Llama 2 folder uses the 7b variant, you can switch to other variants with the `-v` flag, and make sure to change the requested resource accordingly. More information about the flags and customizations can be found in the [`models`](models) folder. The inference server is compatible with the OpenAI `Completion` and `ChatCompletion` API. You can inspect the Slurm output files to see whether inference server is ready.
+By default, the `launch_server.sh` script in Llama 3 folder uses the 8B variant, you can switch to other variants with the `-v` flag, and make sure to change the requested resource accordingly. More information about the flags and customizations can be found in the [`models`](models) folder. The inference server is compatible with the OpenAI `Completion` and `ChatCompletion` API. You can inspect the Slurm output files to check the inference server status. 
+
+Here is a more complicated example that launches a model variant using multiple nodes, say we want to launch Mixtral 8x22B, run
+```bash
+bash models/mixtral/launch_server.sh -v 8x22B-v0.1 -N 2 -n 4
+```
+The default partition for Mixtral models is a40, and we need 8 a40 GPUs to load Mixtral 8x22B, so we requested 2 a40 nodes with 4 GPUs per node. You should see an output like the following:
+> Number of nodes set to: 2
+>
+> Number of GPUs set to: 4
+>
+> Model variant set to: 8x22B-v0.1
+> 
+> Job Name: vLLM/Mixtral-8x22B-v0.1
+> 
+> Partition: a40
+> 
+> Generic Resource Scheduling: gpu:8
+> 
+> Data Type: auto
+> 
+> Submitted batch job 12430232
 
 ## Send inference requests
 Once the inference server is ready, you can start sending in inference requests. We provide example [Python](examples/inference.py) and [Bash](examples/inference.sh) scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. You can run either `python examples/inference.py` or `bash examples/inference.sh`, and you should expect to see an output like the following:

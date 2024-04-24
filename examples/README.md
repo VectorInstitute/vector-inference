@@ -3,4 +3,4 @@
 
 `inference.sh`: Bash example of sending inference requests to inference server, supports JSON mode
 
-`logits.py`(WORK IN PROGRESS): Python example of getting logits from hosted model. 
+`logits.py`: Python example of getting logits from hosted model. 
