@@ -26,7 +26,7 @@ pip install flash-attn --no-build-isolation
 ```
 
 ## Launch an inference server
-We will use the Llama 2 model as example, to launch an inference server for Llama 3 8B, run
+We will use the Llama 3 model as example, to launch an inference server for Llama 3 8B, run
 ```bash
 bash models/llama3/launch_server.sh
 ```
