@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "vector-inference"
-version = "0.1.0"
+version = "0.1.1"
 description = "LLM inference engine provided by Vector Institute"
 authors = ["XkunW <marshall.wang@vectorinstitute.ai>"]
 license = "MIT license"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"

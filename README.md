@@ -23,6 +23,7 @@ pip install wheel
 export CUDA_HOME=/pkgs/cuda-12.3
 
 pip install flash-attn --no-build-isolation
+pip install vllm-flash-attn
 ```
 
 ## Launch an inference server
