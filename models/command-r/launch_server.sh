@@ -4,47 +4,35 @@
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_NAME="Llama-2"
-export MODEL_VARIANT="7b"
+export MODEL_NAME="c4ai-command-r"
+export MODEL_VARIANT="plus"
 export MODEL_DIR="$(dirname $(realpath "$0"))"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
-export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}-hf
+export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
 export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
-export NUM_GPUS=1
+export NUM_NODES=2
+export NUM_GPUS=4
 export JOB_PARTITION="a40"
 export QOS="m3"
 
 # Model configuration
-export VLLM_MAX_LOGPROBS=32000
+export VLLM_MAX_LOGPROBS=256000
 # ======================================= Optional Settings ========================================
 
-while getopts "p:n:q:t:e:v:" flag; do 
+while getopts "q:t:e:" flag; do 
     case "${flag}" in
-        p) partition=${OPTARG};;
-        n) num_gpus=${OPTARG};;
         q) qos=${OPTARG};;
         t) data_type=${OPTARG};;
         e) virtual_env=${OPTARG};;
-        v) model_variant=${OPTARG};;
         *) echo "Invalid option: $flag" ;;
     esac
 done
-
-if [ -n "$partition" ]; then
-    export JOB_PARTITION=$partition
-    echo "Partition set to: ${JOB_PARTITION}"
-fi
-
-if [ -n "$num_gpus" ]; then
-    export NUM_GPUS=$num_gpus
-    echo "Number of GPUs set to: ${NUM_GPUS}"
-fi
 
 if [ -n "$qos" ]; then
     export QOS=$qos
@@ -59,15 +47,6 @@ fi
 if [ -n "$virtual_env" ]; then
     export VENV_BASE=$virtual_env
     echo "Virtual environment set to: ${VENV_BASE}"
-fi
-
-if [ -n "$model_variant" ]; then
-    export MODEL_VARIANT=$model_variant
-    echo "Model variant set to: ${MODEL_VARIANT}"
-
-    export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}-hf"
-    export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
-    export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs
@@ -89,13 +68,14 @@ fi
 
 echo Job Name: ${JOB_NAME}
 echo Partition: ${JOB_PARTITION}
-echo Generic Resource Scheduling: gpu:${NUM_GPUS}
+echo Generic Resource Scheduling: gpu:$((NUM_NODES*NUM_GPUS))
 echo Data Type: ${VLLM_DATA_TYPE}
 
 sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
+    --nodes ${NUM_NODES} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
-    --output ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
-    --error ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
-    $(dirname ${MODEL_DIR})/vllm.slurm
+    --output ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
+    --error ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
+    $(dirname ${MODEL_DIR})/multinode_vllm.slurm

@@ -11,12 +11,13 @@ export POETRY_CACHE_DIR=/scratch/ssd004/scratch/$(whoami)/poetry_cache
 
 # To see if the cache directory is set correctly, run the following command
 # poetry config cache-dir 
+echo "Cache directory set to: $(poetry config cache-dir)"
 
 # Install dependencies via poetry
 poetry install
 
 # Activate the virtual environment
-# poetry shell
+poetry shell
 
 # Deactivate the virtual environment
 # deactivate
