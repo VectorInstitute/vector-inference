@@ -9,13 +9,37 @@ ARG CUDA_VISIBLE_DEVICES=none
 # Specify CUDA architectures -> 7.5: RTX 6000 & T4, 8.0: A100, 8.6+PTX
 ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
 
-# Install dependencies and Python 3.10
-RUN apt-get update && \
-    apt-get install -y software-properties-common wget && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.10 python3.10-distutils python3.10-venv python3.10-dev git bash && \
-    rm -rf /var/lib/apt/lists/*
+# Set the Python version
+ARG PYTHON_VERSION=3.10.12
+
+# Install dependencies for building Python
+RUN apt-get update && apt-get install -y \
+    wget \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libffi-dev \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
+    liblzma-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install Python from precompiled binaries
+RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz && \
+    tar -xzf Python-$PYTHON_VERSION.tgz && \
+    cd Python-$PYTHON_VERSION && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && \
+    cd .. && \
+    rm -rf Python-$PYTHON_VERSION.tgz Python-$PYTHON_VERSION
 
 # Download and install pip using get-pip.py
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
