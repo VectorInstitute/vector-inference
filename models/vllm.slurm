@@ -10,9 +10,6 @@
 module load cuda-12.3
 nvidia-smi
 
-# Activate vllm venv
-source ${VENV_BASE}/bin/activate
-
 source $(dirname ${MODEL_DIR})/find_port.sh
 
 # Write server url to file
@@ -22,10 +19,25 @@ vllm_port_number=$(find_available_port $hostname 8080 65535)
 echo "Server address: http://${hostname}:${vllm_port_number}/v1"
 echo "http://${hostname}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
-python3 -m vllm.entrypoints.openai.api_server \
---model ${VLLM_MODEL_WEIGHTS} \
---host "0.0.0.0" \
---port ${vllm_port_number} \
---tensor-parallel-size ${NUM_GPUS} \
---dtype ${VLLM_DATA_TYPE} \
---max-logprobs ${VLLM_MAX_LOGPROBS} 
+# Activate vllm venv
+if [ "$VENV_BASE" = "singularity" ]; then
+    module load singularity-ce/3.8.2
+    singularity run --nv /scratch/ssd004/scratch/marshallw/vector-inference_0.2.0.sif \
+    python3.10 -m vllm.entrypoints.openai.api_server \
+    --model ${VLLM_MODEL_WEIGHTS} \
+    --host "0.0.0.0" \
+    --port ${vllm_port_number} \
+    --tensor-parallel-size ${NUM_GPUS} \
+    --dtype ${VLLM_DATA_TYPE} \
+    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    
+else
+    source ${VENV_BASE}/bin/activate
+    python3 -m vllm.entrypoints.openai.api_server \
+    --model ${VLLM_MODEL_WEIGHTS} \
+    --host "0.0.0.0" \
+    --port ${vllm_port_number} \
+    --tensor-parallel-size ${NUM_GPUS} \
+    --dtype ${VLLM_DATA_TYPE} \
+    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+fi
