@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "vector-inference"
 version = "0.2.0"
-description = "LLM inference engine provided by Vector Institute"
+description = "Efficient LLM inference on Slurm clusters using vLLM."
 authors = ["XkunW <marshall.wang@vectorinstitute.ai>"]
 license = "MIT license"
 readme = "README.md"
@@ -10,6 +10,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.10"
 vllm = { version = "^0.4.0", allow-prereleases = true }
+vllm-nccl-cu12 = ">=2.18,<2.19"
 ray = "^2.9.3"
 cupy-cuda12x = "12.1.0"
 
