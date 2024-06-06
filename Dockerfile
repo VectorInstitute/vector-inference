@@ -74,5 +74,9 @@ RUN poetry install
 # Install Flash Attention 2 backend
 RUN python3.10 -m pip install flash-attn --no-build-isolation
 
+# Move nccl to accessible location
+RUN mkdir -p /vec-inf/nccl
+RUN mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1; 
+
 # Set the default command to start an interactive shell
 CMD ["bash"]
