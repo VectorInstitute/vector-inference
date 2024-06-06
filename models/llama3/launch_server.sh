@@ -11,6 +11,7 @@ export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE=singularity
+export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
 export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
