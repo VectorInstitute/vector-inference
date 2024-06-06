@@ -12,9 +12,6 @@
 module load cuda-12.3
 nvidia-smi
 
-# Activate vllm venv
-source ${VENV_BASE}/bin/activate
-
 source $(dirname ${MODEL_DIR})/find_port.sh
 
 # Getting the node names
@@ -59,13 +56,32 @@ vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 echo "Server address: http://${head_node_ip}:${vllm_port_number}/v1"
 echo "http://${head_node_ip}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
-python3 -m vllm.entrypoints.openai.api_server \
---model ${VLLM_MODEL_WEIGHTS} \
---host "0.0.0.0" \
---port ${vllm_port_number} \
---tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
---dtype ${VLLM_DATA_TYPE} \
---load-format safetensors \
---trust-remote-code \
---max-model-len 22192 \
---max-logprobs ${VLLM_MAX_LOGPROBS} 
+# Activate vllm venv
+if [ "$VENV_BASE" = "singularity" ]; then
+    export VENV_BASE=/projects/aieng/public/vector-inference_0.2.0.sif
+    module load singularity-ce/3.8.2
+    singularity run $VENV_BASE ray stop
+    singularity run --nv --bind /model-weights:/model-weights $VENV_BASE \
+    python3.10 -m vllm.entrypoints.openai.api_server \
+    --model ${VLLM_MODEL_WEIGHTS} \
+    --host "0.0.0.0" \
+    --port ${vllm_port_number} \
+    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --dtype ${VLLM_DATA_TYPE} \
+    --load-format safetensors \
+    --trust-remote-code \
+    --max-model-len 22192 \
+    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+else
+    source ${VENV_BASE}/bin/activate
+    python3 -m vllm.entrypoints.openai.api_server \
+    --model ${VLLM_MODEL_WEIGHTS} \
+    --host "0.0.0.0" \
+    --port ${vllm_port_number} \
+    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --dtype ${VLLM_DATA_TYPE} \
+    --load-format safetensors \
+    --trust-remote-code \
+    --max-model-len 22192 \
+    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+fi

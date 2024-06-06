@@ -21,8 +21,10 @@ echo "http://${hostname}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
+    export VENV_BASE=/projects/aieng/public/vector-inference_0.2.0.sif
     module load singularity-ce/3.8.2
-    singularity run --nv /scratch/ssd004/scratch/marshallw/vector-inference_0.2.0.sif \
+    singularity run $VENV_BASE ray stop
+    singularity run --nv --bind /model-weights:/model-weights $VENV_BASE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
@@ -30,7 +32,6 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} 
-    
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
