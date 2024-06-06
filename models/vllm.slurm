@@ -21,10 +21,10 @@ echo "http://${hostname}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export VENV_BASE=/projects/aieng/public/vector-inference_0.2.0.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.2.0.sif
     module load singularity-ce/3.8.2
-    singularity run $VENV_BASE ray stop
-    singularity run --nv --bind /model-weights:/model-weights $VENV_BASE \
+    singularity exec $SINGULARITY_IMAGE ray stop
+    singularity exec --nv --bind /model-weights:/model-weights $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
