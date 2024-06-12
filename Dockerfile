@@ -53,7 +53,7 @@ RUN python3.10 -m pip install --upgrade pip
 RUN python3.10 -m pip install poetry
 
 # Clone the repository
-RUN git clone -b feature/default-container https://github.com/VectorInstitute/vector-inference /vec-inf
+RUN git clone https://github.com/VectorInstitute/vector-inference /vec-inf
 
 # Set the working directory
 WORKDIR /vec-inf
