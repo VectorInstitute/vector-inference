@@ -20,6 +20,7 @@ export NUM_NODES=1
 export NUM_GPUS=1
 export JOB_PARTITION="a40"
 export QOS="m3"
+export TIME="04:00:00"
 
 # Model configuration
 relative_path=$(realpath --relative-to="$(pwd)" "$MODEL_DIR")
@@ -29,6 +30,16 @@ export VLLM_MAX_LOGPROBS=32000
 export IMAGE_INPUT_TYPE="pixel_values"
 export IMAGE_TOKEN_ID=32000
 
+# Set data type to fp16 instead of bf16 for non-Ampere GPUs
+fp16_partitions="t4v1 t4v2"
+
+# choose from 'auto', 'half', 'float16', 'bfloat16', 'float', 'float32'
+if [[ ${fp16_partitions} =~ ${JOB_PARTITION} ]]; then
+    export VLLM_DATA_TYPE="float16"
+else
+    export VLLM_DATA_TYPE="auto"
+fi
+
 # ======================================= Optional Settings ========================================
 
 while [[ "$#" -gt 0 ]]; do
@@ -36,6 +47,7 @@ while [[ "$#" -gt 0 ]]; do
         --partition) partition="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
         --qos) qos="$2"; shift ;;
+        --time) time="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
         --image-input-type) image_input_type="$2"; shift ;;
@@ -60,6 +72,11 @@ fi
 if [ -n "$qos" ]; then
     export QOS="$qos"
     echo "QOS set to: ${QOS}"
+fi
+
+if [ -n "$time" ]; then
+    export TIME="$time"
+    echo "Walltime set to: ${TIME}"
 fi
 
 if [ -n "$data_type" ]; then
@@ -98,16 +115,6 @@ else
     exit 1
 fi
 
-# Set data type to fp16 instead of bf16 for non-Ampere GPUs
-fp16_partitions="t4v1 t4v2"
-
-# choose from 'auto', 'half', 'float16', 'bfloat16', 'float', 'float32'
-if [[ ${fp16_partitions} =~ ${JOB_PARTITION} ]]; then
-    export VLLM_DATA_TYPE="float16"
-else
-    export VLLM_DATA_TYPE="auto"
-fi
-
 # ========================================= Launch Server ==========================================
 
 # Create a file to store the API server URL if it doesn't exist
@@ -125,6 +132,7 @@ sbatch --job-name ${JOB_NAME} \
     --nodes ${NUM_NODES} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
+    --time ${TIME} \
     --output ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
     --error ${MODEL_DIR}/vllm-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
     $(dirname ${MODEL_DIR})/vlm_vllm.slurm

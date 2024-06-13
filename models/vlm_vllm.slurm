@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
-#SBATCH --time=04:00:00
 
 # Load CUDA, change to the cuda version on your environment if different
 module load cuda-12.3
