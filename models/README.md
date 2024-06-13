@@ -14,6 +14,7 @@ The following environment variables all have default values that's suitable for 
 * **NUM_GPUS**: Number of GPUs scheduled. Default to suggested resource allocation.
 * **JOB_PARTITION**: Type of compute partition. Default to suggested resource allocation.
 * **QOS**: Quality of Service
+* **TIME**: Max Walltime
 
 The following environment variables are only for Vision Language Models
 
@@ -28,6 +29,7 @@ NOTE: Arguments like `--num-nodes` or `model-variant` might not be available to 
 * `--num-nodes`: Overrides **NUM_NODES**.
 * `--num-gpus`: Overrides **NUM_GPUS**.
 * `--qos`: Overrides **QOS**.
+* `--time`: Overrides **TIME**.
 * `--data-type`: Overrides **VLLM_DATA_TYPE**.
 * `--venv`: Overrides **VENV_BASE**.
 * `--model-variant`: Overrides **MODEL_VARIANT**

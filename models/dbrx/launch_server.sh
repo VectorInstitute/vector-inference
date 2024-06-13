@@ -20,9 +20,21 @@ export NUM_NODES=2
 export NUM_GPUS=4
 export JOB_PARTITION="a40"
 export QOS="m3"
+export TIME="04:00:00"
 
 # Model configuration
 export VLLM_MAX_LOGPROBS=100352
+
+# Set data type to fp16 instead of bf16 for non-Ampere GPUs
+fp16_partitions="t4v1 t4v2"
+
+# choose from 'auto', 'half', 'float16', 'bfloat16', 'float', 'float32'
+if [[ ${fp16_partitions} =~ ${JOB_PARTITION} ]]; then
+    export VLLM_DATA_TYPE="float16"
+else
+    export VLLM_DATA_TYPE="auto"
+fi
+
 # ======================================= Optional Settings ========================================
 
 while [[ "$#" -gt 0 ]]; do
@@ -31,6 +43,7 @@ while [[ "$#" -gt 0 ]]; do
         --num-nodes) num_nodes="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
         --qos) qos="$2"; shift ;;
+        --time) time="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -58,6 +71,11 @@ if [ -n "$qos" ]; then
     echo "QOS set to: ${QOS}"
 fi
 
+if [ -n "$time" ]; then
+    export TIME=$time
+    echo "Walltime set to: ${TIME}"
+fi
+
 if [ -n "$data_type" ]; then
     export VLLM_DATA_TYPE=$data_type
     echo "Data type set to: ${VLLM_DATA_TYPE}"
@@ -66,16 +84,6 @@ fi
 if [ -n "$virtual_env" ]; then
     export VENV_BASE=$virtual_env
     echo "Virtual environment set to: ${VENV_BASE}"
-fi
-
-# Set data type to fp16 instead of bf16 for non-Ampere GPUs
-fp16_partitions="t4v1 t4v2"
-
-# choose from 'auto', 'half', 'float16', 'bfloat16', 'float', 'float32'
-if [[ ${fp16_partitions} =~ ${JOB_PARTITION} ]]; then
-    export VLLM_DATA_TYPE="float16"
-else
-    export VLLM_DATA_TYPE="auto"
 fi
 
 # ========================================= Launch Server ==========================================
@@ -95,6 +103,7 @@ sbatch --job-name ${JOB_NAME} \
     --nodes ${NUM_NODES} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
+    --time ${TIME} \
     --output ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
     --error ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
     $(dirname ${MODEL_DIR})/multinode_vllm.slurm

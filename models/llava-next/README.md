@@ -1,5 +1,3 @@
-# NOTE: LLaVa-NeXT currently only works with `float` data type
-
 # [LLaVa-NeXT](https://huggingface.co/collections/llava-hf/llava-next-65f75c4afac77fd37dbbe6cf) 
 * Supported model variants:
 
