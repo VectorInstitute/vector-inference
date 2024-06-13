@@ -9,7 +9,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-vllm = { version = "^0.4.0", allow-prereleases = true }
+vllm = { version = "^0.5.0", allow-prereleases = true }
 vllm-nccl-cu12 = ">=2.18,<2.19"
 ray = "^2.9.3"
 cupy-cuda12x = "12.1.0"
