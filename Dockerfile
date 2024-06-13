@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     libxmlsec1-dev \
     liblzma-dev \
     git \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Python from precompiled binaries
@@ -57,10 +58,6 @@ RUN git clone https://github.com/VectorInstitute/vector-inference /vec-inf
 
 # Set the working directory
 WORKDIR /vec-inf
-
-# Create a directory for Poetry cache
-RUN mkdir -p /vec-inf/poetry_cache
-ENV POETRY_CACHE_DIR=/vec-inf/poetry_default
 
 # Configure Poetry to not create virtual environments
 RUN poetry config virtualenvs.create false
