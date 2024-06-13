@@ -22,6 +22,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
+
     singularity exec --nv --bind /model-weights:/model-weights $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
@@ -29,7 +30,13 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
+    --image-input-type ${IMAGE_INPUT_TYPE} \
+    --image-token-id ${IMAGE_TOKEN_ID} \
+    --image-input-shape ${IMAGE_INPUT_SHAPE} \
+    --image-feature-size ${IMAGE_FEATURE_SIZE} \
+    --chat-template ${CHAT_TEMPLATE} \
+    --trust-remote-code 
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
@@ -38,5 +45,11 @@ else
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
+    --image-input-type ${IMAGE_INPUT_TYPE} \
+    --image-token-id ${IMAGE_TOKEN_ID} \
+    --image-input-shape ${IMAGE_INPUT_SHAPE} \
+    --image-feature-size ${IMAGE_FEATURE_SIZE} \
+    --chat-template ${CHAT_TEMPLATE} \
+    --trust-remote-code 
 fi

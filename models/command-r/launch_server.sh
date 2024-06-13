@@ -10,7 +10,7 @@ export MODEL_DIR="$(dirname $(realpath "$0"))"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
-export VENV_BASE=/projects/aieng/public/mixtral_vllm_env
+export VENV_BASE="singularity"
 export VLLM_MODEL_WEIGHTS=/model-weights/${MODEL_NAME}-${MODEL_VARIANT}
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
@@ -25,14 +25,33 @@ export QOS="m3"
 export VLLM_MAX_LOGPROBS=256000
 # ======================================= Optional Settings ========================================
 
-while getopts "q:t:e:" flag; do 
-    case "${flag}" in
-        q) qos=${OPTARG};;
-        t) data_type=${OPTARG};;
-        e) virtual_env=${OPTARG};;
-        *) echo "Invalid option: $flag" ;;
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --partition) partition="$2"; shift ;;
+        --num-nodes) num_nodes="$2"; shift ;;
+        --num-gpus) num_gpus="$2"; shift ;;
+        --qos) qos="$2"; shift ;;
+        --data-type) data_type="$2"; shift ;;
+        --venv) virtual_env="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
+    shift
 done
+
+if [ -n "$partition" ]; then
+    export JOB_PARTITION=$partition
+    echo "Partition set to: ${JOB_PARTITION}"
+fi
+
+if [ -n "$num_nodes" ]; then
+    export NUM_NODES=$num_nodes
+    echo "Number of nodes set to: ${NUM_NODES}"
+fi
+
+if [ -n "$num_gpus" ]; then
+    export NUM_GPUS=$num_gpus
+    echo "Number of GPUs set to: ${NUM_GPUS}"
+fi
 
 if [ -n "$qos" ]; then
     export QOS=$qos
