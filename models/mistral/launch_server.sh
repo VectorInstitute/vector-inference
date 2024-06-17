@@ -44,6 +44,7 @@ while [[ "$#" -gt 0 ]]; do
         --time) time="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
+        --model-variant) model_variant="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -78,6 +79,15 @@ fi
 if [ -n "$virtual_env" ]; then
     export VENV_BASE=$virtual_env
     echo "Virtual environment set to: ${VENV_BASE}"
+fi
+
+if [ -n "$model_variant" ]; then
+    export MODEL_VARIANT=$model_variant
+    echo "Model variant set to: ${MODEL_VARIANT}"
+
+    export VLLM_MODEL_WEIGHTS=/model-weights/Mixtral-${MODEL_VARIANT}
+    export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
+    export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
 
 # ========================================= Launch Server ==========================================
