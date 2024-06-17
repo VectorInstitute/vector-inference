@@ -26,9 +26,11 @@ export TIME="04:00:00"
 relative_path=$(realpath --relative-to="$(pwd)" "$MODEL_DIR")
 export CHAT_TEMPLATE="$(pwd)/$relative_path/chat_template.jinja"
 
-export VLLM_MAX_LOGPROBS=32000
+export VLLM_MAX_LOGPROBS=32064
 export IMAGE_INPUT_TYPE="pixel_values"
 export IMAGE_TOKEN_ID=32000
+export IMAGE_INPUT_SHAPE="1,3,560,560"
+export IMAGE_FEATURE_SIZE=2928
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs
 fp16_partitions="t4v1 t4v2"
@@ -102,17 +104,11 @@ fi
 if [ -n "$image_input_shape" ]; then
     export IMAGE_INPUT_SHAPE="$image_input_shape"
     echo "Image input shape set to: ${IMAGE_INPUT_SHAPE}"
-else
-    echo "Image input shape not specified"
-    exit 1
 fi
 
 if [ -n "$image_feature_size" ]; then
     export IMAGE_FEATURE_SIZE="$image_feature_size"
     echo "Image feature size set to: ${IMAGE_FEATURE_SIZE}"
-else
-    echo "Image feature size not specified"
-    exit 1
 fi
 
 # ========================================= Launch Server ==========================================
