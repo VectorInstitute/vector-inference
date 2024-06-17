@@ -4,5 +4,3 @@
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 |[**`13b-hf`**](https://huggingface.co/llava-hf/llava-1.5-13b-hf)| 1x a40 | - tokens/s | - tokens/s |
-
-To run the example VLM completions script, set `--image-input-shape` to `1,3,336,336`, and `--image-feature-size` to `576`
