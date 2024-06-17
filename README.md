@@ -70,7 +70,7 @@ The default partition for Mixtral models is a40, and we need 8 a40 GPUs to load 
 > Submitted batch job 12430232
 
 ## Send inference requests
-Once the inference server is ready, you can start sending in inference requests. We provide example [Python](examples/inference.py) and [Bash](examples/inference.sh) scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. You can run either `python examples/inference.py` or `bash examples/inference.sh`, and you should expect to see an output like the following:
+Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
 > {"id":"cmpl-bdf43763adf242588af07af88b070b62","object":"text_completion","created":2983960,"model":"/model-weights/Llama-2-7b-hf","choices":[{"index":0,"text":"\nCanada is close to the actual continent of North America. Aside from the Arctic islands","logprobs":null,"finish_reason":"length"}],"usage":{"prompt_tokens":8,"total_tokens":28,"completion_tokens":20}}
 
 ## SSH tunnel from your local device
