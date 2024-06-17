@@ -19,9 +19,9 @@ The following environment variables all have default values that's suitable for 
 The following environment variables are only for Vision Language Models
 
 * **IMAGE_INPUT_TYPE**: Possible choices: `pixel_values`, `image_features`. The image input type passed into vLLM, default to `pixel_values`.
-* **IMAGE_TOKEN_ID**: Input ID for image token. Default to HF Config value.
-* **IMAGE_INPUT_SHAPE**: The biggest image input shape (worst for memory footprint) given an input type. Only used for vLLM’s profile_run. 
-* **IMAGE_FEATURE_SIZE**: The image feature size along the context dimension.
+* **IMAGE_TOKEN_ID**: Input ID for image token. Default to HF Config value. Default value set according to model.
+* **IMAGE_INPUT_SHAPE**: The biggest image input shape (worst for memory footprint) given an input type. Only used for vLLM’s profile_run. Default value set according to model.
+* **IMAGE_FEATURE_SIZE**: The image feature size along the context dimension. Default value set according to model.
 
 # Named Arguments
 NOTE: Arguments like `--num-nodes` or `model-variant` might not be available to certain model families because they should fit inside a single node or there is no variant availble in `/model-weights` yet. You can manually add these options in launch scripts if you need, or make a request to download weights for other variants.
@@ -38,5 +38,5 @@ The following flags are only available to Vision Language Models
 
 * `--image-input-type`: Overrides **IMAGE_INPUT_TYPE**
 * `--image-token-id`: Overrides **IMAGE_TOKEN_ID**
-* `--image-input-shape`: Overrides **IMAGE_INPUT_SHAPE**, this has to be set in order to launch VLMs
-* `--image-feature-size`: Overrides **IMAGE_FEATURE_SIZE**, , this has to be set in order to launch VLMs
+* `--image-input-shape`: Overrides **IMAGE_INPUT_SHAPE**
+* `--image-feature-size`: Overrides **IMAGE_FEATURE_SIZE**
