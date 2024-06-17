@@ -1,6 +1,8 @@
 # Examples
-`inference.py`: Python example of sending inference requests to inference server using OpenAI API, make sure to install OpenAI API in your environment.
-
-`inference.sh`: Bash example of sending inference requests to inference server, supports JSON mode
-
-`logits.py`: Python example of getting logits from hosted model. 
+- [`inference`](inference): Examples for sending inference requests
+  - [`llm/chat_completions.py`](inference/llm/chat_completions.py): Python example of sending chat completion requests to OpenAI compatible server
+  - [`llm/completions.py`](inference/llm/completions.py): Python example of sending completion requests to OpenAI compatible server
+  - [`llm/completions.sh`](inference/llm/completions.sh): Bash example of sending completion requests to OpenAI compatible server, supports JSON mode
+  - [`vlm/vision_completions.py`](inference/vlm/vision_completions.py): Python example of sending chat completion requests with image attached to prompt to OpenAI compatible server for vision language models
+- [`logits`](logits): Example for logits generation
+  - [`logits.py`](logits/logits.py): Python example of getting logits from hosted model.  
