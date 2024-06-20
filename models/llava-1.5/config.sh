@@ -1,6 +1,5 @@
 MODEL_NAME="llava-1.5"
 MODEL_VARIANT="13b-hf"
-MODEL_EXT=""
 NUM_NODES=1
 NUM_GPUS=1
 VENV_BASE="singularity"

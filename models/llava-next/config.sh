@@ -1,6 +1,5 @@
 MODEL_NAME="llava-v1.6"
 MODEL_VARIANT="mistral-7b-hf"
-MODEL_EXT=""
 NUM_NODES=1
 NUM_GPUS=1
 VENV_BASE="singularity"

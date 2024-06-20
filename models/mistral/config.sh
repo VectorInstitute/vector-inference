@@ -1,6 +1,5 @@
 MODEL_NAME="Mistral"
 MODEL_VARIANT="7B-v0.3"
-MODEL_EXT=""
 NUM_NODES=1
 NUM_GPUS=1
 VENV_BASE="singularity"
