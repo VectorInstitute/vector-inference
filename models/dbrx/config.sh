@@ -1,6 +1,5 @@
 MODEL_NAME="dbrx"
 MODEL_VARIANT="instruct"
-MODEL_EXT=""
 NUM_NODES=2
 NUM_GPUS=4
 VENV_BASE="singularity"
