@@ -103,8 +103,7 @@ fi
 if [ -n "$model_variant" ]; then
     export MODEL_VARIANT=$model_variant
     echo "Model variant set to: ${MODEL_VARIANT}"
-
-    export VLLM_MODEL_WEIGHTS="/model-weights/Mixtral-${MODEL_VARIANT}${MODEL_EXT}"
+    export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}${MODEL_EXT}"
     export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
     export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
