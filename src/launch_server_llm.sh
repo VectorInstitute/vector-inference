@@ -2,7 +2,7 @@
 # ================================= Set config ======================================
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --model) model="$2"; shift ;;
+        --model-name) model="$2"; shift ;;
         --partition) partition="$2"; shift ;;
         --num-nodes) num_nodes="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
@@ -43,7 +43,7 @@ export MODEL_DIR="$(dirname $(realpath "$0"))/models/${MODEL}"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
-export VENV_BASE
+export VENV_BASE="singularity"
 export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
@@ -56,14 +56,7 @@ export QOS="m3"
 export TIME="04:00:00"
 
 # Model configuration
-relative_path=$(realpath --relative-to="$(pwd)" "$MODEL_DIR")
-export CHAT_TEMPLATE="$(pwd)/$relative_path/chat_template.jinja"
-
 export VLLM_MAX_LOGPROBS
-export IMAGE_INPUT_TYPE
-export IMAGE_TOKEN_ID
-export IMAGE_INPUT_SHAPE
-export IMAGE_FEATURE_SIZE
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs
 fp16_partitions="t4v1 t4v2"
@@ -117,26 +110,6 @@ if [ -n "$model_variant" ]; then
     export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
     export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
     export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
-fi
-
-if [ -n "$image_input_type" ]; then
-    export IMAGE_INPUT_TYPE="$image_input_type"
-    echo "Image input type set to: ${IMAGE_INPUT_TYPE}"
-fi
-
-if [ -n "$image_token_id" ]; then
-    export IMAGE_TOKEN_ID="$image_token_id"
-    echo "Image token ID set to: ${IMAGE_TOKEN_ID}"
-fi
-
-if [ -n "$image_input_shape" ]; then
-    export IMAGE_INPUT_SHAPE="$image_input_shape"
-    echo "Image input shape set to: ${IMAGE_INPUT_SHAPE}"
-fi
-
-if [ -n "$image_feature_size" ]; then
-    export IMAGE_FEATURE_SIZE="$image_feature_size"
-    echo "Image feature size set to: ${IMAGE_FEATURE_SIZE}"
 fi
 
 # ========================================= Launch Server ==========================================

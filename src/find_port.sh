@@ -20,14 +20,6 @@ is_port_available() {
     else
         return 1  # False, port is not available
     fi
-    # if ! lsof -i:$port -nP &>/dev/null && ! ss -lntu src :$port &>/dev/null; then
-    #     # echo "$port is available"
-    #     return 0
-    # else
-    #     # echo "$port is in use"
-    #     return 1
-    # fi
-
 }
 
 # Function to find an available port on the specified IP
