@@ -1,6 +1,5 @@
-MODEL_NAME="dbrx"
-MODEL_VARIANT="instruct"
-NUM_NODES=2
-NUM_GPUS=4
-VENV_BASE="singularity"
-VLLM_MAX_LOGPROBS=100352
+export MODEL_NAME="dbrx"
+export MODEL_VARIANT="instruct"
+export NUM_NODES=2
+export NUM_GPUS=4
+export VLLM_MAX_LOGPROBS=100352
