@@ -6,7 +6,7 @@
 module load cuda-12.3
 nvidia-smi
 
-source $(dirname ${MODEL_DIR})/find_port.sh
+source ${SRC_DIR}/find_port.sh
 
 # Write server url to file
 hostname=${SLURMD_NODENAME}

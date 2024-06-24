@@ -8,7 +8,7 @@
 module load cuda-12.3
 nvidia-smi
 
-source $(dirname ${MODEL_DIR})/find_port.sh
+source ${SRC_DIR}/find_port.sh
 
 if [ "$VENV_BASE" = "singularity" ]; then
     export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.2.0.sif
@@ -85,7 +85,6 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
-    --max-model-len 22192 \
     --max-logprobs ${VLLM_MAX_LOGPROBS} 
 else
     source ${VENV_BASE}/bin/activate
@@ -97,6 +96,5 @@ else
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
-    --max-model-len 22192 \
     --max-logprobs ${VLLM_MAX_LOGPROBS} 
 fi
