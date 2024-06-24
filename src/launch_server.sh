@@ -5,6 +5,7 @@ is_vlm=false
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --model-family) model_family="$2"; shift ;;
+        --model-variant) model_variant="$2"; shift ;;
         --partition) partition="$2"; shift ;;
         --num-nodes) num_nodes="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
@@ -12,7 +13,6 @@ while [[ "$#" -gt 0 ]]; do
         --time) time="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
-        --model-variant) model_variant="$2"; shift ;;
         --is-vlm) is_vlm=true ;;
         --image-input-type) image_input_type="$2"; shift ;;
         --image-token-id) image_token_id="$2"; shift ;;
