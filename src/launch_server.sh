@@ -29,9 +29,10 @@ if [ -z "$model_family" ]; then
 fi
 # ================================= Set default environment variables ======================================
 export MODEL_FAMILY=$model_family
+export SRC_DIR="$(dirname "$0")"
 
 # Load the configuration file for the specified model family
-CONFIG_FILE="$(dirname $(realpath "$0"))/models/${MODEL_FAMILY}/config.sh"
+CONFIG_FILE="${SRC_DIR}/../models/${MODEL_FAMILY}/config.sh"
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "Configuration file not found: $CONFIG_FILE"
   exit 1
@@ -40,7 +41,7 @@ source "$CONFIG_FILE"
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_DIR="$(dirname $(realpath "$0"))/models/${MODEL_FAMILY}"
+export MODEL_DIR="${SRC_DIR}/../models/${MODEL_FAMILY}"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
 export VLLM_DATA_TYPE="auto"
  
@@ -56,9 +57,8 @@ export QOS="m3"
 export TIME="04:00:00"
 
 # VLM configuration
-relative_path=$(realpath --relative-to="$(pwd)" "$MODEL_DIR")
 if [ "$is_vlm" = true ]; then
-    export CHAT_TEMPLATE="$(pwd)/$relative_path/chat_template.jinja"
+    export CHAT_TEMPLATE="${SRC_DIR}/../models/${MODEL_FAMILY}/chat_template.jinja"
 fi
 # ======================================= Overwrite Env Vars ========================================
 
@@ -162,4 +162,4 @@ sbatch --job-name ${JOB_NAME} \
     --time ${TIME} \
     --output ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
     --error ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
-    ${is_special}vllm.slurm
+    ${SRC_DIR}/${is_special}vllm.slurm
