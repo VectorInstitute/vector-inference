@@ -149,3 +149,6 @@ logs/
 local/
 slurm/
 scripts/
+
+# vLLM bug reporting files
+collect_env.py
