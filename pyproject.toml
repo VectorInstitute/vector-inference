@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vector-inference"
-version = "0.2.0"
+version = "0.2.1"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
 authors = ["XkunW <marshall.wang@vectorinstitute.ai>"]
 license = "MIT license"
