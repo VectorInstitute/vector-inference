@@ -1,4 +1,3 @@
-# vecinf/cli/cli.py
 import os
 
 import click
