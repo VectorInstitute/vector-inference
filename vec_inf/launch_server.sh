@@ -32,7 +32,7 @@ export MODEL_FAMILY=$model_family
 export SRC_DIR="$(dirname "$0")"
 
 # Load the configuration file for the specified model family
-CONFIG_FILE="${SRC_DIR}/../models/${MODEL_FAMILY}/config.sh"
+CONFIG_FILE="${SRC_DIR}/models/${MODEL_FAMILY}/config.sh"
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "Configuration file not found: $CONFIG_FILE"
   exit 1
@@ -41,8 +41,8 @@ source "$CONFIG_FILE"
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
 # SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
-export MODEL_DIR="${SRC_DIR}/../models/${MODEL_FAMILY}"
-export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
+export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
+export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${MODEL_NAME}-${MODEL_VARIANT}_url"
 export VLLM_DATA_TYPE="auto"
  
 # Variables specific to your working environment, below are examples for the Vector cluster
@@ -51,7 +51,7 @@ export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 # Slurm job configuration
-export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
+export JOB_NAME="${MODEL_NAME}-${MODEL_VARIANT}"
 export JOB_PARTITION="a40"
 export QOS="m3"
 export TIME="04:00:00"
@@ -64,65 +64,53 @@ fi
 
 if [ -n "$partition" ]; then
     export JOB_PARTITION=$partition
-    echo "Partition set to: ${JOB_PARTITION}"
 fi
 
 if [ -n "$num_nodes" ]; then
     export NUM_NODES=$num_nodes
-    echo "Number of nodes set to: ${NUM_NODES}"
 fi
 
 if [ -n "$num_gpus" ]; then
     export NUM_GPUS=$num_gpus
-    echo "Number of GPUs set to: ${NUM_GPUS}"
 fi
 
 if [ -n "$qos" ]; then
     export QOS=$qos
-    echo "QOS set to: ${QOS}"
 fi
 
 if [ -n "$time" ]; then
     export TIME=$time
-    echo "Walltime set to: ${TIME}"
 fi
 
 if [ -n "$data_type" ]; then
     export VLLM_DATA_TYPE=$data_type
-    echo "Data type set to: ${VLLM_DATA_TYPE}"
 fi
 
 if [ -n "$virtual_env" ]; then
     export VENV_BASE=$virtual_env
-    echo "Virtual environment set to: ${VENV_BASE}"
 fi
 
 if [ -n "$model_variant" ]; then
     export MODEL_VARIANT=$model_variant
-    echo "Model variant set to: ${MODEL_VARIANT}"
     export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
-    export JOB_NAME="vLLM/${MODEL_NAME}-${MODEL_VARIANT}"
-    export VLLM_BASE_URL_FILENAME="$(dirname $(realpath "$0"))/.vLLM_${MODEL_NAME}-${MODEL_VARIANT}_url"
+    export JOB_NAME="${MODEL_NAME}-${MODEL_VARIANT}"
+    export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${MODEL_NAME}-${MODEL_VARIANT}_url"
 fi
 
 if [ -n "$image_input_type" ]; then
     export IMAGE_INPUT_TYPE="$image_input_type"
-    echo "Image input type set to: ${IMAGE_INPUT_TYPE}"
 fi
 
 if [ -n "$image_token_id" ]; then
     export IMAGE_TOKEN_ID="$image_token_id"
-    echo "Image token ID set to: ${IMAGE_TOKEN_ID}"
 fi
 
 if [ -n "$image_input_shape" ]; then
     export IMAGE_INPUT_SHAPE="$image_input_shape"
-    echo "Image input shape set to: ${IMAGE_INPUT_SHAPE}"
 fi
 
 if [ -n "$image_feature_size" ]; then
     export IMAGE_FEATURE_SIZE="$image_feature_size"
-    echo "Image feature size set to: ${IMAGE_FEATURE_SIZE}"
 fi
 
 # Set data type to fp16 instead of bf16 for non-Ampere GPUs
@@ -142,7 +130,10 @@ fi
 
 echo Job Name: ${JOB_NAME}
 echo Partition: ${JOB_PARTITION}
-echo Generic Resource Scheduling: gpu:$((NUM_NODES*NUM_GPUS))
+echo Num Nodes: ${NUM_NODES}
+echo GPUs per Node: ${NUM_GPUS}
+echo QOS: ${QOS}
+echo Walltime: ${TIME}
 echo Data Type: ${VLLM_DATA_TYPE}
 
 is_special=""
@@ -160,6 +151,6 @@ sbatch --job-name ${JOB_NAME} \
     --gres gpu:${NUM_GPUS} \
     --qos ${QOS} \
     --time ${TIME} \
-    --output ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
-    --error ${MODEL_DIR}/vLLM-${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
+    --output ${MODEL_DIR}/${MODEL_NAME}-${MODEL_VARIANT}.%j.out \
+    --error ${MODEL_DIR}/${MODEL_NAME}-${MODEL_VARIANT}.%j.err \
     ${SRC_DIR}/${is_special}vllm.slurm

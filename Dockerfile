@@ -54,19 +54,16 @@ RUN python3.10 -m pip install --upgrade pip
 RUN python3.10 -m pip install poetry
 
 # Clone the repository
-RUN git clone https://github.com/VectorInstitute/vector-inference /vec-inf
+RUN git clone -b develop https://github.com/VectorInstitute/vector-inference /vec-inf
 
 # Set the working directory
 WORKDIR /vec-inf
 
-# Configure Poetry to not create virtual environments
-RUN poetry config virtualenvs.create false
-
 # Update Poetry lock file if necessary
 RUN poetry lock
 
-# Install project dependencies via Poetry
-RUN poetry install
+# Install vec-inf
+RUN python3.10 -m pip install .[dev]
 
 # Install Flash Attention 2 backend
 RUN python3.10 -m pip install flash-attn --no-build-isolation
