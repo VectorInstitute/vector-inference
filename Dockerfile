@@ -59,6 +59,9 @@ RUN git clone -b develop https://github.com/VectorInstitute/vector-inference /ve
 # Set the working directory
 WORKDIR /vec-inf
 
+# Don't create venv
+RUN poetry config virtualenvs.create false
+
 # Update Poetry lock file if necessary
 RUN poetry lock
 
