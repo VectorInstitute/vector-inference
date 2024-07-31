@@ -26,10 +26,10 @@ def get_model_dir(slurm_job_name: str) -> str:
         "models"
     )
     model_dir = ""
+    processed_model_name = slurm_job_name.lower().strip("meta-").strip("c4ai-")
     for dir in os.listdir(models_dir):
-        if slurm_job_name.lower().startswith(dir):
+        if processed_model_name.startswith(dir):
             model_dir = os.path.join(models_dir, dir)
-            break
     return model_dir
 
 

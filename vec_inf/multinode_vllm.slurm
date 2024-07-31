@@ -85,7 +85,9 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
+    --chat-template ${CHAT_TEMPLATE} \
+    --gpu-memory-utilization 1 \
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
@@ -97,4 +99,6 @@ else
     --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --chat-template ${CHAT_TEMPLATE} \
+    --gpu-memory-utilization 1 \
 fi
