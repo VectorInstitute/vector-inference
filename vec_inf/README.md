@@ -1,3 +1,5 @@
-# Model Launching Scripts
+# `vec-inf` Commands
 
-Use the `launch_server.sh` to launch a model, this script will set environment variables according to the input arguments, and invoke one of the three slurm scripts accordingly.
+* `launch`: Specify a model family and other optional parameters to launch an OpenAI compatible inference server, `--json-mode` supported. Check [`here`](./models/README.md) for complete list of available options.
+* `status`: Check the model status by providing its Slurm job ID, `--json-mode` supported.
+* `shutdown`: Shutdown a model by providing its Slurm job ID. 

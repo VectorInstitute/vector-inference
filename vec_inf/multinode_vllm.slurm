@@ -11,7 +11,7 @@ nvidia-smi
 source ${SRC_DIR}/find_port.sh
 
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.2.2.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_1.0.0.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop

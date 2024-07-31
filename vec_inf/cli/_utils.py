@@ -27,7 +27,7 @@ def get_model_dir(slurm_job_name: str) -> str:
     )
     model_dir = ""
     for dir in os.listdir(models_dir):
-        if dir in slurm_job_name.lower():
+        if slurm_job_name.lower().startswith(dir):
             model_dir = os.path.join(models_dir, dir)
             break
     return model_dir
@@ -44,7 +44,8 @@ def is_server_running(slurm_job_name: str, slurm_job_id: int) -> str:
         with open(file_path, 'r') as file:
             lines = file.readlines()
     except FileNotFoundError:
-        return "LAUNCHING"
+        print(f"Could not find file: {file_path}")
+        return "LOG_FILE_NOT_FOUND"
     
     for line in lines:
         if MODEL_READY_SIGNATURE in line:

@@ -1,6 +1,5 @@
 #!/bin/bash
 # ================================= Read Named Args ======================================
-is_vlm=false
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -13,7 +12,6 @@ while [[ "$#" -gt 0 ]]; do
         --time) time="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
-        --is-vlm) is_vlm=true ;;
         --image-input-type) image_input_type="$2"; shift ;;
         --image-token-id) image_token_id="$2"; shift ;;
         --image-input-shape) image_input_shape="$2"; shift ;;
@@ -30,6 +28,7 @@ fi
 # ================================= Set default environment variables ======================================
 export MODEL_FAMILY=$model_family
 export SRC_DIR="$(dirname "$0")"
+export CHAT_TEMPLATE=None
 
 # Load the configuration file for the specified model family
 CONFIG_FILE="${SRC_DIR}/models/${MODEL_FAMILY}/config.sh"
@@ -57,9 +56,9 @@ export QOS="m3"
 export TIME="04:00:00"
 
 # VLM configuration
-if [ "$is_vlm" = true ]; then
-    export CHAT_TEMPLATE="${SRC_DIR}/../models/${MODEL_FAMILY}/chat_template.jinja"
-fi
+# if [ "${IS_VLM}" = "True" ]; then
+#     export CHAT_TEMPLATE="${SRC_DIR}/models/${MODEL_FAMILY}/chat_template.jinja"
+# fi
 # ======================================= Overwrite Env Vars ========================================
 
 if [ -n "$partition" ]; then
@@ -141,9 +140,9 @@ if [ "$NUM_NODES" -gt 1 ]; then
     is_special="multinode_"
 fi
 
-if [ "$is_vlm" = true ]; then
-    is_special="vlm_"
-fi
+# if [ "${IS_VLM}" = "True" ]; then
+#     is_special="vlm_"
+# fi
 
 sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \

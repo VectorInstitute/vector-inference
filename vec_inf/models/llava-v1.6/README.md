@@ -4,3 +4,4 @@
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 |[**`mistral-7b-hf`**](https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf)| 1x a40 | - tokens/s | - tokens/s |
+|[`34b-hf`](https://huggingface.co/llava-hf/llava-v1.6-34b-hf)| 2x a40 | - tokens/s | - tokens/s |

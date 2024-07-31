@@ -17,7 +17,7 @@ echo "http://${hostname}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.2.0.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_1.0.0.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
@@ -28,7 +28,10 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
+    --chat-template ${CHAT_TEMPLATE} \
+    --gpu-memory-utilization 1 \
+    --trust-remote-code
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
@@ -37,5 +40,8 @@ else
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \ 
+    --chat-template ${CHAT_TEMPLATE} \
+    --gpu-memory-utilization 1 \
+    --trust-remote-code
 fi

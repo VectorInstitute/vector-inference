@@ -11,7 +11,7 @@ console = Console()
 
 @click.group()
 def cli():
-    """Main CLI group"""
+    """Vector Inference CLI"""
     pass
 
 @cli.command("launch")
@@ -61,11 +61,6 @@ def cli():
     help='Path to virtual environment'
 )
 @click.option(
-    "--is-vlm",
-    type=bool,
-    help='Whether the model is a VLM model, default to False'
-)
-@click.option(
     "--image-input-type",
     type=str,
     help='The image input type passed into vLLM, default to pixel_values'
@@ -100,7 +95,6 @@ def launch(
     time: str=None,
     data_type: str=None,
     venv: str=None,
-    is_vlm: bool=None,
     image_input_type: str=None,
     image_token_id: str=None,
     image_input_shape: str=None,
@@ -159,6 +153,7 @@ def status(slurm_job_id: int, json_mode: bool=False) -> None:
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = run_bash_command(status_cmd)
 
+    slurm_job_name = "UNAVAILABLE"
     status = "SHUTDOWN"
     base_url = "UNAVAILABLE"
 
