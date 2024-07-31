@@ -81,24 +81,26 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --tensor-parallel-size ${NUM_GPUS} \
+    --pipeline-parallel-size ${NUM_NODES} \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --chat-template ${CHAT_TEMPLATE} \
-    --gpu-memory-utilization 1 \
+    --gpu-memory-utilization 1 
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --tensor-parallel-size ${NUM_GPUS} \
+    --pipeline-parallel-size ${NUM_NODES} \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} 
     --chat-template ${CHAT_TEMPLATE} \
-    --gpu-memory-utilization 1 \
+    --gpu-memory-utilization 1 
 fi

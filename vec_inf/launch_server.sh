@@ -55,10 +55,6 @@ export JOB_PARTITION="a40"
 export QOS="m3"
 export TIME="04:00:00"
 
-# VLM configuration
-# if [ "${IS_VLM}" = "True" ]; then
-#     export CHAT_TEMPLATE="${SRC_DIR}/models/${MODEL_FAMILY}/chat_template.jinja"
-# fi
 # ======================================= Overwrite Env Vars ========================================
 
 if [ -n "$partition" ]; then
@@ -139,10 +135,6 @@ is_special=""
 if [ "$NUM_NODES" -gt 1 ]; then
     is_special="multinode_"
 fi
-
-# if [ "${IS_VLM}" = "True" ]; then
-#     is_special="vlm_"
-# fi
 
 sbatch --job-name ${JOB_NAME} \
     --partition ${JOB_PARTITION} \
