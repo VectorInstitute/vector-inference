@@ -29,6 +29,7 @@ fi
 export MODEL_FAMILY=$model_family
 export SRC_DIR="$(dirname "$0")"
 export CHAT_TEMPLATE=None
+export MAX_NUM_SEQS=256
 
 # Load the configuration file for the specified model family
 CONFIG_FILE="${SRC_DIR}/models/${MODEL_FAMILY}/config.sh"

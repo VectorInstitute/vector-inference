@@ -81,8 +81,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
-    --pipeline-parallel-size ${NUM_NODES} \
+    --tensor-parallel-size $(NUM_NODES*NUM_GPUS) \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
@@ -95,8 +94,7 @@ else
     --model ${VLLM_MODEL_WEIGHTS} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
-    --pipeline-parallel-size ${NUM_NODES} \
+    --tensor-parallel-size $(NUM_NODES*NUM_GPUS) \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
