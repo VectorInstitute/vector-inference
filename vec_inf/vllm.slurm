@@ -30,7 +30,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --chat-template ${CHAT_TEMPLATE} \
-    --gpu-memory-utilization 1 \
+    --gpu-memory-utilization 0.95 \
     --trust-remote-code \
     --max-num-seqs ${MAX_NUM_SEQS}
 else
@@ -43,7 +43,7 @@ else
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \ 
     --chat-template ${CHAT_TEMPLATE} \
-    --gpu-memory-utilization 1 \
+    --gpu-memory-utilization 0.95 \
     --trust-remote-code \
     --max-num-seqs ${MAX_NUM_SEQS}
 fi
