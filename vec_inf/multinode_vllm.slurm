@@ -11,7 +11,7 @@ nvidia-smi
 source ${SRC_DIR}/find_port.sh
 
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_1.0.0.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.3.0.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
@@ -86,7 +86,6 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
-    --chat-template ${CHAT_TEMPLATE} \
     --gpu-memory-utilization 0.95
 else
     source ${VENV_BASE}/bin/activate
@@ -98,7 +97,6 @@ else
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} 
-    --chat-template ${CHAT_TEMPLATE} \
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --gpu-memory-utilization 0.95 
 fi
