@@ -28,6 +28,13 @@ You should see an output like the following:
 
 <img src="https://github.com/user-attachments/assets/310086fd-82ea-4bfc-8062-5c8e71c5650c" width="400">
 
+There are 5 possible states:
+
+* **PENDING**: Job submitted to Slurm, but not executed yet.
+* **LAUNCHING**: Job is running but the server is not ready yet.
+* **READY**: Inference server running and ready to take requests.
+* **FAILED**: Inference server in an unhealthy state.
+* **SHUTDOWN**: Inference server is shutdown/cancelled.
 
 Note that the base URL is only available when model is in `READY` state. 
 Both `launch` and `status` command supports `--json-mode`, where the output information would be structured as a JSON string.
