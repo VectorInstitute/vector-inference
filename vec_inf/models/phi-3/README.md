@@ -2,5 +2,5 @@
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
-| [**`medium-128k-instruct`**](https://huggingface.co/microsoft/Phi-3-medium-128k-instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [**`vision-128k-instruct`**](https://huggingface.co/microsoft/Phi-3-vision-128k-instruct) | 1x a40 | - tokens/s | - tokens/s |
+| [**`medium-128k-instruct`**](https://huggingface.co/microsoft/Phi-3-medium-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |
+| [**`vision-128k-instruct`**](https://huggingface.co/microsoft/Phi-3-vision-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |

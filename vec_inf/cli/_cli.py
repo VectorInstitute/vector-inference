@@ -26,6 +26,11 @@ def cli():
     help='The model variant according to the README in `models/model-family`'
 )
 @click.option(
+    "--max-model-len",
+    type=int,
+    help='Model context length. If unspecified, will be automatically derived from the model config.'
+)
+@click.option(
     "--partition",
     type=str,
     help='Type of compute partition, default to a40'
@@ -59,26 +64,6 @@ def cli():
     "--venv",
     type=str,
     help='Path to virtual environment'
-)
-@click.option(
-    "--image-input-type",
-    type=str,
-    help='The image input type passed into vLLM, default to pixel_values'
-)
-@click.option(
-    "--image-token-id",
-    type=str,
-    help='Input ID for image token. Default to HF Config value. Default value set according to model'
-)
-@click.option(
-    "--image-input-shape",
-    type=str,
-    help='The biggest image input shape given an input type. Default value set according to model.'
-)
-@click.option(
-    "--image-feature-size",
-    type=str,
-    help='The image feature size along the context dimension. Default value set according to model'
 )
 @click.option(
     "--json-mode",

@@ -3,4 +3,5 @@
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
-|[**`13b-hf`**](https://huggingface.co/llava-hf/llava-1.5-13b-hf)| 1x a40 | - tokens/s | - tokens/s |
+|[**`7b-hf`**](https://huggingface.co/llava-hf/llava-1.5-7b-hf)| 1x a40 | - tokens/s | - tokens/s |
+|[`13b-hf`](https://huggingface.co/llava-hf/llava-1.5-13b-hf)| 1x a40 | - tokens/s | - tokens/s |

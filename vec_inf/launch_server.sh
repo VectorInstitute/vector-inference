@@ -5,6 +5,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --model-family) model_family="$2"; shift ;;
         --model-variant) model_variant="$2"; shift ;;
+        --max-model-len) max_model_len="$2"; shift ;;
         --partition) partition="$2"; shift ;;
         --num-nodes) num_nodes="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
@@ -44,6 +45,7 @@ source "$CONFIG_FILE"
 export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${MODEL_NAME}-${MODEL_VARIANT}_url"
 export VLLM_DATA_TYPE="auto"
+export VLLM_MAX_MODEL_LEN=None
  
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VENV_BASE="singularity"
@@ -91,6 +93,10 @@ if [ -n "$model_variant" ]; then
     export VLLM_MODEL_WEIGHTS="/model-weights/${MODEL_NAME}-${MODEL_VARIANT}"
     export JOB_NAME="${MODEL_NAME}-${MODEL_VARIANT}"
     export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${MODEL_NAME}-${MODEL_VARIANT}_url"
+fi
+
+if [ -n "$max_model_len" ]; then
+    export VLLM_MAX_MODEL_LEN=$max_model_len
 fi
 
 if [ -n "$image_input_type" ]; then

@@ -29,9 +29,9 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
-    --gpu-memory-utilization 0.95 \
     --trust-remote-code \
-    --max-num-seqs ${MAX_NUM_SEQS}
+    --max-num-seqs ${MAX_NUM_SEQS} \
+    --max-model-len ${VLLM_MAX_MODEL_LEN}
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
@@ -42,5 +42,6 @@ else
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \ 
     --trust-remote-code \
-    --max-num-seqs ${MAX_NUM_SEQS}
+    --max-num-seqs ${MAX_NUM_SEQS} \
+    --max-model-len ${VLLM_MAX_MODEL_LEN}
 fi

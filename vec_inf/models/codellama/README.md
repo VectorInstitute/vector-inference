@@ -2,8 +2,8 @@
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
-| [**`7b-hf`**](https://huggingface.co/meta-llama/CodeLlama-7b-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`7b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-7b-Instruct-hf) | 1x a40 | - tokens/s | - tokens/s |
+| [`7b-hf`](https://huggingface.co/meta-llama/CodeLlama-7b-hf) | 1x a40 | - tokens/s | - tokens/s |
+| [**`7b-Instruct-hf`**](https://huggingface.co/meta-llama/CodeLlama-7b-Instruct-hf) | 1x a40 | - tokens/s | - tokens/s |
 | [`13b-hf`](https://huggingface.co/meta-llama/CodeLlama-13b-hf) | 1x a40 | - tokens/s | - tokens/s |
 | [`13b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-13b-Instruct-hf) | 1x a40 | - tokens/s | - tokens/s |
 | [`34b-hf`](https://huggingface.co/meta-llama/CodeLlama-34b-hf) | 2x a40 | - tokens/s | - tokens/s |
