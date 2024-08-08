@@ -73,6 +73,7 @@ def cli():
 def launch(
     model_family: str,
     model_variant: str=None,
+    max_model_len: int=None,
     partition: str=None,
     num_nodes: int=None,
     num_gpus: int=None,
