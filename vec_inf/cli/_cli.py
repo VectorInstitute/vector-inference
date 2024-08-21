@@ -1,12 +1,16 @@
 import os
 
 import click
+import pandas as pd
 from rich.console import Console
+from rich.columns import Columns
+from rich.panel import Panel
 
 from ._utils import run_bash_command, is_server_running, model_health_check, get_base_url, create_table
 
-
-console = Console()
+MODELS_DF = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "models/models.csv"))
+MODELS_DF['model_name'] = MODELS_DF['model_family'] + '-' + MODELS_DF['model_variant']
+CONSOLE = Console()
 
 
 @click.group()
@@ -14,11 +18,17 @@ def cli():
     """Vector Inference CLI"""
     pass
 
+
 @cli.command("launch")
 @click.argument(
-    "model-family",
+    "model-name",
     type=str,
     nargs=1
+)
+@click.option(
+    "--model-family",
+    type=str,
+    help='The model family name according to the directories in `models`'
 )
 @click.option(
     "--model-variant",
@@ -66,12 +76,18 @@ def cli():
     help='Path to virtual environment'
 )
 @click.option(
+    "--log-dir",
+    type=str,
+    help='Path to Slurm logs directory'
+)
+@click.option(
     "--json-mode",
     is_flag=True,
     help='Output in JSON string',
 )
 def launch(
-    model_family: str,
+    model_name: str,
+    model_family: str=None,
     model_variant: str=None,
     max_model_len: int=None,
     partition: str=None,
@@ -81,22 +97,21 @@ def launch(
     time: str=None,
     data_type: str=None,
     venv: str=None,
-    image_input_type: str=None,
-    image_token_id: str=None,
-    image_input_shape: str=None,
-    image_feature_size: str=None,
     json_mode: bool=False
 ) -> None:
     """
     Launch a model on the cluster
     """
     input_args_list = list(locals().keys())
+    input_args_list.remove("model_name")
     input_args_list.remove("json_mode")
+
     launch_script_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
         "launch_server.sh"
     )
     launch_cmd = f"bash {launch_script_path}" 
+
     for arg in input_args_list:
         if locals()[arg] is not None:
             named_arg = arg.replace("_", "-")
@@ -118,7 +133,7 @@ def launch(
     if json_mode:
         click.echo(output_dict)
     else:
-        console.print(table)
+        CONSOLE.print(table)
 
 
 @cli.command("status")
@@ -170,7 +185,7 @@ def status(slurm_job_id: int, json_mode: bool=False) -> None:
         table.add_row("Model Name", slurm_job_name)
         table.add_row("Model Status", status, style="blue")
         table.add_row("Base URL", base_url)
-        console.print(table)
+        CONSOLE.print(table)
         
 
 @cli.command("shutdown")
@@ -186,6 +201,26 @@ def shutdown(slurm_job_id: int) -> None:
     shutdown_cmd = f"scancel {slurm_job_id}"
     run_bash_command(shutdown_cmd)
     click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
+
+
+@cli.command("list")
+@click.option(
+    "--json-mode",
+    is_flag=True,
+    help='Output in JSON string',
+)
+def list(json_mode: bool=False) -> None:
+    """
+    List all available models
+    """
+    if json_mode:
+        click.echo(MODELS_DF['model_name'].to_json(orient='records'))
+        return
+    panels = []
+    for _, row in MODELS_DF.iterrows():
+        styled_text = f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
+        panels.append(Panel(styled_text, expand=True))
+    CONSOLE.print(Columns(panels, equal=True))
 
 
 if __name__ == '__main__':
