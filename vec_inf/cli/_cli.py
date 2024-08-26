@@ -6,10 +6,9 @@ from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
 
-from ._utils import run_bash_command, is_server_running, model_health_check, get_base_url, create_table
+from _utils import *
 
-MODELS_DF = pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "models/models.csv"))
-MODELS_DF['model_name'] = MODELS_DF['model_family'] + '-' + MODELS_DF['model_variant']
+
 CONSOLE = Console()
 
 
@@ -78,7 +77,7 @@ def cli():
 @click.option(
     "--log-dir",
     type=str,
-    help='Path to Slurm logs directory'
+    help='Path to slurm log directory'
 )
 @click.option(
     "--json-mode",
@@ -97,25 +96,31 @@ def launch(
     time: str=None,
     data_type: str=None,
     venv: str=None,
+    log_dir: str=None,
     json_mode: bool=False
 ) -> None:
     """
     Launch a model on the cluster
     """
-    input_args_list = list(locals().keys())
-    input_args_list.remove("model_name")
-    input_args_list.remove("json_mode")
-
     launch_script_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
         "launch_server.sh"
     )
     launch_cmd = f"bash {launch_script_path}" 
 
-    for arg in input_args_list:
-        if locals()[arg] is not None:
-            named_arg = arg.replace("_", "-")
-            launch_cmd += f" --{named_arg} {locals()[arg]}"
+    models_df = load_models_df()
+
+    if model_name not in models_df['model_name'].values:
+        raise ValueError(f"Model name {model_name} not found in available models")
+
+    default_args = load_default_args(models_df, model_name)
+
+    for arg in default_args:
+        if arg in locals() and locals()[arg] is not None:
+            default_args[arg] = locals()[arg]
+        renamed_arg = arg.replace("_", "-")
+        launch_cmd += f" --{renamed_arg} {default_args[arg]}"    
+    
     output = run_bash_command(launch_cmd)
 
     slurm_job_id = output.split(" ")[-1].strip().strip("\n")
@@ -143,11 +148,16 @@ def launch(
     nargs=1
 )
 @click.option(
+    "--log-dir",
+    type=str,
+    help='Path to slurm log directory. This is required if it was set when launching the model'
+)
+@click.option(
     "--json-mode",
     is_flag=True,
     help='Output in JSON string',
 )
-def status(slurm_job_id: int, json_mode: bool=False) -> None:
+def status(slurm_job_id: int, log_dir: str=None, json_mode: bool=False) -> None:
     """
     Get the status of a running model on the cluster
     """
@@ -161,29 +171,41 @@ def status(slurm_job_id: int, json_mode: bool=False) -> None:
     try:
         slurm_job_name = output.split(" ")[1].split("=")[1]
         slurm_job_state = output.split(" ")[9].split("=")[1]
-        # If Slurm job is currently PENDING
-        if slurm_job_state == "PENDING":
-            status = "PENDING"
-        # If Slurm job is currently RUNNING
-        elif slurm_job_state == "RUNNING":
-            # Check whether the server is ready, if yes, run model health check to further determine status
-            server_status = is_server_running(slurm_job_name, slurm_job_id)
-            if server_status == "RUNNING":
-                status = model_health_check(slurm_job_name)
-                if status == "READY":
-                    # Only set base_url if model is ready to serve requests
-                    base_url = get_base_url(slurm_job_name)
-            else:
-                status = server_status
-    except:
-        pass
+    except IndexError:
+        # Job ID not found
+        slurm_job_state = "UNAVAILABLE"
+
+    # If Slurm job is currently PENDING
+    if slurm_job_state == "PENDING":
+        slurm_job_pending_reason = output.split(" ")[10].split("=")[1]
+        status = "PENDING"
+    # If Slurm job is currently RUNNING
+    elif slurm_job_state == "RUNNING":
+        # Check whether the server is ready, if yes, run model health check to further determine status
+        server_status = is_server_running(slurm_job_name, slurm_job_id, log_dir)
+        if server_status == "RUNNING":
+            status = model_health_check(slurm_job_name)
+            if status == "READY":
+                # Only set base_url if model is ready to serve requests
+                base_url = get_base_url(slurm_job_name)
+        else:
+            status = server_status
 
     if json_mode:
-        click.echo(f'{{"model_name": "{slurm_job_name}", "model_status": "{status}", "base_url": "{base_url}"}}')
+        status_dict = {
+            "model_name": slurm_job_name, 
+            "model_status": status, 
+            "base_url": base_url
+        }
+        if "slurm_job_pending_reason" in locals():
+            status_dict["pending_reason"] = slurm_job_pending_reason
+        click.echo(f'{status_dict}')
     else:
         table = create_table(key_title="Job Status", value_title="Value")
         table.add_row("Model Name", slurm_job_name)
         table.add_row("Model Status", status, style="blue")
+        if "slurm_job_pending_reason" in locals():
+            table.add_row("Reason", slurm_job_pending_reason)
         table.add_row("Base URL", base_url)
         CONSOLE.print(table)
         
@@ -213,11 +235,12 @@ def list(json_mode: bool=False) -> None:
     """
     List all available models
     """
+    models_df = load_models_df()
     if json_mode:
-        click.echo(MODELS_DF['model_name'].to_json(orient='records'))
+        click.echo(models_df['model_name'].to_json(orient='records'))
         return
     panels = []
-    for _, row in MODELS_DF.iterrows():
+    for _, row in models_df.iterrows():
         styled_text = f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
         panels.append(Panel(styled_text, expand=True))
     CONSOLE.print(Columns(panels, equal=True))

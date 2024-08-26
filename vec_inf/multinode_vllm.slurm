@@ -79,7 +79,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     singularity exec --nv --bind /model-weights:/model-weights $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${MODEL_NAME}-${MODEL_VARIANT} \
+    --served-model-name ${JOB_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
@@ -92,7 +92,7 @@ else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${MODEL_NAME}-${MODEL_VARIANT} \
+    --served-model-name ${JOB_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
