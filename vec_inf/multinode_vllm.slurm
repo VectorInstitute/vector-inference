@@ -74,6 +74,14 @@ vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 echo "Server address: http://${head_node_ip}:${vllm_port_number}/v1"
 echo "http://${head_node_ip}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
+if [ "$PIPELINE_PARALLELISM" = "true" ]; then
+    export PIPELINE_PARALLEL_SIZE=$NUM_NODES
+    export TENSOR_PARALLEL_SIZE=$NUM_GPUS
+else
+    export PIPELINE_PARALLEL_SIZE=1
+    export TENSOR_PARALLEL_SIZE=$((NUM_NODES*NUM_GPUS))
+fi
+
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then    
     singularity exec --nv --bind /model-weights:/model-weights $SINGULARITY_IMAGE \
@@ -82,7 +90,8 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --served-model-name ${JOB_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
+    --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \
@@ -95,7 +104,8 @@ else
     --served-model-name ${JOB_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size $((NUM_NODES*NUM_GPUS)) \
+    --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
+    --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
     --dtype ${VLLM_DATA_TYPE} \
     --load-format safetensors \
     --trust-remote-code \

@@ -16,12 +16,13 @@ while [[ "$#" -gt 0 ]]; do
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
+        --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type virtual_env log_dir)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type virtual_env log_dir pipeline_parallelism)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -42,6 +43,7 @@ export VLLM_MAX_LOGPROBS=$vocab_size
 export VLLM_DATA_TYPE=$data_type
 export VENV_BASE=$virtual_env
 export LOG_DIR=$log_dir
+export PIPELINE_PARALLELISM=$pipeline_parallelism
 
 # ================================= Set default environment variables ======================================
 # Slurm job configuration
