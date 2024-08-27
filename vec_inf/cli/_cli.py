@@ -183,11 +183,19 @@ def status(slurm_job_id: int, log_dir: str=None, json_mode: bool=False) -> None:
     elif slurm_job_state == "RUNNING":
         # Check whether the server is ready, if yes, run model health check to further determine status
         server_status = is_server_running(slurm_job_name, slurm_job_id, log_dir)
-        if server_status == "RUNNING":
-            status = model_health_check(slurm_job_name)
+        # If server status is a tuple, then server status is "FAILED"
+        if type(server_status) is tuple:
+            status = server_status[0]
+            slurm_job_failed_reason = server_status[1]
+        elif server_status == "RUNNING":
+            status = model_health_check(slurm_job_name)                
             if status == "READY":
                 # Only set base_url if model is ready to serve requests
                 base_url = get_base_url(slurm_job_name)
+            else:
+                # If model is not ready, then status must be "FAILED"
+                status = status[0]
+                slurm_job_failed_reason = status[1]
         else:
             status = server_status
 
@@ -199,6 +207,8 @@ def status(slurm_job_id: int, log_dir: str=None, json_mode: bool=False) -> None:
         }
         if "slurm_job_pending_reason" in locals():
             status_dict["pending_reason"] = slurm_job_pending_reason
+        if "slurm_job_failed_reason" in locals():
+            status_dict["failed_reason"] = slurm_job_failed_reason
         click.echo(f'{status_dict}')
     else:
         table = create_table(key_title="Job Status", value_title="Value")
@@ -206,6 +216,8 @@ def status(slurm_job_id: int, log_dir: str=None, json_mode: bool=False) -> None:
         table.add_row("Model Status", status, style="blue")
         if "slurm_job_pending_reason" in locals():
             table.add_row("Reason", slurm_job_pending_reason)
+        if "slurm_job_failed_reason" in locals():
+            table.add_row("Reason", slurm_job_failed_reason)
         table.add_row("Base URL", base_url)
         CONSOLE.print(table)
         

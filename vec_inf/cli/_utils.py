@@ -1,5 +1,6 @@
 import subprocess
 import os
+from typing import Union
 
 import requests
 from rich.table import Table
@@ -38,7 +39,7 @@ def get_model_dir(slurm_job_name: str, is_log_dir: bool=False) -> str:
     return model_dir
 
 
-def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> str:
+def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
     """
     Check if a model is ready to serve requests
     """
@@ -54,6 +55,8 @@ def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> s
         return "LOG_FILE_NOT_FOUND"
     
     for line in lines:
+        if "error" in line.lower():
+            return ("FAILED", line.strip("\n"))
         if MODEL_READY_SIGNATURE in line:
             return "RUNNING"
     return "LAUNCHING"
@@ -73,7 +76,7 @@ def get_base_url(slurm_job_name: str) -> str:
     return lines[0].strip().strip("\n")
 
 
-def model_health_check(slurm_job_name: str) -> str:
+def model_health_check(slurm_job_name: str) -> Union[str, tuple]:
     """
     Check the health of a running model on the cluster
     """
@@ -86,9 +89,9 @@ def model_health_check(slurm_job_name: str) -> str:
         if response.status_code == 200:
             return "READY"
         else:
-            return "FAILED"
+            return ("FAILED", response.status_code)
     except requests.exceptions.RequestException as e:
-        return "FAILED"
+        return ("FAILED", str(e))
     
 
 def create_table(key_title: str = "", value_title: str = "", show_header: bool = True) -> Table:
