@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
 
-from _utils import *
+from ._utils import *
 
 
 CONSOLE = Console()

@@ -152,3 +152,6 @@ scripts/
 
 # vLLM bug reporting files
 collect_env.py
+
+# build files
+dist/
