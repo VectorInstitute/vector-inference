@@ -188,10 +188,10 @@ def status(slurm_job_id: int, log_dir: str=None, json_mode: bool=False) -> None:
             status = server_status[0]
             slurm_job_failed_reason = server_status[1]
         elif server_status == "RUNNING":
-            status = model_health_check(slurm_job_name)                
+            status = model_health_check(slurm_job_name, slurm_job_id, log_dir)                
             if status == "READY":
                 # Only set base_url if model is ready to serve requests
-                base_url = get_base_url(slurm_job_name)
+                base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
             else:
                 # If model is not ready, then status must be "FAILED"
                 status = status[0]

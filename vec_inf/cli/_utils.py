@@ -8,6 +8,7 @@ import pandas as pd
 
 
 MODEL_READY_SIGNATURE = "INFO:     Uvicorn running on http://0.0.0.0:"
+SERVER_ADDRESS_SIGNATURE = "Server address: "
 
 
 def run_bash_command(command: str) -> str:
@@ -19,42 +20,41 @@ def run_bash_command(command: str) -> str:
     return stdout
 
 
-def get_model_dir(slurm_job_name: str, is_log_dir: bool=False) -> str:
+def read_slurm_log(
+        slurm_job_name: str,
+        slurm_job_id: int,
+        slurm_log_type: str,
+        log_dir: str
+    ) -> Union[list, str]:
     """
     Get the directory of a model
     """
-    if is_log_dir:
-        models_dir = os.path.join(os.path.expanduser("~"), ".vec-inf-logs")
-    else:
-        models_dir = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-            "models"
-        )
-    model_dir = ""
-    for dir in sorted(os.listdir(models_dir), key=len, reverse=True):
-        if dir in slurm_job_name:
-            model_dir = os.path.join(models_dir, dir)
-            break
-
-    return model_dir
-
-
-def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
-    """
-    Check if a model is ready to serve requests
-    """
     if not log_dir:
-        log_dir = get_model_dir(slurm_job_name, is_log_dir=True)
+        models_dir = os.path.join(os.path.expanduser("~"), ".vec-inf-logs")
+        
+        for dir in sorted(os.listdir(models_dir), key=len, reverse=True):
+            if dir in slurm_job_name:
+                log_dir = os.path.join(models_dir, dir)
+                break
     
     try:
-        file_path = os.path.join(log_dir, f"{slurm_job_name}.{slurm_job_id}.err")
+        file_path = os.path.join(log_dir, f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}")
         with open(file_path, 'r') as file:
             lines = file.readlines()
     except FileNotFoundError:
         print(f"Could not find file: {file_path}")
         return "LOG_FILE_NOT_FOUND"
+    return lines
+
+def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
+    """
+    Check if a model is ready to serve requests
+    """
+    log_content = read_slurm_log(slurm_job_name, slurm_job_id, "err", log_dir)
+    if type(log_content) is str:
+        return log_content
     
-    for line in lines:
+    for line in log_content:
         if "error" in line.lower():
             return ("FAILED", line.strip("\n"))
         if MODEL_READY_SIGNATURE in line:
@@ -62,25 +62,27 @@ def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> U
     return "LAUNCHING"
 
 
-def get_base_url(slurm_job_name: str) -> str:
+def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> str:
     """
     Get the base URL of a model
     """
-    model_dir = get_model_dir(slurm_job_name)
-    try:
-        file_path = os.path.join(model_dir, f".{slurm_job_name}_url")
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-    except FileNotFoundError:
-        return "UNAVAILABLE"
-    return lines[0].strip().strip("\n")
+    log_content = read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
+    if type(log_content) is str:
+        return log_content
+    
+    for line in log_content:
+        if SERVER_ADDRESS_SIGNATURE in line:
+            return line.split(SERVER_ADDRESS_SIGNATURE)[1].strip("\n")
+    return "URL_NOT_FOUND"
 
 
-def model_health_check(slurm_job_name: str) -> Union[str, tuple]:
+def model_health_check(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
     """
     Check the health of a running model on the cluster
     """
-    base_url = get_base_url(slurm_job_name)
+    base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
+    if not base_url.startswith("http"):
+        return ("FAILED", base_url)
     health_check_url = base_url.replace("v1", "health")
 
     try:
