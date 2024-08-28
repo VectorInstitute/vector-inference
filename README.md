@@ -18,6 +18,7 @@ You should see an output like the following:
 <img width="450" alt="launch_img" src="https://github.com/user-attachments/assets/557eb421-47db-4810-bccd-c49c526b1b43">
 
 The model would be launched using the [default parameters](vec-inf/models/models.csv), you can override these values by providing additional options, use `--help` to see the full list.
+If you'd like to see the Slurm logs, they are located in the `.vec-inf-logs` folder in your home directory. The log folder path can be modified by using the `--log-dir` option. 
 
 You can check the inference server status by providing the Slurm job ID to the `status` command:
 ```bash
@@ -36,7 +37,7 @@ There are 5 possible states:
 * **FAILED**: Inference server in an unhealthy state. Job failed reason will be shown.
 * **SHUTDOWN**: Inference server is shutdown/cancelled.
 
-Note that the base URL is only available when model is in `READY` state. 
+Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
 
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
