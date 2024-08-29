@@ -1,7 +1,6 @@
 import os
 
 import click
-import pandas as pd
 from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
@@ -27,12 +26,12 @@ def cli():
 @click.option(
     "--model-family",
     type=str,
-    help='The model family name according to the directories in `models`'
+    help='The model family'
 )
 @click.option(
     "--model-variant",
     type=str,
-    help='The model variant according to the README in `models/model-family`'
+    help='The model variant'
 )
 @click.option(
     "--max-model-len",
@@ -57,12 +56,12 @@ def cli():
 @click.option(
     "--qos",
     type=str,
-    help='Quality of service, default to m3'
+    help='Quality of service, default depends on suggested resource allocation required for the model'
 )
 @click.option(
     "--time",
     type=str,
-    help='Time limit for job, this should comply with QoS, default to 4:00:00'
+    help='Time limit for job, this should comply with QoS, default to max walltime of the chosen QoS'
 )
 @click.option(
     "--data-type",
@@ -77,7 +76,7 @@ def cli():
 @click.option(
     "--log-dir",
     type=str,
-    help='Path to slurm log directory'
+    help='Path to slurm log directory, default to .vec-inf-logs in home directory'
 )
 @click.option(
     "--json-mode",
@@ -150,7 +149,7 @@ def launch(
 @click.option(
     "--log-dir",
     type=str,
-    help='Path to slurm log directory. This is required if it was set when launching the model'
+    help='Path to slurm log directory. This is required if --log-dir was set in model launch'
 )
 @click.option(
     "--json-mode",
@@ -238,16 +237,40 @@ def shutdown(slurm_job_id: int) -> None:
 
 
 @cli.command("list")
+@click.argument(
+    "model-name",
+    required=False)
 @click.option(
     "--json-mode",
     is_flag=True,
     help='Output in JSON string',
 )
-def list(json_mode: bool=False) -> None:
+def list(model_name: str=None, json_mode: bool=False) -> None:
     """
-    List all available models
+    List all available models, or get default setup of a specific model
     """
     models_df = load_models_df()
+
+    if model_name:
+        if model_name not in models_df['model_name'].values:
+            raise ValueError(f"Model name {model_name} not found in available models")
+        
+        excluded_keys = {'venv', 'log_dir', 'pipeline_parallelism'}
+        model_row = models_df.loc[models_df['model_name'] == model_name]
+
+        if json_mode:
+            # click.echo(model_row.to_json(orient='records'))
+            filtered_model_row = model_row.drop(columns=excluded_keys, errors='ignore')
+            click.echo(filtered_model_row.to_json(orient='records'))
+            return
+        table = create_table(key_title="Model Config", value_title="Value")
+        for _, row in model_row.iterrows():
+            for key, value in row.items():
+                if key not in excluded_keys:
+                    table.add_row(key, str(value))
+        CONSOLE.print(table)
+        return
+    
     if json_mode:
         click.echo(models_df['model_name'].to_json(orient='records'))
         return
