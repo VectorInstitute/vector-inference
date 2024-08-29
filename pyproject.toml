@@ -1,18 +1,26 @@
 [tool.poetry]
-name = "vector-inference"
-version = "0.2.1"
+name = "vec-inf"
+version = "0.3.0"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
-authors = ["XkunW <marshall.wang@vectorinstitute.ai>"]
+authors = ["Marshall Wang <marshall.wang@vectorinstitute.ai>"]
 license = "MIT license"
 readme = "README.md"
-package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-vllm = { version = "^0.5.0", allow-prereleases = true }
-vllm-nccl-cu12 = ">=2.18,<2.19"
-ray = "^2.9.3"
-cupy-cuda12x = "12.1.0"
+requests = "^2.31.0"
+click = "^8.1.0"
+rich = "^13.7.0"
+vllm = { version = "^0.5.0", optional = true }
+vllm-nccl-cu12 = { version = ">=2.18,<2.19", optional = true }
+ray = { version = "^2.9.3", optional = true }
+cupy-cuda12x = { version = "12.1.0", optional = true }
+
+[tool.poetry.extras]
+dev = ["vllm", "vllm-nccl-cu12", "ray", "cupy-cuda12x"]
+
+[tool.poetry.scripts]
+vec-inf = "vec_inf.cli._cli:cli"
 
 [build-system]
 requires = ["poetry-core"]

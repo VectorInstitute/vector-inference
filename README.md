@@ -1,62 +1,58 @@
 # Vector Inference: Easy inference on Slurm clusters
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the config files in the `models` folder and the environment variables in the model launching scripts accordingly.  
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](vec-inf/launch_server.sh), [`vllm.slurm`](vec-inf/vllm.slurm), [`multinode_vllm.slurm`](vec-inf/multinode_vllm.slurm) and [`models.csv`](vec-inf/models/models.csv) accordingly.  
 
 ## Installation
-If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, you can go to the next section as we have a default container environment in place. Otherwise, you might need up to 10GB of storage to setup your own virtual environment. The following steps needs to be run only once for each user.
-
-1. Setup the virtual environment for running inference servers, run 
+If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
 ```bash
-bash venv.sh
+pip install vec-inf
 ```
-More details can be found in [venv.sh](venv.sh), make sure to adjust the commands to your environment if you're not using the Vector cluster.
-
-2. Locate your virtual environment by running
-```bash
-poetry env info --path
-```
-
-1. OPTIONAL: It is recommended to enable [FlashAttention](https://github.com/Dao-AILab/flash-attention) backend for better performance, run the following commands inside your environment to install:
-```bash
-pip install wheel
-
-# Change the path according to your environment, this is an example for the Vector cluster
-export CUDA_HOME=/pkgs/cuda-12.3
-
-pip install flash-attn --no-build-isolation
-pip install vllm-flash-attn
-```
+Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package
 
 ## Launch an inference server
-We will use the Llama 3 model as example, to launch an inference server for Llama 3 8B, run
+We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 ```bash
-bash src/launch_server.sh --model-family llama3
+vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
-> Job Name: vLLM/Meta-Llama-3-8B
-> 
-> Partition: a40
-> 
-> Generic Resource Scheduling: gpu:1
-> 
-> Data Type: auto
-> 
-> Submitted batch job 12217446
 
-If you want to use your own virtual environment, you can run this instead:
-```bash
-bash src/launch_server.sh --model-family llama3 --venv $(poetry env info --path)
-```
-By default, the `launch_server.sh` script is set to use the 8B variant for Llama 3 based on the config file in `models/llama3` folder, you can switch to other variants with the `--model-variant` argument, and make sure to change the requested resource accordingly. More information about the flags and customizations can be found in the [`models`](models) folder. The inference server is compatible with the OpenAI `Completion` and `ChatCompletion` API. You can inspect the Slurm output files to check the inference server status. 
+<img width="450" alt="launch_img" src="https://github.com/user-attachments/assets/557eb421-47db-4810-bccd-c49c526b1b43">
 
-Here is a more complicated example that launches a model variant using multiple nodes, say we want to launch Mixtral 8x22B, run
+The model would be launched using the [default parameters](vec-inf/models/models.csv), you can override these values by providing additional options, use `--help` to see the full list.
+If you'd like to see the Slurm logs, they are located in the `.vec-inf-logs` folder in your home directory. The log folder path can be modified by using the `--log-dir` option. 
+
+You can check the inference server status by providing the Slurm job ID to the `status` command:
 ```bash
-bash src/launch_server.sh --model-family mixtral --model-variant 8x22B-v0.1 --num-nodes 2 --num-gpus 4
+vec-inf status 13014393
 ```
 
-And for launching a multimodal model, here is an example for launching LLaVa-NEXT Mistral 7B (default variant)
+You should see an output like the following:
+
+<img width="450" alt="status_img" src="https://github.com/user-attachments/assets/7385b9ca-9159-4ca9-bae2-7e26d80d9747">
+
+There are 5 possible states:
+
+* **PENDING**: Job submitted to Slurm, but not executed yet. Job pending reason will be shown.
+* **LAUNCHING**: Job is running but the server is not ready yet.
+* **READY**: Inference server running and ready to take requests. 
+* **FAILED**: Inference server in an unhealthy state. Job failed reason will be shown.
+* **SHUTDOWN**: Inference server is shutdown/cancelled.
+
+Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
+
+Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
-bash src/launch_server.sh --model-family llava-next --is-vlm 
+vec-inf shutdown 13014393
+
+> Shutting down model with Slurm Job ID: 13014393
 ```
+
+You call view the full list of available models by running the `list` command:
+```bash
+vec-inf list
+```
+<img width="1200" alt="list_img" src="https://github.com/user-attachments/assets/a4f0d896-989d-43bf-82a2-6a6e5d0d288f">
+
+`launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
 
 ## Send inference requests
 Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
@@ -69,4 +65,4 @@ If you want to run inference from your local device, you can open a SSH tunnel t
 ```bash
 ssh -L 8081:172.17.8.29:8081 username@v.vectorinstitute.ai -N
 ```
-The example provided above is for the vector cluster, change the variables accordingly for your environment
+Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment

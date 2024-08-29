@@ -142,7 +142,7 @@ dmypy.json
 *.err
 
 # Server url files
-.vLLM*
+*_url
 
 logs/
 
@@ -152,3 +152,6 @@ scripts/
 
 # vLLM bug reporting files
 collect_env.py
+
+# build files
+dist/
