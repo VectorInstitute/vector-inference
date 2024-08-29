@@ -22,7 +22,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type virtual_env log_dir pipeline_parallelism)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -40,10 +40,28 @@ export NUM_NODES=$num_nodes
 export NUM_GPUS=$num_gpus
 export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
-export VLLM_DATA_TYPE=$data_type
-export VENV_BASE=$virtual_env
-export LOG_DIR=$log_dir
-export PIPELINE_PARALLELISM=$pipeline_parallelism
+# For custom models, the following are set to default if not specified
+export VLLM_DATA_TYPE="auto"
+export VENV_BASE="singularity"
+export LOG_DIR="default"
+# Pipeline parallelism is disabled and can only be enabled if specified in models.csv as this is an experimental feature
+export PIPELINE_PARALLELISM="false"
+
+if [ -n "$data_type" ]; then
+    export VLLM_DATA_TYPE=$data_type
+fi
+
+if [ -n "$virtual_env" ]; then
+    export VENV_BASE=$virtual_env
+fi
+
+if [ -n "$log_dir" ]; then
+    export LOG_DIR=$log_dir
+fi
+
+if [ -n "$pipeline_parallelism" ]; then
+    export PIPELINE_PARALLELISM=$pipeline_parallelism
+fi
 
 # ================================= Set default environment variables ======================================
 # Slurm job configuration
