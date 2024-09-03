@@ -147,7 +147,7 @@ def status(
     output = utils.run_bash_command(status_cmd)
 
     slurm_job_name = "UNAVAILABLE"
-    status: str = "SHUTDOWN"
+    status = "SHUTDOWN"
     base_url = "UNAVAILABLE"
 
     try:
