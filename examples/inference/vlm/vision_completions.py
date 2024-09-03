@@ -24,4 +24,3 @@ completion = client.chat.completions.create(
 )
 
 print(completion)
-
