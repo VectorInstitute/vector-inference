@@ -76,7 +76,7 @@ mkdir -p $LOG_DIR
 export SRC_DIR="$(dirname "$0")"
 export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${JOB_NAME}_url"
- 
+
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VLLM_MODEL_WEIGHTS="/model-weights/$JOB_NAME"
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"

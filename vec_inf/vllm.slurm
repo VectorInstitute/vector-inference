@@ -41,7 +41,7 @@ else
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
     --dtype ${VLLM_DATA_TYPE} \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} \ 
+    --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
     --max-model-len ${VLLM_MAX_MODEL_LEN}
 fi

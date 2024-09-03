@@ -1,11 +1,10 @@
-import subprocess
 import os
-from typing import Union
+import subprocess
+from typing import Optional, Union
 
+import pandas as pd
 import requests
 from rich.table import Table
-import pandas as pd
-
 
 MODEL_READY_SIGNATURE = "INFO:     Uvicorn running on http://0.0.0.0:"
 SERVER_ADDRESS_SIGNATURE = "Server address: "
@@ -15,45 +14,50 @@ def run_bash_command(command: str) -> str:
     """
     Run a bash command and return the output
     """
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
     stdout, _ = process.communicate()
     return stdout
 
 
 def read_slurm_log(
-        slurm_job_name: str,
-        slurm_job_id: int,
-        slurm_log_type: str,
-        log_dir: str
-    ) -> Union[list, str]:
+    slurm_job_name: str, slurm_job_id: int, slurm_log_type: str, log_dir: Optional[str]
+) -> Union[list[str], str]:
     """
     Get the directory of a model
     """
     if not log_dir:
         models_dir = os.path.join(os.path.expanduser("~"), ".vec-inf-logs")
-        
+
         for dir in sorted(os.listdir(models_dir), key=len, reverse=True):
             if dir in slurm_job_name:
                 log_dir = os.path.join(models_dir, dir)
                 break
-    
+
     try:
-        file_path = os.path.join(log_dir, f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}")
-        with open(file_path, 'r') as file:
+        file_path = os.path.join(
+            log_dir,  # type: ignore
+            f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}",
+        )
+        with open(file_path, "r") as file:
             lines = file.readlines()
     except FileNotFoundError:
         print(f"Could not find file: {file_path}")
         return "LOG_FILE_NOT_FOUND"
     return lines
 
-def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
+
+def is_server_running(
+    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+) -> Union[str, tuple[str, str]]:
     """
     Check if a model is ready to serve requests
     """
     log_content = read_slurm_log(slurm_job_name, slurm_job_id, "err", log_dir)
-    if type(log_content) is str:
+    if isinstance(log_content, str):
         return log_content
-    
+
     for line in log_content:
         if "error" in line.lower():
             return ("FAILED", line.strip("\n"))
@@ -62,21 +66,23 @@ def is_server_running(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> U
     return "LAUNCHING"
 
 
-def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> str:
+def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
     """
     Get the base URL of a model
     """
     log_content = read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
-    if type(log_content) is str:
+    if isinstance(log_content, str):
         return log_content
-    
+
     for line in log_content:
         if SERVER_ADDRESS_SIGNATURE in line:
             return line.split(SERVER_ADDRESS_SIGNATURE)[1].strip("\n")
     return "URL_NOT_FOUND"
 
 
-def model_health_check(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> Union[str, tuple]:
+def model_health_check(
+    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+) -> Union[str, tuple[str, Union[str, int]]]:
     """
     Check the health of a running model on the cluster
     """
@@ -94,9 +100,11 @@ def model_health_check(slurm_job_name: str, slurm_job_id: int, log_dir: str) -> 
             return ("FAILED", response.status_code)
     except requests.exceptions.RequestException as e:
         return ("FAILED", str(e))
-    
 
-def create_table(key_title: str = "", value_title: str = "", show_header: bool = True) -> Table:
+
+def create_table(
+    key_title: str = "", value_title: str = "", show_header: bool = True
+) -> Table:
     """
     Create a table for displaying model status
     """
@@ -113,7 +121,7 @@ def load_models_df() -> pd.DataFrame:
     models_df = pd.read_csv(
         os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-            "models/models.csv"
+            "models/models.csv",
         )
     )
     return models_df
