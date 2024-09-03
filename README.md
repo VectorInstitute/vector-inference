@@ -61,7 +61,7 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 
 ## Send inference requests
 Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
-> {"id":"cmpl-bdf43763adf242588af07af88b070b62","object":"text_completion","created":2983960,"model":"/model-weights/Llama-2-7b-hf","choices":[{"index":0,"text":"\nCanada is close to the actual continent of North America. Aside from the Arctic islands","logprobs":null,"finish_reason":"length"}],"usage":{"prompt_tokens":8,"total_tokens":28,"completion_tokens":20}}
+> {"id":"cmpl-c08d8946224747af9cce9f4d9f36ceb3","object":"text_completion","created":1725394970,"model":"Meta-Llama-3.1-8B-Instruct","choices":[{"index":0,"text":" is a question that many people may wonder. The answer is, of course, Ottawa. But if","logprobs":null,"finish_reason":"length","stop_reason":null}],"usage":{"prompt_tokens":8,"total_tokens":28,"completion_tokens":20}}
 
 **NOTE**: For multimodal models, currently only `ChatCompletion` is available, and only one image can be provided for each prompt.
 

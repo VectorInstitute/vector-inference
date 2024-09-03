@@ -5,7 +5,7 @@ export API_BASE_URL=http://gpuXXX:XXXX/v1
 curl ${API_BASE_URL}/completions \
    -H "Content-Type: application/json" \
    -d '{
-       "model": "/model-weights/Meta-Llama-3-8B",
+       "model": "Meta-Llama-3.1-8B-Instruct",
        "prompt": "What is the capital of Canada?",
        "max_tokens": 20
    }'
