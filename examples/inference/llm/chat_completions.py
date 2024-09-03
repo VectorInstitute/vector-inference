@@ -5,7 +5,7 @@ client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 # Update the model path accordingly
 completion = client.chat.completions.create(
-    model="Meta-Llama-3-8B-Instruct",
+    model="Meta-Llama-3.1-8B-Instruct",
     messages=[
         {
             "role": "system",

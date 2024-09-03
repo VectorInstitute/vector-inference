@@ -64,7 +64,7 @@ for ((i = 1; i <= worker_num; i++)); do
             ray start --address "$ip_head" \
             --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${NUM_GPUS}" --block &
     fi
-    
+
     sleep 5
 done
 
@@ -83,7 +83,7 @@ else
 fi
 
 # Activate vllm venv
-if [ "$VENV_BASE" = "singularity" ]; then    
+if [ "$VENV_BASE" = "singularity" ]; then
     singularity exec --nv --bind /model-weights:/model-weights $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \

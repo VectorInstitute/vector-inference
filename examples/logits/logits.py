@@ -4,7 +4,7 @@ from openai import OpenAI
 client = OpenAI(base_url="http://gpuXXX:XXXXX/v1", api_key="EMPTY")
 
 completion = client.completions.create(
-    model="Meta-Llama-3-8B",
+    model="Meta-Llama-3.1-8B-Instruct",
     prompt="Where is the capital of Canada?",
     max_tokens=1,
     logprobs=32000,  # Set to model vocab size to get logits
