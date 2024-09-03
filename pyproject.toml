@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vec-inf"
-version = "0.3.1"
+version = "0.3.2"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
 authors = ["Marshall Wang <marshall.wang@vectorinstitute.ai>"]
 license = "MIT license"

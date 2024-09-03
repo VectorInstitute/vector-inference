@@ -64,6 +64,11 @@ def cli():
     help='Time limit for job, this should comply with QoS, default to max walltime of the chosen QoS'
 )
 @click.option(
+    "--vocab-size",
+    type=int,
+    help='Vocabulary size, this option is intended for custom models'
+)
+@click.option(
     "--data-type",
     type=str,
     help='Model data type, default to auto'
@@ -93,6 +98,7 @@ def launch(
     num_gpus: int=None,
     qos: str=None,
     time: str=None,
+    vocab_size: int=None,
     data_type: str=None,
     venv: str=None,
     log_dir: str=None,
@@ -109,16 +115,20 @@ def launch(
 
     models_df = load_models_df()
 
-    if model_name not in models_df['model_name'].values:
-        raise ValueError(f"Model name {model_name} not found in available models")
-
-    default_args = load_default_args(models_df, model_name)
-
-    for arg in default_args:
-        if arg in locals() and locals()[arg] is not None:
-            default_args[arg] = locals()[arg]
-        renamed_arg = arg.replace("_", "-")
-        launch_cmd += f" --{renamed_arg} {default_args[arg]}"    
+    if model_name in models_df['model_name'].values:
+        default_args = load_default_args(models_df, model_name)
+        for arg in default_args:
+            if arg in locals() and locals()[arg] is not None:
+                default_args[arg] = locals()[arg]
+            renamed_arg = arg.replace("_", "-")
+            launch_cmd += f" --{renamed_arg} {default_args[arg]}" 
+    else:
+        model_args = models_df.columns.tolist()
+        excluded_keys = ['model_name', 'pipeline_parallelism']
+        for arg in model_args:
+            if arg not in excluded_keys and locals()[arg] is not None:
+                renamed_arg = arg.replace("_", "-")
+                launch_cmd += f" --{renamed_arg} {locals()[arg]}"  
     
     output = run_bash_command(launch_cmd)
 

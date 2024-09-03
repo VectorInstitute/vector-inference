@@ -93,7 +93,6 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
     --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
     --dtype ${VLLM_DATA_TYPE} \
-    --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --max-model-len ${VLLM_MAX_MODEL_LEN}
@@ -107,7 +106,6 @@ else
     --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
     --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
     --dtype ${VLLM_DATA_TYPE} \
-    --load-format safetensors \
     --trust-remote-code \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --max-model-len ${VLLM_MAX_MODEL_LEN}
