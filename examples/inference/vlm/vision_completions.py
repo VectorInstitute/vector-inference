@@ -5,7 +5,7 @@ client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 # Update the model path accordingly
 completion = client.chat.completions.create(
-    model="/model-weights/llava-1.5-13b-hf",
+    model="llava-1.5-13b-hf",
     messages=[
         {
             "role": "user",
@@ -24,4 +24,3 @@ completion = client.chat.completions.create(
 )
 
 print(completion)
-

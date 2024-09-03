@@ -1,15 +1,16 @@
-import requests
 import time
 
+import requests
+
 # Change the ENDPOINT and MODEL_PATH to match your setup
-ENDPOINT = "http://gpuXXX:XXXX/v1" 
+ENDPOINT = "http://gpuXXX:XXXX/v1"
 MODEL_PATH = "Meta-Llama-3-70B"
 
 # Configuration
-API_KEY = 'EMPTY'
+API_KEY = "EMPTY"
 HEADERS = {
-    'Authorization': f'Bearer {API_KEY}',
-    'Content-Type': 'application/json',
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json",
 }
 
 # Sample prompts for testing
@@ -66,15 +67,12 @@ PROMPTS = [
     "What are the ethical implications of cloning?",
     "Explain the significance of the Pyramids of Giza.",
     "Describe the process of making wine.",
-    "How does the GPS system work?"
+    "How does the GPS system work?",
 ]
 
+
 def send_request(prompt):
-    data = {
-        'model': f"/model-weights/{MODEL_PATH}",
-        'prompt': prompt,
-        'max_tokens': 100
-    }
+    data = {"model": f"{MODEL_PATH}", "prompt": prompt, "max_tokens": 100}
     start_time = time.time()
     response = requests.post(f"{ENDPOINT}/completions", headers=HEADERS, json=data)
     duration = time.time() - start_time
@@ -83,6 +81,7 @@ def send_request(prompt):
     else:
         return None
 
+
 def main():
     for i in range(10):
         print("Sending 20x requests 0-52...")
@@ -90,6 +89,5 @@ def main():
     print("Done!")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
