@@ -53,7 +53,7 @@ vec-inf list
 
 You can also view the default setup for a specific supported model by providing the model name, for example `Meta-Llama-3.1-70B-Instruct`:
 ```bash
-vec-inf list Meta-Llama-3.1-8B-Instruct
+vec-inf list Meta-Llama-3.1-70B-Instruct
 ```
 <img width="400" alt="list_model_img" src="https://github.com/user-attachments/assets/5dec7a33-ba6b-490d-af47-4cf7341d0b42">
 
