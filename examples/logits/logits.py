@@ -7,7 +7,7 @@ completion = client.completions.create(
     model="Meta-Llama-3.1-8B-Instruct",
     prompt="Where is the capital of Canada?",
     max_tokens=1,
-    logprobs=32000,  # Set to model vocab size to get logits
+    logprobs=128256,  # Set to model vocab size to get logits
 )
 
 print(completion.choices[0].logprobs)
