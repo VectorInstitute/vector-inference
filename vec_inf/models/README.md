@@ -98,6 +98,12 @@ More profiling metrics coming soon!
 |[`Mixtral-8x22B-v0.1`](https://huggingface.co/mistralai/Mixtral-8x22B-v0.1)| 8x a40 (2 nodes, 4 a40/node) | 145 tokens/s | 827 tokens/s|
 |[`Mixtral-8x22B-Instruct-v0.1`](https://huggingface.co/mistralai/Mixtral-8x22B-Instruct-v0.1)| 8x a40 (2 nodes, 4 a40/node) | 95 tokens/s | 803 tokens/s|
 
+## [Mistral AI: Pixtral](https://huggingface.co/mistralai)
+
+| Variant (Mixtral) | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+|[`Pixtral-12B-2409`](https://huggingface.co/mistralai/Pixtral-12B-2409)| 1x a40 | _ tokens/s | - tokens/s |
+
 ## [Microsoft: Phi 3](https://huggingface.co/collections/microsoft/phi-3-6626e15e9585a200d2d761e3)
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
