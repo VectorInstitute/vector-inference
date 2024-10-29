@@ -48,7 +48,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py
 
 # Ensure pip for Python 3.10 is used
-RUN python3.10 -m pip install --upgrade pip
+RUN python3.10 -m pip install --upgrade pip setuptools wheel
 
 # Install Poetry using Python 3.10
 RUN python3.10 -m pip install poetry
@@ -56,11 +56,17 @@ RUN python3.10 -m pip install poetry
 # Don't create venv
 RUN poetry config virtualenvs.create false
 
+# Set working directory
+WORKDIR /vec-inf
+
+# Copy current directory
+COPY . /vec-inf
+
 # Update Poetry lock file if necessary
 RUN poetry lock
 
 # Install vec-inf
-RUN python3.10 -m pip install vec-inf[dev]
+RUN poetry install --extras "dev"
 
 # Install Flash Attention 2 backend
 RUN python3.10 -m pip install flash-attn --no-build-isolation
