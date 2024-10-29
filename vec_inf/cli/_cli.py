@@ -60,6 +60,11 @@ def cli():
     help="Path to slurm log directory, default to .vec-inf-logs in home directory",
 )
 @click.option(
+    "--pipeline-parallelism",
+    type=bool,
+    help="Enable pipeline parallelism, default to True",
+)
+@click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
@@ -78,6 +83,7 @@ def launch(
     data_type: Optional[str] = None,
     venv: Optional[str] = None,
     log_dir: Optional[str] = None,
+    pipeline_parallelism: Optional[bool] = True,
     json_mode: bool = False,
 ) -> None:
     """
@@ -99,9 +105,9 @@ def launch(
             launch_cmd += f" --{renamed_arg} {default_args[arg]}"
     else:
         model_args = models_df.columns.tolist()
-        excluded_keys = ["model_name", "pipeline_parallelism"]
+        model_args.remove("model_name")
         for arg in model_args:
-            if arg not in excluded_keys and locals()[arg] is not None:
+            if locals()[arg] is not None:
                 renamed_arg = arg.replace("_", "-")
                 launch_cmd += f" --{renamed_arg} {locals()[arg]}"
 
@@ -235,7 +241,7 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
         if model_name not in models_df["model_name"].values:
             raise ValueError(f"Model name {model_name} not found in available models")
 
-        excluded_keys = {"venv", "log_dir", "pipeline_parallelism"}
+        excluded_keys = {"venv", "log_dir"}
         model_row = models_df.loc[models_df["model_name"] == model_name]
 
         if json_mode:

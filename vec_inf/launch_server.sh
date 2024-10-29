@@ -16,12 +16,13 @@ while [[ "$#" -gt 0 ]]; do
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
+        --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size, pipeline_parallelism)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -39,6 +40,7 @@ export NUM_NODES=$num_nodes
 export NUM_GPUS=$num_gpus
 export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
+export PIPLELINE_PARALLELISM=$pipeline_parallelism
 # For custom models, the following are set to default if not specified
 export VLLM_DATA_TYPE="auto"
 export VENV_BASE="singularity"
