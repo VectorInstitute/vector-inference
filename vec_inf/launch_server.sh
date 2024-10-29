@@ -16,7 +16,6 @@ while [[ "$#" -gt 0 ]]; do
         --data-type) data_type="$2"; shift ;;
         --venv) virtual_env="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
-        --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -44,8 +43,6 @@ export VLLM_MAX_LOGPROBS=$vocab_size
 export VLLM_DATA_TYPE="auto"
 export VENV_BASE="singularity"
 export LOG_DIR="default"
-# Pipeline parallelism is disabled and can only be enabled if specified in models.csv as this is an experimental feature
-export PIPELINE_PARALLELISM="false"
 
 if [ -n "$data_type" ]; then
     export VLLM_DATA_TYPE=$data_type
@@ -57,10 +54,6 @@ fi
 
 if [ -n "$log_dir" ]; then
     export LOG_DIR=$log_dir
-fi
-
-if [ -n "$pipeline_parallelism" ]; then
-    export PIPELINE_PARALLELISM=$pipeline_parallelism
 fi
 
 # ================================= Set default environment variables ======================================

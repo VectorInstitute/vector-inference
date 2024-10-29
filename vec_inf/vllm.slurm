@@ -17,7 +17,7 @@ echo "http://${hostname}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.3.0.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.3.4.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop

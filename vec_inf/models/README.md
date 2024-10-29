@@ -88,7 +88,7 @@ More profiling metrics coming soon!
 |[`Mistral-7B-Instruct-v0.2`](https://huggingface.co/mistralai/Mistral-7B-v0.2)| 1x a40 | - tokens/s | - tokens/s|
 |[`Mistral-7B-v0.3`](https://huggingface.co/mistralai/Mistral-7B-v0.3)| 1x a40 | - tokens/s | - tokens/s |
 |[`Mistral-7B-Instruct-v0.3`](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)| 1x a40 | - tokens/s | - tokens/s|
-|[`Mistral-Large-Instruct-2407`](https://huggingface.co/mistralai/Mistral-Large-Instruct-2407)| 4x a40 | - tokens/s | - tokens/s|
+|[`Mistral-Large-Instruct-2407`](https://huggingface.co/mistralai/Mistral-Large-Instruct-2407)| 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s|
 
 ## [Mistral AI: Mixtral](https://huggingface.co/mistralai)
 
