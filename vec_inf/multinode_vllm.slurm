@@ -74,7 +74,7 @@ vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 echo "Server address: http://${head_node_ip}:${vllm_port_number}/v1"
 echo "http://${head_node_ip}:${vllm_port_number}/v1" > ${VLLM_BASE_URL_FILENAME}
 
--if [ "$PIPELINE_PARALLELISM" = "True" ]; then
+if [ "$PIPELINE_PARALLELISM" = "True" ]; then
     export PIPELINE_PARALLEL_SIZE=$NUM_NODES
     export TENSOR_PARALLEL_SIZE=$NUM_GPUS
 else
