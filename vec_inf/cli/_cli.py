@@ -3,6 +3,7 @@ import time
 from typing import Optional
 
 import click
+import pandas as pd
 from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
@@ -111,12 +112,11 @@ def launch(
     else:
         model_args = models_df.columns.tolist()
         model_args.remove("model_name")
+        model_args.remove("model_type")
         for arg in model_args:
             if locals()[arg] is not None:
                 renamed_arg = arg.replace("_", "-")
                 launch_cmd += f" --{renamed_arg} {locals()[arg]}"
-
-    print(launch_cmd)
 
     output = utils.run_bash_command(launch_cmd)
 
@@ -242,9 +242,8 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """
     List all available models, or get default setup of a specific model
     """
-    models_df = utils.load_models_df()
 
-    if model_name:
+    def list_model(model_name: str, models_df: pd.DataFrame, json_mode: bool):
         if model_name not in models_df["model_name"].values:
             raise ValueError(f"Model name {model_name} not found in available models")
 
@@ -252,7 +251,6 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
         model_row = models_df.loc[models_df["model_name"] == model_name]
 
         if json_mode:
-            # click.echo(model_row.to_json(orient='records'))
             filtered_model_row = model_row.drop(columns=excluded_keys, errors="ignore")
             click.echo(filtered_model_row.to_json(orient="records"))
             return
@@ -262,16 +260,32 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
                 if key not in excluded_keys:
                     table.add_row(key, str(value))
         CONSOLE.print(table)
-        return
 
-    if json_mode:
-        click.echo(models_df["model_name"].to_json(orient="records"))
-        return
-    panels = []
-    for _, row in models_df.iterrows():
-        styled_text = f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
-        panels.append(Panel(styled_text, expand=True))
-    CONSOLE.print(Columns(panels, equal=True))
+    def list_all(models_df: pd.DataFrame, json_mode: bool):
+        if json_mode:
+            click.echo(models_df["model_name"].to_json(orient="records"))
+            return
+        panels = []
+        model_type_colors = {
+            "LLM": "cyan",
+            "VLM": "blue",
+            "Text Embedding": "purple",
+        }
+        custom_order = ["LLM", "VLM", "Text Embedding"]
+        models_df["model_type"] = pd.Categorical(models_df["model_type"], categories=custom_order, ordered=True)
+        models_df = models_df.sort_values(by="model_type")
+        for _, row in models_df.iterrows():
+            panel_color = model_type_colors.get(row["model_type"], "white")
+            styled_text = f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
+            panels.append(Panel(styled_text, expand=True, border_style=panel_color))
+        CONSOLE.print(Columns(panels, equal=True))
+
+    models_df = utils.load_models_df()
+
+    if model_name:
+        list_model(model_name, models_df, json_mode)
+    else:
+        list_all(models_df, json_mode)
 
 
 @cli.command("metrics")
@@ -283,7 +297,7 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """
-    Get metrics of a running model on the cluster
+    Stream performance metrics to the console
     """
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)

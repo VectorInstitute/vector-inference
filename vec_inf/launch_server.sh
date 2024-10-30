@@ -22,11 +22,11 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size, pipeline_parallelism)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size pipeline_parallelism)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
-        echo "Error: Missing required --$var//_/- argument."
+        echo "Error: Missing required --$var argument."
         exit 1
     fi
 done
@@ -41,9 +41,6 @@ export NUM_GPUS=$num_gpus
 export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
 export PIPELINE_PARALLELISM=$pipeline_parallelism
-
-echo Pipeline Parallelism: $PIPELINE_PARALLELISM
-
 # For custom models, the following are set to default if not specified
 export VLLM_DATA_TYPE="auto"
 export VENV_BASE="singularity"

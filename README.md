@@ -38,6 +38,15 @@ There are 5 possible states:
 
 Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
 
+Once your server is ready, you can check performance metrics by providing the Slurm job ID to the `metrics` command:
+```bash
+vec-inf metrics 
+```
+
+And you will see the performance metrics streamed to your console, note that the metrics are updated with a 10-second interval.
+
+<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/6732215b-96f3-407c-ba45-6334b2061706">
+
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
 vec-inf shutdown 13014393
@@ -49,13 +58,13 @@ You call view the full list of available models by running the `list` command:
 ```bash
 vec-inf list
 ```
-<img width="1200" alt="list_img" src="https://github.com/user-attachments/assets/a4f0d896-989d-43bf-82a2-6a6e5d0d288f">
+<img width="1200" alt="list_img" src="https://github.com/user-attachments/assets/50b12ca4-2adc-4b2b-8a40-543b6cda0b1a">
 
 You can also view the default setup for a specific supported model by providing the model name, for example `Meta-Llama-3.1-70B-Instruct`:
 ```bash
 vec-inf list Meta-Llama-3.1-70B-Instruct
 ```
-<img width="400" alt="list_model_img" src="https://github.com/user-attachments/assets/5dec7a33-ba6b-490d-af47-4cf7341d0b42">
+<img width="400" alt="list_model_img" src="https://github.com/user-attachments/assets/30e42ab7-dde2-4d20-85f0-187adffefc3d">
 
 `launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
 
