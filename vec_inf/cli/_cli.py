@@ -268,7 +268,7 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
         panels = []
         model_type_colors = {
             "LLM": "cyan",
-            "VLM": "blue",
+            "VLM": "bright_blue",
             "Text Embedding": "purple",
         }
         custom_order = ["LLM", "VLM", "Text Embedding"]
