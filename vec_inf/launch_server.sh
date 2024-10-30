@@ -40,7 +40,10 @@ export NUM_NODES=$num_nodes
 export NUM_GPUS=$num_gpus
 export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
-export PIPLELINE_PARALLELISM=$pipeline_parallelism
+export PIPELINE_PARALLELISM=$pipeline_parallelism
+
+echo Pipeline Parallelism: $PIPELINE_PARALLELISM
+
 # For custom models, the following are set to default if not specified
 export VLLM_DATA_TYPE="auto"
 export VENV_BASE="singularity"

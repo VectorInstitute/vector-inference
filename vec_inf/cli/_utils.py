@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 from rich.table import Table
 
-MODEL_READY_SIGNATURE = "INFO:     Uvicorn running on http://0.0.0.0:"
+MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SERVER_ADDRESS_SIGNATURE = "Server address: "
 
 
@@ -25,7 +25,7 @@ def read_slurm_log(
     slurm_job_name: str, slurm_job_id: int, slurm_log_type: str, log_dir: Optional[str]
 ) -> Union[list[str], str]:
     """
-    Get the directory of a model
+    Read the slurm log file
     """
     if not log_dir:
         models_dir = os.path.join(os.path.expanduser("~"), ".vec-inf-logs")
@@ -135,3 +135,23 @@ def load_default_args(models_df: pd.DataFrame, model_name: str) -> dict:
     default_args = row_data.iloc[0].to_dict()
     default_args.pop("model_name")
     return default_args
+
+
+def get_latest_metric(log_lines: list[str]) -> dict | str:
+    """Read the latest metric entry from the log file."""
+    latest_metric = {}
+
+    try:
+        for line in reversed(log_lines):
+            if "Avg prompt throughput" in line:
+                # Parse the metric values from the line
+                metrics = line.split("] ")[1].strip().strip(".")
+                metrics = metrics.split(", ")
+                for metric in metrics:
+                    key, value = metric.split(": ")
+                    latest_metric[key] = value
+                break
+    except Exception as e:
+        return f"[red]Error reading log file: {e}[/red]"
+
+    return latest_metric

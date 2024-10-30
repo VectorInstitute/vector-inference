@@ -1,9 +1,11 @@
 import os
+import time
 from typing import Optional
 
 import click
 from rich.columns import Columns
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
@@ -61,8 +63,8 @@ def cli():
 )
 @click.option(
     "--pipeline-parallelism",
-    type=bool,
-    help="Enable pipeline parallelism, default to True",
+    type=str,
+    help="Enable pipeline parallelism, accepts 'true' or 'false', defaults to 'true' for supported models"
 )
 @click.option(
     "--json-mode",
@@ -83,12 +85,15 @@ def launch(
     data_type: Optional[str] = None,
     venv: Optional[str] = None,
     log_dir: Optional[str] = None,
-    pipeline_parallelism: Optional[bool] = True,
+    pipeline_parallelism: Optional[str] = None,
     json_mode: bool = False,
 ) -> None:
     """
     Launch a model on the cluster
     """
+    
+    pipeline_parallelism = pipeline_parallelism is None or pipeline_parallelism.lower() == "true"
+
     launch_script_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "launch_server.sh"
     )
@@ -110,6 +115,8 @@ def launch(
             if locals()[arg] is not None:
                 renamed_arg = arg.replace("_", "-")
                 launch_cmd += f" --{renamed_arg} {locals()[arg]}"
+
+    print(launch_cmd)
 
     output = utils.run_bash_command(launch_cmd)
 
@@ -266,6 +273,33 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
         panels.append(Panel(styled_text, expand=True))
     CONSOLE.print(Columns(panels, equal=True))
 
+
+@cli.command("metrics")
+@click.argument("slurm_job_id", type=int, nargs=1)
+@click.option(
+    "--log-dir",
+    type=str,
+    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
+)
+def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
+    """
+    Get metrics of a running model on the cluster
+    """
+    status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
+    output = utils.run_bash_command(status_cmd)
+    slurm_job_name = output.split(" ")[1].split("=")[1]
+    out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
+    
+    with Live(refresh_per_second=1, console=CONSOLE) as live:
+        while True:
+            metrics = utils.get_latest_metric(out_logs)
+            table = utils.create_table(key_title="Metric", value_title="Value")
+            for key, value in metrics.items():
+                table.add_row(key, value)
+            
+            live.update(table)
+
+            time.sleep(10)
 
 if __name__ == "__main__":
     cli()
