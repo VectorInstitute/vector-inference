@@ -40,7 +40,7 @@ Note that the base URL is only available when model is in `READY` state, and if 
 
 Once your server is ready, you can check performance metrics by providing the Slurm job ID to the `metrics` command:
 ```bash
-vec-inf metrics 
+vec-inf metrics 13014393
 ```
 
 And you will see the performance metrics streamed to your console, note that the metrics are updated with a 10-second interval.
