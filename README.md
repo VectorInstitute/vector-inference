@@ -17,7 +17,7 @@ You should see an output like the following:
 
 <img width="400" alt="launch_img" src="https://github.com/user-attachments/assets/9d29947a-2708-4131-9a78-4484d2361da3">
 
-The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional options, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), you'll need to specify all model launching related options to run a successful run.
+The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html). You will need to specify model launching parameters for custom models.
 
 You can check the inference server status by providing the Slurm job ID to the `status` command:
 ```bash
