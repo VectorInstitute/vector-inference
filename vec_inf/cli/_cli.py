@@ -1,4 +1,3 @@
-import inspect
 import os
 import time
 from typing import Optional
@@ -39,7 +38,7 @@ def cli():
     "--partition",
     type=str,
     default="a40",
-    help="Type of compute partition, default to a40"
+    help="Type of compute partition, default to a40",
 )
 @click.option(
     "--num-nodes",
@@ -68,12 +67,14 @@ def cli():
     type=int,
     help="Vocabulary size, this option is intended for custom models",
 )
-@click.option("--data-type", type=str, default="auto", help="Model data type, default to auto")
+@click.option(
+    "--data-type", type=str, default="auto", help="Model data type, default to auto"
+)
 @click.option(
     "--venv",
     type=str,
     default="singularity",
-    help="Path to virtual environment, default to preconfigured singularity container"
+    help="Path to virtual environment, default to preconfigured singularity container",
 )
 @click.option(
     "--log-dir",
@@ -293,11 +294,15 @@ def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
             "Text Embedding": "purple",
         }
         custom_order = ["LLM", "VLM", "Text Embedding"]
-        models_df["model_type"] = pd.Categorical(models_df["model_type"], categories=custom_order, ordered=True)
+        models_df["model_type"] = pd.Categorical(
+            models_df["model_type"], categories=custom_order, ordered=True
+        )
         models_df = models_df.sort_values(by="model_type")
         for _, row in models_df.iterrows():
             panel_color = model_type_colors.get(row["model_type"], "white")
-            styled_text = f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
+            styled_text = (
+                f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
+            )
             panels.append(Panel(styled_text, expand=True, border_style=panel_color))
         CONSOLE.print(Columns(panels, equal=True))
 
@@ -324,17 +329,18 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     output = utils.run_bash_command(status_cmd)
     slurm_job_name = output.split(" ")[1].split("=")[1]
     out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
-    
+
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
             metrics = utils.get_latest_metric(out_logs)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in metrics.items():
                 table.add_row(key, value)
-            
+
             live.update(table)
 
             time.sleep(10)
+
 
 if __name__ == "__main__":
     cli()
