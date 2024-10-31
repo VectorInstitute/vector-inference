@@ -1,3 +1,4 @@
+import inspect
 import os
 import time
 from typing import Optional
@@ -27,9 +28,19 @@ def cli():
 @click.option(
     "--max-model-len",
     type=int,
-    help="Model context length. If unspecified, will be automatically derived from the model config.",
+    help="Model context length. Default value set based on suggested resource allocation.",
 )
-@click.option("--partition", type=str, help="Type of compute partition, default to a40")
+@click.option(
+    "--max-num-seqs",
+    type=int,
+    help="Maximum number of sequences to process in a single request",
+)
+@click.option(
+    "--partition",
+    type=str,
+    default="a40",
+    help="Type of compute partition, default to a40"
+)
 @click.option(
     "--num-nodes",
     type=int,
@@ -43,29 +54,37 @@ def cli():
 @click.option(
     "--qos",
     type=str,
-    help="Quality of service, default depends on suggested resource allocation required for the model",
+    default="m2",
+    help="Quality of service, default set to m2",
 )
 @click.option(
     "--time",
     type=str,
-    help="Time limit for job, this should comply with QoS, default to max walltime of the chosen QoS",
+    default="08:00:00",
+    help="Time limit for job, this should comply with QoS, default to max walltime of m2",
 )
 @click.option(
     "--vocab-size",
     type=int,
     help="Vocabulary size, this option is intended for custom models",
 )
-@click.option("--data-type", type=str, help="Model data type, default to auto")
-@click.option("--venv", type=str, help="Path to virtual environment")
+@click.option("--data-type", type=str, default="auto", help="Model data type, default to auto")
+@click.option(
+    "--venv",
+    type=str,
+    default="singularity",
+    help="Path to virtual environment, default to preconfigured singularity container"
+)
 @click.option(
     "--log-dir",
     type=str,
-    help="Path to slurm log directory, default to .vec-inf-logs in home directory",
+    default="default",
+    help="Path to slurm log directory, default to .vec-inf-logs in user home directory",
 )
 @click.option(
     "--pipeline-parallelism",
     type=str,
-    help="Enable pipeline parallelism, accepts 'true' or 'false', defaults to 'true' for supported models"
+    help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
 )
 @click.option(
     "--json-mode",
@@ -77,6 +96,7 @@ def launch(
     model_family: Optional[str] = None,
     model_variant: Optional[str] = None,
     max_model_len: Optional[int] = None,
+    max_num_seqs: Optional[int] = None,
     partition: Optional[str] = None,
     num_nodes: Optional[int] = None,
     num_gpus: Optional[int] = None,
@@ -92,8 +112,9 @@ def launch(
     """
     Launch a model on the cluster
     """
-    
-    pipeline_parallelism = pipeline_parallelism is None or pipeline_parallelism.lower() == "true"
+
+    if isinstance(pipeline_parallelism, str):
+        pipeline_parallelism = pipeline_parallelism.lower() == "true"
 
     launch_script_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "launch_server.sh"

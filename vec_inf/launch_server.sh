@@ -12,9 +12,10 @@ while [[ "$#" -gt 0 ]]; do
         --num-nodes) num_nodes="$2"; shift ;;
         --num-gpus) num_gpus="$2"; shift ;;
         --max-model-len) max_model_len="$2"; shift ;;
+        --max-num-seqs) max_num_seqs="$2"; shift ;;
         --vocab-size) vocab_size="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
-        --venv) virtual_env="$2"; shift ;;
+        --venv) venv="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
         --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -22,7 +23,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size pipeline_parallelism)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type venv log_dir)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -40,22 +41,20 @@ export NUM_NODES=$num_nodes
 export NUM_GPUS=$num_gpus
 export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
-export PIPELINE_PARALLELISM=$pipeline_parallelism
-# For custom models, the following are set to default if not specified
-export VLLM_DATA_TYPE="auto"
-export VENV_BASE="singularity"
-export LOG_DIR="default"
+export VLLM_DATA_TYPE=$data_type
+export VENV_BASE=$venv
+export LOG_DIR=$log_dir
 
-if [ -n "$data_type" ]; then
-    export VLLM_DATA_TYPE=$data_type
+if [ -n "$max_num_seqs" ]; then
+    export VLLM_MAX_NUM_SEQS=$max_num_seqs
+else 
+    export VLLM_MAX_NUM_SEQS=256
 fi
 
-if [ -n "$virtual_env" ]; then
-    export VENV_BASE=$virtual_env
-fi
-
-if [ -n "$log_dir" ]; then
-    export LOG_DIR=$log_dir
+if [ -n "$pipeline_parallelism" ]; then
+    export PIPELINE_PARALLELISM=$pipeline_parallelism
+else
+    export PIPELINE_PARALLELISM="False"
 fi
 
 # ================================= Set default environment variables ======================================
@@ -100,6 +99,8 @@ echo GPUs per Node: $NUM_GPUS
 echo QOS: $QOS
 echo Walltime: $WALLTIME
 echo Data Type: $VLLM_DATA_TYPE
+echo Max Model Length: $VLLM_MAX_MODEL_LEN
+echo Max Num Seqs: $VLLM_MAX_NUM_SEQS
 
 is_special=""
 if [ "$NUM_NODES" -gt 1 ]; then

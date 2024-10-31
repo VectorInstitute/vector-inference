@@ -31,7 +31,8 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
-    --max-model-len ${VLLM_MAX_MODEL_LEN}
+    --max-model-len ${VLLM_MAX_MODEL_LEN} \
+    --max-num-seqs ${VLLM_MAX_NUM_SEQS}
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
@@ -43,5 +44,6 @@ else
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
-    --max-model-len ${VLLM_MAX_MODEL_LEN}
+    --max-model-len ${VLLM_MAX_MODEL_LEN} \
+    --max-num-seqs ${VLLM_MAX_NUM_SEQS}
 fi
