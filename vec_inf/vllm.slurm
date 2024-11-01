@@ -3,6 +3,7 @@
 #SBATCH --mem=64G
 
 # Load CUDA, change to the cuda version on your environment if different
+source /opt/lmod/lmod/init/profile
 module load cuda-12.3
 nvidia-smi
 
