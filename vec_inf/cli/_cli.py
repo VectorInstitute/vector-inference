@@ -53,14 +53,12 @@ def cli():
 @click.option(
     "--qos",
     type=str,
-    default="m2",
-    help="Quality of service, default set to m2",
+    help="Quality of service",
 )
 @click.option(
     "--time",
     type=str,
-    default="08:00:00",
-    help="Time limit for job, this should comply with QoS, default to max walltime of m2",
+    help="Time limit for job, this should comply with QoS limits",
 )
 @click.option(
     "--vocab-size",

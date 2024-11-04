@@ -37,7 +37,7 @@ def read_slurm_log(
 
     try:
         file_path = os.path.join(
-            log_dir,  # type: ignore
+            log_dir,  
             f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}",
         )
         with open(file_path, "r") as file:
