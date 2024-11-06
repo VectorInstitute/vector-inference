@@ -326,10 +326,10 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
     slurm_job_name = output.split(" ")[1].split("=")[1]
-    out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
+            out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
             metrics = utils.get_latest_metric(out_logs)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in metrics.items():
@@ -337,7 +337,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
             live.update(table)
 
-            time.sleep(10)
+            time.sleep(2)
 
 
 if __name__ == "__main__":

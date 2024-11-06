@@ -45,7 +45,7 @@ vec-inf metrics 13014393
 
 And you will see the performance metrics streamed to your console, note that the metrics are updated with a 10-second interval.
 
-<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/6732215b-96f3-407c-ba45-6334b2061706">
+<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/e5ff2cd5-659b-4c88-8ebc-d8f3fdc023a4">
 
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
