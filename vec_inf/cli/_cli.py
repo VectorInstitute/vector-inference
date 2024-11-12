@@ -81,6 +81,12 @@ def cli():
     help="Path to slurm log directory, default to .vec-inf-logs in user home directory",
 )
 @click.option(
+    "--model-weights-parent-dir",
+    type=str,
+    default="/model-weights",
+    help="Path to parent directory containing model weights",
+)
+@click.option(
     "--pipeline-parallelism",
     type=str,
     help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
@@ -105,6 +111,7 @@ def launch(
     data_type: Optional[str] = None,
     venv: Optional[str] = None,
     log_dir: Optional[str] = None,
+    model_weights_parent_dir: Optional[str] = None,
     pipeline_parallelism: Optional[str] = None,
     json_mode: bool = False,
 ) -> None:

@@ -17,13 +17,14 @@ while [[ "$#" -gt 0 ]]; do
         --data-type) data_type="$2"; shift ;;
         --venv) venv="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
+        --model-weights-parent-dir) model_weights_parent_dir="$2"; shift ;;
         --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type venv log_dir)
+required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type venv log_dir model_weights_parent_dir)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -44,6 +45,7 @@ export VLLM_MAX_LOGPROBS=$vocab_size
 export VLLM_DATA_TYPE=$data_type
 export VENV_BASE=$venv
 export LOG_DIR=$log_dir
+export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dir
 
 if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
@@ -72,7 +74,7 @@ export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
 export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${JOB_NAME}_url"
 
 # Variables specific to your working environment, below are examples for the Vector cluster
-export VLLM_MODEL_WEIGHTS="/model-weights/$JOB_NAME"
+export VLLM_MODEL_WEIGHTS="${MODEL_WEIGHTS_PARENT_DIR}/${JOB_NAME}"
 export LD_LIBRARY_PATH="/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 
 
@@ -101,6 +103,10 @@ echo Walltime: $WALLTIME
 echo Data Type: $VLLM_DATA_TYPE
 echo Max Model Length: $VLLM_MAX_MODEL_LEN
 echo Max Num Seqs: $VLLM_MAX_NUM_SEQS
+echo Vocabulary Size: $VLLM_MAX_LOGPROBS
+echo Pipeline Parallelism: $PIPELINE_PARALLELISM
+echo Log Directory: $LOG_DIR
+echo Model Weights Parent Directory: $MODEL_WEIGHTS_PARENT_DIR
 
 is_special=""
 if [ "$NUM_NODES" -gt 1 ]; then
