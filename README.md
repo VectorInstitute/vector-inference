@@ -9,6 +9,7 @@ pip install vec-inf
 Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package
 
 ## Launch an inference server
+### `launch` command
 We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct
@@ -17,8 +18,14 @@ You should see an output like the following:
 
 <img width="400" alt="launch_img" src="https://github.com/user-attachments/assets/9d29947a-2708-4131-9a78-4484d2361da3">
 
-The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html). You will need to specify model launching parameters for custom models.
+The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
+* Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
+* Your model weights directory should contain HF format weights.
+* The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`. All other launch parameters need to be specified for custom models.
+* Example for setting the model weights parent directory: `--model-weights-parent-dir /h/user_name/my_weights`.
+* For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
+### `status` command
 You can check the inference server status by providing the Slurm job ID to the `status` command:
 ```bash
 vec-inf status 13014393
@@ -38,6 +45,7 @@ There are 5 possible states:
 
 Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
 
+### `metrics` command
 Once your server is ready, you can check performance metrics by providing the Slurm job ID to the `metrics` command:
 ```bash
 vec-inf metrics 13014393
@@ -47,6 +55,7 @@ And you will see the performance metrics streamed to your console, note that the
 
 <img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/e5ff2cd5-659b-4c88-8ebc-d8f3fdc023a4">
 
+### `shutdown` command
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
 vec-inf shutdown 13014393
@@ -54,6 +63,7 @@ vec-inf shutdown 13014393
 > Shutting down model with Slurm Job ID: 13014393
 ```
 
+### `list` command
 You call view the full list of available models by running the `list` command:
 ```bash
 vec-inf list

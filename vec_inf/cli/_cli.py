@@ -84,7 +84,7 @@ def cli():
     "--model-weights-parent-dir",
     type=str,
     default="/model-weights",
-    help="Path to parent directory containing model weights",
+    help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
 )
 @click.option(
     "--pipeline-parallelism",
