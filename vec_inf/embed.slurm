@@ -23,7 +23,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
     singularity exec --nv \
-    --bind ${MODEL_WEIGHTS_PARENT_DIR}:/model-weights \
+    --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} \
     --bind ${SRC_DIR}:${SRC_DIR} \
     $SINGULARITY_IMAGE \
     python3.10 ${SRC_DIR}/embeddings/openai_api_server.py \
