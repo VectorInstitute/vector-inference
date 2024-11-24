@@ -47,6 +47,7 @@ export VLLM_DATA_TYPE=$data_type
 export VENV_BASE=$venv
 export SLURM_SCRIPT=$slurm_script
 export LOG_DIR=$log_dir
+export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dirl
 
 if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
