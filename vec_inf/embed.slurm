@@ -27,7 +27,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --bind ${SRC_DIR}:${SRC_DIR} \
     $SINGULARITY_IMAGE \
     python3.10 ${SRC_DIR}/embedding/openai_api_server.py \
-    --model ${VLLM_MODEL_WEIGHTS} \
+    --model ${MODEL_WEIGHTS_PARENT_DIR}/${VLLM_MODEL_WEIGHTS} \
     --port ${vllm_port_number} \
     --trust-remote-code \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS}
