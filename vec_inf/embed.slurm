@@ -22,7 +22,10 @@ if [ "$VENV_BASE" = "singularity" ]; then
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
-    singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
+    singularity exec --nv \
+    --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} \
+    --bind ${SRC_DIR}:${SRC_DIR} \
+    $SINGULARITY_IMAGE \
     python3.10 ${SRC_DIR}/embedding/openai_api_server.py \
     --model ${VLLM_MODEL_WEIGHTS} \
     --port ${vllm_port_number} \
