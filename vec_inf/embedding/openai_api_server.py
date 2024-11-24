@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model")
 parser.add_argument("--port", type=int)
 parser.add_argument("--max-num-seqs", type=int)
-parser.add_argument("--trust-remote-code", type=bool)
+parser.add_argument("--trust-remote-code", type=bool, action="store_true")
 args = parser.parse_args()
 
 
