@@ -159,6 +159,9 @@ def launch(
     output_dict = {"slurm_job_id": slurm_job_id}
 
     for line in output_lines:
+        if ": " not in line:
+            continue
+        
         key, value = line.split(": ")
         table.add_row(key, value)
         output_dict[key.lower().replace(" ", "_")] = value
