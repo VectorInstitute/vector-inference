@@ -166,4 +166,4 @@ async def startup_event():
 
 if __name__ == "__main__":
     print("INFO:     Application startup complete.", file=sys.stderr)
-    uvicorn.run("embedding_server:app", host="0.0.0.0", port=args.port)
+    uvicorn.run(app, host="0.0.0.0", port=args.port)

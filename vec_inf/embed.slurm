@@ -23,17 +23,17 @@ if [ "$VENV_BASE" = "singularity" ]; then
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
     singularity exec --nv \
-    --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} \
+    --bind ${MODEL_WEIGHTS_PARENT_DIR}:/model-weights \
     --bind ${SRC_DIR}:${SRC_DIR} \
     $SINGULARITY_IMAGE \
-    python3.10 ${SRC_DIR}/embedding/openai_api_server.py \
-    --model ${MODEL_WEIGHTS_PARENT_DIR}/${VLLM_MODEL_WEIGHTS} \
+    python3.10 ${SRC_DIR}/embeddings/openai_api_server.py \
+    --model /model-weights/${VLLM_MODEL_WEIGHTS} \
     --port ${vllm_port_number} \
     --trust-remote-code \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS}
 else
     source ${VENV_BASE}/bin/activate
-    python3 ${SRC_DIR}/embedding/openai_api_server.py \
+    python3 ${SRC_DIR}/embeddings/openai_api_server.py \
     --model ${VLLM_MODEL_WEIGHTS} \
     --port ${vllm_port_number} \
     --trust-remote-code \
