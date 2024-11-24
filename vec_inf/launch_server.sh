@@ -17,6 +17,7 @@ while [[ "$#" -gt 0 ]]; do
         --data-type) data_type="$2"; shift ;;
         --venv) venv="$2"; shift ;;
         --log-dir) log_dir="$2"; shift ;;
+        --slurm-script) slurm_script="$2"; shift ;;
         --model-weights-parent-dir) model_weights_parent_dir="$2"; shift ;;
         --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -44,13 +45,19 @@ export VLLM_MAX_MODEL_LEN=$max_model_len
 export VLLM_MAX_LOGPROBS=$vocab_size
 export VLLM_DATA_TYPE=$data_type
 export VENV_BASE=$venv
+export SLURM_SCRIPT=$slurm_script
 export LOG_DIR=$log_dir
-export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dir
 
 if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
 else 
     export VLLM_MAX_NUM_SEQS=256
+fi
+
+if [ -n "$slurm_script" ]; then
+    export SLURM_SCRIPT=$slurm_script
+else 
+    export SLURM_SCRIPT="vllm.slurm"
 fi
 
 if [ -n "$pipeline_parallelism" ]; then
@@ -121,4 +128,4 @@ sbatch --job-name $JOB_NAME \
     --time $WALLTIME \
     --output $LOG_DIR/$JOB_NAME.%j.out \
     --error $LOG_DIR/$JOB_NAME.%j.err \
-    $SRC_DIR/${is_special}vllm.slurm
+    $SRC_DIR/${is_special}${SLURM_SCRIPT}

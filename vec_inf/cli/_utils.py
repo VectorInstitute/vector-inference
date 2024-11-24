@@ -135,7 +135,6 @@ def load_default_args(models_df: pd.DataFrame, model_name: str) -> dict:
     row_data = models_df.loc[models_df["model_name"] == model_name]
     default_args = row_data.iloc[0].to_dict()
     default_args.pop("model_name")
-    default_args.pop("model_type")
     return default_args
 
 

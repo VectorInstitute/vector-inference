@@ -131,6 +131,10 @@ def launch(
 
     if model_name in models_df["model_name"].values:
         default_args = utils.load_default_args(models_df, model_name)
+        model_type = default_args.pop("model_type")
+        if model_type == "Text Embedding":
+            launch_cmd += " --slurm-script embed.slurm"
+
         for arg in default_args:
             if arg in locals() and locals()[arg] is not None:
                 default_args[arg] = locals()[arg]
@@ -336,7 +340,9 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
+            out_logs = utils.read_slurm_log(
+                slurm_job_name, slurm_job_id, "out", log_dir
+            )
             metrics = utils.get_latest_metric(out_logs)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in metrics.items():
