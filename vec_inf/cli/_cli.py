@@ -82,8 +82,8 @@ def cli():
 )
 @click.option(
     "--model-weights-parent-dir",
-    type=str,
-    default="/model-weights",
+    type=Optional[str],
+    default=None,
     help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
 )
 @click.option(
@@ -161,7 +161,7 @@ def launch(
     for line in output_lines:
         if ": " not in line:
             continue
-        
+
         key, value = line.split(": ")
         table.add_row(key, value)
         output_dict[key.lower().replace(" ", "_")] = value

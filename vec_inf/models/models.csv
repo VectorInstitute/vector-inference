@@ -65,3 +65,4 @@ Qwen2.5-72B-Instruct,Qwen2.5,72B-Instruct,LLM,4,1,152064,16384,256,true,m2,08:00
 Pixtral-12B-2409,Pixtral,12B-2409,VLM,1,1,131072,8192,256,true,m2,08:00:00,a40,auto,singularity,default,/model-weights
 bge-multilingual-gemma2,bge,multilingual-gemma2,Text Embedding,1,1,256002,4096,256,true,m2,08:00:00,a40,auto,singularity,default,/model-weights
 e5-mistral-7b-instruct,e5,mistral-7b-instruct,Text Embedding,1,1,32000,4096,256,true,m2,08:00:00,a40,auto,singularity,default,/model-weights
+all-MiniLM-L6-v2,sentence-transformers,all-MiniLM-L6-v2,Text Embedding,1,1,30522,512,256,true,m2,08:00:00,a40,auto,singularity,default,/fs01/projects/llm/
