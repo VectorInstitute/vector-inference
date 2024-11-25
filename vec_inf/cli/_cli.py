@@ -82,8 +82,8 @@ def cli():
 )
 @click.option(
     "--model-weights-parent-dir",
-    type=str,
-    default="/model-weights",
+    type=Optional[str],
+    default=None,
     help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
 )
 @click.option(
@@ -131,6 +131,10 @@ def launch(
 
     if model_name in models_df["model_name"].values:
         default_args = utils.load_default_args(models_df, model_name)
+        model_type = default_args.pop("model_type")
+        if model_type == "Text Embedding":
+            launch_cmd += " --slurm-script embed.slurm"
+
         for arg in default_args:
             if arg in locals() and locals()[arg] is not None:
                 default_args[arg] = locals()[arg]
@@ -155,6 +159,9 @@ def launch(
     output_dict = {"slurm_job_id": slurm_job_id}
 
     for line in output_lines:
+        if ": " not in line:
+            continue
+
         key, value = line.split(": ")
         table.add_row(key, value)
         output_dict[key.lower().replace(" ", "_")] = value
@@ -336,7 +343,9 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
+            out_logs = utils.read_slurm_log(
+                slurm_job_name, slurm_job_id, "out", log_dir
+            )
             metrics = utils.get_latest_metric(out_logs)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in metrics.items():
