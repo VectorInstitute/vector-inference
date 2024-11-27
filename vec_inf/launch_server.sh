@@ -19,6 +19,7 @@ while [[ "$#" -gt 0 ]]; do
         --log-dir) log_dir="$2"; shift ;;
         --model-weights-parent-dir) model_weights_parent_dir="$2"; shift ;;
         --pipeline-parallelism) pipeline_parallelism="$2"; shift ;;
+        --enforce-eager) enforce_eager="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -59,6 +60,12 @@ else
     export PIPELINE_PARALLELISM="False"
 fi
 
+if [ -n "$enforce_eager" ]; then
+    export ENFORCE_EAGER=$enforce_eager
+else
+    export ENFORCE_EAGER="False"
+fi
+
 # ================================= Set default environment variables ======================================
 # Slurm job configuration
 export JOB_NAME="$MODEL_FAMILY-$MODEL_VARIANT"
@@ -68,10 +75,9 @@ fi
 mkdir -p $LOG_DIR
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
-# SLURM job and are written to the file specified at VLLM_BASE_URL_FILENAME
+# SLURM job 
 export SRC_DIR="$(dirname "$0")"
 export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
-export VLLM_BASE_URL_FILENAME="${MODEL_DIR}/.${JOB_NAME}_url"
 
 # Variables specific to your working environment, below are examples for the Vector cluster
 export VLLM_MODEL_WEIGHTS="${MODEL_WEIGHTS_PARENT_DIR}/${JOB_NAME}"
@@ -89,11 +95,6 @@ if [[ $fp16_partitions =~ $JOB_PARTITION ]]; then
     echo "Data type set to due to non-Ampere GPUs used: $VLLM_DATA_TYPE"
 fi
 
-# Create a file to store the API server URL if it doesn't exist
-if [ -f $VLLM_BASE_URL_FILENAME ]; then
-    touch $VLLM_BASE_URL_FILENAME
-fi
-
 echo Job Name: $JOB_NAME
 echo Partition: $JOB_PARTITION
 echo Num Nodes: $NUM_NODES
@@ -105,6 +106,7 @@ echo Max Model Length: $VLLM_MAX_MODEL_LEN
 echo Max Num Seqs: $VLLM_MAX_NUM_SEQS
 echo Vocabulary Size: $VLLM_MAX_LOGPROBS
 echo Pipeline Parallelism: $PIPELINE_PARALLELISM
+echo Enforce Eager: $ENFORCE_EAGER
 echo Log Directory: $LOG_DIR
 echo Model Weights Parent Directory: $MODEL_WEIGHTS_PARENT_DIR
 
