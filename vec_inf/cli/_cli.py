@@ -1,9 +1,10 @@
 import os
 import time
-from typing import Optional
+from typing import Optional, cast
 
 import click
-import pandas as pd
+
+import polars as pl
 from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
@@ -92,6 +93,11 @@ def cli():
     help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
 )
 @click.option(
+    "--enforce-eager",
+    type=str,
+    help="Always use eager-mode PyTorch, accepts 'True' or 'False', default to 'False' for custom models if not set",
+)
+@click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
@@ -113,6 +119,7 @@ def launch(
     log_dir: Optional[str] = None,
     model_weights_parent_dir: Optional[str] = None,
     pipeline_parallelism: Optional[str] = None,
+    enforce_eager: Optional[str] = None,
     json_mode: bool = False,
 ) -> None:
     """
@@ -120,7 +127,9 @@ def launch(
     """
 
     if isinstance(pipeline_parallelism, str):
-        pipeline_parallelism = pipeline_parallelism.lower() == "true"
+        pipeline_parallelism = (
+            "True" if pipeline_parallelism.lower() == "true" else "False"
+        )
 
     launch_script_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "launch_server.sh"
@@ -129,7 +138,7 @@ def launch(
 
     models_df = utils.load_models_df()
 
-    if model_name in models_df["model_name"].values:
+    if model_name in models_df["model_name"].to_list():
         default_args = utils.load_default_args(models_df, model_name)
         for arg in default_args:
             if arg in locals() and locals()[arg] is not None:
@@ -137,7 +146,7 @@ def launch(
             renamed_arg = arg.replace("_", "-")
             launch_cmd += f" --{renamed_arg} {default_args[arg]}"
     else:
-        model_args = models_df.columns.tolist()
+        model_args = models_df.columns
         model_args.remove("model_name")
         model_args.remove("model_type")
         for arg in model_args:
@@ -265,45 +274,58 @@ def shutdown(slurm_job_id: int) -> None:
     is_flag=True,
     help="Output in JSON string",
 )
-def list(model_name: Optional[str] = None, json_mode: bool = False) -> None:
+def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """
     List all available models, or get default setup of a specific model
     """
 
-    def list_model(model_name: str, models_df: pd.DataFrame, json_mode: bool):
-        if model_name not in models_df["model_name"].values:
+    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool):
+        if model_name not in models_df["model_name"].to_list():
             raise ValueError(f"Model name {model_name} not found in available models")
 
         excluded_keys = {"venv", "log_dir"}
-        model_row = models_df.loc[models_df["model_name"] == model_name]
+        model_row = models_df.filter(models_df["model_name"] == model_name)
 
         if json_mode:
-            filtered_model_row = model_row.drop(columns=excluded_keys, errors="ignore")
-            click.echo(filtered_model_row.to_json(orient="records"))
+            filtered_model_row = model_row.drop(excluded_keys, strict=False)
+            click.echo(filtered_model_row.to_dicts()[0])
             return
         table = utils.create_table(key_title="Model Config", value_title="Value")
-        for _, row in model_row.iterrows():
+        for row in model_row.to_dicts():
             for key, value in row.items():
                 if key not in excluded_keys:
                     table.add_row(key, str(value))
         CONSOLE.print(table)
 
-    def list_all(models_df: pd.DataFrame, json_mode: bool):
+    def list_all(models_df: pl.DataFrame, json_mode: bool):
         if json_mode:
-            click.echo(models_df["model_name"].to_json(orient="records"))
+            click.echo(models_df["model_name"].to_list())
             return
         panels = []
         model_type_colors = {
             "LLM": "cyan",
             "VLM": "bright_blue",
             "Text Embedding": "purple",
+            "Reward Modeling": "bright_magenta",
         }
-        custom_order = ["LLM", "VLM", "Text Embedding"]
-        models_df["model_type"] = pd.Categorical(
-            models_df["model_type"], categories=custom_order, ordered=True
+
+        models_df = models_df.with_columns(
+            pl.when(pl.col("model_type") == "LLM")
+            .then(0)
+            .when(pl.col("model_type") == "VLM")
+            .then(1)
+            .when(pl.col("model_type") == "Text Embedding")
+            .then(2)
+            .when(pl.col("model_type") == "Reward Modeling")
+            .then(3)
+            .otherwise(-1)
+            .alias("model_type_order")
         )
-        models_df = models_df.sort_values(by="model_type")
-        for _, row in models_df.iterrows():
+
+        models_df = models_df.sort("model_type_order")
+        models_df = models_df.drop("model_type_order")
+
+        for row in models_df.to_dicts():
             panel_color = model_type_colors.get(row["model_type"], "white")
             styled_text = (
                 f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
@@ -336,10 +358,22 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
-            metrics = utils.get_latest_metric(out_logs)
+            out_logs = utils.read_slurm_log(
+                slurm_job_name, slurm_job_id, "out", log_dir
+            )
+            # if out_logs is a string, then it is an error message
+            if isinstance(out_logs, str):
+                live.update(out_logs)
+                break
+            out_logs = cast(list, out_logs)
+            latest_metrics = utils.get_latest_metric(out_logs)
+            # if latest_metrics is a string, then it is an error message
+            if isinstance(latest_metrics, str):
+                live.update(latest_metrics)
+                break
+            latest_metrics = cast(dict, latest_metrics)
             table = utils.create_table(key_title="Metric", value_title="Value")
-            for key, value in metrics.items():
+            for key, value in latest_metrics.items():
                 table.add_row(key, value)
 
             live.update(table)
