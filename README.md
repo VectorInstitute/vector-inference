@@ -16,12 +16,12 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="400" alt="launch_img" src="https://github.com/user-attachments/assets/9d29947a-2708-4131-9a78-4484d2361da3">
+<img width="700" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
 
 The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
 * Your model weights directory should contain HF format weights.
-* The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`. All other launch parameters need to be specified for custom models.
+* The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`, `--enforce-eager`. All other launch parameters need to be specified for custom models.
 * Example for setting the model weights parent directory: `--model-weights-parent-dir /h/user_name/my_weights`.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
@@ -68,7 +68,7 @@ You call view the full list of available models by running the `list` command:
 ```bash
 vec-inf list
 ```
-<img width="900" alt="list_img" src="https://github.com/user-attachments/assets/ee53cc36-0681-40e6-ba72-17208df2027c">
+<img width="900" alt="list_img" src="https://github.com/user-attachments/assets/7cb2b2ac-d30c-48a8-b773-f648c27d9de2">
 
 You can also view the default setup for a specific supported model by providing the model name, for example `Meta-Llama-3.1-70B-Instruct`:
 ```bash
