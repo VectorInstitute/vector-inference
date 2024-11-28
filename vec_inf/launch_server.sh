@@ -50,7 +50,7 @@ export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dir
 
 if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
-else 
+else
     export VLLM_MAX_NUM_SEQS=256
 fi
 
@@ -75,7 +75,7 @@ fi
 mkdir -p $LOG_DIR
 
 # Model and entrypoint configuration. API Server URL (host, port) are set automatically based on the
-# SLURM job 
+# SLURM job
 export SRC_DIR="$(dirname "$0")"
 export MODEL_DIR="${SRC_DIR}/models/${MODEL_FAMILY}"
 
