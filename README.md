@@ -68,7 +68,8 @@ You call view the full list of available models by running the `list` command:
 ```bash
 vec-inf list
 ```
-<img width="900" alt="list_img" src="https://github.com/user-attachments/assets/7cb2b2ac-d30c-48a8-b773-f648c27d9de2">
+<img width="940" alt="list_img" src="https://github.com/user-attachments/assets/8cf901c4-404c-4398-a52f-0486f00747a3">
+
 
 You can also view the default setup for a specific supported model by providing the model name, for example `Meta-Llama-3.1-70B-Instruct`:
 ```bash
