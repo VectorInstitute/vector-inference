@@ -1,12 +1,12 @@
 import os
 import subprocess
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
-import pandas as pd
+import polars as pl
 import requests
 from rich.table import Table
 
-MODEL_READY_SIGNATURE = "INFO:     Uvicorn running on http://0.0.0.0:"
+MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SERVER_ADDRESS_SIGNATURE = "Server address: "
 
 
@@ -25,7 +25,7 @@ def read_slurm_log(
     slurm_job_name: str, slurm_job_id: int, slurm_log_type: str, log_dir: Optional[str]
 ) -> Union[list[str], str]:
     """
-    Get the directory of a model
+    Read the slurm log file
     """
     if not log_dir:
         models_dir = os.path.join(os.path.expanduser("~"), ".vec-inf-logs")
@@ -35,9 +35,11 @@ def read_slurm_log(
                 log_dir = os.path.join(models_dir, dir)
                 break
 
+    log_dir = cast(str, log_dir)
+
     try:
         file_path = os.path.join(
-            log_dir,  # type: ignore
+            log_dir,
             f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}",
         )
         with open(file_path, "r") as file:
@@ -58,12 +60,15 @@ def is_server_running(
     if isinstance(log_content, str):
         return log_content
 
+    status: Union[str, tuple[str, str]] = "LAUNCHING"
+
     for line in log_content:
         if "error" in line.lower():
-            return ("FAILED", line.strip("\n"))
+            status = ("FAILED", line.strip("\n"))
         if MODEL_READY_SIGNATURE in line:
-            return "RUNNING"
-    return "LAUNCHING"
+            status = "RUNNING"
+
+    return status
 
 
 def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
@@ -114,11 +119,11 @@ def create_table(
     return table
 
 
-def load_models_df() -> pd.DataFrame:
+def load_models_df() -> pl.DataFrame:
     """
     Load the models dataframe
     """
-    models_df = pd.read_csv(
+    models_df = pl.read_csv(
         os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
             "models/models.csv",
@@ -127,11 +132,32 @@ def load_models_df() -> pd.DataFrame:
     return models_df
 
 
-def load_default_args(models_df: pd.DataFrame, model_name: str) -> dict:
+def load_default_args(models_df: pl.DataFrame, model_name: str) -> dict:
     """
     Load the default arguments for a model
     """
-    row_data = models_df.loc[models_df["model_name"] == model_name]
-    default_args = row_data.iloc[0].to_dict()
-    default_args.pop("model_name")
+    row_data = models_df.filter(models_df["model_name"] == model_name)
+    default_args = row_data.to_dicts()[0]
+    default_args.pop("model_name", None)
+    default_args.pop("model_type", None)
     return default_args
+
+
+def get_latest_metric(log_lines: list[str]) -> dict | str:
+    """Read the latest metric entry from the log file."""
+    latest_metric = {}
+
+    try:
+        for line in reversed(log_lines):
+            if "Avg prompt throughput" in line:
+                # Parse the metric values from the line
+                metrics_str = line.split("] ")[1].strip().strip(".")
+                metrics_list = metrics_str.split(", ")
+                for metric in metrics_list:
+                    key, value = metric.split(": ")
+                    latest_metric[key] = value
+                break
+    except Exception as e:
+        return f"[red]Error reading log file: {e}[/red]"
+
+    return latest_metric
