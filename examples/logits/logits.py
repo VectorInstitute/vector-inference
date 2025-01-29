@@ -1,6 +1,10 @@
+"""Example of how to get logits from the model."""
+
 from openai import OpenAI
 
-# The url is located in the .vLLM_model-variant_url file in the corresponding model directory.
+
+# The url is located in the .vLLM_model-variant_url file in the corresponding
+# model directory.
 client = OpenAI(base_url="http://gpuXXX:XXXXX/v1", api_key="EMPTY")
 
 completion = client.completions.create(

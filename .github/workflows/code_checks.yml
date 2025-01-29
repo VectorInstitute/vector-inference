@@ -9,7 +9,7 @@ on:
       - .pre-commit-config.yaml
       - .github/workflows/code_checks.yml
       - '**.py'
-      - poetry.lock
+      - uv.lock
       - pyproject.toml
       - '**.ipynb'
   pull_request:
@@ -20,7 +20,7 @@ on:
       - .pre-commit-config.yaml
       - .github/workflows/code_checks.yml
       - '**.py'
-      - poetry.lock
+      - uv.lock
       - pyproject.toml
       - '**.ipynb'
 
@@ -28,21 +28,22 @@ jobs:
   run-code-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
-      - name: Install and configure Poetry
-        uses: snok/install-poetry@v1
+      - uses: actions/checkout@v4.2.2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - uses: actions/setup-python@v5.0.0
+          # Install a specific version of uv.
+          version: "0.5.21"
+          enable-cache: true
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'poetry'
+          python-version-file: ".python-version"
+      - name: Install the project
+        run: uv sync --dev
       - name: Install dependencies and check code
         run: |
-          poetry env use '3.10'
           source .venv/bin/activate
-          poetry install --with test --all-extras
           pre-commit run --all-files
       - name: pip-audit (gh-action-pip-audit)
         uses: pypa/gh-action-pip-audit@v1.0.8

@@ -1,9 +1,10 @@
+"""Command line interface for Vector Inference."""
+
 import os
 import time
-from typing import Optional, cast
+from typing import Optional
 
 import click
-
 import polars as pl
 from rich.columns import Columns
 from rich.console import Console
@@ -12,12 +13,13 @@ from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
 
+
 CONSOLE = Console()
 
 
 @click.group()
-def cli():
-    """Vector Inference CLI"""
+def cli() -> None:
+    """Vector Inference CLI."""
     pass
 
 
@@ -122,10 +124,7 @@ def launch(
     enforce_eager: Optional[str] = None,
     json_mode: bool = False,
 ) -> None:
-    """
-    Launch a model on the cluster
-    """
-
+    """Launch a model on the cluster."""
     if isinstance(pipeline_parallelism, str):
         pipeline_parallelism = (
             "True" if pipeline_parallelism.lower() == "true" else "False"
@@ -189,9 +188,7 @@ def launch(
 def status(
     slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
 ) -> None:
-    """
-    Get the status of a running model on the cluster
-    """
+    """Get the status of a running model on the cluster."""
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
 
@@ -212,7 +209,7 @@ def status(
         status = "PENDING"
     # If Slurm job is currently RUNNING
     elif slurm_job_state == "RUNNING":
-        # Check whether the server is ready, if yes, run model health check to further determine status
+        # Check whether the server is ready, if yes, run model health check to further determine status  # noqa: W505
         server_status = utils.is_server_running(slurm_job_name, slurm_job_id, log_dir)
         # If server status is a tuple, then server status is "FAILED"
         if isinstance(server_status, tuple):
@@ -259,9 +256,7 @@ def status(
 @cli.command("shutdown")
 @click.argument("slurm_job_id", type=int, nargs=1)
 def shutdown(slurm_job_id: int) -> None:
-    """
-    Shutdown a running model on the cluster
-    """
+    """Shutdown a running model on the cluster."""
     shutdown_cmd = f"scancel {slurm_job_id}"
     utils.run_bash_command(shutdown_cmd)
     click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
@@ -275,11 +270,9 @@ def shutdown(slurm_job_id: int) -> None:
     help="Output in JSON string",
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
-    """
-    List all available models, or get default setup of a specific model
-    """
+    """List all available models, or get default setup of a specific model."""
 
-    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool):
+    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool) -> None:
         if model_name not in models_df["model_name"].to_list():
             raise ValueError(f"Model name {model_name} not found in available models")
 
@@ -297,7 +290,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
                     table.add_row(key, str(value))
         CONSOLE.print(table)
 
-    def list_all(models_df: pl.DataFrame, json_mode: bool):
+    def list_all(models_df: pl.DataFrame, json_mode: bool) -> None:
         if json_mode:
             click.echo(models_df["model_name"].to_list())
             return
@@ -349,9 +342,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
     help="Path to slurm log directory. This is required if --log-dir was set in model launch",
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """
-    Stream performance metrics to the console
-    """
+    """Stream performance metrics to the console."""
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
     slurm_job_name = output.split(" ")[1].split("=")[1]
@@ -365,13 +356,11 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
             if isinstance(out_logs, str):
                 live.update(out_logs)
                 break
-            out_logs = cast(list, out_logs)
             latest_metrics = utils.get_latest_metric(out_logs)
             # if latest_metrics is a string, then it is an error message
             if isinstance(latest_metrics, str):
                 live.update(latest_metrics)
                 break
-            latest_metrics = cast(dict, latest_metrics)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in latest_metrics.items():
                 table.add_row(key, value)

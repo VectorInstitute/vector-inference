@@ -1,6 +1,10 @@
+"""Testing script."""
+
 import time
+from typing import List, Union
 
 import requests
+
 
 # Change the ENDPOINT and MODEL_PATH to match your setup
 ENDPOINT = "http://gpuXXX:XXXX/v1"
@@ -71,19 +75,20 @@ PROMPTS = [
 ]
 
 
-def send_request(prompt):
+def send_request(prompt: List[str]) -> Union[float, None]:
+    """Send a request to the API."""
     data = {"model": f"{MODEL_PATH}", "prompt": prompt, "max_tokens": 100}
     start_time = time.time()
     response = requests.post(f"{ENDPOINT}/completions", headers=HEADERS, json=data)
     duration = time.time() - start_time
     if response.status_code == 200:
         return duration
-    else:
-        return None
+    return None
 
 
-def main():
-    for i in range(10):
+def main() -> None:
+    """Run main function."""
+    for _ in range(10):
         print("Sending 20x requests 0-52...")
         send_request(PROMPTS * 20)
     print("Done!")
