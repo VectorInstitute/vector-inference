@@ -613,13 +613,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "compressed-tensors"
-version = "0.8.1"
+version = "0.9.0"
 description = "Library for utilization of compressed safetensors of neural network models"
 optional = true
 python-versions = "*"
 files = [
-    {file = "compressed-tensors-0.8.1.tar.gz", hash = "sha256:c8d04c0e6768c8286b0e8c38d63a7b89ae34d4b03f5de77cbe4f6f58222d4390"},
-    {file = "compressed_tensors-0.8.1-py3-none-any.whl", hash = "sha256:5aa3b99642e5067a2c2e526be074948d2ae10bc5555d65b84bf60efcd612f445"},
+    {file = "compressed-tensors-0.9.0.tar.gz", hash = "sha256:80f8b002309b5970493e578d58542a308111fbef26f96811fa2c5322b24e7f1f"},
+    {file = "compressed_tensors-0.9.0-py3-none-any.whl", hash = "sha256:c4a0bccf2fd180a18a4bf0646f7746df4ea8ea537c06061f4b571662debf4424"},
 ]
 
 [package.dependencies]
@@ -4486,20 +4486,20 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "vllm"
-version = "0.6.6.post1"
+version = "0.7.0"
 description = "A high-throughput and memory-efficient inference and serving engine for LLMs"
 optional = true
 python-versions = ">=3.9"
 files = [
-    {file = "vllm-0.6.6.post1-cp38-abi3-manylinux1_x86_64.whl", hash = "sha256:07cd8b4bc6368b5ce37ea14936d6941021ac2ac032e2731f1de108a1e499cab4"},
-    {file = "vllm-0.6.6.post1.tar.gz", hash = "sha256:d9035954a2028fd7efb2c37e137d69b568d80f193b6a8748f885676292a43a95"},
+    {file = "vllm-0.7.0-cp38-abi3-manylinux1_x86_64.whl", hash = "sha256:946c4169df196138ebc60f8de9cefb229580d837b85061a2e1d5793955149709"},
+    {file = "vllm-0.7.0.tar.gz", hash = "sha256:91521ca3e7629e2a40a4fceea3290cbde34c3ea6cb291ee9f84ad2ce752e65be"},
 ]
 
 [package.dependencies]
 aiohttp = "*"
 blake3 = "*"
 cloudpickle = "*"
-compressed-tensors = "0.8.1"
+compressed-tensors = "0.9.0"
 depyf = "0.18.0"
 einops = "*"
 fastapi = {version = ">=0.107.0,<0.113.dev0 || >0.114.0", markers = "python_version >= \"3.9\""}
@@ -4985,4 +4985,4 @@ dev = ["cupy-cuda12x", "ray", "vllm", "vllm-nccl-cu12"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "0bc239e9a51e0bc929d9c42b2accd53d0dbe20268ddf68527fee7c48986ee760"
+content-hash = "d46f7114da4dabab677cab45d3ac9fdbc42f829796ed2a78f48611e294de3236"
