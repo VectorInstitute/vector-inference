@@ -2,7 +2,7 @@
 
 import os
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import click
 import polars as pl
@@ -192,65 +192,120 @@ def status(
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
 
-    slurm_job_name = "UNAVAILABLE"
-    status = "SHUTDOWN"
-    base_url = "UNAVAILABLE"
+    base_data = _get_base_status_data(output)
+    status_info = _process_job_state(output, base_data, slurm_job_id, log_dir)
+    _display_status(status_info, json_mode)
 
+
+def _get_base_status_data(output: str) -> Dict[str, Any]:
+    """Extract basic job status information from scontrol output."""
     try:
-        slurm_job_name = output.split(" ")[1].split("=")[1]
-        slurm_job_state = output.split(" ")[9].split("=")[1]
+        job_name = output.split(" ")[1].split("=")[1]
+        job_state = output.split(" ")[9].split("=")[1]
     except IndexError:
-        # Job ID not found
-        slurm_job_state = "UNAVAILABLE"
+        job_name = "UNAVAILABLE"
+        job_state = "UNAVAILABLE"
 
-    # If Slurm job is currently PENDING
-    if slurm_job_state == "PENDING":
-        slurm_job_pending_reason = output.split(" ")[10].split("=")[1]
-        status = "PENDING"
-    # If Slurm job is currently RUNNING
-    elif slurm_job_state == "RUNNING":
-        # Check whether the server is ready, if yes, run model health check to further determine status  # noqa: W505
-        server_status = utils.is_server_running(slurm_job_name, slurm_job_id, log_dir)
-        # If server status is a tuple, then server status is "FAILED"
-        if isinstance(server_status, tuple):
-            status = server_status[0]
-            slurm_job_failed_reason = server_status[1]
-        elif server_status == "RUNNING":
-            model_status = utils.model_health_check(
-                slurm_job_name, slurm_job_id, log_dir
-            )
-            if model_status == "READY":
-                # Only set base_url if model is ready to serve requests
-                base_url = utils.get_base_url(slurm_job_name, slurm_job_id, log_dir)
-                status = "READY"
-            else:
-                # If model is not ready, then status must be "FAILED"
-                status = model_status[0]
-                slurm_job_failed_reason = str(model_status[1])
-        else:
-            status = server_status
+    return {
+        "model_name": job_name,
+        "status": "SHUTDOWN",
+        "base_url": "UNAVAILABLE",
+        "state": job_state,
+        "pending_reason": None,
+        "failed_reason": None,
+    }
 
-    if json_mode:
-        status_dict = {
-            "model_name": slurm_job_name,
-            "model_status": status,
-            "base_url": base_url,
-        }
-        if "slurm_job_pending_reason" in locals():
-            status_dict["pending_reason"] = slurm_job_pending_reason
-        if "slurm_job_failed_reason" in locals():
-            status_dict["failed_reason"] = slurm_job_failed_reason
-        click.echo(f"{status_dict}")
+
+def _process_job_state(
+    output: str, status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> Dict[str, Any]:
+    """Process different job states and update status information."""
+    if status_info["state"] == "PENDING":
+        _process_pending_state(output, status_info)
+    elif status_info["state"] == "RUNNING":
+        _handle_running_state(status_info, slurm_job_id, log_dir)
+    return status_info
+
+
+def _process_pending_state(output: str, status_info: Dict[str, Any]) -> None:
+    """Handle PENDING job state."""
+    try:
+        status_info["pending_reason"] = output.split(" ")[10].split("=")[1]
+        status_info["status"] = "PENDING"
+    except IndexError:
+        status_info["pending_reason"] = "Unknown pending reason"
+
+
+def _handle_running_state(
+    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> None:
+    """Handle RUNNING job state and check server status."""
+    server_status = utils.is_server_running(
+        status_info["model_name"], slurm_job_id, log_dir
+    )
+
+    if isinstance(server_status, tuple):
+        status_info["status"], status_info["failed_reason"] = server_status
+        return
+
+    if server_status == "RUNNING":
+        _check_model_health(status_info, slurm_job_id, log_dir)
     else:
-        table = utils.create_table(key_title="Job Status", value_title="Value")
-        table.add_row("Model Name", slurm_job_name)
-        table.add_row("Model Status", status, style="blue")
-        if "slurm_job_pending_reason" in locals():
-            table.add_row("Reason", slurm_job_pending_reason)
-        if "slurm_job_failed_reason" in locals():
-            table.add_row("Reason", slurm_job_failed_reason)
-        table.add_row("Base URL", base_url)
-        CONSOLE.print(table)
+        status_info["status"] = server_status
+
+
+def _check_model_health(
+    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> None:
+    """Check model health and update status accordingly."""
+    model_status = utils.model_health_check(
+        status_info["model_name"], slurm_job_id, log_dir
+    )
+    status, failed_reason = model_status
+    if status == "READY":
+        status_info["base_url"] = utils.get_base_url(
+            status_info["model_name"], slurm_job_id, log_dir
+        )
+        status_info["status"] = status
+    else:
+        status_info["status"], status_info["failed_reason"] = status, failed_reason
+
+
+def _display_status(status_info: Dict[str, Any], json_mode: bool) -> None:
+    """Display the status information in appropriate format."""
+    if json_mode:
+        _output_json(status_info)
+    else:
+        _output_table(status_info)
+
+
+def _output_json(status_info: Dict[str, Any]) -> None:
+    """Format and output JSON data."""
+    json_data = {
+        "model_name": status_info["model_name"],
+        "model_status": status_info["status"],
+        "base_url": status_info["base_url"],
+    }
+    if status_info["pending_reason"]:
+        json_data["pending_reason"] = status_info["pending_reason"]
+    if status_info["failed_reason"]:
+        json_data["failed_reason"] = status_info["failed_reason"]
+    click.echo(json_data)
+
+
+def _output_table(status_info: Dict[str, Any]) -> None:
+    """Create and display rich table."""
+    table = utils.create_table(key_title="Job Status", value_title="Value")
+    table.add_row("Model Name", status_info["model_name"])
+    table.add_row("Model Status", status_info["status"], style="blue")
+
+    if status_info["pending_reason"]:
+        table.add_row("Pending Reason", status_info["pending_reason"])
+    if status_info["failed_reason"]:
+        table.add_row("Failed Reason", status_info["failed_reason"])
+
+    table.add_row("Base URL", status_info["base_url"])
+    CONSOLE.print(table)
 
 
 @cli.command("shutdown")

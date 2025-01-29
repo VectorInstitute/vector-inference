@@ -2,7 +2,7 @@
 
 import os
 import subprocess
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import polars as pl
 import requests
@@ -82,7 +82,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 def model_health_check(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
-) -> Union[str, tuple[str, Union[str, int]]]:
+) -> Tuple[str, Union[str, int]]:
     """Check the health of a running model on the cluster."""
     base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
     if not base_url.startswith("http"):
@@ -93,7 +93,7 @@ def model_health_check(
         response = requests.get(health_check_url)
         # Check if the request was successful
         if response.status_code == 200:
-            return "READY"
+            return ("READY", response.status_code)
         return ("FAILED", response.status_code)
     except requests.exceptions.RequestException as e:
         return ("FAILED", str(e))
