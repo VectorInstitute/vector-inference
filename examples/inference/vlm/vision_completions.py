@@ -1,6 +1,10 @@
+"""Example of using the OpenAI API to generate completions for vision tasks."""
+
 from openai import OpenAI
 
-# The url is located in the .vLLM_model-variant_url file in the corresponding model directory.
+
+# The url is located in the .vLLM_model-variant_url file in the corresponding
+# model directory.
 client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 # Update the model path accordingly
