@@ -1,0 +1,69 @@
+name: unit tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/code_checks.yml
+      - .github/workflows/docs_build.yml
+      - .github/workflows/docs_deploy.yml
+      - .github/workflows/unit_tests.yml
+      - .github/workflows/integration_tests.yml
+      - '**.py'
+      - '**.ipynb'
+      - uv.lock
+      - pyproject.toml
+      - '**.rst'
+      - '**.md'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/code_checks.yml
+      - .github/workflows/docs_build.yml
+      - .github/workflows/docs_deploy.yml
+      - .github/workflows/unit_tests.yml
+      - .github/workflows/integration_tests.yml
+      - '**.py'
+      - '**.ipynb'
+      - uv.lock
+      - pyproject.toml
+      - '**.rst'
+      - '**.md'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5.2.2
+        with:
+          # Install a specific version of uv.
+          version: "0.5.21"
+          enable-cache: true
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Install dependencies and check code
+        run: |
+          uv run pytest -m "not integration_test" --cov src/vec_inf --cov-report=xml tests
+
+      # Uncomment this once this repo is configured on Codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5.3.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: VectorInstitute/vec-inf
+          fail_ci_if_error: true
+          verbose: true
