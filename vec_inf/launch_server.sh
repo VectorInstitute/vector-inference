@@ -37,6 +37,7 @@ done
 
 export MODEL_FAMILY=$model_family
 export MODEL_VARIANT=$model_variant
+export MODEL_TYPE=$model_type
 export JOB_PARTITION=$partition
 export QOS=$qos
 export WALLTIME=$walltime
@@ -113,6 +114,7 @@ echo Num Nodes: $NUM_NODES
 echo GPUs per Node: $NUM_GPUS
 echo QOS: $QOS
 echo Walltime: $WALLTIME
+echo Model Type: $MODEL_TYPE
 echo Task: $VLLM_TASK
 echo Data Type: $VLLM_DATA_TYPE
 echo Max Model Length: $VLLM_MAX_MODEL_LEN
