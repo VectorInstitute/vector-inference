@@ -71,3 +71,5 @@ Qwen2.5-Math-RM-72B,Qwen2.5,Math-RM-72B,Reward Modeling,4,1,152064,4096,256,true
 QwQ-32B-Preview,QwQ,32B-Preview,LLM,2,1,152064,32768,256,true,false,m2,08:00:00,a40,auto,singularity,default,/model-weights
 Pixtral-12B-2409,Pixtral,12B-2409,VLM,1,1,131072,8192,256,true,false,m2,08:00:00,a40,auto,singularity,default,/model-weights
 e5-mistral-7b-instruct,e5,mistral-7b-instruct,Text Embedding,1,1,32000,4096,256,true,false,m2,08:00:00,a40,auto,singularity,default,/model-weights
+bge-base-en-v1.5,bge,base-en-v1.5,Text Embedding,1,1,30522,512,256,true,false,m2,08:00:00,a40,auto,singularity,default,/model-weights
+all-MiniLM-L6-v2,all-MiniLM,L6-v2,Text Embedding,1,1,30522,512,256,true,false,m2,08:00:00,a40,auto,singularity,default,/model-weights
