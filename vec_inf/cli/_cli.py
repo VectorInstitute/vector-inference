@@ -139,10 +139,10 @@ def launch(
     models_df = utils.load_models_df()
 
     models_df = models_df.with_columns(
-    pl.col("model_type").replace("Reward Modeling", "Reward_Modeling")
+        pl.col("model_type").replace("Reward Modeling", "Reward_Modeling")
     )
     models_df = models_df.with_columns(
-    pl.col("model_type").replace("Text Embedding", "Text_Embedding")
+        pl.col("model_type").replace("Text Embedding", "Text_Embedding")
     )
 
     if model_name in models_df["model_name"].to_list():
