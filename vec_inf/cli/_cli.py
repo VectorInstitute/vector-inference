@@ -138,6 +138,13 @@ def launch(
 
     models_df = utils.load_models_df()
 
+    models_df = models_df.with_columns(
+    pl.col("model_type").replace("Reward Modeling", "Reward_Modeling")
+    )
+    models_df = models_df.with_columns(
+    pl.col("model_type").replace("Text Embedding", "Text_Embedding")
+    )
+
     if model_name in models_df["model_name"].to_list():
         default_args = utils.load_default_args(models_df, model_name)
         for arg in default_args:
@@ -148,7 +155,6 @@ def launch(
     else:
         model_args = models_df.columns
         model_args.remove("model_name")
-        model_args.remove("model_type")
         for arg in model_args:
             if locals()[arg] is not None:
                 renamed_arg = arg.replace("_", "-")

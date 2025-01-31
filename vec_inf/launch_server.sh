@@ -6,6 +6,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --model-family) model_family="$2"; shift ;;
         --model-variant) model_variant="$2"; shift ;;
+        --model-type) model_type="$2"; shift ;;
         --partition) partition="$2"; shift ;;
         --qos) qos="$2"; shift ;;
         --time) walltime="$2"; shift ;;
@@ -25,7 +26,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-required_vars=(model_family model_variant partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type venv log_dir model_weights_parent_dir)
+required_vars=(model_family model_variant model_type partition qos walltime num_nodes num_gpus max_model_len vocab_size data_type venv log_dir model_weights_parent_dir)
 
 for var in "$required_vars[@]"; do
     if [ -z "$!var" ]; then
@@ -47,6 +48,17 @@ export VLLM_DATA_TYPE=$data_type
 export VENV_BASE=$venv
 export LOG_DIR=$log_dir
 export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dir
+
+if [[ "$model_type" == "LLM" || "$model_type" == "VLM" ]]; then
+    export VLLM_TASK="generate"
+elif [[ "$model_type" == "Reward_Modeling" ]]; then
+    export VLLM_TASK="reward"
+elif [[ "$model_type" == "Text_Embedding" ]]; then
+    export VLLM_TASK="embed"
+else
+    echo "Error: Unknown model_type: $model_type"
+    exit 1
+fi
 
 if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
@@ -101,6 +113,7 @@ echo Num Nodes: $NUM_NODES
 echo GPUs per Node: $NUM_GPUS
 echo QOS: $QOS
 echo Walltime: $WALLTIME
+echo Task: $VLLM_TASK
 echo Data Type: $VLLM_DATA_TYPE
 echo Max Model Length: $VLLM_MAX_MODEL_LEN
 echo Max Num Seqs: $VLLM_MAX_NUM_SEQS
