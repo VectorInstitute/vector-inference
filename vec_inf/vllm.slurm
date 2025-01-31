@@ -23,7 +23,7 @@ fi
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_0.6.4.post1.sif
+    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_latest.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
@@ -39,6 +39,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --trust-remote-code \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 else
     source ${VENV_BASE}/bin/activate
@@ -53,5 +54,6 @@ else
     --trust-remote-code \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 fi

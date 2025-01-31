@@ -124,7 +124,6 @@ def load_default_args(models_df: pl.DataFrame, model_name: str) -> Dict[str, str
     row_data = models_df.filter(models_df["model_name"] == model_name)
     default_args = row_data.to_dicts()[0]
     default_args.pop("model_name", None)
-    default_args.pop("model_type", None)
     return default_args
 
 
