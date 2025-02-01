@@ -3,9 +3,8 @@
 from openai import OpenAI
 
 
-# The url is located in the .vLLM_model-variant_url file in the corresponding
-# model directory.
-client = OpenAI(base_url="http://gpuXXX:XXXXX/v1", api_key="EMPTY")
+# The url can be found with vec-inf status $JOB_ID 
+client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 completion = client.completions.create(
     model="Meta-Llama-3.1-8B-Instruct",
