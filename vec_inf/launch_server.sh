@@ -52,9 +52,9 @@ export MODEL_WEIGHTS_PARENT_DIR=$model_weights_parent_dir
 
 if [[ "$model_type" == "LLM" || "$model_type" == "VLM" ]]; then
     export VLLM_TASK="generate"
-elif [[ "$model_type" == "Reward_Modeling" ]]; then
+elif [ "$model_type" == "Reward_Modeling" ]; then
     export VLLM_TASK="reward"
-elif [[ "$model_type" == "Text_Embedding" ]]; then
+elif [ "$model_type" == "Text_Embedding" ]; then
     export VLLM_TASK="embed"
 else
     echo "Error: Unknown model_type: $model_type"
@@ -82,6 +82,10 @@ fi
 # ================================= Set default environment variables ======================================
 # Slurm job configuration
 export JOB_NAME="$MODEL_FAMILY-$MODEL_VARIANT"
+if [ "$JOB_NAME" == "DeepSeek-R1-None" ]; then
+    export JOB_NAME=$MODEL_FAMILY
+fi
+
 if [ "$LOG_DIR" = "default" ]; then
     export LOG_DIR="$HOME/.vec-inf-logs/$MODEL_FAMILY"
 fi
