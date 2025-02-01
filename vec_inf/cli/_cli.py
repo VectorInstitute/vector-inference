@@ -381,8 +381,8 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 
         for row in models_df.to_dicts():
             panel_color = model_type_colors.get(row["model_type"], "white")
-            if row['model_variant'] == "None":
-                styled_text = (f"[magenta]{row['model_family']}[/magenta]")
+            if row["model_variant"] == "None":
+                styled_text = f"[magenta]{row['model_family']}[/magenta]"
             else:
                 styled_text = (
                     f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
