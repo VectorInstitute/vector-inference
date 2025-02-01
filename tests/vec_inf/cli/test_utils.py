@@ -188,7 +188,7 @@ def test_load_default_args(sample_models_csv):
         mock_dirname.return_value = str(models_dir.parent)
         df = load_models_df()
         args = load_default_args(df, "model_a")
-        assert args == {"param1": "value1", "param2": "value2"}
+        assert args == {"model_type": "type1", "param1": "value1", "param2": "value2"}
 
 
 @pytest.mark.parametrize(

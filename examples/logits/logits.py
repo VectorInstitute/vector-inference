@@ -3,7 +3,7 @@
 from openai import OpenAI
 
 
-# The url can be found with vec-inf status $JOB_ID 
+# The url can be found with vec-inf status $JOB_ID
 client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 completion = client.completions.create(

@@ -1,6 +1,9 @@
+"""Example of how to use the OpenAI API to generate embeddings."""
+
 from openai import OpenAI
 
-# The url can be found with vec-inf status $JOB_ID 
+
+# The url can be found with vec-inf status $JOB_ID
 client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 model_name = "bge-base-en-v1.5"
