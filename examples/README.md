@@ -1,3 +1,4 @@
+(examples)=
 # Examples
 - [`inference`](inference): Examples for sending inference requests
   - [`llm/chat_completions.py`](inference/llm/chat_completions.py): Python example of sending chat completion requests to OpenAI compatible server
