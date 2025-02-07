@@ -1,8 +1,11 @@
+"""Calculate the average prompt and generation throughput from a log file."""
+
 import argparse
 import re
 
 
-def filter_throughput(log_file_path):
+def filter_throughput(log_file_path: str) -> None:
+    """Filter log file for non-zero entries and calculate the avg throughput."""
     avg_prompt_throughput = []
     avg_generation_throughput = []
     # Define a regular expression pattern to extract throughput values
@@ -33,7 +36,8 @@ def filter_throughput(log_file_path):
     )
 
 
-def main():
+def main() -> None:
+    """Run the main function."""
     # Create the parser
     parser = argparse.ArgumentParser(
         description="Filter log file for non-zero throughput entries."

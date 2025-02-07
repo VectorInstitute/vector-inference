@@ -194,6 +194,18 @@ More profiling metrics coming soon!
 |:----------:|:----------:|:----------:|:----------:|
 | [`e5-mistral-7b-instruct`](https://huggingface.co/intfloat/e5-mistral-7b-instruct) | 1x a40 | - tokens/s | - tokens/s |
 
+### [BAAI: bge](https://huggingface.co/BAAI)
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`bge-base-en-v1.5`](https://huggingface.co/BAAI/bge-base-en-v1.5) | 1x A40 | - tokens/s | - tokens/s |
+
+### [Sentence Transformers: MiniLM](https://huggingface.co/sentence-transformers)
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`all-MiniLM-L6-v2`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | 1x A40 | - tokens/s | - tokens/s |
+
+
+
 ## Reward Modeling Models
 
 ### [Qwen: Qwen2.5-Math](https://huggingface.co/collections/Qwen/qwen25-math-66eaa240a1b7d5ee65f1da3e)
