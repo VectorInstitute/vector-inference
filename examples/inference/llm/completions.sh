@@ -1,6 +1,6 @@
 #!bin/bash
 
-# The url can be found with vec-inf status $JOB_ID 
+# The url can be found with vec-inf status $JOB_ID
 export API_BASE_URL=http://gpuXXX:XXXX/v1
 
 # Update the model path accordingly
