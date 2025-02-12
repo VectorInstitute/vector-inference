@@ -29,7 +29,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@4db96194c378173c656ce18a155ffc14a9fc4355
         with:
-          # Install a specific version of uv.
           version: "0.5.21"
           enable-cache: true
 
