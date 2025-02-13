@@ -148,6 +148,18 @@ More profiling metrics coming soon!
 |:----------:|:----------:|:----------:|:----------:|
 | [`QwQ-32B-Preview`](https://huggingface.co/Qwen/QwQ-32B-Preview) | 2x a40 | - tokens/s | - tokens/s |
 
+### [DeepSeek-R1: Distilled Models](https://huggingface.co/collections/deepseek-ai/deepseek-r1-678e1e131c0169c0bc89728d)
+
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`DeepSeek-R1-Distill-Llama-70B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-70B) | 4x a40 | - tokens/s | - tokens/s |
+| [`DeepSeek-R1-Distill-Llama-8B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) | 1x a40 | - tokens/s | - tokens/s |
+| [`DeepSeek-R1-Distill-Qwen-32B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B) | 2x a40 | - tokens/s | - tokens/s |
+| [`DeepSeek-R1-Distill-Qwen-14B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-14B) | 1x a40 | - tokens/s | - tokens/s |
+| [`DeepSeek-R1-Distill-Qwen-7B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B) | 1x a40 | - tokens/s | - tokens/s |
+| [`DeepSeek-R1-Distill-Qwen-1.5B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B) | 1x a40 | - tokens/s | - tokens/s |
+
+
 ## Vision Language Models
 
 ### [LLaVa-1.5](https://huggingface.co/collections/llava-hf/llava-15-65f762d5b6941db5c2ba07e0)
