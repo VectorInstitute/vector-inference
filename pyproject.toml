@@ -1,39 +1,146 @@
-[tool.poetry]
+[project]
 name = "vec-inf"
-version = "0.4.0.post1"
+version = "0.4.1"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
-authors = ["Marshall Wang <marshall.wang@vectorinstitute.ai>"]
-license = "MIT license"
 readme = "README.md"
+authors = [{name = "Marshall Wang", email = "marshall.wang@vectorinstitute.ai"}]
+license = "MIT"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "requests>=2.31.0",
+    "click>=8.1.0",
+    "rich>=13.7.0",
+    "polars>=1.15.0",
+    "numpy>=1.24.0"
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-requests = "^2.31.0"
-click = "^8.1.0"
-rich = "^13.7.0"
-polars = "^1.15.0"
-numpy = "^1.24.0"
-vllm = { version = "^0.6.0", optional = true }
-vllm-nccl-cu12 = { version = ">=2.18,<2.19", optional = true }
-ray = { version = "^2.9.3", optional = true }
-cupy-cuda12x = { version = "12.1.0", optional = true }
+[dependency-groups]
+dev = [
+    "codecov>=2.1.13",
+    "mypy>=1.15.0",
+    "nbqa>=1.9.1",
+    "pip-audit>=2.8.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.3",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.9.6",
+]
+docs = [
+    "furo>=2024.8.6",
+    "ipykernel>=6.29.5",
+    "ipython>=8.31.0",
+    "myst-parser>=4.0.0",
+    "nbsphinx>=0.9.6",
+    "numpydoc>=1.8.0",
+    "sphinx>=8.1.3",
+    "sphinx-autoapi>=3.4.0",
+    "sphinx-autodoc-typehints>=3.0.1",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.6.1",
+    "sphinxcontrib-apidoc>=0.5.0",
+]
 
-[tool.poetry.extras]
-dev = ["vllm", "vllm-nccl-cu12", "ray", "cupy-cuda12x"]
+[project.optional-dependencies]
+dev = [
+    "vllm>=0.7.2",
+    "vllm-nccl-cu12>=2.18,<2.19",
+    "ray>=2.40.0",
+    "cupy-cuda12x==12.1.0"
+]
 
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.test.dependencies]
-mypy = "^1.11.1"
-pytest = "^8.3.2"
-pre-commit = "^3.8.0"
-pip-audit = "^2.7.3"
-types-requests = "^2.32.0.20240712"
-
-[tool.poetry.scripts]
+[project.scripts]
 vec-inf = "vec_inf.cli._cli:cli"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.mypy]
+ignore_missing_imports = true
+install_types = true
+pretty = true
+namespace_packages = true
+explicit_package_bases = true
+non_interactive = true
+warn_unused_configs = true
+allow_any_generics = false
+allow_subclassing_any = false
+allow_untyped_calls = false
+allow_untyped_defs = false
+allow_incomplete_defs = false
+check_untyped_defs = true
+allow_untyped_decorators = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+implicit_reexport = false
+strict_equality = true
+extra_checks = true
+
+[tool.ruff]
+include = ["*.py", "pyproject.toml", "*.ipynb"]
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "COM", # flake8-commas
+    "C4", # flake8-comprehensions
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "ICN", # flake8-import-conventions
+    "Q", # flake8-quotes
+    "RSE", # flake8-raise
+    "D", # pydocstyle
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "W", # pycodestyle
+    "N", # pep8-naming
+    "ERA", # eradicate
+    "PL", # pylint
+]
+fixable = ["A", "B", "COM", "C4", "RET", "SIM", "ICN", "Q", "RSE", "D", "E", "F", "I", "W", "N", "ERA", "PL"]
+ignore = [
+    "B905", # `zip()` without an explicit `strict=` parameter
+    "E501", # line too long
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "PLR2004", # Replace magic number with named constant
+    "PLR0913", # Too many arguments
+    "COM812", # Missing trailing comma
+]
+
+# Ignore import violations in all `__init__.py` files.
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "F811"]
+
+[tool.ruff.lint.pep8-naming]
+ignore-names = ["X*", "setUp"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+[tool.pytest.ini_options]
+markers = [
+    "integration_test: marks tests as integration tests",
+]
+
+[tool.coverage]
+    [tool.coverage.run]
+    source=["vec_inf"]
+    omit=["tests/*", "*__init__.py"]

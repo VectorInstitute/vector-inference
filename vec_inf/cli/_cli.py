@@ -1,9 +1,10 @@
+"""Command line interface for Vector Inference."""
+
 import os
 import time
-from typing import Optional, cast
+from typing import Any, Dict, Optional
 
 import click
-
 import polars as pl
 from rich.columns import Columns
 from rich.console import Console
@@ -12,12 +13,13 @@ from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
 
+
 CONSOLE = Console()
 
 
 @click.group()
-def cli():
-    """Vector Inference CLI"""
+def cli() -> None:
+    """Vector Inference CLI."""
     pass
 
 
@@ -122,10 +124,7 @@ def launch(
     enforce_eager: Optional[str] = None,
     json_mode: bool = False,
 ) -> None:
-    """
-    Launch a model on the cluster
-    """
-
+    """Launch a model on the cluster."""
     if isinstance(pipeline_parallelism, str):
         pipeline_parallelism = (
             "True" if pipeline_parallelism.lower() == "true" else "False"
@@ -138,6 +137,13 @@ def launch(
 
     models_df = utils.load_models_df()
 
+    models_df = models_df.with_columns(
+        pl.col("model_type").replace("Reward Modeling", "Reward_Modeling")
+    )
+    models_df = models_df.with_columns(
+        pl.col("model_type").replace("Text Embedding", "Text_Embedding")
+    )
+
     if model_name in models_df["model_name"].to_list():
         default_args = utils.load_default_args(models_df, model_name)
         for arg in default_args:
@@ -148,7 +154,6 @@ def launch(
     else:
         model_args = models_df.columns
         model_args.remove("model_name")
-        model_args.remove("model_type")
         for arg in model_args:
             if locals()[arg] is not None:
                 renamed_arg = arg.replace("_", "-")
@@ -189,79 +194,130 @@ def launch(
 def status(
     slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
 ) -> None:
-    """
-    Get the status of a running model on the cluster
-    """
+    """Get the status of a running model on the cluster."""
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
 
-    slurm_job_name = "UNAVAILABLE"
-    status = "SHUTDOWN"
-    base_url = "UNAVAILABLE"
+    base_data = _get_base_status_data(output)
+    status_info = _process_job_state(output, base_data, slurm_job_id, log_dir)
+    _display_status(status_info, json_mode)
 
+
+def _get_base_status_data(output: str) -> Dict[str, Any]:
+    """Extract basic job status information from scontrol output."""
     try:
-        slurm_job_name = output.split(" ")[1].split("=")[1]
-        slurm_job_state = output.split(" ")[9].split("=")[1]
+        job_name = output.split(" ")[1].split("=")[1]
+        job_state = output.split(" ")[9].split("=")[1]
     except IndexError:
-        # Job ID not found
-        slurm_job_state = "UNAVAILABLE"
+        job_name = "UNAVAILABLE"
+        job_state = "UNAVAILABLE"
 
-    # If Slurm job is currently PENDING
-    if slurm_job_state == "PENDING":
-        slurm_job_pending_reason = output.split(" ")[10].split("=")[1]
-        status = "PENDING"
-    # If Slurm job is currently RUNNING
-    elif slurm_job_state == "RUNNING":
-        # Check whether the server is ready, if yes, run model health check to further determine status
-        server_status = utils.is_server_running(slurm_job_name, slurm_job_id, log_dir)
-        # If server status is a tuple, then server status is "FAILED"
-        if isinstance(server_status, tuple):
-            status = server_status[0]
-            slurm_job_failed_reason = server_status[1]
-        elif server_status == "RUNNING":
-            model_status = utils.model_health_check(
-                slurm_job_name, slurm_job_id, log_dir
-            )
-            if model_status == "READY":
-                # Only set base_url if model is ready to serve requests
-                base_url = utils.get_base_url(slurm_job_name, slurm_job_id, log_dir)
-                status = "READY"
-            else:
-                # If model is not ready, then status must be "FAILED"
-                status = model_status[0]
-                slurm_job_failed_reason = str(model_status[1])
-        else:
-            status = server_status
+    return {
+        "model_name": job_name,
+        "status": "SHUTDOWN",
+        "base_url": "UNAVAILABLE",
+        "state": job_state,
+        "pending_reason": None,
+        "failed_reason": None,
+    }
 
-    if json_mode:
-        status_dict = {
-            "model_name": slurm_job_name,
-            "model_status": status,
-            "base_url": base_url,
-        }
-        if "slurm_job_pending_reason" in locals():
-            status_dict["pending_reason"] = slurm_job_pending_reason
-        if "slurm_job_failed_reason" in locals():
-            status_dict["failed_reason"] = slurm_job_failed_reason
-        click.echo(f"{status_dict}")
+
+def _process_job_state(
+    output: str, status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> Dict[str, Any]:
+    """Process different job states and update status information."""
+    if status_info["state"] == "PENDING":
+        _process_pending_state(output, status_info)
+    elif status_info["state"] == "RUNNING":
+        _handle_running_state(status_info, slurm_job_id, log_dir)
+    return status_info
+
+
+def _process_pending_state(output: str, status_info: Dict[str, Any]) -> None:
+    """Handle PENDING job state."""
+    try:
+        status_info["pending_reason"] = output.split(" ")[10].split("=")[1]
+        status_info["status"] = "PENDING"
+    except IndexError:
+        status_info["pending_reason"] = "Unknown pending reason"
+
+
+def _handle_running_state(
+    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> None:
+    """Handle RUNNING job state and check server status."""
+    server_status = utils.is_server_running(
+        status_info["model_name"], slurm_job_id, log_dir
+    )
+
+    if isinstance(server_status, tuple):
+        status_info["status"], status_info["failed_reason"] = server_status
+        return
+
+    if server_status == "RUNNING":
+        _check_model_health(status_info, slurm_job_id, log_dir)
     else:
-        table = utils.create_table(key_title="Job Status", value_title="Value")
-        table.add_row("Model Name", slurm_job_name)
-        table.add_row("Model Status", status, style="blue")
-        if "slurm_job_pending_reason" in locals():
-            table.add_row("Reason", slurm_job_pending_reason)
-        if "slurm_job_failed_reason" in locals():
-            table.add_row("Reason", slurm_job_failed_reason)
-        table.add_row("Base URL", base_url)
-        CONSOLE.print(table)
+        status_info["status"] = server_status
+
+
+def _check_model_health(
+    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> None:
+    """Check model health and update status accordingly."""
+    model_status = utils.model_health_check(
+        status_info["model_name"], slurm_job_id, log_dir
+    )
+    status, failed_reason = model_status
+    if status == "READY":
+        status_info["base_url"] = utils.get_base_url(
+            status_info["model_name"], slurm_job_id, log_dir
+        )
+        status_info["status"] = status
+    else:
+        status_info["status"], status_info["failed_reason"] = status, failed_reason
+
+
+def _display_status(status_info: Dict[str, Any], json_mode: bool) -> None:
+    """Display the status information in appropriate format."""
+    if json_mode:
+        _output_json(status_info)
+    else:
+        _output_table(status_info)
+
+
+def _output_json(status_info: Dict[str, Any]) -> None:
+    """Format and output JSON data."""
+    json_data = {
+        "model_name": status_info["model_name"],
+        "model_status": status_info["status"],
+        "base_url": status_info["base_url"],
+    }
+    if status_info["pending_reason"]:
+        json_data["pending_reason"] = status_info["pending_reason"]
+    if status_info["failed_reason"]:
+        json_data["failed_reason"] = status_info["failed_reason"]
+    click.echo(json_data)
+
+
+def _output_table(status_info: Dict[str, Any]) -> None:
+    """Create and display rich table."""
+    table = utils.create_table(key_title="Job Status", value_title="Value")
+    table.add_row("Model Name", status_info["model_name"])
+    table.add_row("Model Status", status_info["status"], style="blue")
+
+    if status_info["pending_reason"]:
+        table.add_row("Pending Reason", status_info["pending_reason"])
+    if status_info["failed_reason"]:
+        table.add_row("Failed Reason", status_info["failed_reason"])
+
+    table.add_row("Base URL", status_info["base_url"])
+    CONSOLE.print(table)
 
 
 @cli.command("shutdown")
 @click.argument("slurm_job_id", type=int, nargs=1)
 def shutdown(slurm_job_id: int) -> None:
-    """
-    Shutdown a running model on the cluster
-    """
+    """Shutdown a running model on the cluster."""
     shutdown_cmd = f"scancel {slurm_job_id}"
     utils.run_bash_command(shutdown_cmd)
     click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
@@ -275,11 +331,9 @@ def shutdown(slurm_job_id: int) -> None:
     help="Output in JSON string",
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
-    """
-    List all available models, or get default setup of a specific model
-    """
+    """List all available models, or get default setup of a specific model."""
 
-    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool):
+    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool) -> None:
         if model_name not in models_df["model_name"].to_list():
             raise ValueError(f"Model name {model_name} not found in available models")
 
@@ -297,7 +351,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
                     table.add_row(key, str(value))
         CONSOLE.print(table)
 
-    def list_all(models_df: pl.DataFrame, json_mode: bool):
+    def list_all(models_df: pl.DataFrame, json_mode: bool) -> None:
         if json_mode:
             click.echo(models_df["model_name"].to_list())
             return
@@ -327,9 +381,12 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 
         for row in models_df.to_dicts():
             panel_color = model_type_colors.get(row["model_type"], "white")
-            styled_text = (
-                f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
-            )
+            if row["model_variant"] == "None":
+                styled_text = f"[magenta]{row['model_family']}[/magenta]"
+            else:
+                styled_text = (
+                    f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
+                )
             panels.append(Panel(styled_text, expand=True, border_style=panel_color))
         CONSOLE.print(Columns(panels, equal=True))
 
@@ -349,9 +406,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
     help="Path to slurm log directory. This is required if --log-dir was set in model launch",
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """
-    Stream performance metrics to the console
-    """
+    """Stream performance metrics to the console."""
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
     slurm_job_name = output.split(" ")[1].split("=")[1]
@@ -365,13 +420,11 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
             if isinstance(out_logs, str):
                 live.update(out_logs)
                 break
-            out_logs = cast(list, out_logs)
             latest_metrics = utils.get_latest_metric(out_logs)
             # if latest_metrics is a string, then it is an error message
             if isinstance(latest_metrics, str):
                 live.update(latest_metrics)
                 break
-            latest_metrics = cast(dict, latest_metrics)
             table = utils.create_table(key_title="Metric", value_title="Value")
             for key, value in latest_metrics.items():
                 table.add_row(key, value)

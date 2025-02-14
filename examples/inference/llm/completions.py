@@ -1,6 +1,9 @@
+"""Example of how to use the OpenAI API to generate completions."""
+
 from openai import OpenAI
 
-# The url is located in the .vLLM_model-variant_url file in the corresponding model directory.
+
+# The url can be found with vec-inf status $JOB_ID
 client = OpenAI(base_url="http://gpuXXX:XXXX/v1", api_key="EMPTY")
 
 # Update the model path accordingly
