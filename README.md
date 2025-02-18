@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/graph/badge.svg?token=83MYFZ3UPA)](https://codecov.io/github/VectorInstitute/vector-inference)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](vec_inf/launch_server.sh), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.csv`](vec_inf/models/models.csv) accordingly.
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](vec_inf/launch_server.sh), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.csv`](vec_inf/config/models.yaml) accordingly.
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
@@ -26,12 +26,16 @@ You should see an output like the following:
 
 <img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
 
-The model would be launched using the [default parameters](vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
+The model would be launched using the [default parameters](vec_inf/config/models.yaml), you can override these values by providing additional parameters, use `--help` to see the full list.
+
+You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
-* Your model weights directory should contain HF format weights.
+* Your model weights directory should contain HuggingFace format weights.
 * The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`, `--enforce-eager`. All other launch parameters need to be specified for custom models.
 * Example for setting the model weights parent directory: `--model-weights-parent-dir /h/user_name/my_weights`.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
+* You can create a custom configuration file for your model and specify it via setting the environment variable `VEC_INF_CONFIG`. Check
+the [default parameters](vec_inf/config/models.yaml) file for the format of the config file.
 
 ### `status` command
 You can check the inference server status by providing the Slurm job ID to the `status` command:

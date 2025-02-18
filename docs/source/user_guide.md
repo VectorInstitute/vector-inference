@@ -13,12 +13,16 @@ You should see an output like the following:
 
 <img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
 
-The model would be launched using the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/models/models.csv), you can override these values by providing additional parameters, use `--help` to see the full list. You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
+The model would be launched using the [default parameters](vec_inf/config/models.yaml), you can override these values by providing additional parameters, use `--help` to see the full list.
+
+You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
-* Your model weights directory should contain HF format weights.
+* Your model weights directory should contain HuggingFace format weights.
 * The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`, `--enforce-eager`. All other launch parameters need to be specified for custom models.
 * Example for setting the model weights parent directory: `--model-weights-parent-dir /h/user_name/my_weights`.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
+* You can create a custom configuration file for your model and specify it via setting the environment variable `VEC_INF_CONFIG`. Check
+the [default parameters](vec_inf/config/models.yaml) file for the format of the config file.
 
 ### `status` command
 
