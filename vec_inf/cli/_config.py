@@ -67,11 +67,3 @@ class ModelConfig(BaseModel):
     model_config = ConfigDict(
         extra="forbid", str_strip_whitespace=True, validate_default=True, frozen=True
     )
-
-    @field_validator("log_dir", "model_weights_parent_dir", mode="after")
-    @classmethod
-    def validate_paths(cls, v: Path) -> Path:
-        """Ensure paths are resolved and absolute."""
-        if not v.is_absolute():
-            v = v.resolve()
-        return v

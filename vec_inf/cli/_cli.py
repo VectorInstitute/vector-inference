@@ -100,7 +100,7 @@ def _process_configuration(
 
     # Merge other overrides
     for key, value in cli_overrides.items():
-        if value is not None and key not in ["pipeline_parallelism", "enforce_eager"]:
+        if value is not None and key not in ["json_mode", "pipeline_parallelism", "enforce_eager"]:
             params[key] = value
 
     return params
@@ -109,8 +109,8 @@ def _process_configuration(
 def _convert_boolean_value(value: Union[str, int, bool]) -> bool:
     """Convert various input types to boolean."""
     if isinstance(value, str):
-        return value.lower() == "true"
-    return bool(value)
+        return "True" if value.lower() == "true" else "False"
+    return "True" if bool(value) else "False"
 
 
 def _build_launch_command(base_command: str, params: Dict[str, Any]) -> str:
@@ -120,19 +120,13 @@ def _build_launch_command(base_command: str, params: Dict[str, Any]) -> str:
         if param_value is None:
             continue
 
-        converted = _convert_parameter_value(param_value)
+        if isinstance(param_value, bool):
+            param_value = "True" if param_value else "False"
+
         arg_name = param_name.replace("_", "-")
-        command += f" --{arg_name} {converted}"
+        command += f" --{arg_name} {param_value}"
+
     return command
-
-
-def _convert_parameter_value(value: Any) -> str:
-    """Convert parameter values to CLI-friendly strings."""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, Path):
-        return str(value)
-    return str(value)
 
 
 def _handle_launch_output(output: str, json_mode: bool = False) -> None:
