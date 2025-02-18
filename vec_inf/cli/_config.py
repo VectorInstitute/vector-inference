@@ -14,7 +14,7 @@ class ModelConfig(BaseModel):
     model_variant: Optional[str] = Field(
         default=None, description="Specific variant/version of the model family"
     )
-    model_type: Literal["LLM", "VLM", "Text Embedding", "Reward Modeling"] = Field(
+    model_type: Literal["LLM", "VLM", "Text_Embedding", "Reward_Modeling"] = Field(
         ..., description="Type of model architecture"
     )
     num_gpus: int = Field(..., gt=0, le=8, description="GPUs per node")

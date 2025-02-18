@@ -1226,7 +1226,7 @@ models:
   Qwen2.5-Math-RM-72B:
     model_family: Qwen2.5
     model_variant: Math-RM-72B
-    model_type: Reward Modeling
+    model_type: Reward_Modeling
     num_gpus: 4
     num_nodes: 1
     vocab_size: 152064
@@ -1280,7 +1280,7 @@ models:
   e5-mistral-7b-instruct:
     model_family: e5
     model_variant: mistral-7b-instruct
-    model_type: Text Embedding
+    model_type: Text_Embedding
     num_gpus: 1
     num_nodes: 1
     vocab_size: 32000
@@ -1298,7 +1298,7 @@ models:
   bge-base-en-v1.5:
     model_family: bge
     model_variant: base-en-v1.5
-    model_type: Text Embedding
+    model_type: Text_Embedding
     num_gpus: 1
     num_nodes: 1
     vocab_size: 30522
@@ -1316,7 +1316,7 @@ models:
   all-MiniLM-L6-v2:
     model_family: all-MiniLM
     model_variant: L6-v2
-    model_type: Text Embedding
+    model_type: Text_Embedding
     num_gpus: 1
     num_nodes: 1
     vocab_size: 30522
