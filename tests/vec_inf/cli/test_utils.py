@@ -28,42 +28,6 @@ def mock_log_dir(tmp_path):
     return log_dir
 
 
-@pytest.fixture
-def sample_config_data():
-    """Provide default model configuration data."""
-    return {
-        "models": {
-            "model_a": {
-                "model_name": "model_a",
-                "model_family": "family1",
-                "model_type": "LLM",
-                "num_gpus": 4,
-                "num_nodes": 1,
-                "vocab_size": 50000,
-                "max_model_len": 2048,
-            }
-        }
-    }
-
-
-@pytest.fixture
-def user_config_data():
-    """Provide user defined model configuration data."""
-    return {
-        "models": {
-            "model_b": {
-                "model_name": "model_b",
-                "model_family": "family2",
-                "model_type": "VLM",
-                "num_gpus": 8,
-                "num_nodes": 2,
-                "vocab_size": 100000,
-                "max_model_len": 4096,
-            }
-        }
-    }
-
-
 def test_run_bash_command_success():
     """Test that run_bash_command returns the output of the command."""
     with patch("subprocess.Popen") as mock_popen:
