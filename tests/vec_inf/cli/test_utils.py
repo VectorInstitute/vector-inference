@@ -13,23 +13,11 @@ from vec_inf.cli._utils import (
     get_base_url,
     get_latest_metric,
     is_server_running,
-    load_default_args,
-    load_models_df,
+    load_config,
     model_health_check,
     read_slurm_log,
     run_bash_command,
 )
-
-
-@pytest.fixture
-def sample_models_csv(tmp_path):
-    """Create a sample models CSV file."""
-    csv_content = """model_name,model_type,param1,param2
-model_a,type1,value1,value2
-model_b,type2,value3,value4"""
-    path = tmp_path / "models.csv"
-    path.write_text(csv_content)
-    return path
 
 
 @pytest.fixture
@@ -38,6 +26,42 @@ def mock_log_dir(tmp_path):
     log_dir = tmp_path / "logs"
     log_dir.mkdir()
     return log_dir
+
+
+@pytest.fixture
+def sample_config_data():
+    """Provide default model configuration data."""
+    return {
+        "models": {
+            "model_a": {
+                "model_name": "model_a",
+                "model_family": "family1",
+                "model_type": "LLM",
+                "num_gpus": 4,
+                "num_nodes": 1,
+                "vocab_size": 50000,
+                "max_model_len": 2048,
+            }
+        }
+    }
+
+
+@pytest.fixture
+def user_config_data():
+    """Provide user defined model configuration data."""
+    return {
+        "models": {
+            "model_b": {
+                "model_name": "model_b",
+                "model_family": "family2",
+                "model_type": "VLM",
+                "num_gpus": 8,
+                "num_nodes": 2,
+                "vocab_size": 100000,
+                "max_model_len": 4096,
+            }
+        }
+    }
 
 
 def test_run_bash_command_success():
@@ -157,40 +181,6 @@ def test_create_table_without_header():
     assert table.show_header is False
 
 
-def test_load_models_df(sample_models_csv):
-    """Test that load_models_df loads the models CSV file correctly."""
-    models_dir = sample_models_csv.parent / "models"
-    models_dir.mkdir()
-    (models_dir / "models.csv").write_text(sample_models_csv.read_text())
-
-    with (
-        patch.object(os.path, "dirname") as mock_dirname,
-        patch.object(os.path, "realpath") as mock_realpath,
-    ):
-        mock_realpath.return_value = str(models_dir / "dummy_file.py")
-        mock_dirname.return_value = str(models_dir.parent)
-        df = load_models_df()
-        assert df.shape == (2, 4)
-        assert "model_name" in df.columns
-
-
-def test_load_default_args(sample_models_csv):
-    """Test that load_default_args returns the default arguments for a model."""
-    models_dir = sample_models_csv.parent / "models"
-    models_dir.mkdir()
-    (models_dir / "models.csv").write_text(sample_models_csv.read_text())
-
-    with (
-        patch.object(os.path, "dirname") as mock_dirname,
-        patch.object(os.path, "realpath") as mock_realpath,
-    ):
-        mock_realpath.return_value = str(models_dir / "dummy_file.py")
-        mock_dirname.return_value = str(models_dir.parent)
-        df = load_models_df()
-        args = load_default_args(df, "model_a")
-        assert args == {"model_type": "type1", "param1": "value1", "param2": "value2"}
-
-
 @pytest.mark.parametrize(
     "log_lines,expected",
     [
@@ -207,3 +197,79 @@ def test_get_latest_metric(log_lines, expected):
     """Test that get_latest_metric returns the latest metric entry."""
     result = get_latest_metric(log_lines)
     assert result == expected
+
+
+def test_load_config_default_only():
+    """Test loading the actual default configuration file from the filesystem."""
+    configs = load_config()
+
+    # Verify at least one known model exists
+    model_names = {m.model_name for m in configs}
+    assert "c4ai-command-r-plus" in model_names
+
+    # Verify full configuration of a sample model
+    model = next(m for m in configs if m.model_name == "c4ai-command-r-plus")
+    assert model.model_family == "c4ai-command-r"
+    assert model.model_type == "LLM"
+    assert model.num_gpus == 4
+    assert model.num_nodes == 2
+    assert model.max_model_len == 8192
+    assert model.pipeline_parallelism is True
+
+
+def test_load_config_with_user_override(tmp_path, monkeypatch):
+    """Test user config overriding default values."""
+    # Create user config with override and new model
+    user_config = tmp_path / "user_config.yaml"
+    user_config.write_text("""\
+models:
+  c4ai-command-r-plus:
+    num_gpus: 8
+  new-model:
+    model_family: new-family
+    model_type: VLM
+    num_gpus: 4
+    num_nodes: 1
+    vocab_size: 256000
+    max_model_len: 4096
+""")
+
+    with monkeypatch.context() as m:
+        m.setenv("VEC_INF_CONFIG", str(user_config))
+        configs = load_config()
+        config_map = {m.model_name: m for m in configs}
+
+    # Verify override (merged with defaults)
+    assert config_map["c4ai-command-r-plus"].num_gpus == 8
+    assert config_map["c4ai-command-r-plus"].num_nodes == 2
+    assert config_map["c4ai-command-r-plus"].vocab_size == 256000
+
+    # Verify new model
+    new_model = config_map["new-model"]
+    assert new_model.model_family == "new-family"
+    assert new_model.model_type == "VLM"
+    assert new_model.num_gpus == 4
+    assert new_model.vocab_size == 256000
+
+
+def test_load_config_invalid_user_model(tmp_path):
+    """Test validation of user-provided model configurations."""
+    invalid_config = tmp_path / "bad_config.yaml"
+    invalid_config.write_text("""\
+models:
+  invalid-model:
+    model_family: ""
+    model_type: INVALID_TYPE
+    num_gpus: 0
+    num_nodes: -1
+""")
+
+    with (
+        pytest.raises(ValueError) as excinfo,
+        patch.dict(os.environ, {"VEC_INF_CONFIG": str(invalid_config)}),
+    ):
+        load_config()
+
+    assert "validation error" in str(excinfo.value).lower()
+    assert "model_type" in str(excinfo.value)
+    assert "num_gpus" in str(excinfo.value)

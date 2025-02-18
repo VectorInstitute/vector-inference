@@ -10,8 +10,7 @@ dependencies = [
     "requests>=2.31.0",
     "click>=8.1.0",
     "rich>=13.7.0",
-    "polars>=1.15.0",
-    "numpy>=1.24.0"
+    "pydantic>=2.10.6",
 ]
 
 [dependency-groups]
