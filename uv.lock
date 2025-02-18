@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = "==3.10.*"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -3026,8 +3027,10 @@ dependencies = [
 dev = [
     { name = "cupy-cuda12x" },
     { name = "ray" },
+    { name = "torch" },
     { name = "vllm" },
     { name = "vllm-nccl-cu12" },
+    { name = "xgrammar" },
 ]
 
 [package.dev-dependencies]
@@ -3066,9 +3069,12 @@ requires-dist = [
     { name = "ray", marker = "extra == 'dev'", specifier = ">=2.40.0" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "rich", specifier = ">=13.7.0" },
+    { name = "torch", marker = "extra == 'dev'", specifier = ">=2.5.1" },
     { name = "vllm", marker = "extra == 'dev'", specifier = ">=0.7.2" },
     { name = "vllm-nccl-cu12", marker = "extra == 'dev'", specifier = ">=2.18,<2.19" },
+    { name = "xgrammar", marker = "extra == 'dev'", specifier = ">=0.1.13" },
 ]
+provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -3277,20 +3283,22 @@ wheels = [
 
 [[package]]
 name = "xgrammar"
-version = "0.1.12"
+version = "0.1.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pybind11", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "pydantic", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "pytest", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "sentencepiece", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "tiktoken", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "torch", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
-    { name = "transformers", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
+    { name = "pybind11" },
+    { name = "pydantic" },
+    { name = "pytest" },
+    { name = "sentencepiece" },
+    { name = "tiktoken" },
+    { name = "torch" },
+    { name = "transformers" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/cb/88b5e02bbe36c54ad1b01edaae0aa1e89940575f4a733f8341cf816d916b/xgrammar-0.1.12-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:e63f83d58481ba91eb83738fefdbb1b06b675a738e4e2be9c71b5cb530a5f2e1", size = 334828 },
-    { url = "https://files.pythonhosted.org/packages/0a/bb/ae2433e723f1ce648aaa94266f051681248eba7a6af351d905b7f090a395/xgrammar-0.1.12-cp310-cp310-win_amd64.whl", hash = "sha256:97013170eb46f40d865b66ae98452d494e0578618aa3fdff6a474a395ac6c9fa", size = 319664 },
+    { url = "https://files.pythonhosted.org/packages/0f/9a/0d037283b55ae1877f2aa7e22ff8111d8e4527014a36e925452403198134/xgrammar-0.1.13-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:7c1017a39628f4242c679d746b50c087f37f0baadeca11145fc5d68260136c8c", size = 334931 },
+    { url = "https://files.pythonhosted.org/packages/49/fb/6de262ee22b43174b62dca54a6b1c614c7e3fc16e7776cedcf918b3dfb6c/xgrammar-0.1.13-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:b32c4f07baaf9a5891c3064068e4f39677da5d87fa3085d6dd935c8b72c26aa7", size = 296596 },
+    { url = "https://files.pythonhosted.org/packages/e9/ad/15115d0fd8d2c561e08ac40bfa6cf266de2c6395afe26b08ce7d03987c9a/xgrammar-0.1.13-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d1a2613df6ac86710b5a09afbb1742ec27785f0222a13e4b7a8113f93d6201af", size = 401804 },
+    { url = "https://files.pythonhosted.org/packages/db/c2/716aa7fc7d1fa26e5c2c328808a99f47e75d6642403fe7a15a066852c69b/xgrammar-0.1.13-cp310-cp310-win_amd64.whl", hash = "sha256:bc7a29bd856fadcc6779466b016822a68083976174210ea86e698febc1ffc343", size = 319744 },
 ]
 
 [[package]]

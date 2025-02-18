@@ -43,6 +43,8 @@ docs = [
 
 [project.optional-dependencies]
 dev = [
+	"xgrammar>=0.1.13",
+    "torch>=2.5.1",
     "vllm>=0.7.2",
     "vllm-nccl-cu12>=2.18,<2.19",
     "ray>=2.40.0",
