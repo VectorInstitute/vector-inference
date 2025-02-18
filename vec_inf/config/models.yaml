@@ -1403,24 +1403,6 @@ models:
     venv: singularity
     log_dir: default
     model_weights_parent_dir: /model-weights
-  DeepSeek-R1:
-    model_family: DeepSeek-R1
-    model_variant: null
-    model_type: LLM
-    num_gpus: 4
-    num_nodes: 16
-    vocab_size: 129280
-    max_model_len: 32768
-    max_num_seqs: 256
-    pipeline_parallelism: true
-    enforce_eager: false
-    qos: m5
-    time: 01:00:00
-    partition: a40
-    data_type: auto
-    venv: singularity
-    log_dir: default
-    model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Llama-70B:
     model_family: DeepSeek-R1
     model_variant: 'Distill-Llama-70B '
