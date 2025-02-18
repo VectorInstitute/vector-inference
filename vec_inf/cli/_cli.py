@@ -30,29 +30,83 @@ def cli() -> None:
 @click.argument("model-name", type=str, nargs=1)
 @click.option("--model-family", type=str, help="The model family")
 @click.option("--model-variant", type=str, help="The model variant")
-@click.option("--max-model-len", type=int, help="Model context length")
 @click.option(
-    "--max-num-seqs", type=int, help="Maximum number of sequences per request"
-)
-@click.option("--partition", type=str, help="GPU partition type")
-@click.option("--num-nodes", type=int, help="Number of nodes to use")
-@click.option("--num-gpus", type=int, help="GPUs per node")
-@click.option("--qos", type=str, help="Quality of service tier")
-@click.option("--time", type=str, help="Job time limit (HH:MM:SS)")
-@click.option("--vocab-size", type=int, help="Model vocabulary size")
-@click.option("--data-type", type=str, help="Model precision format")
-@click.option("--venv", type=str, help="Virtual environment/container system")
-@click.option("--log-dir", type=str, help="Log directory path")
-@click.option(
-    "--model-weights-parent-dir", type=str, help="Model weights base directory"
+    "--max-model-len",
+    type=int,
+    help="Model context length. Default value set based on suggested resource allocation.",
 )
 @click.option(
-    "--pipeline-parallelism", type=str, help="Enable pipeline parallelism (true/false)"
+    "--max-num-seqs",
+    type=int,
+    help="Maximum number of sequences to process in a single request",
 )
 @click.option(
-    "--enforce-eager", type=str, help="Force eager mode execution (true/false)"
+    "--partition",
+    type=str,
+    default="a40",
+    help="Type of compute partition, default to a40",
 )
-@click.option("--json-mode", is_flag=True, help="Output in JSON format")
+@click.option(
+    "--num-nodes",
+    type=int,
+    help="Number of nodes to use, default to suggested resource allocation for model",
+)
+@click.option(
+    "--num-gpus",
+    type=int,
+    help="Number of GPUs/node to use, default to suggested resource allocation for model",
+)
+@click.option(
+    "--qos",
+    type=str,
+    help="Quality of service",
+)
+@click.option(
+    "--time",
+    type=str,
+    help="Time limit for job, this should comply with QoS limits",
+)
+@click.option(
+    "--vocab-size",
+    type=int,
+    help="Vocabulary size, this option is intended for custom models",
+)
+@click.option(
+    "--data-type", type=str, default="auto", help="Model data type, default to auto"
+)
+@click.option(
+    "--venv",
+    type=str,
+    default="singularity",
+    help="Path to virtual environment, default to preconfigured singularity container",
+)
+@click.option(
+    "--log-dir",
+    type=str,
+    default="default",
+    help="Path to slurm log directory, default to .vec-inf-logs in user home directory",
+)
+@click.option(
+    "--model-weights-parent-dir",
+    type=str,
+    default="/model-weights",
+    help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
+)
+@click.option(
+    "--pipeline-parallelism",
+    type=str,
+    help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
+)
+@click.option(
+    "--enforce-eager",
+    type=str,
+    help="Always use eager-mode PyTorch, accepts 'True' or 'False', default to 'False' for custom models if not set",
+)
+@click.option(
+    "--json-mode",
+    is_flag=True,
+    help="Output in JSON string",
+)
 def launch(
     model_name: str,
     **cli_kwargs: Optional[Union[str, int, bool]],
