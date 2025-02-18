@@ -408,7 +408,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
             return
 
         # Sort by model type priority
-        type_priority = {"LLM": 0, "VLM": 1, "Text Embedding": 2, "Reward Modeling": 3}
+        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
 
         sorted_configs = sorted(
             model_configs, key=lambda x: type_priority.get(x.model_type, 4)
@@ -418,8 +418,8 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
         model_type_colors = {
             "LLM": "cyan",
             "VLM": "bright_blue",
-            "Text Embedding": "purple",
-            "Reward Modeling": "bright_magenta",
+            "Text_Embedding": "purple",
+            "Reward_Modeling": "bright_magenta",
         }
 
         panels = []
