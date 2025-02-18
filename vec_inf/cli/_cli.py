@@ -3,7 +3,6 @@
 import json
 import os
 import time
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
@@ -154,7 +153,11 @@ def _process_configuration(
 
     # Merge other overrides
     for key, value in cli_overrides.items():
-        if value is not None and key not in ["json_mode", "pipeline_parallelism", "enforce_eager"]:
+        if value is not None and key not in [
+            "json_mode",
+            "pipeline_parallelism",
+            "enforce_eager",
+        ]:
             params[key] = value
 
     return params
