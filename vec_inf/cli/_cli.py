@@ -166,8 +166,8 @@ def _process_configuration(
 def _convert_boolean_value(value: Union[str, int, bool]) -> bool:
     """Convert various input types to boolean."""
     if isinstance(value, str):
-        return "True" if value.lower() == "true" else "False"
-    return "True" if bool(value) else "False"
+        return value.lower() == "true"
+    return bool(value)
 
 
 def _build_launch_command(base_command: str, params: Dict[str, Any]) -> str:
@@ -177,11 +177,16 @@ def _build_launch_command(base_command: str, params: Dict[str, Any]) -> str:
         if param_value is None:
             continue
 
-        if isinstance(param_value, bool):
-            param_value = "True" if param_value else "False"
+        arg_value = (
+            "True"
+            if param_value
+            else "False"
+            if isinstance(param_value, bool)
+            else str(param_value)
+        )
 
         arg_name = param_name.replace("_", "-")
-        command += f" --{arg_name} {param_value}"
+        command += f" --{arg_name} {arg_value}"
 
     return command
 
