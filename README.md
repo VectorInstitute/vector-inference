@@ -11,14 +11,21 @@ This repository provides an easy-to-use solution to run inference servers on [Sl
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
+
 ```bash
 pip install vec-inf
 ```
 Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package
 
-## Launch an inference server
+## Usage
+
 ### `launch` command
+
+The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for
+the user to send requests for inference. 
+
 We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
+
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
@@ -26,16 +33,57 @@ You should see an output like the following:
 
 <img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
 
-The model would be launched using the [default parameters](vec_inf/config/models.yaml), you can override these values by providing additional parameters, use `--help` to see the full list.
+#### Overrides
 
-You can also launch your own customized model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
+Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be 
+overriden. For example, if `qos` is to be overriden:
+
+```bash
+vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
+```
+
+#### Custom models
+
+You can also launch your own custom model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
 * Your model weights directory should contain HuggingFace format weights.
-* The following launch parameters will conform to default value if not specified: `--max-num-seqs`, `--partition`, `--data-type`, `--venv`, `--log-dir`, `--model-weights-parent-dir`, `--pipeline-parallelism`, `--enforce-eager`. All other launch parameters need to be specified for custom models.
-* Example for setting the model weights parent directory: `--model-weights-parent-dir /h/user_name/my_weights`.
+* You should create a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`
+Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model
+should be specified in that config file.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
-* You can create a custom configuration file for your model and specify it via setting the environment variable `VEC_INF_CONFIG`. Check
-the [default parameters](vec_inf/config/models.yaml) file for the format of the config file.
+
+Here is an example to deploy a custom [Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M) model which is not
+supported in the default list of models. In this case, the model weights are assumed to be downloaded to a `model-weights` directory
+inside the user's home directory. The weights directory of the model follows the naming convention so it would be named 
+`Qwen2.5-7B-Instruct-1M`. The following yaml file would need to be created, lets say it is named `/h/<username>/my-model-config.yaml`.
+
+```yaml
+models:
+  Qwen2.5-7B-Instruct-1M:
+    model_family: Qwen2.5
+    model_variant: 7B-Instruct-1M
+    model_type: LLM
+    num_gpus: 2
+    num_nodes: 1
+    vocab_size: 152064
+    max_model_len: 1010000
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: default
+    model_weights_parent_dir: /h/<username>/model-weights
+```
+
+You would then set the `VEC_INF_CONFIG` path using:
+
+```bash
+export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
+```
 
 ### `status` command
 You can check the inference server status by providing the Slurm job ID to the `status` command:
