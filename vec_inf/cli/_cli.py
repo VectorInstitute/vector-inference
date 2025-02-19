@@ -42,8 +42,7 @@ def cli() -> None:
 @click.option(
     "--partition",
     type=str,
-    default="a40",
-    help="Type of compute partition, default to a40",
+    help="Type of compute partition",
 )
 @click.option(
     "--num-nodes",
@@ -70,26 +69,21 @@ def cli() -> None:
     type=int,
     help="Vocabulary size, this option is intended for custom models",
 )
-@click.option(
-    "--data-type", type=str, default="auto", help="Model data type, default to auto"
-)
+@click.option("--data-type", type=str, help="Model data type")
 @click.option(
     "--venv",
     type=str,
-    default="singularity",
-    help="Path to virtual environment, default to preconfigured singularity container",
+    help="Path to virtual environment",
 )
 @click.option(
     "--log-dir",
     type=str,
-    default="default",
-    help="Path to slurm log directory, default to .vec-inf-logs in user home directory",
+    help="Path to slurm log directory",
 )
 @click.option(
     "--model-weights-parent-dir",
     type=str,
-    default="/model-weights",
-    help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
+    help="Path to parent directory containing model weights",
 )
 @click.option(
     "--pipeline-parallelism",
@@ -159,7 +153,6 @@ def _process_configuration(
             "enforce_eager",
         ]:
             params[key] = value
-
     return params
 
 
