@@ -21,7 +21,7 @@ class ModelConfig(BaseModel):
     num_nodes: int = Field(..., gt=0, le=16, description="Number of nodes")
     vocab_size: int = Field(..., gt=0, le=1_000_000)
     max_model_len: int = Field(
-        ..., gt=0, le=131_072, description="Maximum context length supported"
+        ..., gt=0, le=1_010_000, description="Maximum context length supported"
     )
     max_num_seqs: int = Field(
         default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
