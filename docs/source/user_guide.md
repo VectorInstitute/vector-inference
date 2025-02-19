@@ -5,7 +5,7 @@
 ### `launch` command
 
 The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for
-the user to send requests for inference. 
+the user to send requests for inference.
 
 We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 
@@ -18,7 +18,7 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be 
+Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
 overriden. For example, if `qos` is to be overriden:
 
 ```bash
@@ -37,7 +37,7 @@ should be specified in that config file.
 
 Here is an example to deploy a custom [Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M) model which is not
 supported in the default list of models. In this case, the model weights are assumed to be downloaded to a `model-weights` directory
-inside the user's home directory. The weights directory of the model follows the naming convention so it would be named 
+inside the user's home directory. The weights directory of the model follows the naming convention so it would be named
 `Qwen2.5-7B-Instruct-1M`. The following yaml file would need to be created, lets say it is named `/h/<username>/my-model-config.yaml`.
 
 ```yaml
