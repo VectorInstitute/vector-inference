@@ -3,7 +3,7 @@
 import json
 import os
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import click
 from rich.columns import Columns
@@ -135,8 +135,8 @@ def _get_base_launch_command() -> str:
 
 
 def _process_configuration(
-    model_config: ModelConfig, cli_overrides: Dict[str, Optional[Union[str, int, bool]]]
-) -> Dict[str, Any]:
+    model_config: ModelConfig, cli_overrides: dict[str, Optional[Union[str, int, bool]]]
+) -> dict[str, Any]:
     """Merge config defaults with CLI overrides."""
     params = model_config.model_dump(exclude={"model_name"})
 
@@ -163,7 +163,7 @@ def _convert_boolean_value(value: Union[str, int, bool]) -> str:
     return "True" if bool(value) else "False"
 
 
-def _build_launch_command(base_command: str, params: Dict[str, Any]) -> str:
+def _build_launch_command(base_command: str, params: dict[str, Any]) -> str:
     """Construct the full launch command with parameters."""
     command = base_command
     for param_name, param_value in params.items():
@@ -192,14 +192,14 @@ def _handle_launch_output(output: str, json_mode: bool = False) -> None:
         CONSOLE.print(table)
 
 
-def _parse_launch_output(output: str) -> Tuple[str, List[str]]:
+def _parse_launch_output(output: str) -> tuple[str, list[str]]:
     """Extract job ID and output lines from command output."""
     slurm_job_id = output.split(" ")[-1].strip().strip("\n")
     output_lines = output.split("\n")[:-2]
     return slurm_job_id, output_lines
 
 
-def _format_json_output(job_id: str, lines: List[str]) -> str:
+def _format_json_output(job_id: str, lines: list[str]) -> str:
     """Format output as JSON string with proper double quotes."""
     output_data = {"slurm_job_id": job_id}
     for line in lines:
@@ -209,7 +209,7 @@ def _format_json_output(job_id: str, lines: List[str]) -> str:
     return json.dumps(output_data)
 
 
-def _format_table_output(job_id: str, lines: List[str]) -> Table:
+def _format_table_output(job_id: str, lines: list[str]) -> Table:
     """Format output as rich Table."""
     table = utils.create_table(key_title="Job Config", value_title="Value")
     table.add_row("Slurm Job ID", job_id, style="blue")
@@ -243,7 +243,7 @@ def status(
     _display_status(status_info, json_mode)
 
 
-def _get_base_status_data(output: str) -> Dict[str, Any]:
+def _get_base_status_data(output: str) -> dict[str, Any]:
     """Extract basic job status information from scontrol output."""
     try:
         job_name = output.split(" ")[1].split("=")[1]
@@ -263,8 +263,8 @@ def _get_base_status_data(output: str) -> Dict[str, Any]:
 
 
 def _process_job_state(
-    output: str, status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> Dict[str, Any]:
+    output: str, status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+) -> dict[str, Any]:
     """Process different job states and update status information."""
     if status_info["state"] == "PENDING":
         _process_pending_state(output, status_info)
@@ -273,7 +273,7 @@ def _process_job_state(
     return status_info
 
 
-def _process_pending_state(output: str, status_info: Dict[str, Any]) -> None:
+def _process_pending_state(output: str, status_info: dict[str, Any]) -> None:
     """Handle PENDING job state."""
     try:
         status_info["pending_reason"] = output.split(" ")[10].split("=")[1]
@@ -283,7 +283,7 @@ def _process_pending_state(output: str, status_info: Dict[str, Any]) -> None:
 
 
 def _handle_running_state(
-    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+    status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
 ) -> None:
     """Handle RUNNING job state and check server status."""
     server_status = utils.is_server_running(
@@ -301,7 +301,7 @@ def _handle_running_state(
 
 
 def _check_model_health(
-    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
+    status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
 ) -> None:
     """Check model health and update status accordingly."""
     model_status = utils.model_health_check(
@@ -317,7 +317,7 @@ def _check_model_health(
         status_info["status"], status_info["failed_reason"] = status, failed_reason
 
 
-def _display_status(status_info: Dict[str, Any], json_mode: bool) -> None:
+def _display_status(status_info: dict[str, Any], json_mode: bool) -> None:
     """Display the status information in appropriate format."""
     if json_mode:
         _output_json(status_info)
@@ -325,7 +325,7 @@ def _display_status(status_info: Dict[str, Any], json_mode: bool) -> None:
         _output_table(status_info)
 
 
-def _output_json(status_info: Dict[str, Any]) -> None:
+def _output_json(status_info: dict[str, Any]) -> None:
     """Format and output JSON data."""
     json_data = {
         "model_name": status_info["model_name"],
@@ -339,7 +339,7 @@ def _output_json(status_info: Dict[str, Any]) -> None:
     click.echo(json_data)
 
 
-def _output_table(status_info: Dict[str, Any]) -> None:
+def _output_table(status_info: dict[str, Any]) -> None:
     """Create and display rich table."""
     table = utils.create_table(key_title="Job Status", value_title="Value")
     table.add_row("Model Name", status_info["model_name"])

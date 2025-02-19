@@ -3,7 +3,7 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Optional, Union, cast
 
 import requests
 import yaml
@@ -85,7 +85,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 def model_health_check(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
-) -> Tuple[str, Union[str, int]]:
+) -> tuple[str, Union[str, int]]:
     """Check the health of a running model on the cluster."""
     base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
     if not base_url.startswith("http"):
@@ -112,14 +112,14 @@ def create_table(
     return table
 
 
-def load_config() -> List[ModelConfig]:
+def load_config() -> list[ModelConfig]:
     """Load the model configuration."""
     default_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
         "config",
         "models.yaml",
     )
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
     if os.path.exists(default_path):
         with open(default_path) as f:
             config = yaml.safe_load(f) or {}
@@ -142,7 +142,7 @@ def load_config() -> List[ModelConfig]:
     ]
 
 
-def get_latest_metric(log_lines: List[str]) -> Union[str, Dict[str, str]]:
+def get_latest_metric(log_lines: list[str]) -> Union[str, dict[str, str]]:
     """Read the latest metric entry from the log file."""
     latest_metric = {}
 
