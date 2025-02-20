@@ -14,6 +14,7 @@ from vec_inf.cli._config import ModelConfig
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SERVER_ADDRESS_SIGNATURE = "Server address: "
+CACHED_CONFIG = os.path.join("/", "weights", "vec-inf-config.yaml")
 
 
 def run_bash_command(command: str) -> str:
@@ -114,15 +115,19 @@ def create_table(
 
 def load_config() -> list[ModelConfig]:
     """Load the model configuration."""
-    default_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-        "config",
-        "models.yaml",
+    default_path = (
+        CACHED_CONFIG
+        if os.path.exists(CACHED_CONFIG)
+        else os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+            "config",
+            "models.yaml",
+        )
     )
+
     config: dict[str, Any] = {}
-    if os.path.exists(default_path):
-        with open(default_path) as f:
-            config = yaml.safe_load(f) or {}
+    with open(default_path) as f:
+        config = yaml.safe_load(f) or {}
 
     user_path = os.getenv("VEC_INF_CONFIG")
     if user_path:
@@ -135,6 +140,10 @@ def load_config() -> list[ModelConfig]:
                         config["models"][name].update(data)
                     else:
                         config.setdefault("models", {})[name] = data
+        else:
+            print(
+                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}"
+            )
 
     return [
         ModelConfig(model_name=name, **model_data)
