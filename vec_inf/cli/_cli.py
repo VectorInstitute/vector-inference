@@ -1,19 +1,16 @@
 """Command line interface for Vector Inference."""
 
-import json
-import os
 import time
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 import click
 from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
-from rich.table import Table
 
 import vec_inf.cli._utils as utils
-from vec_inf.cli._config import ModelConfig
+from vec_inf.cli._helper import LaunchHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -106,117 +103,18 @@ def launch(
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        model_config = _get_model_configuration(model_name)
-        base_command = _get_base_launch_command()
-        params = _process_configuration(model_config, cli_kwargs)
-        launch_command = _build_launch_command(base_command, params)
+        launch_helper = LaunchHelper(model_name, cli_kwargs)
+
+        base_command = launch_helper.get_base_launch_command()
+        params = launch_helper.process_configuration()
+        launch_command = launch_helper.build_launch_command(base_command, params)
         command_output = utils.run_bash_command(launch_command)
-        _handle_launch_output(command_output, bool(cli_kwargs.get("json_mode", False)))
+        launch_helper.handle_launch_output(command_output, CONSOLE)
+
     except click.ClickException as e:
         raise e
     except Exception as e:
         raise click.ClickException(f"Launch failed: {str(e)}") from e
-
-
-def _get_model_configuration(model_name: str) -> ModelConfig:
-    """Load and validate model configuration."""
-    model_configs = utils.load_config()
-    if config := next((m for m in model_configs if m.model_name == model_name), None):
-        return config
-    raise click.ClickException(f"Model '{model_name}' not found in configuration")
-
-
-def _get_base_launch_command() -> str:
-    """Construct base launch command."""
-    script_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "launch_server.sh"
-    )
-    return f"bash {script_path}"
-
-
-def _process_configuration(
-    model_config: ModelConfig, cli_overrides: dict[str, Optional[Union[str, int, bool]]]
-) -> dict[str, Any]:
-    """Merge config defaults with CLI overrides."""
-    params = model_config.model_dump(exclude={"model_name"})
-
-    # Process boolean fields
-    for bool_field in ["pipeline_parallelism", "enforce_eager"]:
-        if (value := cli_overrides.get(bool_field)) is not None:
-            params[bool_field] = _convert_boolean_value(value)
-
-    # Merge other overrides
-    for key, value in cli_overrides.items():
-        if value is not None and key not in [
-            "json_mode",
-            "pipeline_parallelism",
-            "enforce_eager",
-        ]:
-            params[key] = value
-    return params
-
-
-def _convert_boolean_value(value: Union[str, int, bool]) -> str:
-    """Convert various input types to boolean strings."""
-    if isinstance(value, str):
-        return "True" if value.lower() == "true" else "False"
-    return "True" if bool(value) else "False"
-
-
-def _build_launch_command(base_command: str, params: dict[str, Any]) -> str:
-    """Construct the full launch command with parameters."""
-    command = base_command
-    for param_name, param_value in params.items():
-        if param_value is None:
-            continue
-
-        formatted_value = param_value
-        if isinstance(formatted_value, bool):
-            formatted_value = "True" if formatted_value else "False"
-
-        arg_name = param_name.replace("_", "-")
-        command += f" --{arg_name} {formatted_value}"
-
-    return command
-
-
-def _handle_launch_output(output: str, json_mode: bool = False) -> None:
-    """Process and display launch output."""
-    slurm_job_id, output_lines = _parse_launch_output(output)
-
-    if json_mode:
-        output_data = _format_json_output(slurm_job_id, output_lines)
-        click.echo(output_data)
-    else:
-        table = _format_table_output(slurm_job_id, output_lines)
-        CONSOLE.print(table)
-
-
-def _parse_launch_output(output: str) -> tuple[str, list[str]]:
-    """Extract job ID and output lines from command output."""
-    slurm_job_id = output.split(" ")[-1].strip().strip("\n")
-    output_lines = output.split("\n")[:-2]
-    return slurm_job_id, output_lines
-
-
-def _format_json_output(job_id: str, lines: list[str]) -> str:
-    """Format output as JSON string with proper double quotes."""
-    output_data = {"slurm_job_id": job_id}
-    for line in lines:
-        if ": " in line:
-            key, value = line.split(": ", 1)
-            output_data[key.lower().replace(" ", "_")] = value
-    return json.dumps(output_data)
-
-
-def _format_table_output(job_id: str, lines: list[str]) -> Table:
-    """Format output as rich Table."""
-    table = utils.create_table(key_title="Job Config", value_title="Value")
-    table.add_row("Slurm Job ID", job_id, style="blue")
-    for line in lines:
-        key, value = line.split(": ")
-        table.add_row(key, value)
-    return table
 
 
 @cli.command("status")
@@ -238,120 +136,13 @@ def status(
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
 
-    base_data = _get_base_status_data(output)
-    status_info = _process_job_state(output, base_data, slurm_job_id, log_dir)
-    _display_status(status_info, json_mode)
+    status_helper = StatusHelper(slurm_job_id, output, log_dir)
 
-
-def _get_base_status_data(output: str) -> dict[str, Any]:
-    """Extract basic job status information from scontrol output."""
-    try:
-        job_name = output.split(" ")[1].split("=")[1]
-        job_state = output.split(" ")[9].split("=")[1]
-    except IndexError:
-        job_name = "UNAVAILABLE"
-        job_state = "UNAVAILABLE"
-
-    return {
-        "model_name": job_name,
-        "status": "SHUTDOWN",
-        "base_url": "UNAVAILABLE",
-        "state": job_state,
-        "pending_reason": None,
-        "failed_reason": None,
-    }
-
-
-def _process_job_state(
-    output: str, status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> dict[str, Any]:
-    """Process different job states and update status information."""
-    if status_info["state"] == "PENDING":
-        _process_pending_state(output, status_info)
-    elif status_info["state"] == "RUNNING":
-        _handle_running_state(status_info, slurm_job_id, log_dir)
-    return status_info
-
-
-def _process_pending_state(output: str, status_info: dict[str, Any]) -> None:
-    """Handle PENDING job state."""
-    try:
-        status_info["pending_reason"] = output.split(" ")[10].split("=")[1]
-        status_info["status"] = "PENDING"
-    except IndexError:
-        status_info["pending_reason"] = "Unknown pending reason"
-
-
-def _handle_running_state(
-    status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> None:
-    """Handle RUNNING job state and check server status."""
-    server_status = utils.is_server_running(
-        status_info["model_name"], slurm_job_id, log_dir
-    )
-
-    if isinstance(server_status, tuple):
-        status_info["status"], status_info["failed_reason"] = server_status
-        return
-
-    if server_status == "RUNNING":
-        _check_model_health(status_info, slurm_job_id, log_dir)
-    else:
-        status_info["status"] = server_status
-
-
-def _check_model_health(
-    status_info: dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> None:
-    """Check model health and update status accordingly."""
-    model_status = utils.model_health_check(
-        status_info["model_name"], slurm_job_id, log_dir
-    )
-    status, failed_reason = model_status
-    if status == "READY":
-        status_info["base_url"] = utils.get_base_url(
-            status_info["model_name"], slurm_job_id, log_dir
-        )
-        status_info["status"] = status
-    else:
-        status_info["status"], status_info["failed_reason"] = status, failed_reason
-
-
-def _display_status(status_info: dict[str, Any], json_mode: bool) -> None:
-    """Display the status information in appropriate format."""
+    status_helper.process_job_state()
     if json_mode:
-        _output_json(status_info)
+        status_helper.output_json()
     else:
-        _output_table(status_info)
-
-
-def _output_json(status_info: dict[str, Any]) -> None:
-    """Format and output JSON data."""
-    json_data = {
-        "model_name": status_info["model_name"],
-        "model_status": status_info["status"],
-        "base_url": status_info["base_url"],
-    }
-    if status_info["pending_reason"]:
-        json_data["pending_reason"] = status_info["pending_reason"]
-    if status_info["failed_reason"]:
-        json_data["failed_reason"] = status_info["failed_reason"]
-    click.echo(json_data)
-
-
-def _output_table(status_info: dict[str, Any]) -> None:
-    """Create and display rich table."""
-    table = utils.create_table(key_title="Job Status", value_title="Value")
-    table.add_row("Model Name", status_info["model_name"])
-    table.add_row("Model Status", status_info["status"], style="blue")
-
-    if status_info["pending_reason"]:
-        table.add_row("Pending Reason", status_info["pending_reason"])
-    if status_info["failed_reason"]:
-        table.add_row("Failed Reason", status_info["failed_reason"])
-
-    table.add_row("Base URL", status_info["base_url"])
-    CONSOLE.print(table)
+        status_helper.output_table(CONSOLE)
 
 
 @cli.command("shutdown")
