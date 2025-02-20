@@ -1,9 +1,30 @@
 """Model configuration."""
 
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+from typing_extensions import Literal
+
+
+QOS = Literal[
+    "normal",
+    "m",
+    "m2",
+    "m3",
+    "m4",
+    "m5",
+    "long",
+    "deadline",
+    "high",
+    "scavenger",
+    "llm",
+    "a100",
+]
+
+PARTITION = Literal["a40", "a100", "t4v1", "t4v2", "rtx6000"]
+
+DATA_TYPE = Literal["auto", "float16", "bfloat16", "float32"]
 
 
 class ModelConfig(BaseModel):
@@ -30,30 +51,14 @@ class ModelConfig(BaseModel):
         default=True, description="Enable pipeline parallelism"
     )
     enforce_eager: bool = Field(default=False, description="Force eager mode execution")
-    qos: Literal[
-        "normal",
-        "m",
-        "m2",
-        "m3",
-        "m4",
-        "m5",
-        "long",
-        "deadline",
-        "high",
-        "scavenger",
-        "llm",
-    ] = Field(default="m2", description="Quality of Service tier")
+    qos: QOS = Field(default="m2", description="Quality of Service tier")
     time: str = Field(
         default="08:00:00",
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
-    partition: Literal["a40", "t4v1", "t4v2", "rtx6000"] = Field(
-        default="a40", description="GPU partition type"
-    )
-    data_type: Literal["auto", "float16", "bfloat16", "float32"] = Field(
-        default="auto", description="Model precision format"
-    )
+    partition: PARTITION = Field(default="a40", description="GPU partition type")
+    data_type: DATA_TYPE = Field(default="auto", description="Model precision format")
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )

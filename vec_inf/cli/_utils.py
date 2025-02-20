@@ -14,7 +14,7 @@ from vec_inf.cli._config import ModelConfig
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SERVER_ADDRESS_SIGNATURE = "Server address: "
-CACHED_CONFIG = os.path.join("/", "weights", "vec-inf-config.yaml")
+CACHED_CONFIG = os.path.join("/", "model-weights", "vec-inf-config.yaml")
 
 
 def run_bash_command(command: str) -> str:
