@@ -57,8 +57,12 @@ class ModelConfig(BaseModel):
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
-    partition: Union[PARTITION, str] = Field(default="a40", description="GPU partition type")
-    data_type: Union[DATA_TYPE, str] = Field(default="auto", description="Model precision format")
+    partition: Union[PARTITION, str] = Field(
+        default="a40", description="GPU partition type"
+    )
+    data_type: Union[DATA_TYPE, str] = Field(
+        default="auto", description="Model precision format"
+    )
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )
