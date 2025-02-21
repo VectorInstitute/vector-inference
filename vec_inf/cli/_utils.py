@@ -2,15 +2,19 @@
 
 import os
 import subprocess
-from typing import Dict, List, Optional, Tuple, Union, cast
+from pathlib import Path
+from typing import Any, Optional, Union, cast
 
-import polars as pl
 import requests
+import yaml
 from rich.table import Table
+
+from vec_inf.cli._config import ModelConfig
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SERVER_ADDRESS_SIGNATURE = "Server address: "
+CACHED_CONFIG = os.path.join("/", "model-weights", "vec-inf-config.yaml")
 
 
 def run_bash_command(command: str) -> str:
@@ -82,7 +86,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 def model_health_check(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
-) -> Tuple[str, Union[str, int]]:
+) -> tuple[str, Union[str, int]]:
     """Check the health of a running model on the cluster."""
     base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
     if not base_url.startswith("http"):
@@ -109,25 +113,45 @@ def create_table(
     return table
 
 
-def load_models_df() -> pl.DataFrame:
-    """Load the models dataframe."""
-    return pl.read_csv(
-        os.path.join(
+def load_config() -> list[ModelConfig]:
+    """Load the model configuration."""
+    default_path = (
+        CACHED_CONFIG
+        if os.path.exists(CACHED_CONFIG)
+        else os.path.join(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-            "models/models.csv",
+            "config",
+            "models.yaml",
         )
     )
 
+    config: dict[str, Any] = {}
+    with open(default_path) as f:
+        config = yaml.safe_load(f) or {}
 
-def load_default_args(models_df: pl.DataFrame, model_name: str) -> Dict[str, str]:
-    """Load the default arguments for a model."""
-    row_data = models_df.filter(models_df["model_name"] == model_name)
-    default_args = row_data.to_dicts()[0]
-    default_args.pop("model_name", None)
-    return default_args
+    user_path = os.getenv("VEC_INF_CONFIG")
+    if user_path:
+        user_path_obj = Path(user_path)
+        if user_path_obj.exists():
+            with open(user_path_obj) as f:
+                user_config = yaml.safe_load(f) or {}
+                for name, data in user_config.get("models", {}).items():
+                    if name in config.get("models", {}):
+                        config["models"][name].update(data)
+                    else:
+                        config.setdefault("models", {})[name] = data
+        else:
+            print(
+                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}"
+            )
+
+    return [
+        ModelConfig(model_name=name, **model_data)
+        for name, model_data in config.get("models", {}).items()
+    ]
 
 
-def get_latest_metric(log_lines: List[str]) -> Union[str, Dict[str, str]]:
+def get_latest_metric(log_lines: list[str]) -> Union[str, dict[str, str]]:
     """Read the latest metric entry from the log file."""
     latest_metric = {}
 

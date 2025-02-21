@@ -1,17 +1,16 @@
 """Command line interface for Vector Inference."""
 
-import os
 import time
-from typing import Any, Dict, Optional
+from typing import Optional, Union
 
 import click
-import polars as pl
 from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
+from vec_inf.cli._helper import LaunchHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -40,8 +39,7 @@ def cli() -> None:
 @click.option(
     "--partition",
     type=str,
-    default="a40",
-    help="Type of compute partition, default to a40",
+    help="Type of compute partition",
 )
 @click.option(
     "--num-nodes",
@@ -68,26 +66,21 @@ def cli() -> None:
     type=int,
     help="Vocabulary size, this option is intended for custom models",
 )
-@click.option(
-    "--data-type", type=str, default="auto", help="Model data type, default to auto"
-)
+@click.option("--data-type", type=str, help="Model data type")
 @click.option(
     "--venv",
     type=str,
-    default="singularity",
-    help="Path to virtual environment, default to preconfigured singularity container",
+    help="Path to virtual environment",
 )
 @click.option(
     "--log-dir",
     type=str,
-    default="default",
-    help="Path to slurm log directory, default to .vec-inf-logs in user home directory",
+    help="Path to slurm log directory",
 )
 @click.option(
     "--model-weights-parent-dir",
     type=str,
-    default="/model-weights",
-    help="Path to parent directory containing model weights, default to '/model-weights' for supported models",
+    help="Path to parent directory containing model weights",
 )
 @click.option(
     "--pipeline-parallelism",
@@ -106,77 +99,22 @@ def cli() -> None:
 )
 def launch(
     model_name: str,
-    model_family: Optional[str] = None,
-    model_variant: Optional[str] = None,
-    max_model_len: Optional[int] = None,
-    max_num_seqs: Optional[int] = None,
-    partition: Optional[str] = None,
-    num_nodes: Optional[int] = None,
-    num_gpus: Optional[int] = None,
-    qos: Optional[str] = None,
-    time: Optional[str] = None,
-    vocab_size: Optional[int] = None,
-    data_type: Optional[str] = None,
-    venv: Optional[str] = None,
-    log_dir: Optional[str] = None,
-    model_weights_parent_dir: Optional[str] = None,
-    pipeline_parallelism: Optional[str] = None,
-    enforce_eager: Optional[str] = None,
-    json_mode: bool = False,
+    **cli_kwargs: Optional[Union[str, int, bool]],
 ) -> None:
     """Launch a model on the cluster."""
-    if isinstance(pipeline_parallelism, str):
-        pipeline_parallelism = (
-            "True" if pipeline_parallelism.lower() == "true" else "False"
-        )
+    try:
+        launch_helper = LaunchHelper(model_name, cli_kwargs)
 
-    launch_script_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "launch_server.sh"
-    )
-    launch_cmd = f"bash {launch_script_path}"
+        base_command = launch_helper.get_base_launch_command()
+        params = launch_helper.process_configuration()
+        launch_command = launch_helper.build_launch_command(base_command, params)
+        command_output = utils.run_bash_command(launch_command)
+        launch_helper.handle_launch_output(command_output, CONSOLE)
 
-    models_df = utils.load_models_df()
-
-    models_df = models_df.with_columns(
-        pl.col("model_type").replace("Reward Modeling", "Reward_Modeling")
-    )
-    models_df = models_df.with_columns(
-        pl.col("model_type").replace("Text Embedding", "Text_Embedding")
-    )
-
-    if model_name in models_df["model_name"].to_list():
-        default_args = utils.load_default_args(models_df, model_name)
-        for arg in default_args:
-            if arg in locals() and locals()[arg] is not None:
-                default_args[arg] = locals()[arg]
-            renamed_arg = arg.replace("_", "-")
-            launch_cmd += f" --{renamed_arg} {default_args[arg]}"
-    else:
-        model_args = models_df.columns
-        model_args.remove("model_name")
-        for arg in model_args:
-            if locals()[arg] is not None:
-                renamed_arg = arg.replace("_", "-")
-                launch_cmd += f" --{renamed_arg} {locals()[arg]}"
-
-    output = utils.run_bash_command(launch_cmd)
-
-    slurm_job_id = output.split(" ")[-1].strip().strip("\n")
-    output_lines = output.split("\n")[:-2]
-
-    table = utils.create_table(key_title="Job Config", value_title="Value")
-    table.add_row("Slurm Job ID", slurm_job_id, style="blue")
-    output_dict = {"slurm_job_id": slurm_job_id}
-
-    for line in output_lines:
-        key, value = line.split(": ")
-        table.add_row(key, value)
-        output_dict[key.lower().replace(" ", "_")] = value
-
-    if json_mode:
-        click.echo(output_dict)
-    else:
-        CONSOLE.print(table)
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
 @cli.command("status")
@@ -198,120 +136,13 @@ def status(
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = utils.run_bash_command(status_cmd)
 
-    base_data = _get_base_status_data(output)
-    status_info = _process_job_state(output, base_data, slurm_job_id, log_dir)
-    _display_status(status_info, json_mode)
+    status_helper = StatusHelper(slurm_job_id, output, log_dir)
 
-
-def _get_base_status_data(output: str) -> Dict[str, Any]:
-    """Extract basic job status information from scontrol output."""
-    try:
-        job_name = output.split(" ")[1].split("=")[1]
-        job_state = output.split(" ")[9].split("=")[1]
-    except IndexError:
-        job_name = "UNAVAILABLE"
-        job_state = "UNAVAILABLE"
-
-    return {
-        "model_name": job_name,
-        "status": "SHUTDOWN",
-        "base_url": "UNAVAILABLE",
-        "state": job_state,
-        "pending_reason": None,
-        "failed_reason": None,
-    }
-
-
-def _process_job_state(
-    output: str, status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> Dict[str, Any]:
-    """Process different job states and update status information."""
-    if status_info["state"] == "PENDING":
-        _process_pending_state(output, status_info)
-    elif status_info["state"] == "RUNNING":
-        _handle_running_state(status_info, slurm_job_id, log_dir)
-    return status_info
-
-
-def _process_pending_state(output: str, status_info: Dict[str, Any]) -> None:
-    """Handle PENDING job state."""
-    try:
-        status_info["pending_reason"] = output.split(" ")[10].split("=")[1]
-        status_info["status"] = "PENDING"
-    except IndexError:
-        status_info["pending_reason"] = "Unknown pending reason"
-
-
-def _handle_running_state(
-    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> None:
-    """Handle RUNNING job state and check server status."""
-    server_status = utils.is_server_running(
-        status_info["model_name"], slurm_job_id, log_dir
-    )
-
-    if isinstance(server_status, tuple):
-        status_info["status"], status_info["failed_reason"] = server_status
-        return
-
-    if server_status == "RUNNING":
-        _check_model_health(status_info, slurm_job_id, log_dir)
-    else:
-        status_info["status"] = server_status
-
-
-def _check_model_health(
-    status_info: Dict[str, Any], slurm_job_id: int, log_dir: Optional[str]
-) -> None:
-    """Check model health and update status accordingly."""
-    model_status = utils.model_health_check(
-        status_info["model_name"], slurm_job_id, log_dir
-    )
-    status, failed_reason = model_status
-    if status == "READY":
-        status_info["base_url"] = utils.get_base_url(
-            status_info["model_name"], slurm_job_id, log_dir
-        )
-        status_info["status"] = status
-    else:
-        status_info["status"], status_info["failed_reason"] = status, failed_reason
-
-
-def _display_status(status_info: Dict[str, Any], json_mode: bool) -> None:
-    """Display the status information in appropriate format."""
+    status_helper.process_job_state()
     if json_mode:
-        _output_json(status_info)
+        status_helper.output_json()
     else:
-        _output_table(status_info)
-
-
-def _output_json(status_info: Dict[str, Any]) -> None:
-    """Format and output JSON data."""
-    json_data = {
-        "model_name": status_info["model_name"],
-        "model_status": status_info["status"],
-        "base_url": status_info["base_url"],
-    }
-    if status_info["pending_reason"]:
-        json_data["pending_reason"] = status_info["pending_reason"]
-    if status_info["failed_reason"]:
-        json_data["failed_reason"] = status_info["failed_reason"]
-    click.echo(json_data)
-
-
-def _output_table(status_info: Dict[str, Any]) -> None:
-    """Create and display rich table."""
-    table = utils.create_table(key_title="Job Status", value_title="Value")
-    table.add_row("Model Name", status_info["model_name"])
-    table.add_row("Model Status", status_info["status"], style="blue")
-
-    if status_info["pending_reason"]:
-        table.add_row("Pending Reason", status_info["pending_reason"])
-    if status_info["failed_reason"]:
-        table.add_row("Failed Reason", status_info["failed_reason"])
-
-    table.add_row("Base URL", status_info["base_url"])
-    CONSOLE.print(table)
+        status_helper.output_table(CONSOLE)
 
 
 @cli.command("shutdown")
@@ -332,70 +163,63 @@ def shutdown(slurm_job_id: int) -> None:
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
+    model_configs = utils.load_config()
 
-    def list_model(model_name: str, models_df: pl.DataFrame, json_mode: bool) -> None:
-        if model_name not in models_df["model_name"].to_list():
-            raise ValueError(f"Model name {model_name} not found in available models")
-
-        excluded_keys = {"venv", "log_dir"}
-        model_row = models_df.filter(models_df["model_name"] == model_name)
+    def list_single_model(target_name: str) -> None:
+        config = next((c for c in model_configs if c.model_name == target_name), None)
+        if not config:
+            raise click.ClickException(
+                f"Model '{target_name}' not found in configuration"
+            )
 
         if json_mode:
-            filtered_model_row = model_row.drop(excluded_keys, strict=False)
-            click.echo(filtered_model_row.to_dicts()[0])
-            return
-        table = utils.create_table(key_title="Model Config", value_title="Value")
-        for row in model_row.to_dicts():
-            for key, value in row.items():
-                if key not in excluded_keys:
-                    table.add_row(key, str(value))
-        CONSOLE.print(table)
+            # Exclude non-essential fields from JSON output
+            excluded = {"venv", "log_dir"}
+            output = config.model_dump(exclude=excluded)
+            click.echo(output)
+        else:
+            table = utils.create_table(key_title="Model Config", value_title="Value")
+            for field, value in config.model_dump().items():
+                if field not in {"venv", "log_dir"}:
+                    table.add_row(field, str(value))
+            CONSOLE.print(table)
 
-    def list_all(models_df: pl.DataFrame, json_mode: bool) -> None:
+    def list_all_models() -> None:
         if json_mode:
-            click.echo(models_df["model_name"].to_list())
+            click.echo([config.model_name for config in model_configs])
             return
-        panels = []
+
+        # Sort by model type priority
+        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
+
+        sorted_configs = sorted(
+            model_configs, key=lambda x: type_priority.get(x.model_type, 4)
+        )
+
+        # Create panels with color coding
         model_type_colors = {
             "LLM": "cyan",
             "VLM": "bright_blue",
-            "Text Embedding": "purple",
-            "Reward Modeling": "bright_magenta",
+            "Text_Embedding": "purple",
+            "Reward_Modeling": "bright_magenta",
         }
 
-        models_df = models_df.with_columns(
-            pl.when(pl.col("model_type") == "LLM")
-            .then(0)
-            .when(pl.col("model_type") == "VLM")
-            .then(1)
-            .when(pl.col("model_type") == "Text Embedding")
-            .then(2)
-            .when(pl.col("model_type") == "Reward Modeling")
-            .then(3)
-            .otherwise(-1)
-            .alias("model_type_order")
-        )
+        panels = []
+        for config in sorted_configs:
+            color = model_type_colors.get(config.model_type, "white")
+            variant = config.model_variant or ""
+            display_text = f"[magenta]{config.model_family}[/magenta]"
+            if variant:
+                display_text += f"-{variant}"
 
-        models_df = models_df.sort("model_type_order")
-        models_df = models_df.drop("model_type_order")
+            panels.append(Panel(display_text, expand=True, border_style=color))
 
-        for row in models_df.to_dicts():
-            panel_color = model_type_colors.get(row["model_type"], "white")
-            if row["model_variant"] == "None":
-                styled_text = f"[magenta]{row['model_family']}[/magenta]"
-            else:
-                styled_text = (
-                    f"[magenta]{row['model_family']}[/magenta]-{row['model_variant']}"
-                )
-            panels.append(Panel(styled_text, expand=True, border_style=panel_color))
         CONSOLE.print(Columns(panels, equal=True))
 
-    models_df = utils.load_models_df()
-
     if model_name:
-        list_model(model_name, models_df, json_mode)
+        list_single_model(model_name)
     else:
-        list_all(models_df, json_mode)
+        list_all_models()
 
 
 @cli.command("metrics")

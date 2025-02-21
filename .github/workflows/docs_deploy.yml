@@ -43,7 +43,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --all-groups
+        run: uv sync --dev --group docs
 
       - name: Build docs
         run: |
