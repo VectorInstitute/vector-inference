@@ -1,7 +1,7 @@
 """Model configuration."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
@@ -51,14 +51,14 @@ class ModelConfig(BaseModel):
         default=True, description="Enable pipeline parallelism"
     )
     enforce_eager: bool = Field(default=False, description="Force eager mode execution")
-    qos: QOS = Field(default="m2", description="Quality of Service tier")
+    qos: Union[QOS, str] = Field(default="m2", description="Quality of Service tier")
     time: str = Field(
         default="08:00:00",
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
-    partition: PARTITION = Field(default="a40", description="GPU partition type")
-    data_type: DATA_TYPE = Field(default="auto", description="Model precision format")
+    partition: Union[PARTITION, str] = Field(default="a40", description="GPU partition type")
+    data_type: Union[DATA_TYPE, str] = Field(default="auto", description="Model precision format")
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )
