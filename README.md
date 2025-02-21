@@ -53,8 +53,8 @@ should be specified in that config file.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
 Here is an example to deploy a custom [Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M) model which is not
-supported in the default list of models using a user custom config. In this case, the model weights are assumed to be downloaded to 
-a `model-weights` directory inside the user's home directory. The weights directory of the model follows the naming convention so it 
+supported in the default list of models using a user custom config. In this case, the model weights are assumed to be downloaded to
+a `model-weights` directory inside the user's home directory. The weights directory of the model follows the naming convention so it
 would be named `Qwen2.5-7B-Instruct-1M`. The following yaml file would need to be created, lets say it is named `/h/<username>/my-model-config.yaml`.
 
 ```yaml
@@ -85,7 +85,7 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Alternatively, you can also use launch parameters to set these values instead of using a user-defined config. 
+Alternatively, you can also use launch parameters to set these values instead of using a user-defined config.
 
 ### `status` command
 You can check the inference server status by providing the Slurm job ID to the `status` command:
