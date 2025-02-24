@@ -31,7 +31,7 @@ jobs:
           submodules: 'true'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@4db96194c378173c656ce18a155ffc14a9fc4355
+        uses: astral-sh/setup-uv@b9ef7bd2eba2a1793516b20e90cf37d382bf7053
         with:
           # Install a specific version of uv.
           version: "0.5.21"
