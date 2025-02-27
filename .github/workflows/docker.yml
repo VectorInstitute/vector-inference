@@ -25,6 +25,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
+      - name: Extract vLLM version
+        id: vllm-version
+        run: |
+          VERSION=$(grep -A 1 'name = "vllm"' uv.lock | grep version | cut -d '"' -f 2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Log in to Docker Hub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
         with:
@@ -43,5 +49,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            vectorinstitute/vector-inference:${{ steps.vllm-version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
