@@ -3,7 +3,7 @@
 ----------------------------------------------------
 
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
-[![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_build.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_build.yml)
+[![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/graph/badge.svg?token=83MYFZ3UPA)](https://codecov.io/github/VectorInstitute/vector-inference)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
