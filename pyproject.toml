@@ -5,7 +5,7 @@ description = "Efficient LLM inference on Slurm clusters using vLLM."
 readme = "README.md"
 authors = [{name = "Marshall Wang", email = "marshall.wang@vectorinstitute.ai"}]
 license = "MIT"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31.0",
     "click>=8.1.0",
