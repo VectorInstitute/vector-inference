@@ -12,6 +12,7 @@ on:
   pull_request:
     branches:
       - main
+      - develop
     paths:
       - Dockerfile
       - .github/workflows/docker.yml
