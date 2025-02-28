@@ -14,7 +14,6 @@ from vec_inf.cli._config import ModelConfig
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
-SERVER_ADDRESS_SIGNATURE = "Server address: "
 CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "config.yaml")
 
 
