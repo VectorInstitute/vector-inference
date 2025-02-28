@@ -249,8 +249,37 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
                     table.add_row("Failure Reason", helper.status_info["failed_reason"])
                 table.add_row("Message", metrics)
             else:
-                for metric, value in metrics.items():
-                    table.add_row(metric, f"{value:.2f}")
+                # Display calculated rates
+                if "prompt_tokens_per_sec" in metrics:
+                    table.add_row(
+                        "Prompt Throughput (tokens/s)",
+                        f"{metrics['prompt_tokens_per_sec']:.2f}",
+                    )
+                if "generation_tokens_per_sec" in metrics:
+                    table.add_row(
+                        "Generation Throughput (tokens/s)",
+                        f"{metrics['generation_tokens_per_sec']:.2f}",
+                    )
+
+                # Display cumulative totals
+                table.add_row(
+                    "Total Prompt Tokens",
+                    f"{metrics.get('total_prompt_tokens', 0):.0f}",
+                )
+                table.add_row(
+                    "Total Generation Tokens",
+                    f"{metrics.get('total_generation_tokens', 0):.0f}",
+                )
+
+                # Other metrics
+                table.add_row(
+                    "Successful Requests",
+                    f"{metrics.get('successful_requests_total', 0):.0f}",
+                )
+                table.add_row(
+                    "Avg Request Latency (s)",
+                    f"{metrics.get('request_latency_sum', 0):.2f}",
+                )
 
             live.update(table)
             time.sleep(2)

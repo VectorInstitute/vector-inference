@@ -2,7 +2,8 @@
 
 import json
 import os
-from typing import Any, Optional, Union, cast
+import time
+from typing import Any, Dict, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
 import click
@@ -231,11 +232,15 @@ class MetricsHelper:
         self.status_info = self._get_status_info()
         self.metrics_url = self._build_metrics_url()
 
-    def _get_status_info(self) -> dict[str, Union[str, None]]:
-        """Get current job status information using existing status infrastructure."""
+        # Separate type-safe state tracking
+        self._prev_prompt_tokens: float = 0.0
+        self._prev_generation_tokens: float = 0.0
+        self._last_updated: Optional[float] = None
+
+    def _get_status_info(self) -> Dict[str, Union[str, None]]:
+        """Retrieve status info using existing StatusHelper."""
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output = utils.run_bash_command(status_cmd)
-
         status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
         status_helper.process_job_state()
         return status_helper.status_info
@@ -253,39 +258,69 @@ class MetricsHelper:
         ):
             return None
 
-        # Remove API version path segment using URL parsing
-        parsed_url = urlparse(base_url)
-        new_path = parsed_url.path.replace("/v1", "", 1).rstrip("/")
-
-        # Reconstruct base URL without version path
-        clean_base = urlunparse(
-            (parsed_url.scheme, parsed_url.netloc, new_path, "", "", "")
+        parsed = urlparse(base_url)
+        clean_path = parsed.path.replace("/v1", "", 1).rstrip("/")
+        return urlunparse(
+            (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
         )
 
-        return f"{clean_base}/metrics"
-
-    def fetch_metrics(self) -> Union[dict[str, float], str]:
-        """Fetch and parse metrics from Prometheus endpoint."""
+    def fetch_metrics(self) -> Union[Dict[str, float], str]:
+        """Fetch metrics with rate calculations."""
         if not self.metrics_url:
-            return "Server not ready for metrics collection"
+            return "Metrics endpoint unavailable - server not ready"
 
         try:
-            response = requests.get(self.metrics_url, timeout=5)
-            return self._parse_metrics(response.text)
-        except requests.RequestException as e:
-            return f"Metrics endpoint error: {str(e)}"
+            response = requests.get(self.metrics_url, timeout=3)
+            response.raise_for_status()
+            current_metrics = self._parse_metrics(response.text)
+            current_time = time.time()
 
-    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
-        """Parse Prometheus-formatted metrics text into key-value pairs."""
+            # Initialize previous state if first run
+            if self._last_updated is None:
+                self._prev_prompt_tokens = current_metrics.get(
+                    "total_prompt_tokens", 0.0
+                )
+                self._prev_generation_tokens = current_metrics.get(
+                    "total_generation_tokens", 0.0
+                )
+                self._last_updated = current_time
+                return current_metrics
+
+            # Calculate rates using type-safe values
+            time_diff = current_time - self._last_updated
+            if time_diff > 0:
+                current_prompt = current_metrics.get("total_prompt_tokens", 0.0)
+                current_gen = current_metrics.get("total_generation_tokens", 0.0)
+
+                current_metrics["prompt_tokens_per_sec"] = (
+                    current_prompt - self._prev_prompt_tokens
+                ) / time_diff
+
+                current_metrics["generation_tokens_per_sec"] = (
+                    current_gen - self._prev_generation_tokens
+                ) / time_diff
+
+                # Update state with current values
+                self._prev_prompt_tokens = current_prompt
+                self._prev_generation_tokens = current_gen
+                self._last_updated = current_time
+
+            return current_metrics
+
+        except requests.RequestException as e:
+            return f"Metrics request failed: {str(e)}"
+
+    def _parse_metrics(self, metrics_text: str) -> Dict[str, float]:
+        """Parse Prometheus metrics into float values."""
         key_metrics = {
-            "vllm:prompt_tokens_total": "Prompt Tokens/s",
-            "vllm:generation_tokens_total": "Generation Tokens/s",
-            "vllm:e2e_request_latency_seconds_sum": "Avg Latency (s)",
-            "vllm:request_queue_time_seconds_sum": "Avg Queue Time (s)",
-            "vllm:request_success_total": "Successful Requests",
+            "vllm:prompt_tokens_total": "total_prompt_tokens",
+            "vllm:generation_tokens_total": "total_generation_tokens",
+            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
+            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
+            "vllm:request_success_total": "successful_requests_total",
         }
 
-        parsed = {}
+        parsed: Dict[str, float] = {}
         for line in metrics_text.split("\n"):
             if line.startswith("#") or not line.strip():
                 continue
@@ -296,7 +331,8 @@ class MetricsHelper:
 
             metric_name = parts[0].split("{")[0]
             if metric_name in key_metrics:
-                display_name = key_metrics[metric_name]
-                parsed[display_name] = float(parts[1])
-
+                try:
+                    parsed[key_metrics[metric_name]] = float(parts[1])
+                except (ValueError, IndexError):
+                    continue
         return parsed
