@@ -229,9 +229,9 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
+    helper = MetricsHelper(slurm_job_id, log_dir)
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            helper = MetricsHelper(slurm_job_id, log_dir)
             metrics = helper.fetch_metrics()
 
             table = utils.create_table("Metric", "Value")
