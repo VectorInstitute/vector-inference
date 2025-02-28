@@ -232,10 +232,10 @@ class MetricsHelper:
         self.status_info = self._get_status_info()
         self.metrics_url = self._build_metrics_url()
 
-        # Separate type-safe state tracking
         self._prev_prompt_tokens: float = 0.0
         self._prev_generation_tokens: float = 0.0
         self._last_updated: Optional[float] = None
+        self._last_throughputs = {"prompt": 0.0, "generation": 0.0}
 
     def _get_status_info(self) -> Dict[str, Union[str, None]]:
         """Retrieve status info using existing StatusHelper."""
@@ -265,7 +265,7 @@ class MetricsHelper:
         )
 
     def fetch_metrics(self) -> Union[Dict[str, float], str]:
-        """Fetch metrics with rate calculations."""
+        """Fetch metrics with persistent throughput and correct latency."""
         if not self.metrics_url:
             return "Metrics endpoint unavailable - server not ready"
 
@@ -275,7 +275,15 @@ class MetricsHelper:
             current_metrics = self._parse_metrics(response.text)
             current_time = time.time()
 
-            # Initialize previous state if first run
+            # Initialize default values for throughput
+            current_metrics.setdefault(
+                "prompt_tokens_per_sec", self._last_throughputs["prompt"]
+            )
+            current_metrics.setdefault(
+                "generation_tokens_per_sec", self._last_throughputs["generation"]
+            )
+
+            # Handle initial state
             if self._last_updated is None:
                 self._prev_prompt_tokens = current_metrics.get(
                     "total_prompt_tokens", 0.0
@@ -286,24 +294,38 @@ class MetricsHelper:
                 self._last_updated = current_time
                 return current_metrics
 
-            # Calculate rates using type-safe values
+            # Calculate time difference
             time_diff = current_time - self._last_updated
             if time_diff > 0:
                 current_prompt = current_metrics.get("total_prompt_tokens", 0.0)
                 current_gen = current_metrics.get("total_generation_tokens", 0.0)
 
-                current_metrics["prompt_tokens_per_sec"] = (
-                    current_prompt - self._prev_prompt_tokens
-                ) / time_diff
+                # Calculate and store throughputs
+                prompt_tps = (current_prompt - self._prev_prompt_tokens) / time_diff
+                gen_tps = (current_gen - self._prev_generation_tokens) / time_diff
 
-                current_metrics["generation_tokens_per_sec"] = (
-                    current_gen - self._prev_generation_tokens
-                ) / time_diff
+                current_metrics["prompt_tokens_per_sec"] = prompt_tps
+                current_metrics["generation_tokens_per_sec"] = gen_tps
 
-                # Update state with current values
+                # Update last known throughputs
+                self._last_throughputs = {"prompt": prompt_tps, "generation": gen_tps}
+
+                # Update state
                 self._prev_prompt_tokens = current_prompt
                 self._prev_generation_tokens = current_gen
                 self._last_updated = current_time
+
+            # Calculate average latency
+            if (
+                "request_latency_sum" in current_metrics
+                and "request_latency_count" in current_metrics
+            ):
+                latency_sum = current_metrics["request_latency_sum"]
+                latency_count = current_metrics["request_latency_count"]
+                if latency_count > 0:
+                    current_metrics["avg_request_latency"] = latency_sum / latency_count
+                else:
+                    current_metrics["avg_request_latency"] = 0.0
 
             return current_metrics
 
@@ -311,11 +333,12 @@ class MetricsHelper:
             return f"Metrics request failed: {str(e)}"
 
     def _parse_metrics(self, metrics_text: str) -> Dict[str, float]:
-        """Parse Prometheus metrics into float values."""
+        """Parse metrics with latency count and sum."""
         key_metrics = {
             "vllm:prompt_tokens_total": "total_prompt_tokens",
             "vllm:generation_tokens_total": "total_generation_tokens",
             "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
+            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
             "vllm:request_queue_time_seconds_sum": "queue_time_sum",
             "vllm:request_success_total": "successful_requests_total",
         }
