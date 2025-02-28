@@ -3,6 +3,7 @@
 import json
 import os
 from typing import Any, Optional, Union, cast
+from urllib.parse import urlparse, urlunparse
 
 import click
 import requests
@@ -240,14 +241,28 @@ class MetricsHelper:
         return status_helper.status_info
 
     def _build_metrics_url(self) -> Optional[str]:
-        """Construct metrics endpoint URL from base URL if available."""
+        """Construct metrics endpoint URL from base URL with version stripping."""
         if self.status_info.get("status") != "READY":
             return None
 
         base_url = self.status_info.get("base_url")
-        if base_url and isinstance(base_url, str) and base_url.startswith("http"):
-            return f"{base_url}/metrics"
-        return None
+        if (
+            not base_url
+            or not isinstance(base_url, str)
+            or not base_url.startswith("http")
+        ):
+            return None
+
+        # Remove API version path segment using URL parsing
+        parsed_url = urlparse(base_url)
+        new_path = parsed_url.path.replace("/v1", "", 1).rstrip("/")
+
+        # Reconstruct base URL without version path
+        clean_base = urlunparse(
+            (parsed_url.scheme, parsed_url.netloc, new_path, "", "", "")
+        )
+
+        return f"{clean_base}/metrics"
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
         """Fetch and parse metrics from Prometheus endpoint."""
