@@ -265,7 +265,6 @@ class MetricsHelper:
         )
 
     def fetch_metrics(self) -> Union[Dict[str, float], str]:
-        """Fetch metrics with persistent throughput and correct latency."""
         if not self.metrics_url:
             return "Metrics endpoint unavailable - server not ready"
 
@@ -275,7 +274,7 @@ class MetricsHelper:
             current_metrics = self._parse_metrics(response.text)
             current_time = time.time()
 
-            # Initialize default values for throughput
+            # Set defaults using last known throughputs
             current_metrics.setdefault(
                 "prompt_tokens_per_sec", self._last_throughputs["prompt"]
             )
@@ -283,7 +282,6 @@ class MetricsHelper:
                 "generation_tokens_per_sec", self._last_throughputs["generation"]
             )
 
-            # Handle initial state
             if self._last_updated is None:
                 self._prev_prompt_tokens = current_metrics.get(
                     "total_prompt_tokens", 0.0
@@ -294,38 +292,47 @@ class MetricsHelper:
                 self._last_updated = current_time
                 return current_metrics
 
-            # Calculate time difference
             time_diff = current_time - self._last_updated
             if time_diff > 0:
                 current_prompt = current_metrics.get("total_prompt_tokens", 0.0)
                 current_gen = current_metrics.get("total_generation_tokens", 0.0)
 
-                # Calculate and store throughputs
-                prompt_tps = (current_prompt - self._prev_prompt_tokens) / time_diff
-                gen_tps = (current_gen - self._prev_generation_tokens) / time_diff
+                delta_prompt = current_prompt - self._prev_prompt_tokens
+                delta_gen = current_gen - self._prev_generation_tokens
+
+                # Only update throughputs when we have new tokens
+                prompt_tps = (
+                    delta_prompt / time_diff
+                    if delta_prompt > 0
+                    else self._last_throughputs["prompt"]
+                )
+                gen_tps = (
+                    delta_gen / time_diff
+                    if delta_gen > 0
+                    else self._last_throughputs["generation"]
+                )
 
                 current_metrics["prompt_tokens_per_sec"] = prompt_tps
                 current_metrics["generation_tokens_per_sec"] = gen_tps
 
-                # Update last known throughputs
-                self._last_throughputs = {"prompt": prompt_tps, "generation": gen_tps}
+                # Persist calculated values regardless of activity
+                self._last_throughputs["prompt"] = prompt_tps
+                self._last_throughputs["generation"] = gen_tps
 
-                # Update state
+                # Update tracking state
                 self._prev_prompt_tokens = current_prompt
                 self._prev_generation_tokens = current_gen
                 self._last_updated = current_time
 
-            # Calculate average latency
             if (
                 "request_latency_sum" in current_metrics
                 and "request_latency_count" in current_metrics
             ):
                 latency_sum = current_metrics["request_latency_sum"]
                 latency_count = current_metrics["request_latency_count"]
-                if latency_count > 0:
-                    current_metrics["avg_request_latency"] = latency_sum / latency_count
-                else:
-                    current_metrics["avg_request_latency"] = 0.0
+                current_metrics["avg_request_latency"] = (
+                    latency_sum / latency_count if latency_count > 0 else 0.0
+                )
 
             return current_metrics
 
