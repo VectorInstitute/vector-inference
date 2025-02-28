@@ -1,9 +1,10 @@
 """Utility functions for the CLI."""
 
+import json
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 import requests
 import yaml
@@ -27,7 +28,7 @@ def run_bash_command(command: str) -> tuple[str, str]:
 
 def read_slurm_log(
     slurm_job_name: str, slurm_job_id: int, slurm_log_type: str, log_dir: Optional[Union[str, Path]]
-) -> Union[list[str], str]:
+) -> Union[list[str], str, dict[str, str]]:
     """Read the slurm log file."""
     if not log_dir:
         # Default log directory
@@ -51,12 +52,15 @@ def read_slurm_log(
 
     try:
         file_path = log_dir / f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}"
-        with file_path.open("r") as file:
-            lines = file.readlines()
+        if slurm_log_type == "json":
+            with file_path.open("r") as file:
+                return json.load(file)
+        else:
+            with file_path.open("r") as file:
+                return file.readlines()
     except FileNotFoundError:
         print(f"Could not find file: {file_path}")
         return "LOG_FILE_NOT_FOUND"
-    return lines
 
 
 def is_server_running(
@@ -80,14 +84,12 @@ def is_server_running(
 
 def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
     """Get the base URL of a model."""
-    log_content = read_slurm_log(slurm_job_name, slurm_job_id, "out", log_dir)
+    log_content = read_slurm_log(slurm_job_name, slurm_job_id, "json", log_dir)
     if isinstance(log_content, str):
         return log_content
 
-    for line in log_content:
-        if SERVER_ADDRESS_SIGNATURE in line:
-            return line.split(SERVER_ADDRESS_SIGNATURE)[1].strip("\n")
-    return "URL_NOT_FOUND"
+    server_addr = cast(dict, log_content).get("server_address")
+    return server_addr if server_addr else "URL_NOT_FOUND"
 
 
 def model_health_check(
