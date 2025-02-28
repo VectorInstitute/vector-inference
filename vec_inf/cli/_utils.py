@@ -26,7 +26,10 @@ def run_bash_command(command: str) -> tuple[str, str]:
 
 
 def read_slurm_log(
-    slurm_job_name: str, slurm_job_id: int, slurm_log_type: str, log_dir: Optional[Union[str, Path]]
+    slurm_job_name: str,
+    slurm_job_id: int,
+    slurm_log_type: str,
+    log_dir: Optional[Union[str, Path]],
 ) -> Union[list[str], str, dict[str, str]]:
     """Read the slurm log file."""
     if not log_dir:
@@ -36,7 +39,7 @@ def read_slurm_log(
         for directory in sorted(
             [d for d in models_dir.iterdir() if d.is_dir()],
             key=lambda d: len(d.name),
-            reverse=True
+            reverse=True,
         ):
             if directory.name in slurm_job_name:
                 log_dir = directory
