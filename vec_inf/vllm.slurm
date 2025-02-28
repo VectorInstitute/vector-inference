@@ -14,6 +14,7 @@ hostname=${SLURMD_NODENAME}
 vllm_port_number=$(find_available_port $hostname 8080 65535)
 
 echo "Server address: http://${hostname}:${vllm_port_number}/v1"
+jq '. + {"server_addr": "http://${hostname}:${vllm_port_number}/v1"}' $LOG_DIR/$JOB_NAME.%j.json > temp.json && mv temp.json $LOG_DIR/$JOB_NAME.%j.json
 
 if [ "$ENFORCE_EAGER" = "True" ]; then
     export ENFORCE_EAGER="--enforce-eager"
@@ -23,14 +24,14 @@ fi
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_latest.sif
+    export SINGULARITY_IMAGE=/model-weights/vec-inf-shared/vector-inference_latest.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
     singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${JOB_NAME} \
+    --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
@@ -45,7 +46,7 @@ else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${JOB_NAME} \
+    --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --tensor-parallel-size ${NUM_GPUS} \
