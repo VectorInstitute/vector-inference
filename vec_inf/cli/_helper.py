@@ -3,7 +3,7 @@
 import json
 import os
 import time
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
 import click
@@ -237,7 +237,7 @@ class MetricsHelper:
         self._last_updated: Optional[float] = None
         self._last_throughputs = {"prompt": 0.0, "generation": 0.0}
 
-    def _get_status_info(self) -> Dict[str, Union[str, None]]:
+    def _get_status_info(self) -> dict[str, Union[str, None]]:
         """Retrieve status info using existing StatusHelper."""
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output = utils.run_bash_command(status_cmd)
@@ -264,7 +264,7 @@ class MetricsHelper:
             (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
         )
 
-    def fetch_metrics(self) -> Union[Dict[str, float], str]:
+    def fetch_metrics(self) -> Union[dict[str, float], str]:
         if not self.metrics_url:
             return "Metrics endpoint unavailable - server not ready"
 
@@ -339,7 +339,7 @@ class MetricsHelper:
         except requests.RequestException as e:
             return f"Metrics request failed: {str(e)}"
 
-    def _parse_metrics(self, metrics_text: str) -> Dict[str, float]:
+    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
         """Parse metrics with latency count and sum."""
         key_metrics = {
             "vllm:prompt_tokens_total": "total_prompt_tokens",
@@ -350,7 +350,7 @@ class MetricsHelper:
             "vllm:request_success_total": "successful_requests_total",
         }
 
-        parsed: Dict[str, float] = {}
+        parsed: dict[str, float] = {}
         for line in metrics_text.split("\n"):
             if line.startswith("#") or not line.strip():
                 continue
