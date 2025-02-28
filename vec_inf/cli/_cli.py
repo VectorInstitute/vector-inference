@@ -1,7 +1,7 @@
 """Command line interface for Vector Inference."""
 
 import time
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import click
 from rich.columns import Columns
@@ -249,7 +249,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
             if isinstance(out_logs, str):
                 live.update(out_logs)
                 break
-            latest_metrics = utils.get_latest_metric(out_logs)
+            latest_metrics = utils.get_latest_metric(cast(list, out_logs))
             # if latest_metrics is a string, then it is an error message
             if isinstance(latest_metrics, str):
                 live.update(latest_metrics)

@@ -52,12 +52,12 @@ class LaunchHelper:
 
         if config:
             return config
-
+        # If model config not found, load path from CLI args or fallback to default
         model_weights_parent_dir = self.cli_kwargs.get(
             "model_weights_parent_dir", model_configs[0].model_weights_parent_dir
         )
-        model_weights_path = Path(model_weights_parent_dir, self.model_name)
-
+        model_weights_path = Path(cast(str, model_weights_parent_dir), self.model_name)
+        # Only give a warning msg if weights exist but config missing
         if model_weights_path.exists():
             click.echo(
                 click.style(
@@ -74,7 +74,7 @@ class LaunchHelper:
                 num_nodes=1,
                 vocab_size=1000,
                 max_model_len=8192,
-                model_weights_parent_dir=model_weights_parent_dir,
+                model_weights_parent_dir=Path(cast(str, model_weights_parent_dir)),
             )
         raise click.ClickException(
             f"Model '{self.model_name}' not found in configuration and model weights "
@@ -126,7 +126,7 @@ class LaunchHelper:
         os.environ["NUM_GPUS"] = cast(str, self.params["gpus_per_node"])
         os.environ["NUM_NODES"] = cast(str, self.params["num_nodes"])
         os.environ["VLLM_MAX_MODEL_LEN"] = cast(str, self.params["max_model_len"])
-        os.environ["VLLM_MAX_LOGPROBS"] = cast(int, self.params["vocab_size"])
+        os.environ["VLLM_MAX_LOGPROBS"] = cast(str, self.params["vocab_size"])
         os.environ["VLLM_DATA_TYPE"] = cast(str, self.params["data_type"])
         os.environ["VLLM_MAX_NUM_SEQS"] = cast(str, self.params["max_num_seqs"])
         os.environ["VLLM_TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
