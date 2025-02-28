@@ -1,6 +1,6 @@
 [project]
 name = "vec-inf"
-version = "0.4.1"
+version = "0.4.2"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
 readme = "README.md"
 authors = [{name = "Marshall Wang", email = "marshall.wang@vectorinstitute.ai"}]
@@ -10,7 +10,7 @@ dependencies = [
     "requests>=2.31.0",
     "click>=8.1.0",
     "rich>=13.7.0",
-    "pydantic>=2.10.6",
+    "pydantic>=2.10.6"
 ]
 
 [dependency-groups]
@@ -43,12 +43,13 @@ docs = [
 
 [project.optional-dependencies]
 dev = [
-    "xgrammar>=0.1.13",
+    "xgrammar>=0.1.11",
     "torch>=2.5.1",
-    "vllm>=0.7.2",
+    "vllm>=0.7.3",
     "vllm-nccl-cu12>=2.18,<2.19",
     "ray>=2.40.0",
-    "cupy-cuda12x==12.1.0"
+    "cupy-cuda12x==12.1.0",
+    "transformers>=4.49.0"
 ]
 
 [project.scripts]

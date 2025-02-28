@@ -1496,7 +1496,7 @@ models:
   DeepSeek-R1-Distill-Qwen-1.5B:
     model_family: DeepSeek-R1
     model_variant: Distill-Qwen-1.5B
-    model_type: LLM
+    model_type: VLM
     num_gpus: 1
     num_nodes: 1
     vocab_size: 152064
@@ -1511,3 +1511,75 @@ models:
     venv: singularity
     log_dir: default
     model_weights_parent_dir: /model-weights
+  Phi-3.5-vision-instruct:
+    model_family: Phi-3.5-vision
+    model_variant: instruct
+    model_type: VLM
+    num_gpus: 4
+    num_nodes: 1
+    vocab_size: 32064
+    max_model_len: 131072
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: default
+    model_weights_parent_dir: /model-weights
+  InternVL2_5-8B:
+    model_family: InternVL2_5
+    model_variant: 8B
+    model_type: VLM
+    num_gpus: 1
+    num_nodes: 1
+    vocab_size: 92553
+    max_model_len: 32768
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: default
+    model_weights_parent_dir: /model-weights
+  glm-4v-9b:
+    model_family: glm-4v
+    model_variant: 9b
+    model_type: VLM
+    num_gpus: 1
+    num_nodes: 1
+    vocab_size: 151552
+    max_model_len: 8192
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: default
+    model_weights_parent_dir: /model-weights
+  Molmo-7B-D-0924:
+      model_family: Molmo
+      model_variant: 7B-D-0924
+      model_type: VLM
+      num_gpus: 1
+      num_nodes: 1
+      vocab_size: 152064
+      max_model_len: 4096
+      max_num_seqs: 256
+      pipeline_parallelism: true
+      enforce_eager: false
+      qos: m2
+      time: 08:00:00
+      partition: a40
+      data_type: auto
+      venv: singularity
+      log_dir: default
+      model_weights_parent_dir: /model-weights
