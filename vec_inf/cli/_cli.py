@@ -10,7 +10,7 @@ from rich.live import Live
 from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
-from vec_inf.cli._helper import LaunchHelper, StatusHelper
+from vec_inf.cli._helper import LaunchHelper, MetricsHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -225,36 +225,34 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 @cli.command("metrics")
 @click.argument("slurm_job_id", type=int, nargs=1)
 @click.option(
-    "--log-dir",
-    type=str,
-    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
+    "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """Stream performance metrics to the console."""
-    status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output = utils.run_bash_command(status_cmd)
-    slurm_job_name = output.split(" ")[1].split("=")[1]
-
+    """Stream real-time performance metrics from the model endpoint."""
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(
-                slurm_job_name, slurm_job_id, "out", log_dir
-            )
-            # if out_logs is a string, then it is an error message
-            if isinstance(out_logs, str):
-                live.update(out_logs)
-                break
-            latest_metrics = utils.get_latest_metric(out_logs)
-            # if latest_metrics is a string, then it is an error message
-            if isinstance(latest_metrics, str):
-                live.update(latest_metrics)
-                break
-            table = utils.create_table(key_title="Metric", value_title="Value")
-            for key, value in latest_metrics.items():
-                table.add_row(key, value)
+            helper = MetricsHelper(slurm_job_id, log_dir)
+            metrics = helper.fetch_metrics()
+
+            table = utils.create_table("Metric", "Value")
+
+            if isinstance(metrics, str):
+                # Show status information if metrics aren't available
+                table.add_row(
+                    "System Status", helper.status_info["status"], style="yellow"
+                )
+                if helper.status_info["pending_reason"]:
+                    table.add_row(
+                        "Pending Reason", helper.status_info["pending_reason"]
+                    )
+                if helper.status_info["failed_reason"]:
+                    table.add_row("Failure Reason", helper.status_info["failed_reason"])
+                table.add_row("Message", metrics)
+            else:
+                for metric, value in metrics.items():
+                    table.add_row(metric, f"{value:.2f}")
 
             live.update(table)
-
             time.sleep(2)
 
 

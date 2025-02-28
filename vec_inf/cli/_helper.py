@@ -5,6 +5,7 @@ import os
 from typing import Any, Optional, Union, cast
 
 import click
+import requests
 from rich.console import Console
 from rich.table import Table
 
@@ -220,3 +221,67 @@ class StatusHelper:
 
         table.add_row("Base URL", self.status_info["base_url"])
         console.print(table)
+
+
+class MetricsHelper:
+    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+        self.slurm_job_id = slurm_job_id
+        self.log_dir = log_dir
+        self.status_info = self._get_status_info()
+        self.metrics_url = self._build_metrics_url()
+
+    def _get_status_info(self) -> dict[str, Union[str, None]]:
+        """Get current job status information using existing status infrastructure."""
+        status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
+        output = utils.run_bash_command(status_cmd)
+
+        status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
+        status_helper.process_job_state()
+        return status_helper.status_info
+
+    def _build_metrics_url(self) -> Optional[str]:
+        """Construct metrics endpoint URL from base URL if available."""
+        if self.status_info.get("status") != "READY":
+            return None
+
+        base_url = self.status_info.get("base_url")
+        if base_url and isinstance(base_url, str) and base_url.startswith("http"):
+            return f"{base_url}/metrics"
+        return None
+
+    def fetch_metrics(self) -> Union[dict[str, float], str]:
+        """Fetch and parse metrics from Prometheus endpoint."""
+        if not self.metrics_url:
+            return "Server not ready for metrics collection"
+
+        try:
+            response = requests.get(self.metrics_url, timeout=5)
+            return self._parse_metrics(response.text)
+        except requests.RequestException as e:
+            return f"Metrics endpoint error: {str(e)}"
+
+    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
+        """Parse Prometheus-formatted metrics text into key-value pairs."""
+        key_metrics = {
+            "vllm:prompt_tokens_total": "Prompt Tokens/s",
+            "vllm:generation_tokens_total": "Generation Tokens/s",
+            "vllm:e2e_request_latency_seconds_sum": "Avg Latency (s)",
+            "vllm:request_queue_time_seconds_sum": "Avg Queue Time (s)",
+            "vllm:request_success_total": "Successful Requests",
+        }
+
+        parsed = {}
+        for line in metrics_text.split("\n"):
+            if line.startswith("#") or not line.strip():
+                continue
+
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+
+            metric_name = parts[0].split("{")[0]
+            if metric_name in key_metrics:
+                display_name = key_metrics[metric_name]
+                parsed[display_name] = float(parts[1])
+
+        return parsed
