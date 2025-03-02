@@ -1,8 +1,6 @@
 """Tests for the Vector Inference API data models."""
 
-import pytest
-
-from vec_inf.api import ModelInfo, ModelStatus, ModelType, LaunchOptions
+from vec_inf.api import LaunchOptions, ModelInfo, ModelStatus, ModelType
 
 
 def test_model_info_creation():
@@ -12,9 +10,9 @@ def test_model_info_creation():
         family="test-family",
         variant="test-variant",
         type=ModelType.LLM,
-        config={"num_gpus": 1}
+        config={"num_gpus": 1},
     )
-    
+
     assert model.name == "test-model"
     assert model.family == "test-family"
     assert model.variant == "test-variant"
@@ -31,7 +29,7 @@ def test_model_info_optional_fields():
         type=ModelType.LLM,
         config={},
     )
-    
+
     assert model.name == "test-model"
     assert model.family == "test-family"
     assert model.variant is None
@@ -41,7 +39,7 @@ def test_model_info_optional_fields():
 def test_launch_options_default_values():
     """Test LaunchOptions with default values."""
     options = LaunchOptions()
-    
+
     assert options.num_gpus is None
     assert options.partition is None
     assert options.data_type is None
@@ -55,4 +53,4 @@ def test_model_status_enum():
     assert ModelStatus.LAUNCHING.value == "LAUNCHING"
     assert ModelStatus.READY.value == "READY"
     assert ModelStatus.FAILED.value == "FAILED"
-    assert ModelStatus.SHUTDOWN.value == "SHUTDOWN" 
+    assert ModelStatus.SHUTDOWN.value == "SHUTDOWN"

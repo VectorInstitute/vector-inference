@@ -26,4 +26,4 @@ The tests cover the following areas:
 
 ## Dependencies
 
-The tests use pytest and mock objects to isolate the tests from actual dependencies. 
+The tests use pytest and mock objects to isolate the tests from actual dependencies.

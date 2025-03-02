@@ -1,1 +1,1 @@
-"""Tests for the Vector Inference API.""" 
+"""Tests for the Vector Inference API."""

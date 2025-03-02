@@ -40,4 +40,4 @@ if metrics.metrics:
 # Shutdown when done
 print("\nShutting down model...")
 client.shutdown_model(job_id)
-print("Model shutdown complete") 
+print("Model shutdown complete")
