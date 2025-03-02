@@ -7,3 +7,6 @@
   - [`vlm/vision_completions.py`](inference/vlm/vision_completions.py): Python example of sending chat completion requests with image attached to prompt to OpenAI compatible server for vision language models
 - [`logits`](logits): Example for logits generation
   - [`logits.py`](logits/logits.py): Python example of getting logits from hosted model.
+- [`api`](api): Examples for using the Python API
+  - [`api_usage.py`](api/api_usage.py): Basic Python example demonstrating the Vector Inference API
+  - [`advanced_api_usage.py`](api/advanced_api_usage.py): Advanced Python example with rich UI for the Vector Inference API
