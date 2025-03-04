@@ -1,6 +1,5 @@
 """Model configuration."""
 
-from pathlib import Path
 from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -50,7 +49,8 @@ class ModelConfig(BaseModel):
     venv: str = Field(default="singularity", description="Virtual environment path")
     log_dir: str = Field(default="default", description="Slurm log directory path")
     model_weights_parent_dir: str = Field(
-        default="/model-weights", description="Parent directory containing model weights"
+        default="/model-weights",
+        description="Parent directory containing model weights",
     )
 
     model_config = ConfigDict(
