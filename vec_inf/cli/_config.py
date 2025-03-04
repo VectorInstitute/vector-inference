@@ -7,21 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
 
 
-QOS = Literal[
-    "normal",
-    "m",
-    "m2",
-    "m3",
-    "m4",
-    "m5",
-    "long",
-    "deadline",
-    "high",
-    "scavenger",
-    "llm",
-    "a100",
-]
-
 PARTITION = Literal["a40", "a100", "t4v1", "t4v2", "rtx6000"]
 
 DATA_TYPE = Literal["auto", "float16", "bfloat16", "float32"]
@@ -51,26 +36,21 @@ class ModelConfig(BaseModel):
         default=True, description="Enable pipeline parallelism"
     )
     enforce_eager: bool = Field(default=False, description="Force eager mode execution")
-    qos: Union[QOS, str] = Field(default="m2", description="Quality of Service tier")
     time: str = Field(
         default="08:00:00",
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
     partition: Union[PARTITION, str] = Field(
-        default="a40", description="GPU partition type"
+        default="a100", description="GPU partition type"
     )
     data_type: Union[DATA_TYPE, str] = Field(
-        default="auto", description="Model precision format"
+        default="auto", description="Model data type"
     )
-    venv: str = Field(
-        default="singularity", description="Virtual environment/container system"
-    )
-    log_dir: Path = Field(
-        default=Path("~/.vec-inf-logs").expanduser(), description="Log directory path"
-    )
-    model_weights_parent_dir: Path = Field(
-        default=Path("/model-weights"), description="Base directory for model weights"
+    venv: str = Field(default="singularity", description="Virtual environment path")
+    log_dir: str = Field(default="default", description="Slurm log directory path")
+    model_weights_parent_dir: str = Field(
+        default="/model-weights", description="Parent directory containing model weights"
     )
 
     model_config = ConfigDict(

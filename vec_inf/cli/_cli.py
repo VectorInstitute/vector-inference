@@ -108,7 +108,9 @@ def launch(
         base_command = launch_helper.get_base_launch_command()
         params = launch_helper.process_configuration()
         launch_command = launch_helper.build_launch_command(base_command, params)
+        print(f"Launch command: {launch_command}")
         command_output = utils.run_bash_command(launch_command)
+        print(f"Command output: {command_output}")  
         launch_helper.handle_launch_output(command_output, CONSOLE)
 
     except click.ClickException as e:

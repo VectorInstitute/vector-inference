@@ -22,7 +22,9 @@ def run_bash_command(command: str) -> str:
     process = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
-    stdout, _ = process.communicate()
+    stdout, stderr = process.communicate()
+    print(f"STDOUT: {stdout}")
+    print(f"STDERR: {stderr}")
     return stdout
 
 

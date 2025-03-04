@@ -1,0 +1,85 @@
+Bootstrap: docker
+From: nvidia/cuda:12.1.0-devel-ubuntu20.04
+
+%environment
+    export CUDA_VISIBLE_DEVICES=none
+    export TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
+    export PYTHON_VERSION=3.10.12
+    export DEBIAN_FRONTEND=noninteractive
+
+%post
+    # Non-interactive apt-get commands
+    export DEBIAN_FRONTEND=noninteractive
+    export CUDA_VISIBLE_DEVICES=none
+    export TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
+    export PYTHON_VERSION=3.10.12
+
+    # Install dependencies for building Python
+    apt-get update && apt-get install -y \
+        wget \
+        build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        libffi-dev \
+        libncursesw5-dev \
+        xz-utils \
+        tk-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        liblzma-dev \
+        git \
+        vim \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Download and install Python
+    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz
+    tar -xzf Python-${PYTHON_VERSION}.tgz
+    cd Python-${PYTHON_VERSION}
+    ./configure --enable-optimizations
+    make -j$(nproc)
+    make altinstall
+    cd ..
+    rm -rf Python-${PYTHON_VERSION}.tgz Python-${PYTHON_VERSION}
+
+    # Install pip
+    wget https://bootstrap.pypa.io/get-pip.py
+    python3.10 get-pip.py
+    rm get-pip.py
+
+    # Install Poetry
+    python3.10 -m pip install --upgrade pip setuptools wheel
+    python3.10 -m pip install poetry
+    poetry config virtualenvs.create false
+
+    # Set up vec-inf
+    mkdir -p /vec-inf
+    cd /vec-inf
+
+    # Install PyTorch with CUDA 12.x support (updated from 1.12.0+cu117)
+    python3.10 -m pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+
+    # Install Flash Attention 2
+    python3.10 -m pip install flash-attn --no-build-isolation
+
+    # Install PyYAML
+    python3.10 -m pip install pyyaml
+
+    # Create NCCL directory
+    mkdir -p /vec-inf/nccl
+    
+%files
+    # Copy the current directory contents into the container
+    . /vec-inf
+    
+%post
+    # Continue setup after files are copied
+    cd /vec-inf
+    
+    # Install the application and its dependencies
+    python3.10 -m pip install -e .
+    
+%runscript
+    exec vec-inf "$@"

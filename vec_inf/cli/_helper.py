@@ -66,6 +66,7 @@ class LaunchHelper:
 
     def build_launch_command(self, base_command: str, params: dict[str, Any]) -> str:
         """Construct the full launch command with parameters."""
+        print(f"Building launch command with params: {params}")
         command = base_command
         for param_name, param_value in params.items():
             if param_value is None:
@@ -108,6 +109,8 @@ class LaunchHelper:
         """Process and display launch output."""
         json_mode = bool(self.cli_kwargs.get("json_mode", False))
         slurm_job_id, output_lines = self.parse_launch_output(output)
+        console.print(f"SLURM Job ID: {slurm_job_id}")
+        console.print(f"Output lines: {output_lines}")
 
         if json_mode:
             output_data = self.format_json_output(slurm_job_id, output_lines)
@@ -127,6 +130,7 @@ class StatusHelper:
     def get_base_status_data(self) -> dict[str, Union[str, None]]:
         """Extract basic job status information from scontrol output."""
         try:
+            print(f"get_base_status_data Output: {self.output}")
             job_name = self.output.split(" ")[1].split("=")[1]
             job_state = self.output.split(" ")[9].split("=")[1]
         except IndexError:

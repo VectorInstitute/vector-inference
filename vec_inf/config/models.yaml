@@ -10,7 +10,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -28,7 +27,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -46,7 +44,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -64,7 +61,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -82,7 +78,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -100,7 +95,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -118,7 +112,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -136,7 +129,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -154,7 +146,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -172,7 +163,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -190,7 +180,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -208,7 +197,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -226,7 +214,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -244,7 +231,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -262,7 +248,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -280,7 +265,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -298,7 +282,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -316,7 +299,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -334,7 +316,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -352,7 +333,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -370,7 +350,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -388,7 +367,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -406,7 +384,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -424,7 +401,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -442,7 +418,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -460,7 +435,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -478,7 +452,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -496,7 +469,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -514,7 +486,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -532,7 +503,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -550,7 +520,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -568,13 +537,12 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
-    partition: a40
+    partition: a100
     data_type: auto
     venv: singularity
     log_dir: default
-    model_weights_parent_dir: /model-weights
+    model_weights_parent_dir: /projects/bbwb/avd6/model-weights
   Meta-Llama-3.1-70B:
     model_family: Meta-Llama-3.1
     model_variant: 70B
@@ -586,7 +554,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -604,7 +571,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -622,7 +588,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m4
     time: 02:00:00
     partition: a40
     data_type: auto
@@ -640,7 +605,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -658,7 +622,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -676,7 +639,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -694,7 +656,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -712,7 +673,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -730,7 +690,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -748,7 +707,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -766,7 +724,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -784,7 +741,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -802,7 +758,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -820,7 +775,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -838,7 +792,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -856,7 +809,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -874,7 +826,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -892,7 +843,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -910,7 +860,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -928,7 +877,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -946,7 +894,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -964,7 +911,6 @@ models:
     max_num_seqs: 64
     pipeline_parallelism: false
     enforce_eager: true
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -982,7 +928,6 @@ models:
     max_num_seqs: 64
     pipeline_parallelism: false
     enforce_eager: true
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1000,7 +945,6 @@ models:
     max_num_seqs: 32
     pipeline_parallelism: false
     enforce_eager: true
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1018,7 +962,6 @@ models:
     max_num_seqs: 32
     pipeline_parallelism: false
     enforce_eager: true
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1036,7 +979,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1054,7 +996,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1072,7 +1013,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1090,7 +1030,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1108,7 +1047,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1126,7 +1064,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1144,7 +1081,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1162,7 +1098,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1180,7 +1115,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1198,7 +1132,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1216,7 +1149,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1234,7 +1166,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1252,7 +1183,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1270,7 +1200,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1288,7 +1217,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1306,7 +1234,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1324,7 +1251,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1342,7 +1268,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1360,7 +1285,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1378,7 +1302,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1396,7 +1319,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1414,7 +1336,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1432,7 +1353,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1450,7 +1370,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1468,7 +1387,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1486,7 +1404,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
@@ -1504,7 +1421,6 @@ models:
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
-    qos: m2
     time: 08:00:00
     partition: a40
     data_type: auto
