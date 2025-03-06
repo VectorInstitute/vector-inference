@@ -12,7 +12,7 @@ SERVER_ADDR="http://${hostname}:${vllm_port_number}/v1"
 echo "Server address: $SERVER_ADDR"
 
 jq --arg server_addr "$SERVER_ADDR" \
-  '. + {"server_addr": $server_addr}' \
+  '. + {"server_address": $server_addr}' \
   "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" > temp.json \
   && mv temp.json "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" \
   && rm temp.json
