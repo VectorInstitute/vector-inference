@@ -21,7 +21,6 @@ VLLM_TASK_MAP = {
 }
 
 REQUIRED_FIELDS = {
-    "model_name",
     "model_family",
     "model_type",
     "gpus_per_node",
@@ -31,7 +30,7 @@ REQUIRED_FIELDS = {
 }
 
 LD_LIBRARY_PATH = "/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
-SRC_DIR = Path(__file__).parent.parent
+SRC_DIR = str(Path(__file__).parent.parent)
 
 
 class LaunchHelper:
@@ -81,11 +80,11 @@ class LaunchHelper:
             f"not found at expected path '{model_weights_path}'"
         )
 
-    def convert_boolean_value(self, value: Union[str, int, bool]) -> str:
+    def convert_boolean_value(self, value: Union[str, int, bool]) -> bool:
         """Convert various input types to boolean strings."""
         if isinstance(value, str):
-            return "True" if value.lower() == "true" else "False"
-        return "True" if bool(value) else "False"
+            return value.lower() == "true"
+        return bool(value)
 
     def get_launch_params(self) -> dict[str, Any]:
         """Merge config defaults with CLI overrides."""
@@ -112,60 +111,61 @@ class LaunchHelper:
             )
 
         # Create log directory
-        if params["log_dir"] == "default":
-            params["log_dir"] = str(
-                Path(Path.home(), ".vec-inf-logs", params["model_family"])
-            )
-        Path(params["log_dir"]).mkdir(parents=True, exist_ok=True)
+        params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
+        params["log_dir"].mkdir(parents=True, exist_ok=True)
+
+        # Convert to string for JSON serialization
+        for field in params:
+            params[field] = str(params[field])
 
         return params
 
     def set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
-        os.environ["MODEL_NAME"] = self.params["model_name"]
-        os.environ["NUM_GPUS"] = cast(str, self.params["gpus_per_node"])
-        os.environ["NUM_NODES"] = cast(str, self.params["num_nodes"])
-        os.environ["VLLM_MAX_MODEL_LEN"] = cast(str, self.params["max_model_len"])
-        os.environ["VLLM_MAX_LOGPROBS"] = cast(str, self.params["vocab_size"])
-        os.environ["VLLM_DATA_TYPE"] = cast(str, self.params["data_type"])
-        os.environ["VLLM_MAX_NUM_SEQS"] = cast(str, self.params["max_num_seqs"])
+        os.environ["MODEL_NAME"] = self.model_name
+        os.environ["VLLM_MAX_MODEL_LEN"] = self.params["max_model_len"]
+        os.environ["VLLM_MAX_LOGPROBS"] = self.params["vocab_size"]
+        os.environ["VLLM_DATA_TYPE"] = self.params["data_type"]
+        os.environ["VLLM_MAX_NUM_SEQS"] = self.params["max_num_seqs"]
         os.environ["VLLM_TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
-        os.environ["PIPELINE_PARALLELISM"] = cast(
-            str, self.params["pipeline_parallelism"]
-        )
-        os.environ["ENFORCE_EAGER"] = cast(str, self.params["enforce_eager"])
-        os.environ["SRC_DIR"] = str(SRC_DIR)
+        os.environ["PIPELINE_PARALLELISM"] = self.params["pipeline_parallelism"]
+        os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
+        os.environ["SRC_DIR"] = SRC_DIR
         os.environ["VLLM_MODEL_WEIGHTS"] = str(
-            Path(self.params["model_weights_parent_dir"], self.params["model_name"])
+            Path(self.params["model_weights_parent_dir"], self.model_name)
         )
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
-        os.environ["VENV_BASE"] = cast(str, self.params["venv"])
-        os.environ["MODEL_WEIGHTS_PARENT_DIR"] = cast(
-            str, self.params["model_weights_parent_dir"]
-        )
+        os.environ["VENV_BASE"] = self.params["venv"]
+        os.environ["LOG_DIR"] = self.params["log_dir"]
 
     def build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
         # Base command
         command_list = ["sbatch"]
         # Append options
-        command_list.extend(["--job-name", f"{self.params['model_name']}"])
+        command_list.extend(["--job-name", f"{self.model_name}"])
         command_list.extend(["--partition", f"{self.params['partition']}"])
         command_list.extend(["--qos", f"{self.params['qos']}"])
         command_list.extend(["--time", f"{self.params['time']}"])
         command_list.extend(["--nodes", f"{self.params['num_nodes']}"])
         command_list.extend(["--gpus-per-node", f"{self.params['gpus_per_node']}"])
         command_list.extend(
-            ["--output", f"{self.params['log_dir']}/{self.params['model_name']}.%j.out"]
+            [
+                "--output",
+                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out",
+            ]
         )
         command_list.extend(
-            ["--error", f"{self.params['log_dir']}/{self.params['model_name']}.%j.err"]
+            [
+                "--error",
+                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err",
+            ]
         )
         # Add slurm script
         slurm_script = "vllm.slurm"
-        if self.params["num_nodes"] > 1:
-            slurm_script = "vllm_multi_node.slurm"
-        command_list.append(f"{str(SRC_DIR)}/{slurm_script}")
+        if int(self.params["num_nodes"]) > 1:
+            slurm_script = "multinode_vllm.slurm"
+        command_list.append(f"{SRC_DIR}/{slurm_script}")
         return " ".join(command_list)
 
     def format_table_output(self, job_id: str) -> Table:
@@ -173,7 +173,7 @@ class LaunchHelper:
         table = utils.create_table(key_title="Job Config", value_title="Value")
         # Add rows
         table.add_row("Slurm Job ID", job_id, style="blue")
-        table.add_row("Job Name", self.params["model_name"])
+        table.add_row("Job Name", self.model_name)
         table.add_row("Model Type", self.params["model_type"])
         table.add_row("Partition", self.params["partition"])
         table.add_row("QoS", self.params["qos"])
@@ -186,10 +186,8 @@ class LaunchHelper:
         table.add_row("Max Num Seqs", self.params["max_num_seqs"])
         table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
         table.add_row("Enforce Eager", self.params["enforce_eager"])
+        table.add_row("Model Weights Directory", os.environ.get("VLLM_MODEL_WEIGHTS"))
         table.add_row("Log Directory", self.params["log_dir"])
-        table.add_row(
-            "Model Weights Parent Directory", self.params["model_weights_parent_dir"]
-        )
 
         return table
 
@@ -199,9 +197,13 @@ class LaunchHelper:
         slurm_job_id = output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = slurm_job_id
         job_json = Path(
-            self.params["log_dir"], f"{self.params['model_name']}.{slurm_job_id}.json"
+            self.params["log_dir"],
+            f"{self.model_name}.{slurm_job_id}",
+            f"{self.model_name}.{slurm_job_id}.json",
         )
+        job_json.parent.mkdir(parents=True, exist_ok=True)
         job_json.touch(exist_ok=True)
+
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
         if json_mode:
