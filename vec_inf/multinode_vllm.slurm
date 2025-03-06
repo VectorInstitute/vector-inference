@@ -36,7 +36,7 @@ echo "IP Head: $ip_head"
 echo "Starting HEAD at $head_node"
 if [ "$VENV_BASE" = "singularity" ]; then
     srun --nodes=1 --ntasks=1 -w "$head_node" \
-        singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
+        singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
         ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \
         --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${NUM_GPUS}" --block &
 else
@@ -57,7 +57,7 @@ for ((i = 1; i <= worker_num; i++)); do
     echo "Starting WORKER $i at $node_i"
     if [ "$VENV_BASE" = "singularity" ]; then
         srun --nodes=1 --ntasks=1 -w "$node_i" \
-            singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
+            singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
             ray start --address "$ip_head" \
             --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${NUM_GPUS}" --block &
     else
@@ -72,8 +72,14 @@ done
 
 vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 
-echo "Server address: http://${head_node_ip}:${vllm_port_number}/v1"
-jq '. + {"server_addr": "http://${hostname}:${vllm_port_number}/v1"}' $LOG_DIR/$JOB_NAME.%j.json > temp.json && mv temp.json $LOG_DIR/$JOB_NAME.%j.json
+SERVER_ADDR="http://${head_node_ip}:${vllm_port_number}/v1"
+echo "Server address: $SERVER_ADDR"
+
+jq --arg server_addr "$SERVER_ADDR" \
+  '. + {"server_addr": $server_addr}' \
+  "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" > temp.json \
+  && mv temp.json "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" \
+  && rm temp.json
 
 if [ "$PIPELINE_PARALLELISM" = "True" ]; then
     export PIPELINE_PARALLEL_SIZE=$NUM_NODES
@@ -91,7 +97,7 @@ fi
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
+    singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
     --served-model-name ${MODEL_NAME} \
