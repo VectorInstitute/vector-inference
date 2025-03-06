@@ -50,10 +50,14 @@ def read_slurm_log(
     # If log_dir is still not set, then didn't find the log dir at default location
     if not log_dir:
         print("Could not determine log directory.")
-        return "LOG_FILE_NOT_FOUND"
+        return "LOG_DIR_NOT_FOUND"
 
     try:
-        file_path = log_dir / f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}"
+        file_path = (
+            log_dir
+            / Path(f"{slurm_job_name}.{slurm_job_id}")
+            / f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}"
+        )
         if slurm_log_type == "json":
             with file_path.open("r") as file:
                 return json.load(file)
