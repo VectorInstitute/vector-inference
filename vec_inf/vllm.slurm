@@ -35,7 +35,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
+    --tensor-parallel-size ${SLURM_GPUS_PER_NODE} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
@@ -50,7 +50,7 @@ else
     --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
+    --tensor-parallel-size ${SLURM_GPUS_PER_NODE} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
