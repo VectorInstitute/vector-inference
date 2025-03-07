@@ -8,7 +8,6 @@ import requests
 
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
-    SERVER_ADDRESS_SIGNATURE,
     create_table,
     get_base_url,
     get_latest_metric,
@@ -34,8 +33,9 @@ def test_run_bash_command_success():
         mock_process = MagicMock()
         mock_process.communicate.return_value = ("test output", "")
         mock_popen.return_value = mock_process
-        result = run_bash_command("echo test")
+        result, stderr = run_bash_command("echo test")
         assert result == "test output"
+        assert stderr == ""
 
 
 def test_run_bash_command_error():
@@ -44,14 +44,16 @@ def test_run_bash_command_error():
         mock_process = MagicMock()
         mock_process.communicate.return_value = ("", "error output")
         mock_popen.return_value = mock_process
-        result = run_bash_command("invalid_command")
+        result, stderr = run_bash_command("invalid_command")
         assert result == ""
+        assert stderr == "error output" 
 
 
 def test_read_slurm_log_found(mock_log_dir):
     """Test that read_slurm_log reads the content of a log file."""
     test_content = ["line1\n", "line2\n"]
-    log_file = mock_log_dir / "test_job.123.err"
+    log_file = mock_log_dir / "test_job.123" / "test_job.123.err"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
     log_file.write_text("".join(test_content))
     result = read_slurm_log("test_job", 123, "err", mock_log_dir)
     assert result == test_content
@@ -60,7 +62,7 @@ def test_read_slurm_log_found(mock_log_dir):
 def test_read_slurm_log_not_found():
     """Test read_slurm_log, return an error message if the log file is not found."""
     result = read_slurm_log("missing_job", 456, "err", "/nonexistent")
-    assert result == "LOG_FILE_NOT_FOUND"
+    assert result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456/missing_job.456.err"
 
 
 @pytest.mark.parametrize(
@@ -82,9 +84,9 @@ def test_is_server_running_statuses(log_content, expected):
 
 def test_get_base_url_found():
     """Test that get_base_url returns the correct base URL."""
-    test_line = f"{SERVER_ADDRESS_SIGNATURE}http://localhost:8000\n"
+    test_dict = {"server_address": "http://localhost:8000"}
     with patch("vec_inf.cli._utils.read_slurm_log") as mock_read:
-        mock_read.return_value = [test_line]
+        mock_read.return_value = test_dict
         result = get_base_url("test_job", 123, None)
         assert result == "http://localhost:8000"
 
@@ -92,9 +94,9 @@ def test_get_base_url_found():
 def test_get_base_url_not_found():
     """Test get_base_url when URL is not found in logs."""
     with patch("vec_inf.cli._utils.read_slurm_log") as mock_read:
-        mock_read.return_value = ["some other content"]
+        mock_read.return_value = {"random_key": "123"}
         result = get_base_url("test_job", 123, None)
-        assert result == "URL_NOT_FOUND"
+        assert result == "URL NOT FOUND"
 
 
 @pytest.mark.parametrize(
@@ -175,7 +177,7 @@ def test_load_config_default_only():
     model = next(m for m in configs if m.model_name == "c4ai-command-r-plus")
     assert model.model_family == "c4ai-command-r"
     assert model.model_type == "LLM"
-    assert model.num_gpus == 4
+    assert model.gpus_per_node == 4
     assert model.num_nodes == 2
     assert model.max_model_len == 8192
     assert model.pipeline_parallelism is True
@@ -188,11 +190,11 @@ def test_load_config_with_user_override(tmp_path, monkeypatch):
     user_config.write_text("""\
 models:
   c4ai-command-r-plus:
-    num_gpus: 8
+    gpus_per_node: 8
   new-model:
     model_family: new-family
     model_type: VLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 4096
@@ -204,7 +206,7 @@ models:
         config_map = {m.model_name: m for m in configs}
 
     # Verify override (merged with defaults)
-    assert config_map["c4ai-command-r-plus"].num_gpus == 8
+    assert config_map["c4ai-command-r-plus"].gpus_per_node == 8
     assert config_map["c4ai-command-r-plus"].num_nodes == 2
     assert config_map["c4ai-command-r-plus"].vocab_size == 256000
 
@@ -212,7 +214,7 @@ models:
     new_model = config_map["new-model"]
     assert new_model.model_family == "new-family"
     assert new_model.model_type == "VLM"
-    assert new_model.num_gpus == 4
+    assert new_model.gpus_per_node == 4
     assert new_model.vocab_size == 256000
 
 

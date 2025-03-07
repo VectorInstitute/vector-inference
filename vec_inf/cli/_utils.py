@@ -49,8 +49,7 @@ def read_slurm_log(
 
     # If log_dir is still not set, then didn't find the log dir at default location
     if not log_dir:
-        print("Could not determine log directory.")
-        return "LOG_DIR_NOT_FOUND"
+        return "LOG DIR NOT FOUND"
 
     try:
         file_path = (
@@ -65,8 +64,7 @@ def read_slurm_log(
             with file_path.open("r") as file:
                 return file.readlines()
     except FileNotFoundError:
-        print(f"Could not find file: {file_path}")
-        return "LOG_FILE_NOT_FOUND"
+        return f"LOG FILE NOT FOUND: {file_path}"
 
 
 def is_server_running(
@@ -95,7 +93,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
         return log_content
 
     server_addr = cast(dict, log_content).get("server_address")
-    return server_addr if server_addr else "URL_NOT_FOUND"
+    return server_addr if server_addr else "URL NOT FOUND"
 
 
 def model_health_check(
