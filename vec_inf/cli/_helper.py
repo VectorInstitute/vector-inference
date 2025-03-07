@@ -39,10 +39,10 @@ class LaunchHelper:
     ):
         self.model_name = model_name
         self.cli_kwargs = cli_kwargs
-        self.model_config = self.get_model_configuration()
-        self.params = self.get_launch_params()
+        self.model_config = self._get_model_configuration()
+        self.params = self._get_launch_params()
 
-    def get_model_configuration(self) -> ModelConfig:
+    def _get_model_configuration(self) -> ModelConfig:
         """Load and validate model configuration."""
         model_configs = utils.load_config()
         config = next(
@@ -80,20 +80,14 @@ class LaunchHelper:
             f"not found at expected path '{model_weights_path}'"
         )
 
-    def convert_boolean_value(self, value: Union[str, int, bool]) -> bool:
-        """Convert various input types to boolean strings."""
-        if isinstance(value, str):
-            return value.lower() == "true"
-        return bool(value)
-
-    def get_launch_params(self) -> dict[str, Any]:
+    def _get_launch_params(self) -> dict[str, Any]:
         """Merge config defaults with CLI overrides."""
         params = self.model_config.model_dump(exclude={"model_name"})
 
         # Process boolean fields
         for bool_field in ["pipeline_parallelism", "enforce_eager"]:
             if (value := self.cli_kwargs.get(bool_field)) is not None:
-                params[bool_field] = self.convert_boolean_value(value)
+                params[bool_field] = utils.convert_boolean_value(value)
 
         # Merge other overrides
         for key, value in self.cli_kwargs.items():

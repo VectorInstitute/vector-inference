@@ -177,3 +177,9 @@ def get_latest_metric(log_lines: list[str]) -> Union[str, dict[str, str]]:
         return f"[red]Error reading log file: {e}[/red]"
 
     return latest_metric
+
+def convert_boolean_value(value: Union[str, int, bool]) -> bool:
+    """Convert various input types to boolean strings."""
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return bool(value)
