@@ -14,6 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         --num-gpus) num_gpus="$2"; shift ;;
         --max-model-len) max_model_len="$2"; shift ;;
         --max-num-seqs) max_num_seqs="$2"; shift ;;
+        --gpu-memory-utilization) gpu_memory_utilization="$2"; shift ;;
         --vocab-size) vocab_size="$2"; shift ;;
         --data-type) data_type="$2"; shift ;;
         --venv) venv="$2"; shift ;;
@@ -65,6 +66,12 @@ if [ -n "$max_num_seqs" ]; then
     export VLLM_MAX_NUM_SEQS=$max_num_seqs
 else
     export VLLM_MAX_NUM_SEQS=256
+fi
+
+if [ -n "$gpu_memory_utilization" ]; then
+    export GPU_MEMORY_UTILIZATION=$gpu_memory_utilization
+else
+    export GPU_MEMORY_UTILIZATION=0.9
 fi
 
 if [ -n "$pipeline_parallelism" ]; then
@@ -123,6 +130,7 @@ echo Task: $VLLM_TASK
 echo Data Type: $VLLM_DATA_TYPE
 echo Max Model Length: $VLLM_MAX_MODEL_LEN
 echo Max Num Seqs: $VLLM_MAX_NUM_SEQS
+echo GPU Memory Utilization: $GPU_MEMORY_UTILIZATION
 echo Vocabulary Size: $VLLM_MAX_LOGPROBS
 echo Pipeline Parallelism: $PIPELINE_PARALLELISM
 echo Enforce Eager: $ENFORCE_EAGER

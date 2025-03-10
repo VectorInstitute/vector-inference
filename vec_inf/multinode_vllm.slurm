@@ -103,6 +103,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
     --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 else
@@ -119,6 +120,7 @@ else
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
     --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 fi

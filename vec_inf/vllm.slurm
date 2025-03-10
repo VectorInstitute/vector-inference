@@ -39,6 +39,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --trust-remote-code \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
     --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 else
@@ -54,6 +55,7 @@ else
     --trust-remote-code \
     --max-model-len ${VLLM_MAX_MODEL_LEN} \
     --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
     --task ${VLLM_TASK} \
     ${ENFORCE_EAGER}
 fi
