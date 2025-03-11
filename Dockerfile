@@ -40,16 +40,9 @@ WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN python3.10 -m uv sync --dev --all-extras
-
-# Configure virtual environment
-ENV VIRTUAL_ENV=/.venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-# Install Flash Attention with explicit build dependencies
-RUN . .venv/bin/activate && \
-    python3.10 -m pip install --upgrade setuptools packaging && \
-    python3.10 -m pip install flash-attn --no-build-isolation
+RUN PIP_INDEX_URL=“https://download.pytorch.org/whl/cu121” uv pip install --system -e “.[dev]”
+# Install Flash Attention
+RUN python3.10 -m pip install flash-attn --no-build-isolation
 
 # Final configuration
 RUN mkdir -p /vec-inf/nccl && \
