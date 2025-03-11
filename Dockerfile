@@ -40,7 +40,7 @@ WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN PIP_INDEX_URL=“https://download.pytorch.org/whl/cu121” uv pip install --system -e “.[dev]”
+RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
 # Install Flash Attention
 RUN python3.10 -m pip install flash-attn --no-build-isolation
 
