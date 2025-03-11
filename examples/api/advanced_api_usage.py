@@ -15,7 +15,13 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
 
-from vec_inf.api import LaunchOptions, ModelStatus, VecInfClient
+from vec_inf.api import (
+    LaunchOptions,
+    LaunchOptionsDict,
+    ModelStatus,
+    StatusResponse,
+    VecInfClient,
+)
 
 
 console = Console()
@@ -26,7 +32,7 @@ def create_openai_client(base_url: str) -> OpenAI:
     return OpenAI(base_url=base_url, api_key="EMPTY")
 
 
-def export_model_configs(output_file: str):
+def export_model_configs(output_file: str) -> None:
     """Export all model configurations to a JSON file."""
     client = VecInfClient()
     models = client.list_models()
@@ -54,15 +60,15 @@ def export_model_configs(output_file: str):
 
 def launch_with_custom_config(
     model_name: str, custom_options: Dict[str, Union[str, int, bool]]
-):
+) -> str:
     """Launch a model with custom configuration options."""
     client = VecInfClient()
 
     # Create LaunchOptions from dictionary
-    options_dict = {}
+    options_dict: LaunchOptionsDict = {}
     for key, value in custom_options.items():
         if key in LaunchOptions.__annotations__:
-            options_dict[key] = value
+            options_dict[key] = value  # type: ignore[literal-required]
         else:
             console.print(f"[yellow]Warning: Ignoring unknown option '{key}'[/yellow]")
 
@@ -70,8 +76,8 @@ def launch_with_custom_config(
 
     # Launch the model
     console.print(f"[blue]Launching model {model_name} with custom options:[/blue]")
-    for key, value in options_dict.items():
-        console.print(f"  [cyan]{key}[/cyan]: {value}")
+    for key, value in options_dict.items():  # type: ignore[assignment]
+        console.print(f" [cyan]{key}[/cyan]: {value}")
 
     response = client.launch_model(model_name, options)
 
@@ -81,7 +87,9 @@ def launch_with_custom_config(
     return response.slurm_job_id
 
 
-def monitor_with_rich_ui(job_id: str, poll_interval: int = 5, max_time: int = 1800):
+def monitor_with_rich_ui(
+    job_id: str, poll_interval: int = 5, max_time: int = 1800
+) -> StatusResponse:
     """Monitor a model's status with a rich UI."""
     client = VecInfClient()
 
@@ -143,7 +151,7 @@ def monitor_with_rich_ui(job_id: str, poll_interval: int = 5, max_time: int = 18
     return client.get_status(job_id)
 
 
-def stream_metrics(job_id: str, duration: int = 60, interval: int = 5):
+def stream_metrics(job_id: str, duration: int = 60, interval: int = 5) -> None:
     """Stream metrics for a specified duration."""
     client = VecInfClient()
 
@@ -174,7 +182,7 @@ def stream_metrics(job_id: str, duration: int = 60, interval: int = 5):
 
 def batch_inference_example(
     base_url: str, model_name: str, input_file: str, output_file: str
-):
+) -> None:
     """Perform batch inference on inputs from a file."""
     # Read inputs
     with open(input_file, "r") as f:
@@ -218,8 +226,8 @@ def batch_inference_example(
     )
 
 
-def main():
-    """Main function to parse arguments and run the selected function."""
+def main() -> None:
+    """Parse arguments and run the selected function."""
     parser = argparse.ArgumentParser(
         description="Advanced Vector Inference API usage examples"
     )
@@ -305,14 +313,11 @@ def main():
     elif args.command == "monitor":
         status = monitor_with_rich_ui(args.job_id, args.interval, args.max_time)
 
-        if status.status == ModelStatus.READY:
-            if (
-                console.input(
-                    "[cyan]Stream metrics for this model? (y/n): [/cyan]"
-                ).lower()
-                == "y"
-            ):
-                stream_metrics(args.job_id)
+        if (status.status == ModelStatus.READY) and (
+            console.input("[cyan]Stream metrics for this model? (y/n): [/cyan]").lower()
+            == "y"
+        ):
+            stream_metrics(args.job_id)
 
     elif args.command == "metrics":
         stream_metrics(args.job_id, args.duration, args.interval)

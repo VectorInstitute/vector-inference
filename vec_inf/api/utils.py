@@ -1,10 +1,11 @@
 """Utility functions for the Vector Inference API."""
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import requests
 
 from vec_inf.api.models import ModelStatus
+from vec_inf.cli._config import ModelConfig
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
     SERVER_ADDRESS_SIGNATURE,
@@ -40,20 +41,24 @@ class ServerError(APIError):
     pass
 
 
-def load_models():
+def load_models() -> list[ModelConfig]:
     """Load model configurations."""
     return cli_load_config()
 
 
-def parse_launch_output(output: str) -> Tuple[str, Dict[str, str]]:
+def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
     """Parse output from model launch command.
 
-    Args:
-        output: Output from the launch command
+    Parameters
+    ----------
+    output: str
+        Output from the launch command
 
     Returns
     -------
-        Tuple of (slurm_job_id, dict of config key-value pairs)
+    tuple[str, dict[str, str]]
+        Slurm job ID and dictionary of config parameters
+
     """
     slurm_job_id = output.split(" ")[-1].strip().strip("\n")
 
@@ -70,16 +75,21 @@ def parse_launch_output(output: str) -> Tuple[str, Dict[str, str]]:
 
 def get_model_status(
     slurm_job_id: str, log_dir: Optional[str] = None
-) -> Tuple[ModelStatus, Dict[str, Any]]:
+) -> tuple[ModelStatus, dict[str, Any]]:
     """Get the status of a model.
 
-    Args:
-        slurm_job_id: The Slurm job ID
-        log_dir: Optional path to Slurm log directory
+    Parameters
+    ----------
+    slurm_job_id: str
+        The Slurm job ID
+    log_dir: str, optional
+        Optional path to Slurm log directory
 
     Returns
     -------
-        Tuple of (ModelStatus, dict with additional status info)
+    tuple[ModelStatus, dict[str, Any]]
+        Model status and status information
+
     """
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
     output = run_bash_command(status_cmd)
@@ -92,8 +102,8 @@ def get_model_status(
     try:
         job_name = output.split(" ")[1].split("=")[1]
         job_state = output.split(" ")[9].split("=")[1]
-    except IndexError:
-        raise SlurmJobError(f"Could not parse job status for {slurm_job_id}")
+    except IndexError as err:
+        raise SlurmJobError(f"Could not parse job status for {slurm_job_id}") from err
 
     status_info = {
         "model_name": job_name,
@@ -122,70 +132,80 @@ def get_model_status(
 
 
 def check_server_status(
-    job_name: str, job_id: str, log_dir: Optional[str], status_info: Dict[str, Any]
-) -> Tuple[ModelStatus, Dict[str, Any]]:
-    """Check the status of a running inference server.
-
-    Args:
-        job_name: The name of the Slurm job
-        job_id: The Slurm job ID
-        log_dir: Optional path to Slurm log directory
-        status_info: Dictionary to update with status information
-
-    Returns
-    -------
-        Tuple of (ModelStatus, updated status_info)
-    """
-    # Read error log to check if server is running
+    job_name: str, job_id: str, log_dir: Optional[str], status_info: dict[str, Any]
+) -> tuple[ModelStatus, dict[str, Any]]:
+    """Check the status of a running inference server."""
+    # Initialize default status
+    final_status = ModelStatus.LAUNCHING
     log_content = read_slurm_log(job_name, int(job_id), "err", log_dir)
+
+    # Handle initial log reading error
     if isinstance(log_content, str):
         status_info["failed_reason"] = log_content
         return ModelStatus.FAILED, status_info
 
-    # Check for errors or if server is ready
+    # Process log content
     for line in log_content:
-        if "error" in line.lower():
-            status_info["failed_reason"] = line.strip("\n")
-            return ModelStatus.FAILED, status_info
+        line_lower = line.lower()
 
+        # Check for error indicators
+        if "error" in line_lower:
+            status_info["failed_reason"] = line.strip("\n")
+            final_status = ModelStatus.FAILED
+            break
+
+        # Check for server ready signal
         if MODEL_READY_SIGNATURE in line:
-            # Server is running, get URL and check health
             base_url = get_base_url(job_name, int(job_id), log_dir)
+
+            # Validate base URL
             if not isinstance(base_url, str) or not base_url.startswith("http"):
                 status_info["failed_reason"] = f"Invalid base URL: {base_url}"
-                return ModelStatus.FAILED, status_info
+                final_status = ModelStatus.FAILED
+                break
 
             status_info["base_url"] = base_url
+            final_status = _perform_health_check(base_url, status_info)
+            break  # Stop processing after first ready signature
 
-            # Check if the server is healthy
-            health_check_url = base_url.replace("v1", "health")
-            try:
-                response = requests.get(health_check_url)
-                if response.status_code == 200:
-                    return ModelStatus.READY, status_info
-                status_info["failed_reason"] = (
-                    f"Health check failed with status code {response.status_code}"
-                )
-                return ModelStatus.FAILED, status_info
-            except requests.exceptions.RequestException as e:
-                status_info["failed_reason"] = f"Health check request error: {str(e)}"
-                return ModelStatus.FAILED, status_info
+    return final_status, status_info
 
-    # If we get here, server is running but not yet ready
-    return ModelStatus.LAUNCHING, status_info
+
+def _perform_health_check(base_url: str, status_info: dict[str, Any]) -> ModelStatus:
+    """Execute health check and return appropriate status."""
+    health_check_url = base_url.replace("v1", "health")
+
+    try:
+        response = requests.get(health_check_url)
+        if response.status_code == 200:
+            return ModelStatus.READY
+
+        status_info["failed_reason"] = (
+            f"Health check failed with status code {response.status_code}"
+        )
+    except requests.exceptions.RequestException as e:
+        status_info["failed_reason"] = f"Health check request error: {str(e)}"
+
+    return ModelStatus.FAILED
 
 
 def get_base_url(job_name: str, job_id: int, log_dir: Optional[str]) -> str:
     """Get the base URL of a running model.
 
-    Args:
-        job_name: The name of the Slurm job
-        job_id: The Slurm job ID
-        log_dir: Optional path to Slurm log directory
+    Parameters
+    ----------
+    job_name: str
+        The name of the Slurm job
+    job_id: int
+        The Slurm job ID
+    log_dir: str, optional
+        Optional path to Slurm log directory
 
     Returns
     -------
+    str
         The base URL string or an error message
+
     """
     log_content = read_slurm_log(job_name, job_id, "out", log_dir)
     if isinstance(log_content, str):
@@ -197,17 +217,23 @@ def get_base_url(job_name: str, job_id: int, log_dir: Optional[str]) -> str:
     return "URL_NOT_FOUND"
 
 
-def get_metrics(job_name: str, job_id: int, log_dir: Optional[str]) -> Dict[str, str]:
+def get_metrics(job_name: str, job_id: int, log_dir: Optional[str]) -> dict[str, str]:
     """Get the latest metrics for a model.
 
-    Args:
-        job_name: The name of the Slurm job
-        job_id: The Slurm job ID
-        log_dir: Optional path to Slurm log directory
+    Parameters
+    ----------
+    job_name: str
+        The name of the Slurm job
+    job_id: int
+        The Slurm job ID
+    log_dir: str, optional
+        Optional path to Slurm log directory
 
     Returns
     -------
+    dict[str, str]
         Dictionary of metrics or empty dict if not found
+
     """
     log_content = read_slurm_log(job_name, job_id, "out", log_dir)
     if isinstance(log_content, str):

@@ -7,7 +7,9 @@ for both request parameters and response objects.
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TypedDict
+
+from typing_extensions import NotRequired
 
 
 class ModelStatus(str, Enum):
@@ -118,3 +120,24 @@ class LaunchOptions:
     model_weights_parent_dir: Optional[str] = None
     pipeline_parallelism: Optional[bool] = None
     enforce_eager: Optional[bool] = None
+
+
+class LaunchOptionsDict(TypedDict):
+    """TypedDict for LaunchOptions."""
+
+    model_family: NotRequired[Optional[str]]
+    model_variant: NotRequired[Optional[str]]
+    max_model_len: NotRequired[Optional[int]]
+    max_num_seqs: NotRequired[Optional[int]]
+    partition: NotRequired[Optional[str]]
+    num_nodes: NotRequired[Optional[int]]
+    num_gpus: NotRequired[Optional[int]]
+    qos: NotRequired[Optional[str]]
+    time: NotRequired[Optional[str]]
+    vocab_size: NotRequired[Optional[int]]
+    data_type: NotRequired[Optional[str]]
+    venv: NotRequired[Optional[str]]
+    log_dir: NotRequired[Optional[str]]
+    model_weights_parent_dir: NotRequired[Optional[str]]
+    pipeline_parallelism: NotRequired[Optional[bool]]
+    enforce_eager: NotRequired[Optional[bool]]

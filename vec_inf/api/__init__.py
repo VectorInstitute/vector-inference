@@ -8,6 +8,7 @@ without relying on the command-line interface.
 from vec_inf.api.client import VecInfClient
 from vec_inf.api.models import (
     LaunchOptions,
+    LaunchOptionsDict,
     LaunchResponse,
     MetricsResponse,
     ModelConfig,
@@ -28,4 +29,5 @@ __all__ = [
     "ModelStatus",
     "ModelType",
     "LaunchOptions",
+    "LaunchOptionsDict",
 ]

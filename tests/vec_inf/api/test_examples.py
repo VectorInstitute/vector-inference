@@ -74,12 +74,12 @@ def test_api_usage_example():
     mock_client.get_metrics.return_value = metrics_response
 
     # Mock the VecInfClient class
-    with patch("vec_inf.api.VecInfClient", return_value=mock_client):
-        # Mock print to avoid output
-        with patch("builtins.print"):
-            # Execute the script
-            with open(example_path) as f:
-                exec(f.read())
+    with (
+        patch("vec_inf.api.VecInfClient", return_value=mock_client),
+        patch("builtins.print"),
+        open(example_path) as f,
+    ):
+        exec(f.read())
 
     # Verify the client methods were called
     mock_client.list_models.assert_called_once()
@@ -87,32 +87,3 @@ def test_api_usage_example():
     mock_client.wait_until_ready.assert_called_once()
     mock_client.get_metrics.assert_called_once()
     mock_client.shutdown_model.assert_called_once()
-
-
-@pytest.mark.skipif(
-    not os.path.exists(os.path.join("examples", "api", "api_usage.py")),
-    reason="Example file not found",
-)
-def test_openai_client_compatibility():
-    """Test that OpenAI client can be used with API base URLs."""
-    # Create a mock for the OpenAI client
-    mock_openai_client = MagicMock()
-
-    # Create a mock for the VecInfClient
-    mock_vec_inf_client = MagicMock(spec=VecInfClient)
-    status = MagicMock()
-    status.base_url = "http://gpu123:8080/v1"
-    mock_vec_inf_client.wait_until_ready.return_value = status
-
-    # Mock the OpenAI class
-    with patch("openai.OpenAI", return_value=mock_openai_client) as mock_openai_class:
-        # Get URL from the API
-        model_status = mock_vec_inf_client.wait_until_ready("123456")
-
-        # Create OpenAI client with the URL
-        from openai import OpenAI
-
-        openai_client = OpenAI(base_url=model_status.base_url, api_key="")
-
-        # Verify mocks were called as expected
-        mock_openai_class.assert_called_with(base_url=status.base_url, api_key="")

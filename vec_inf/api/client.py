@@ -13,7 +13,6 @@ from vec_inf.api.models import (
     LaunchOptions,
     LaunchResponse,
     MetricsResponse,
-    ModelConfig,
     ModelInfo,
     ModelStatus,
     ModelType,
@@ -29,6 +28,7 @@ from vec_inf.api.utils import (
     load_models,
     parse_launch_output,
 )
+from vec_inf.cli._config import ModelConfig
 from vec_inf.cli._utils import run_bash_command
 
 
@@ -41,27 +41,18 @@ class VecInfClient:
 
     Examples
     --------
-        ```python
-        from vec_inf.api import VecInfClient
+    >>> from vec_inf.api import VecInfClient
+    >>> client = VecInfClient()
+    >>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
+    >>> job_id = response.slurm_job_id
+    >>> status = client.get_status(job_id)
+    >>> if status.status == ModelStatus.READY:
+    ...     print(f"Model is ready at {status.base_url}")
+    >>> client.shutdown_model(job_id)
 
-        # Create a client
-        client = VecInfClient()
-
-        # Launch a model
-        response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
-        job_id = response.slurm_job_id
-
-        # Check status
-        status = client.get_status(job_id)
-        if status.status == ModelStatus.READY:
-            print(f"Model is ready at {status.base_url}")
-
-        # Shutdown when done
-        client.shutdown_model(job_id)
-        ```
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Vector Inference client."""
         pass
 
@@ -70,11 +61,14 @@ class VecInfClient:
 
         Returns
         -------
-            List of ModelInfo objects containing information about available models.
+        List[ModelInfo]
+            ModelInfo objects containing information about available models.
 
         Raises
         ------
-            APIError: If there was an error retrieving model information.
+        APIError
+            If there was an error retrieving model information.
+
         """
         try:
             model_configs = load_models()
@@ -97,17 +91,22 @@ class VecInfClient:
     def get_model_config(self, model_name: str) -> ModelConfig:
         """Get the configuration for a specific model.
 
-        Args:
-            model_name: Name of the model to get configuration for.
+        Parameters
+        ----------
+        model_name: str
+            Name of the model to get configuration for.
 
         Returns
         -------
-            ModelConfig object containing the model's configuration.
+        ModelConfig
+            Model configuration.
 
         Raises
         ------
-            ModelNotFoundError: If the specified model is not found.
-            APIError: If there was an error retrieving the model configuration.
+        ModelNotFoundError
+            Error if the specified model is not found.
+        APIError
+                Error if there was an error retrieving the model configuration.
         """
         try:
             model_configs = load_models()
@@ -126,18 +125,24 @@ class VecInfClient:
     ) -> LaunchResponse:
         """Launch a model on the cluster.
 
-        Args:
-            model_name: Name of the model to launch.
-            options: Optional launch options to override default configuration.
+        Parameters
+        ----------
+        model_name: str
+            Name of the model to launch.
+        options: LaunchOptions, optional
+            Optional launch options to override default configuration.
 
         Returns
         -------
-            LaunchResponse object containing information about the launched model.
+        LaunchResponse
+            Information about the launched model.
 
         Raises
         ------
-            ModelNotFoundError: If the specified model is not found.
-            APIError: If there was an error launching the model.
+        ModelNotFoundError
+            Error if the specified model is not found.
+        APIError
+            Error if there was an error launching the model.
         """
         try:
             # Build the launch command
@@ -198,18 +203,24 @@ class VecInfClient:
     ) -> StatusResponse:
         """Get the status of a running model.
 
-        Args:
-            slurm_job_id: The Slurm job ID to check.
-            log_dir: Optional path to the Slurm log directory.
+        Parameters
+        ----------
+        slurm_job_id: str
+            The Slurm job ID to check.
+        log_dir: str, optional
+            Optional path to the Slurm log directory.
 
         Returns
         -------
-            StatusResponse object containing the model's status information.
+        StatusResponse
+            Model status information.
 
         Raises
         ------
-            SlurmJobError: If the specified job is not found or there's an error with the job.
-            APIError: If there was an error retrieving the status.
+        SlurmJobError
+            Error if the specified job is not found or there's an error with the job.
+        APIError
+            Error if there was an error retrieving the status.
         """
         try:
             status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
@@ -236,18 +247,25 @@ class VecInfClient:
     ) -> MetricsResponse:
         """Get the performance metrics of a running model.
 
-        Args:
-            slurm_job_id: The Slurm job ID to get metrics for.
-            log_dir: Optional path to the Slurm log directory.
+        Parameters
+        ----------
+        slurm_job_id : str
+            The Slurm job ID to get metrics for.
+        log_dir : str, optional
+            Optional path to the Slurm log directory.
 
         Returns
         -------
-            MetricsResponse object containing the model's performance metrics.
+        MetricsResponse
+            Object containing the model's performance metrics.
 
         Raises
         ------
-            SlurmJobError: If the specified job is not found or there's an error with the job.
-            APIError: If there was an error retrieving the metrics.
+        SlurmJobError
+            If the specified job is not found or there's an error with the job.
+        APIError
+            If there was an error retrieving the metrics.
+
         """
         try:
             # First check if the job exists and get the job name
@@ -300,21 +318,31 @@ class VecInfClient:
     ) -> StatusResponse:
         """Wait until a model is ready or fails.
 
-        Args:
-            slurm_job_id: The Slurm job ID to wait for.
-            timeout_seconds: Maximum time to wait in seconds (default: 30 minutes).
-            poll_interval_seconds: How often to check status in seconds (default: 10 seconds).
-            log_dir: Optional path to the Slurm log directory.
+        Parameters
+        ----------
+        slurm_job_id: str
+            The Slurm job ID to wait for.
+        timeout_seconds: int
+            Maximum time to wait in seconds (default: 30 mins).
+        poll_interval_seconds: int
+            How often to check status in seconds (default: 10s).
+        log_dir: str, optional
+            Optional path to the Slurm log directory.
 
         Returns
         -------
-            StatusResponse object once the model is ready or failed.
+        StatusResponse
+            Status, if the model is ready or failed.
 
         Raises
         ------
-            SlurmJobError: If the specified job is not found or there's an error with the job.
-            ServerError: If the server fails to start within the timeout period.
-            APIError: If there was an error checking the status.
+        SlurmJobError
+            If the specified job is not found or there's an error with the job.
+        ServerError
+            If the server fails to start within the timeout period.
+        APIError
+            If there was an error checking the status.
+
         """
         start_time = time.time()
 

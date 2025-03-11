@@ -47,7 +47,6 @@ def test_list_models():
     client = VecInfClient()
 
     # Replace the list_models method with a lambda that returns our mock model
-    original_list_models = client.list_models
     client.list_models = lambda: [mock_model]
 
     # Call the mocked method
@@ -67,21 +66,22 @@ def test_launch_model(mock_model_config, mock_launch_output):
     # Create mocks for all the dependencies
     client.get_model_config = MagicMock(return_value=MagicMock())
 
-    with patch("vec_inf.cli._utils.run_bash_command", return_value=mock_launch_output):
-        with patch("vec_inf.api.utils.parse_launch_output", return_value="12345678"):
-            # Create a mock response
-            response = MagicMock()
-            response.slurm_job_id = "12345678"
-            response.model_name = "test-model"
+    with (
+        patch("vec_inf.cli._utils.run_bash_command", return_value=mock_launch_output),
+        patch("vec_inf.api.utils.parse_launch_output", return_value="12345678"),
+    ):
+        # Create a mock response
+        response = MagicMock()
+        response.slurm_job_id = "12345678"
+        response.model_name = "test-model"
 
-            # Replace the actual implementation
-            original_launch = client.launch_model
-            client.launch_model = lambda model_name, options=None: response
+        # Replace the actual implementation
+        client.launch_model = lambda model_name, options=None: response
 
-            result = client.launch_model("test-model")
+        result = client.launch_model("test-model")
 
-            assert result.slurm_job_id == "12345678"
-            assert result.model_name == "test-model"
+        assert result.slurm_job_id == "12345678"
+        assert result.model_name == "test-model"
 
 
 def test_get_status(mock_status_output):
