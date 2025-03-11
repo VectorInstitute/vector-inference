@@ -4,7 +4,7 @@
 
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml)
-[![codecov](https://codecov.io/github/VectorInstitute/vector-inference/graph/badge.svg?token=83MYFZ3UPA)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/develop)
+[![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/develop/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/develop)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
 This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](vec_inf/launch_server.sh), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.csv`](vec_inf/config/models.yaml) accordingly.
