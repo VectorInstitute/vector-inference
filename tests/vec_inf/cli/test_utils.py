@@ -8,6 +8,7 @@ import requests
 
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
+    convert_boolean_value,
     create_table,
     get_base_url,
     get_latest_metric,
@@ -16,7 +17,6 @@ from vec_inf.cli._utils import (
     model_health_check,
     read_slurm_log,
     run_bash_command,
-    convert_boolean_value
 )
 
 
@@ -47,7 +47,7 @@ def test_run_bash_command_error():
         mock_popen.return_value = mock_process
         result, stderr = run_bash_command("invalid_command")
         assert result == ""
-        assert stderr == "error output" 
+        assert stderr == "error output"
 
 
 def test_read_slurm_log_found(mock_log_dir):
@@ -63,7 +63,9 @@ def test_read_slurm_log_found(mock_log_dir):
 def test_read_slurm_log_not_found():
     """Test read_slurm_log, return an error message if the log file is not found."""
     result = read_slurm_log("missing_job", 456, "err", "/nonexistent")
-    assert result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456/missing_job.456.err"
+    assert (
+        result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456/missing_job.456.err"
+    )
 
 
 @pytest.mark.parametrize(
