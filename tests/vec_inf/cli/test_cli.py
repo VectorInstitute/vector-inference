@@ -47,9 +47,7 @@ def mock_exists():
 
     def _exists(path):
         # Return False for CACHED_CONFIG to fall back to default config
-        if str(path).endswith("vec-inf-shared/models.yaml"):
-            return False
-        return True
+        return not str(path).endswith("vec-inf-shared/models.yaml")
 
     return _exists
 
@@ -157,7 +155,13 @@ def mock_truediv(test_paths):
 
 
 def create_path_exists(test_paths, path_exists, exists_paths=None):
-    """Helper function to create path existence checker."""
+    """Create a path existence checker.
+
+    Args:
+        test_paths: Dictionary containing test paths
+        path_exists: Default path existence checker
+        exists_paths: Optional list of paths that should exist
+    """
 
     def _custom_path_exists(p):
         str_path = str(p)
@@ -208,7 +212,7 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
 
     with (
         patch("vec_inf.cli._utils.run_bash_command") as mock_run,
-        patch("pathlib.Path.mkdir") as mock_mkdir,
+        patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.exists", new=path_exists),
@@ -217,8 +221,8 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
         patch(
             "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
         ),
-        patch("json.dump") as mock_json_dump,
-        patch("pathlib.Path.touch") as mock_touch,
+        patch("json.dump"),
+        patch("pathlib.Path.touch"),
         patch("pathlib.Path.__truediv__", return_value=test_log_dir),
     ):
         expected_job_id = "14933053"
@@ -239,7 +243,7 @@ def test_launch_command_with_json_output(
     test_log_dir = Path("/tmp/test_vec_inf_logs")
     with (
         patch("vec_inf.cli._utils.run_bash_command") as mock_run,
-        patch("pathlib.Path.mkdir") as mock_mkdir,
+        patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.exists", new=path_exists),
@@ -248,8 +252,8 @@ def test_launch_command_with_json_output(
         patch(
             "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
         ),
-        patch("json.dump") as mock_json_dump,
-        patch("pathlib.Path.touch") as mock_touch,
+        patch("json.dump"),
+        patch("pathlib.Path.touch"),
         patch("pathlib.Path.__truediv__", return_value=test_log_dir),
     ):
         expected_job_id = "14933051"
@@ -325,9 +329,7 @@ def test_launch_command_model_not_found(
         ):
             return False
         # Allow access to the default config file
-        if str_path.endswith("config/models.yaml"):
-            return True
-        return False
+        return str_path.endswith("config/models.yaml")
 
     with ExitStack() as stack:
         # Apply all base patches except the Path mock
