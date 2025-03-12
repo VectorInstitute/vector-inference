@@ -4,13 +4,11 @@ import time
 from typing import Optional, Union, cast
 
 import click
-from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
-from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
-from vec_inf.cli._helper import LaunchHelper, StatusHelper
+from vec_inf.cli._helper import LaunchHelper, ListHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -166,63 +164,8 @@ def shutdown(slurm_job_id: int) -> None:
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
-    model_configs = utils.load_config()
-
-    def list_single_model(target_name: str) -> None:
-        config = next((c for c in model_configs if c.model_name == target_name), None)
-        if not config:
-            raise click.ClickException(
-                f"Model '{target_name}' not found in configuration"
-            )
-
-        if json_mode:
-            # Exclude non-essential fields from JSON output
-            excluded = {"venv", "log_dir"}
-            output = config.model_dump(exclude=excluded)
-            click.echo(output)
-        else:
-            table = utils.create_table(key_title="Model Config", value_title="Value")
-            for field, value in config.model_dump().items():
-                if field not in {"venv", "log_dir"}:
-                    table.add_row(field, str(value))
-            CONSOLE.print(table)
-
-    def list_all_models() -> None:
-        if json_mode:
-            click.echo([config.model_name for config in model_configs])
-            return
-
-        # Sort by model type priority
-        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
-
-        sorted_configs = sorted(
-            model_configs, key=lambda x: type_priority.get(x.model_type, 4)
-        )
-
-        # Create panels with color coding
-        model_type_colors = {
-            "LLM": "cyan",
-            "VLM": "bright_blue",
-            "Text_Embedding": "purple",
-            "Reward_Modeling": "bright_magenta",
-        }
-
-        panels = []
-        for config in sorted_configs:
-            color = model_type_colors.get(config.model_type, "white")
-            variant = config.model_variant or ""
-            display_text = f"[magenta]{config.model_family}[/magenta]"
-            if variant:
-                display_text += f"-{variant}"
-
-            panels.append(Panel(display_text, expand=True, border_style=color))
-
-        CONSOLE.print(Columns(panels, equal=True))
-
-    if model_name:
-        list_single_model(model_name)
-    else:
-        list_all_models()
+    list_helper = ListHelper(model_name, json_mode)
+    list_helper.process_list_command(CONSOLE)
 
 
 @cli.command("metrics")

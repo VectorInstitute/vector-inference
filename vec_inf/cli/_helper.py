@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import Any, Optional, Union, cast
 
 import click
+from rich.columns import Columns
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
 import vec_inf.cli._utils as utils
@@ -310,3 +312,97 @@ class StatusHelper:
 
         table.add_row("Base URL", self.status_info["base_url"])
         console.print(table)
+
+
+class ListHelper:
+    """Helper class for handling model listing functionality."""
+
+    def __init__(self, model_name: Optional[str] = None, json_mode: bool = False):
+        self.model_name = model_name
+        self.json_mode = json_mode
+        self.model_configs = utils.load_config()
+
+    def get_single_model_config(self) -> ModelConfig:
+        """Get configuration for a specific model."""
+        config = next(
+            (c for c in self.model_configs if c.model_name == self.model_name), None
+        )
+        if not config:
+            raise click.ClickException(
+                f"Model '{self.model_name}' not found in configuration"
+            )
+        return config
+
+    def format_single_model_output(
+        self, config: ModelConfig
+    ) -> Union[dict[str, Any], Table]:
+        """Format output for a single model."""
+        if self.json_mode:
+            # Exclude non-essential fields from JSON output
+            excluded = {"venv", "log_dir"}
+            config_dict = config.model_dump(exclude=excluded)
+            # Convert Path objects to strings
+            config_dict["model_weights_parent_dir"] = str(
+                config_dict["model_weights_parent_dir"]
+            )
+            return config_dict
+
+        table = utils.create_table(key_title="Model Config", value_title="Value")
+        for field, value in config.model_dump().items():
+            if field not in {"venv", "log_dir"}:
+                table.add_row(field, str(value))
+        return table
+
+    def format_all_models_output(self) -> Union[list[str], list[Panel]]:
+        """Format output for all models."""
+        if self.json_mode:
+            return [config.model_name for config in self.model_configs]
+
+        # Sort by model type priority
+        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
+        sorted_configs = sorted(
+            self.model_configs, key=lambda x: type_priority.get(x.model_type, 4)
+        )
+
+        # Create panels with color coding
+        model_type_colors = {
+            "LLM": "cyan",
+            "VLM": "bright_blue",
+            "Text_Embedding": "purple",
+            "Reward_Modeling": "bright_magenta",
+        }
+
+        panels = []
+        for config in sorted_configs:
+            color = model_type_colors.get(config.model_type, "white")
+            variant = config.model_variant or ""
+            display_text = f"[magenta]{config.model_family}[/magenta]"
+            if variant:
+                display_text += f"-{variant}"
+            panels.append(Panel(display_text, expand=True, border_style=color))
+
+        return panels
+
+    def process_list_command(self, console: Console) -> None:
+        """Process the list command and display output."""
+        try:
+            if self.model_name:
+                # Handle single model case
+                config = self.get_single_model_config()
+                output = self.format_single_model_output(config)
+                if self.json_mode:
+                    click.echo(output)
+                else:
+                    console.print(output)
+            # Handle all models case
+            elif self.json_mode:
+                # JSON output for all models is just a list of names
+                model_names = [config.model_name for config in self.model_configs]
+                click.echo(model_names)
+            else:
+                # Rich output for all models is a list of panels
+                panels = self.format_all_models_output()
+                if isinstance(panels, list):  # This helps mypy understand the type
+                    console.print(Columns(panels, equal=True))
+        except Exception as e:
+            raise click.ClickException(str(e)) from e
