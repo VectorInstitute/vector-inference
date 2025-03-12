@@ -1158,7 +1158,7 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
+    max_model_len: 4096
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
@@ -1176,7 +1176,7 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
+    max_model_len: 4096
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
@@ -1194,7 +1194,7 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 16384
+    max_model_len: 4096
     max_num_seqs: 256
     pipeline_parallelism: true
     enforce_eager: false
@@ -1228,6 +1228,24 @@ models:
     model_variant: Math-RM-72B
     model_type: Reward_Modeling
     gpus_per_node: 4
+    num_nodes: 1
+    vocab_size: 152064
+    max_model_len: 4096
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: ~/.vec-inf-logs
+    model_weights_parent_dir: /model-weights
+  Qwen2.5-Math-PRM-7B:
+    model_family: Qwen2.5
+    model_variant: Math-PRM-7B
+    model_type: Reward_Modeling
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 4096
