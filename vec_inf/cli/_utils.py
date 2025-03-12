@@ -14,7 +14,7 @@ from vec_inf.cli._config import ModelConfig
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
-CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "config.yaml")
+CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "models.yaml")
 
 
 def run_bash_command(command: str) -> tuple[str, str]:
