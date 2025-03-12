@@ -76,13 +76,13 @@ class LaunchHelper:
                 model_weights_parent_dir=Path(cast(str, model_weights_parent_dir)),
             )
         raise click.ClickException(
-            f"Model '{self.model_name}' not found in configuration and model weights "
+            f"'{self.model_name}' not found in configuration and model weights "
             f"not found at expected path '{model_weights_path}'"
         )
 
     def _get_launch_params(self) -> dict[str, Any]:
         """Merge config defaults with CLI overrides."""
-        params = self.model_config.model_dump(exclude={"model_name"})
+        params = self.model_config.model_dump()
 
         # Process boolean fields
         for bool_field in ["pipeline_parallelism", "enforce_eager"]:
@@ -212,9 +212,9 @@ class StatusHelper:
         self.slurm_job_id = slurm_job_id
         self.output = output
         self.log_dir = log_dir
-        self.status_info = self.get_base_status_data()
+        self.status_info = self._get_base_status_data()
 
-    def get_base_status_data(self) -> dict[str, Union[str, None]]:
+    def _get_base_status_data(self) -> dict[str, Union[str, None]]:
         """Extract basic job status information from scontrol output."""
         try:
             job_name = self.output.split(" ")[1].split("=")[1]
