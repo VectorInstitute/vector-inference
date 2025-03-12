@@ -59,7 +59,8 @@ def read_slurm_log(
         )
         if slurm_log_type == "json":
             with file_path.open("r") as file:
-                return json.load(file)
+                json_content: dict[str, str] = json.load(file)
+                return json_content
         else:
             with file_path.open("r") as file:
                 return file.readlines()
@@ -92,7 +93,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
     if isinstance(log_content, str):
         return log_content
 
-    server_addr = cast(dict, log_content).get("server_address")
+    server_addr = cast(dict[str, str], log_content).get("server_address")
     return server_addr if server_addr else "URL NOT FOUND"
 
 
