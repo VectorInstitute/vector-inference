@@ -31,7 +31,7 @@ echo "IP Head: $ip_head"
 echo "Starting HEAD at $head_node"
 if [ "$VENV_BASE" = "singularity" ]; then
     srun --nodes=1 --ntasks=1 -w "$head_node" \
-        singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
+        singularity exec --nv --bind ${MODEL_WEIGHTS}:${MODEL_WEIGHTS} $SINGULARITY_IMAGE \
         ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \
         --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${SLURM_GPUS_PER_NODE}" --block &
 else
@@ -52,7 +52,7 @@ for ((i = 1; i <= worker_num; i++)); do
     echo "Starting WORKER $i at $node_i"
     if [ "$VENV_BASE" = "singularity" ]; then
         srun --nodes=1 --ntasks=1 -w "$node_i" \
-            singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
+            singularity exec --nv --bind ${MODEL_WEIGHTS}:${MODEL_WEIGHTS} $SINGULARITY_IMAGE \
             ray start --address "$ip_head" \
             --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${SLURM_GPUS_PER_NODE}" --block &
     else
@@ -92,37 +92,37 @@ fi
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
+    singularity exec --nv --bind ${MODEL_WEIGHTS}:${MODEL_WEIGHTS} $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
-    --model ${VLLM_MODEL_WEIGHTS} \
+    --model ${MODEL_WEIGHTS} \
     --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
     --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
-    --dtype ${VLLM_DATA_TYPE} \
+    --dtype ${DATA_TYPE} \
     --trust-remote-code \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} \
-    --max-model-len ${VLLM_MAX_MODEL_LEN} \
-    --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --max-logprobs ${MAX_LOGPROBS} \
+    --max-model-len ${MAX_MODEL_LEN} \
+    --max-num-seqs ${MAX_NUM_SEQS} \
     --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
-    --task ${VLLM_TASK} \
+    --task ${TASK} \
     ${ENFORCE_EAGER}
 else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
-    --model ${VLLM_MODEL_WEIGHTS} \
+    --model ${MODEL_WEIGHTS} \
     --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
     --pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \
     --tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \
-    --dtype ${VLLM_DATA_TYPE} \
+    --dtype ${DATA_TYPE} \
     --trust-remote-code \
-    --max-logprobs ${VLLM_MAX_LOGPROBS} \
-    --max-model-len ${VLLM_MAX_MODEL_LEN} \
-    --max-num-seqs ${VLLM_MAX_NUM_SEQS} \
+    --max-logprobs ${MAX_LOGPROBS} \
+    --max-model-len ${MAX_MODEL_LEN} \
+    --max-num-seqs ${MAX_NUM_SEQS} \
     --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
-    --task ${VLLM_TASK} \
+    --task ${TASK} \
     ${ENFORCE_EAGER}
 fi
