@@ -119,15 +119,16 @@ class LaunchHelper:
     def set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
         os.environ["MODEL_NAME"] = self.model_name
-        os.environ["VLLM_MAX_MODEL_LEN"] = self.params["max_model_len"]
-        os.environ["VLLM_MAX_LOGPROBS"] = self.params["vocab_size"]
-        os.environ["VLLM_DATA_TYPE"] = self.params["data_type"]
-        os.environ["VLLM_MAX_NUM_SEQS"] = self.params["max_num_seqs"]
-        os.environ["VLLM_TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
+        os.environ["MAX_MODEL_LEN"] = self.params["max_model_len"]
+        os.environ["MAX_LOGPROBS"] = self.params["vocab_size"]
+        os.environ["DATA_TYPE"] = self.params["data_type"]
+        os.environ["MAX_NUM_SEQS"] = self.params["max_num_seqs"]
+        os.environ["GPU_MEMORY_UTILIZATION"] = self.params["gpu_memory_utilization"]
+        os.environ["TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
         os.environ["PIPELINE_PARALLELISM"] = self.params["pipeline_parallelism"]
         os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
         os.environ["SRC_DIR"] = SRC_DIR
-        os.environ["VLLM_MODEL_WEIGHTS"] = str(
+        os.environ["MODEL_WEIGHTS"] = str(
             Path(self.params["model_weights_parent_dir"], self.model_name)
         )
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
@@ -180,9 +181,10 @@ class LaunchHelper:
         table.add_row("Vocabulary Size", self.params["vocab_size"])
         table.add_row("Max Model Length", self.params["max_model_len"])
         table.add_row("Max Num Seqs", self.params["max_num_seqs"])
+        table.add_row("GPU Memory Utilization", self.params["gpu_memory_utilization"])
         table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
         table.add_row("Enforce Eager", self.params["enforce_eager"])
-        table.add_row("Model Weights Directory", os.environ.get("VLLM_MODEL_WEIGHTS"))
+        table.add_row("Model Weights Directory", os.environ.get("MODEL_WEIGHTS"))
         table.add_row("Log Directory", self.params["log_dir"])
 
         return table
