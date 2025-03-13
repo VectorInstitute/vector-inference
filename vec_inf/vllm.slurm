@@ -2,18 +2,20 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 
-# Load CUDA, change to the cuda version on your environment if different
-source /opt/lmod/lmod/init/profile
-module load cuda-12.3
-nvidia-smi
-
 source ${SRC_DIR}/find_port.sh
 
 # Write server url to file
 hostname=${SLURMD_NODENAME}
 vllm_port_number=$(find_available_port $hostname 8080 65535)
 
-echo "Server address: http://${hostname}:${vllm_port_number}/v1"
+SERVER_ADDR="http://${hostname}:${vllm_port_number}/v1"
+echo "Server address: $SERVER_ADDR"
+
+jq --arg server_addr "$SERVER_ADDR" \
+  '. + {"server_address": $server_addr}' \
+  "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" > temp.json \
+  && mv temp.json "$LOG_DIR/$MODEL_NAME.$SLURM_JOB_ID/$MODEL_NAME.$SLURM_JOB_ID.json" \
+  && rm temp.json
 
 if [ "$ENFORCE_EAGER" = "True" ]; then
     export ENFORCE_EAGER="--enforce-eager"
@@ -23,17 +25,17 @@ fi
 
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/projects/aieng/public/vector-inference_latest.sif
+    export SINGULARITY_IMAGE=/model-weights/vec-inf-shared/vector-inference_latest.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
     module load singularity-ce/3.8.2
     singularity exec $SINGULARITY_IMAGE ray stop
-    singularity exec --nv --bind ${MODEL_WEIGHTS_PARENT_DIR}:${MODEL_WEIGHTS_PARENT_DIR} $SINGULARITY_IMAGE \
+    singularity exec --nv --bind ${VLLM_MODEL_WEIGHTS}:${VLLM_MODEL_WEIGHTS} $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${JOB_NAME} \
+    --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
+    --tensor-parallel-size ${SLURM_GPUS_PER_NODE} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \
@@ -46,10 +48,10 @@ else
     source ${VENV_BASE}/bin/activate
     python3 -m vllm.entrypoints.openai.api_server \
     --model ${VLLM_MODEL_WEIGHTS} \
-    --served-model-name ${JOB_NAME} \
+    --served-model-name ${MODEL_NAME} \
     --host "0.0.0.0" \
     --port ${vllm_port_number} \
-    --tensor-parallel-size ${NUM_GPUS} \
+    --tensor-parallel-size ${SLURM_GPUS_PER_NODE} \
     --dtype ${VLLM_DATA_TYPE} \
     --max-logprobs ${VLLM_MAX_LOGPROBS} \
     --trust-remote-code \

@@ -38,7 +38,7 @@ class ModelConfig(BaseModel):
     model_type: Literal["LLM", "VLM", "Text_Embedding", "Reward_Modeling"] = Field(
         ..., description="Type of model architecture"
     )
-    num_gpus: int = Field(..., gt=0, le=8, description="GPUs per node")
+    gpus_per_node: int = Field(..., gt=0, le=8, description="GPUs per node")
     num_nodes: int = Field(..., gt=0, le=16, description="Number of nodes")
     vocab_size: int = Field(..., gt=0, le=1_000_000)
     max_model_len: int = Field(
