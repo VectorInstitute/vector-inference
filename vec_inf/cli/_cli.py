@@ -35,6 +35,11 @@ def cli() -> None:
     help="Maximum number of sequences to process in a single request",
 )
 @click.option(
+    "--gpu-memory-utilization",
+    type=float,
+    help="GPU memory utilization, default to 0.9",
+)
+@click.option(
     "--partition",
     type=str,
     help="Type of compute partition",
