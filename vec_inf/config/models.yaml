@@ -8,6 +8,7 @@ models:
     vocab_size: 256000
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -26,6 +27,7 @@ models:
     vocab_size: 256000
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -44,6 +46,7 @@ models:
     vocab_size: 256000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -62,6 +65,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -80,6 +84,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -98,6 +103,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -116,6 +122,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -134,6 +141,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -152,6 +160,7 @@ models:
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -170,6 +179,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -188,6 +198,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -206,6 +217,7 @@ models:
     vocab_size: 100352
     max_model_len: 32000
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -224,6 +236,7 @@ models:
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -242,6 +255,7 @@ models:
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -260,6 +274,7 @@ models:
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -278,6 +293,7 @@ models:
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -296,6 +312,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -314,6 +331,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -332,6 +350,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -350,6 +369,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -368,6 +388,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -386,6 +407,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -404,6 +426,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -422,6 +445,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -440,6 +464,7 @@ models:
     vocab_size: 32064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -458,6 +483,7 @@ models:
     vocab_size: 64064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -476,6 +502,7 @@ models:
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -494,6 +521,7 @@ models:
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -512,6 +540,7 @@ models:
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -530,6 +559,7 @@ models:
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -548,6 +578,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -566,6 +597,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -584,6 +616,7 @@ models:
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -602,6 +635,7 @@ models:
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -620,6 +654,7 @@ models:
     vocab_size: 128256
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m4
@@ -638,6 +673,7 @@ models:
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -656,6 +692,7 @@ models:
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -674,6 +711,7 @@ models:
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -692,6 +730,7 @@ models:
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -710,6 +749,7 @@ models:
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -728,6 +768,7 @@ models:
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -746,6 +787,7 @@ models:
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -764,6 +806,7 @@ models:
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -782,6 +825,7 @@ models:
     vocab_size: 32768
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -800,6 +844,7 @@ models:
     vocab_size: 32768
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -818,6 +863,7 @@ models:
     vocab_size: 32064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -836,6 +882,7 @@ models:
     vocab_size: 32064
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -854,6 +901,7 @@ models:
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -872,6 +920,7 @@ models:
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -890,6 +939,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -908,6 +958,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -926,6 +977,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -944,6 +996,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -962,6 +1015,7 @@ models:
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 64
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -980,6 +1034,7 @@ models:
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 64
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -998,6 +1053,7 @@ models:
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 32
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -1016,6 +1072,7 @@ models:
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 32
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -1034,6 +1091,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1052,6 +1110,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1070,6 +1129,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1088,6 +1148,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1106,6 +1167,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1124,6 +1186,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1142,6 +1205,7 @@ models:
     vocab_size: 152064
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1160,6 +1224,7 @@ models:
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1178,6 +1243,7 @@ models:
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1196,6 +1262,7 @@ models:
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1214,6 +1281,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1232,6 +1300,7 @@ models:
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1250,6 +1319,7 @@ models:
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1268,6 +1338,7 @@ models:
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1286,6 +1357,7 @@ models:
     vocab_size: 131072
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1304,6 +1376,7 @@ models:
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1322,6 +1395,7 @@ models:
     vocab_size: 30522
     max_model_len: 512
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1340,6 +1414,7 @@ models:
     vocab_size: 30522
     max_model_len: 512
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1358,6 +1433,7 @@ models:
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1376,6 +1452,7 @@ models:
     vocab_size: 92553
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1394,6 +1471,7 @@ models:
     vocab_size: 92553
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1412,6 +1490,7 @@ models:
     vocab_size: 256000
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1430,6 +1509,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1448,6 +1528,7 @@ models:
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1466,6 +1547,7 @@ models:
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1484,6 +1566,7 @@ models:
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1502,6 +1585,7 @@ models:
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1520,6 +1604,7 @@ models:
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
