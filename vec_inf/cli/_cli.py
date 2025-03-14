@@ -40,6 +40,21 @@ def cli() -> None:
     help="GPU memory utilization, default to 0.9",
 )
 @click.option(
+    "--enable-prefix-caching",
+    type=click.Choice(["True", "False"]),
+    help="Enables automatic prefix caching, accepts 'True' or 'False', default to 'False'",
+)
+@click.option(
+    "--enable-chunked-prefill",
+    type=click.Choice(["True", "False"]),
+    help="Enable chunked prefill, accepts 'True' or 'False', default to 'True' if max-num-seqs > 32k, else 'False'",
+)
+@click.option(
+    "--max-num-batched-tokens",
+    type=int,
+    help="Maximum number of batched tokens per iteration, defaults to min(2048, max-num-seqs), pairs with --enable-chunked-prefill to control the batch size at the prefill stage",
+)
+@click.option(
     "--partition",
     type=str,
     help="Type of compute partition",
@@ -89,6 +104,11 @@ def cli() -> None:
     "--pipeline-parallelism",
     type=str,
     help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
+)
+@click.option(
+    "--compilation-config",
+    type=click.Choice(["0", "3"]),
+    help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
 )
 @click.option(
     "--enforce-eager",

@@ -90,6 +90,18 @@ else
     export ENFORCE_EAGER=""
 fi
 
+if [ "$ENABLE_PREFIX_CACHING" = "True" ]; then
+    export ENABLE_PREFIX_CACHING="--enable-prefix-caching"
+else
+    export ENABLE_PREFIX_CACHING="--no-enable-prefix-caching"
+fi
+
+if [ "$ENABLE_CHUNKED_PREFILL" = "True" ]; then
+    export ENABLE_CHUNKED_PREFILL="--enable-chunked-prefill"
+else
+    export ENABLE_CHUNKED_PREFILL=""
+fi
+
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
     singularity exec --nv --bind ${MODEL_WEIGHTS}:${MODEL_WEIGHTS} $SINGULARITY_IMAGE \
@@ -105,8 +117,11 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --max-logprobs ${MAX_LOGPROBS} \
     --max-model-len ${MAX_MODEL_LEN} \
     --max-num-seqs ${MAX_NUM_SEQS} \
-    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
+    --max-num-batched-tokens ${MAX_NUM_BATCHED_TOKENS} \
+    --compilation-config ${COMPILATION_CONFIG} \
     --task ${TASK} \
+    ${ENABLE_PREFIX_CACHING} \
+    ${ENABLE_CHUNKED_PREFILL} \
     ${ENFORCE_EAGER}
 else
     source ${VENV_BASE}/bin/activate
@@ -123,6 +138,10 @@ else
     --max-model-len ${MAX_MODEL_LEN} \
     --max-num-seqs ${MAX_NUM_SEQS} \
     --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
+    --max-num-batched-tokens ${MAX_NUM_BATCHED_TOKENS} \
+    --compilation-config ${COMPILATION_CONFIG} \
     --task ${TASK} \
+    ${ENABLE_PREFIX_CACHING} \
+    ${ENABLE_CHUNKED_PREFILL} \
     ${ENFORCE_EAGER}
 fi

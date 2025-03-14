@@ -174,6 +174,14 @@ def get_latest_metric(log_lines: list[str]) -> Union[str, dict[str, str]]:
                     key, value = metric.split(": ")
                     latest_metric[key] = value
                 break
+            if "Prefix cache hit rate" in line:
+                # Parse the metric values from the line
+                metrics_str = line.split("] ")[1].strip()
+                prefix, metrics_str = metrics_str.split(": ", 1)
+                metrics_list = metrics_str.split(", ")
+                for metric in metrics_list:
+                    key, value = metric.split(": ")
+                    latest_metric[f"{key} {prefix}"] = value
     except Exception as e:
         return f"[red]Error reading log file: {e}[/red]"
 
