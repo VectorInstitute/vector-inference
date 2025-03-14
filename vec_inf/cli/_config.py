@@ -47,6 +47,9 @@ class ModelConfig(BaseModel):
     max_num_seqs: int = Field(
         default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
     )
+    gpu_memory_utilization: float = Field(
+        default=0.9, gt=0.0, le=1.0, description="GPU memory utilization"
+    )
     pipeline_parallelism: bool = Field(
         default=True, description="Enable pipeline parallelism"
     )
