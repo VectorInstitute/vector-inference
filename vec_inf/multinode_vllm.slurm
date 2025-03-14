@@ -117,6 +117,7 @@ if [ "$VENV_BASE" = "singularity" ]; then
     --max-logprobs ${MAX_LOGPROBS} \
     --max-model-len ${MAX_MODEL_LEN} \
     --max-num-seqs ${MAX_NUM_SEQS} \
+    --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION} \
     --max-num-batched-tokens ${MAX_NUM_BATCHED_TOKENS} \
     --compilation-config ${COMPILATION_CONFIG} \
     --task ${TASK} \
