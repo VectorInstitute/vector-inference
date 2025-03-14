@@ -182,7 +182,7 @@ class VecInfClient:
                 command += f" --{arg_name} {formatted_value}"
 
             # Execute the command
-            output = run_bash_command(command)
+            output, _ = run_bash_command(command)
 
             # Parse the output
             job_id, config_dict = parse_launch_output(output)
@@ -224,7 +224,7 @@ class VecInfClient:
         """
         try:
             status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-            output = run_bash_command(status_cmd)
+            output, _ = run_bash_command(status_cmd)
 
             status, status_info = get_model_status(slurm_job_id, log_dir)
 

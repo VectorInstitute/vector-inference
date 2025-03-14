@@ -8,7 +8,7 @@ from vec_inf.api.models import ModelStatus
 from vec_inf.cli._config import ModelConfig
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
-    SERVER_ADDRESS_SIGNATURE,
+    get_base_url,
     read_slurm_log,
     run_bash_command,
 )
@@ -92,7 +92,7 @@ def get_model_status(
 
     """
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output = run_bash_command(status_cmd)
+    output, _ = run_bash_command(status_cmd)
 
     # Check if job exists
     if "Invalid job id specified" in output:
@@ -187,34 +187,6 @@ def _perform_health_check(base_url: str, status_info: dict[str, Any]) -> ModelSt
         status_info["failed_reason"] = f"Health check request error: {str(e)}"
 
     return ModelStatus.FAILED
-
-
-def get_base_url(job_name: str, job_id: int, log_dir: Optional[str]) -> str:
-    """Get the base URL of a running model.
-
-    Parameters
-    ----------
-    job_name: str
-        The name of the Slurm job
-    job_id: int
-        The Slurm job ID
-    log_dir: str, optional
-        Optional path to Slurm log directory
-
-    Returns
-    -------
-    str
-        The base URL string or an error message
-
-    """
-    log_content = read_slurm_log(job_name, job_id, "out", log_dir)
-    if isinstance(log_content, str):
-        return log_content
-
-    for line in log_content:
-        if SERVER_ADDRESS_SIGNATURE in line:
-            return line.split(SERVER_ADDRESS_SIGNATURE)[1].strip("\n")
-    return "URL_NOT_FOUND"
 
 
 def get_metrics(job_name: str, job_id: int, log_dir: Optional[str]) -> dict[str, str]:

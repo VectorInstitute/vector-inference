@@ -4,6 +4,7 @@ import json
 import traceback
 from contextlib import ExitStack
 from pathlib import Path
+from typing import Callable, Optional
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -154,13 +155,21 @@ def mock_truediv(test_paths):
     return _mock_truediv
 
 
-def create_path_exists(test_paths, path_exists, exists_paths=None):
+def create_path_exists(
+    test_paths: dict[Path, str],
+    path_exists: Callable[[Path], bool],
+    exists_paths: Optional[list[Path]] = None,
+):
     """Create a path existence checker.
 
-    Args:
-        test_paths: Dictionary containing test paths
-        path_exists: Default path existence checker
-        exists_paths: Optional list of paths that should exist
+    Parameters
+    ----------
+    test_paths: dict[Path, str]
+        Dictionary containing test paths
+    path_exists: Callable[[Path], bool]
+        Default path existence checker
+    exists_paths: Optional[list[Path]]
+        Optional list of paths that should exist
     """
 
     def _custom_path_exists(p):
