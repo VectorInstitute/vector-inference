@@ -5,36 +5,11 @@ for both request parameters and response objects.
 """
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, Dict, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
 from vec_inf.shared.models import ModelStatus, ModelType
-
-
-@dataclass
-class ModelConfig:
-    """Model configuration parameters."""
-
-    model_name: str
-    model_family: str
-    model_variant: Optional[str] = None
-    model_type: ModelType = ModelType.LLM
-    num_gpus: int = 1
-    num_nodes: int = 1
-    vocab_size: int = 0
-    max_model_len: int = 0
-    max_num_seqs: int = 256
-    pipeline_parallelism: bool = True
-    enforce_eager: bool = False
-    qos: str = "m2"
-    time: str = "08:00:00"
-    partition: str = "a40"
-    data_type: str = "auto"
-    venv: str = "singularity"
-    log_dir: Optional[Path] = None
-    model_weights_parent_dir: Optional[Path] = None
 
 
 @dataclass

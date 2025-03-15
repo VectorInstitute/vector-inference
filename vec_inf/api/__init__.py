@@ -11,7 +11,6 @@ from vec_inf.api.models import (
     LaunchOptionsDict,
     LaunchResponse,
     MetricsResponse,
-    ModelConfig,
     ModelInfo,
     StatusResponse,
 )
@@ -23,7 +22,6 @@ __all__ = [
     "LaunchResponse",
     "StatusResponse",
     "ModelInfo",
-    "ModelConfig",
     "MetricsResponse",
     "ModelStatus",
     "ModelType",
