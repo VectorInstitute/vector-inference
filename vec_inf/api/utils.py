@@ -4,16 +4,14 @@ from typing import Any, Optional
 
 import requests
 
-from vec_inf.api.models import ModelStatus
-from vec_inf.cli._config import ModelConfig
-from vec_inf.cli._utils import (
+from vec_inf.shared.config import ModelConfig
+from vec_inf.shared.models import ModelStatus
+from vec_inf.shared.utils import (
     MODEL_READY_SIGNATURE,
     get_base_url,
+    load_config,
     read_slurm_log,
     run_bash_command,
-)
-from vec_inf.cli._utils import (
-    load_config as cli_load_config,
 )
 
 
@@ -43,34 +41,7 @@ class ServerError(APIError):
 
 def load_models() -> list[ModelConfig]:
     """Load model configurations."""
-    return cli_load_config()
-
-
-def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
-    """Parse output from model launch command.
-
-    Parameters
-    ----------
-    output: str
-        Output from the launch command
-
-    Returns
-    -------
-    tuple[str, dict[str, str]]
-        Slurm job ID and dictionary of config parameters
-
-    """
-    slurm_job_id = output.split(" ")[-1].strip().strip("\n")
-
-    # Extract config parameters
-    config_dict = {}
-    output_lines = output.split("\n")[:-2]
-    for line in output_lines:
-        if ": " in line:
-            key, value = line.split(": ", 1)
-            config_dict[key.lower().replace(" ", "_")] = value
-
-    return slurm_job_id, config_dict
+    return load_config()
 
 
 def get_model_status(

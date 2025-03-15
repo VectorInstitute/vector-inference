@@ -5,30 +5,12 @@ for both request parameters and response objects.
 """
 
 from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-
-class ModelStatus(str, Enum):
-    """Enum representing the possible status states of a model."""
-
-    PENDING = "PENDING"
-    LAUNCHING = "LAUNCHING"
-    READY = "READY"
-    FAILED = "FAILED"
-    SHUTDOWN = "SHUTDOWN"
-
-
-class ModelType(str, Enum):
-    """Enum representing the possible model types."""
-
-    LLM = "LLM"
-    VLM = "VLM"
-    TEXT_EMBEDDING = "Text_Embedding"
-    REWARD_MODELING = "Reward_Modeling"
+from vec_inf.shared.models import ModelStatus, ModelType
 
 
 @dataclass

@@ -14,8 +14,6 @@ from vec_inf.api.models import (
     LaunchResponse,
     MetricsResponse,
     ModelInfo,
-    ModelStatus,
-    ModelType,
     StatusResponse,
 )
 from vec_inf.api.utils import (
@@ -26,10 +24,13 @@ from vec_inf.api.utils import (
     get_metrics,
     get_model_status,
     load_models,
-    parse_launch_output,
 )
-from vec_inf.cli._config import ModelConfig
-from vec_inf.cli._utils import run_bash_command
+from vec_inf.shared.config import ModelConfig
+from vec_inf.shared.models import ModelStatus, ModelType
+from vec_inf.shared.utils import (
+    parse_launch_output,
+    run_bash_command,
+)
 
 
 class VecInfClient:
@@ -107,6 +108,7 @@ class VecInfClient:
             Error if the specified model is not found.
         APIError
                 Error if there was an error retrieving the model configuration.
+
         """
         try:
             model_configs = load_models()
@@ -291,8 +293,10 @@ class VecInfClient:
     def shutdown_model(self, slurm_job_id: str) -> bool:
         """Shutdown a running model.
 
-        Args:
-            slurm_job_id: The Slurm job ID to shut down.
+        Parameters
+        ----------
+        slurm_job_id: str
+            The Slurm job ID to shut down.
 
         Returns
         -------

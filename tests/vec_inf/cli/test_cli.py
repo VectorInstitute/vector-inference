@@ -220,7 +220,7 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
     test_log_dir = Path("/tmp/test_vec_inf_logs")
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -251,7 +251,7 @@ def test_launch_command_with_json_output(
     """Test JSON output format for launch command."""
     test_log_dir = Path("/tmp/test_vec_inf_logs")
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -309,7 +309,7 @@ def test_launch_command_model_not_in_config_with_weights(
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
         # Apply specific patches for this test
-        mock_run = stack.enter_context(patch("vec_inf.cli._utils.run_bash_command"))
+        mock_run = stack.enter_context(patch("vec_inf.shared.utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=custom_path_exists))
 
         expected_job_id = "14933051"

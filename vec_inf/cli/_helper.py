@@ -11,8 +11,15 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-import vec_inf.cli._utils as utils
-from vec_inf.cli._config import ModelConfig
+from vec_inf.shared.config import ModelConfig
+from vec_inf.shared.utils import (
+    convert_boolean_value,
+    create_table,
+    get_base_url,
+    is_server_running,
+    load_config,
+    model_health_check,
+)
 
 
 VLLM_TASK_MAP = {
@@ -46,7 +53,7 @@ class LaunchHelper:
 
     def _get_model_configuration(self) -> ModelConfig:
         """Load and validate model configuration."""
-        model_configs = utils.load_config()
+        model_configs = load_config()
         config = next(
             (m for m in model_configs if m.model_name == self.model_name), None
         )
@@ -89,7 +96,7 @@ class LaunchHelper:
         # Process boolean fields
         for bool_field in ["pipeline_parallelism", "enforce_eager"]:
             if (value := self.cli_kwargs.get(bool_field)) is not None:
-                params[bool_field] = utils.convert_boolean_value(value)
+                params[bool_field] = convert_boolean_value(value)
 
         # Merge other overrides
         for key, value in self.cli_kwargs.items():
@@ -167,7 +174,7 @@ class LaunchHelper:
 
     def format_table_output(self, job_id: str) -> Table:
         """Format output as rich Table."""
-        table = utils.create_table(key_title="Job Config", value_title="Value")
+        table = create_table(key_title="Job Config", value_title="Value")
         # Add rows
         table.add_row("Slurm Job ID", job_id, style="blue")
         table.add_row("Job Name", self.model_name)
@@ -245,11 +252,11 @@ class StatusHelper:
 
     def check_model_health(self) -> None:
         """Check model health and update status accordingly."""
-        status, status_code = utils.model_health_check(
+        status, status_code = model_health_check(
             cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
         )
         if status == "READY":
-            self.status_info["base_url"] = utils.get_base_url(
+            self.status_info["base_url"] = get_base_url(
                 cast(str, self.status_info["model_name"]),
                 self.slurm_job_id,
                 self.log_dir,
@@ -263,7 +270,7 @@ class StatusHelper:
 
     def process_running_state(self) -> None:
         """Process RUNNING job state and check server status."""
-        server_status = utils.is_server_running(
+        server_status = is_server_running(
             cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
         )
 
@@ -303,7 +310,7 @@ class StatusHelper:
 
     def output_table(self, console: Console) -> None:
         """Create and display rich table."""
-        table = utils.create_table(key_title="Job Status", value_title="Value")
+        table = create_table(key_title="Job Status", value_title="Value")
         table.add_row("Model Name", self.status_info["model_name"])
         table.add_row("Model Status", self.status_info["status"], style="blue")
 
@@ -322,7 +329,7 @@ class ListHelper:
     def __init__(self, model_name: Optional[str] = None, json_mode: bool = False):
         self.model_name = model_name
         self.json_mode = json_mode
-        self.model_configs = utils.load_config()
+        self.model_configs = load_config()
 
     def get_single_model_config(self) -> ModelConfig:
         """Get configuration for a specific model."""
@@ -349,7 +356,7 @@ class ListHelper:
             )
             return config_dict
 
-        table = utils.create_table(key_title="Model Config", value_title="Value")
+        table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
             if field not in {"venv", "log_dir"}:
                 table.add_row(field, str(value))

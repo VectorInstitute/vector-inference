@@ -13,10 +13,9 @@ from vec_inf.api.models import (
     MetricsResponse,
     ModelConfig,
     ModelInfo,
-    ModelStatus,
-    ModelType,
     StatusResponse,
 )
+from vec_inf.shared.models import ModelStatus, ModelType
 
 
 __all__ = [

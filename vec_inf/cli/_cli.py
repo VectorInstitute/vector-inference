@@ -7,8 +7,8 @@ import click
 from rich.console import Console
 from rich.live import Live
 
-import vec_inf.cli._utils as utils
 from vec_inf.cli._helper import LaunchHelper, ListHelper, StatusHelper
+from vec_inf.shared import utils
 
 
 CONSOLE = Console()
