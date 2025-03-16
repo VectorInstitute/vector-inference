@@ -12,6 +12,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from vec_inf.shared.config import ModelConfig
+from vec_inf.shared.models import ModelStatus, ModelType
 from vec_inf.shared.utils import (
     convert_boolean_value,
     create_table,
@@ -23,10 +24,10 @@ from vec_inf.shared.utils import (
 
 
 VLLM_TASK_MAP = {
-    "LLM": "generate",
-    "VLM": "generate",
-    "Text_Embedding": "embed",
-    "Reward_Modeling": "reward",
+    ModelType.LLM: "generate",
+    ModelType.VLM: "generate",
+    ModelType.TEXT_EMBEDDING: "embed",
+    ModelType.REWARD_MODELING: "reward",
 }
 
 REQUIRED_FIELDS = {
@@ -231,13 +232,13 @@ class StatusHelper:
             job_name = self.output.split(" ")[1].split("=")[1]
             job_state = self.output.split(" ")[9].split("=")[1]
         except IndexError:
-            job_name = "UNAVAILABLE"
-            job_state = "UNAVAILABLE"
+            job_name = ModelStatus.UNAVAILABLE
+            job_state = ModelStatus.UNAVAILABLE
 
         return {
             "model_name": job_name,
-            "status": "UNAVAILABLE",
-            "base_url": "UNAVAILABLE",
+            "status": ModelStatus.UNAVAILABLE,
+            "base_url": ModelStatus.UNAVAILABLE,
             "state": job_state,
             "pending_reason": None,
             "failed_reason": None,
@@ -245,7 +246,7 @@ class StatusHelper:
 
     def process_job_state(self) -> None:
         """Process different job states and update status information."""
-        if self.status_info["state"] == "PENDING":
+        if self.status_info["state"] == ModelStatus.PENDING:
             self.process_pending_state()
         elif self.status_info["state"] == "RUNNING":
             self.process_running_state()
@@ -255,7 +256,7 @@ class StatusHelper:
         status, status_code = model_health_check(
             cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
         )
-        if status == "READY":
+        if status == ModelStatus.READY:
             self.status_info["base_url"] = get_base_url(
                 cast(str, self.status_info["model_name"]),
                 self.slurm_job_id,
@@ -291,7 +292,7 @@ class StatusHelper:
             self.status_info["pending_reason"] = self.output.split(" ")[10].split("=")[
                 1
             ]
-            self.status_info["status"] = "PENDING"
+            self.status_info["status"] = ModelStatus.PENDING
         except IndexError:
             self.status_info["pending_reason"] = "Unknown pending reason"
 
@@ -368,9 +369,15 @@ class ListHelper:
             return [config.model_name for config in self.model_configs]
 
         # Sort by model type priority
-        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
+        type_priority = {
+            "LLM": 0,
+            "VLM": 1,
+            "Text_Embedding": 2,
+            "Reward_Modeling": 3,
+        }
         sorted_configs = sorted(
-            self.model_configs, key=lambda x: type_priority.get(x.model_type, 4)
+            self.model_configs,
+            key=lambda x: type_priority.get(x.model_type, 4),
         )
 
         # Create panels with color coding

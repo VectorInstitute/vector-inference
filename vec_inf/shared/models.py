@@ -11,6 +11,7 @@ class ModelStatus(str, Enum):
     READY = "READY"
     FAILED = "FAILED"
     SHUTDOWN = "SHUTDOWN"
+    UNAVAILABLE = "UNAVAILABLE"
 
 
 class ModelType(str, Enum):
