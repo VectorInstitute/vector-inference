@@ -4,9 +4,7 @@ This module provides the main client class for interacting with Vector Inference
 services programmatically.
 """
 
-import os
 import time
-from pathlib import Path
 from typing import List, Optional
 
 from vec_inf.api.models import (
@@ -28,7 +26,7 @@ from vec_inf.api.utils import (
 from vec_inf.shared.config import ModelConfig
 from vec_inf.shared.models import ModelStatus, ModelType
 from vec_inf.shared.utils import (
-    parse_launch_output,
+    ModelLauncher,
     run_bash_command,
 )
 
@@ -147,56 +145,31 @@ class VecInfClient:
             Error if there was an error launching the model.
         """
         try:
-            # Build the launch command
-            script_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-                "launch_server.sh",
-            )
-            base_command = f"bash {script_path}"
-
-            # Get model configuration
-            try:
-                model_config = self.get_model_config(model_name)
-            except ModelNotFoundError:
-                raise
-
-            # Apply options if provided
-            params = model_config.model_dump(exclude={"model_name"})
+            # Convert LaunchOptions to dictionary if provided
+            options_dict = None
             if options:
                 options_dict = {k: v for k, v in vars(options).items() if v is not None}
-                params.update(options_dict)
 
-            # Build the command with parameters
-            command = base_command
-            for param_name, param_value in params.items():
-                if param_value is None:
-                    continue
+            # Create and use the shared ModelLauncher
+            launcher = ModelLauncher(model_name, options_dict)
 
-                # Format boolean values
-                if isinstance(param_value, bool):
-                    formatted_value = "True" if param_value else "False"
-                elif isinstance(param_value, Path):
-                    formatted_value = str(param_value)
-                else:
-                    formatted_value = param_value
+            # Launch the model
+            job_id, config_dict, _ = launcher.launch()
 
-                arg_name = param_name.replace("_", "-")
-                command += f" --{arg_name} {formatted_value}"
-
-            # Execute the command
-            output, _ = run_bash_command(command)
-
-            # Parse the output
-            job_id, config_dict = parse_launch_output(output)
+            # Get the raw output
+            status_cmd = f"scontrol show job {job_id} --oneliner"
+            raw_output, _ = run_bash_command(status_cmd)
 
             return LaunchResponse(
                 slurm_job_id=job_id,
                 model_name=model_name,
                 config=config_dict,
-                raw_output=output,
+                raw_output=raw_output,
             )
-        except ModelNotFoundError:
-            raise
+        except ValueError as e:
+            if "not found in configuration" in str(e):
+                raise ModelNotFoundError(str(e)) from e
+            raise APIError(f"Failed to launch model: {str(e)}") from e
         except Exception as e:
             raise APIError(f"Failed to launch model: {str(e)}") from e
 

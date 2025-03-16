@@ -211,7 +211,7 @@ def base_patches(test_paths, mock_truediv, debug_helper):
         patch("pathlib.Path.__truediv__", side_effect=mock_truediv),
         patch("json.dump"),
         patch("pathlib.Path.touch"),
-        patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"]),
+        patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"]),
     ]
 
 
@@ -318,9 +318,9 @@ def test_launch_command_model_not_in_config_with_weights(
         result = runner.invoke(cli, ["launch", "unknown-model"])
         debug_helper.print_debug_info(result)
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
-            "Warning: 'unknown-model' configuration not found in config"
+            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
             in result.output
         )
 
@@ -350,7 +350,7 @@ def test_launch_command_model_not_found(
 
         # Mock Path to return the weights dir path
         stack.enter_context(
-            patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"])
+            patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"])
         )
 
         result = runner.invoke(cli, ["launch", "unknown-model"])
@@ -358,7 +358,7 @@ def test_launch_command_model_not_found(
 
         assert result.exit_code == 1
         assert (
-            "'unknown-model' not found in configuration and model weights not found"
+            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
             in result.output
         )
 
