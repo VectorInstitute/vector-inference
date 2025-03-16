@@ -19,6 +19,7 @@ dev = [
     "codecov>=2.1.13",
     "mypy>=1.15.0",
     "nbqa>=1.9.1",
+    "openai>=1.65.1",
     "pip-audit>=2.8.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",

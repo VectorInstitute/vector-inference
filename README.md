@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/develop/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/develop)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](vec_inf/launch_server.sh), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.csv`](vec_inf/config/models.yaml) accordingly.
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`utils.py`](vec_inf/shared/utils.py), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.yaml`](vec_inf/config/models.yaml) accordingly.
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:

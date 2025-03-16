@@ -44,12 +44,12 @@ def mock_client():
 
 
 @pytest.mark.skipif(
-    not os.path.exists(os.path.join("examples", "api", "api_usage.py")),
+    not os.path.exists(os.path.join("examples", "api", "basic_usage.py")),
     reason="Example file not found",
 )
 def test_api_usage_example():
     """Test the basic API usage example."""
-    example_path = os.path.join("examples", "api", "api_usage.py")
+    example_path = os.path.join("examples", "api", "basic_usage.py")
 
     # Create a mock client
     mock_client = MagicMock(spec=VecInfClient)

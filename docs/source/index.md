@@ -8,10 +8,11 @@ hide-toc: true
 :hidden:
 
 user_guide
+reference/api/index
 
 ```
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`launch_server.sh`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/launch_server.sh), [`vllm.slurm`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/vllm.slurm), [`multinode_vllm.slurm`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/multinode_vllm.slurm) and [`models.yaml`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml) accordingly.
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update [`utils.py`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/shared.utils.py), [`vllm.slurm`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/vllm.slurm), [`multinode_vllm.slurm`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/multinode_vllm.slurm) and [`models.yaml`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml) accordingly.
 
 ## Installation
 

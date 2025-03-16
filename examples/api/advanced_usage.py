@@ -208,7 +208,7 @@ def batch_inference_example(
                     {
                         "input": input_text,
                         "output": completion.choices[0].text,
-                        "tokens": completion.usage.completion_tokens,
+                        "tokens": completion.usage.completion_tokens,  # type: ignore[union-attr]
                     }
                 )
 

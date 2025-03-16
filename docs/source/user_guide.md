@@ -1,6 +1,6 @@
 # User Guide
 
-## Usage
+## CLI Usage
 
 ### `launch` command
 
@@ -18,7 +18,7 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
+Models that are already supported by `vec-inf` would be launched using the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/develop/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
 overriden. For example, if `qos` is to be overriden:
 
 ```bash
@@ -31,7 +31,7 @@ You can also launch your own custom model as long as the model architecture is [
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
 * Your model weights directory should contain HuggingFace format weights.
 * You should create a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`
-Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model
+Check the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/develop/vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model
 should be specified in that config file.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
@@ -136,7 +136,7 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 
 ## Send inference requests
 
-Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](https://github.com/VectorInstitute/vector-inference/blob/main/examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
+Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](https://github.com/VectorInstitute/vector-inference/blob/develop/examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
 
 ```json
 {
@@ -171,3 +171,10 @@ If you want to run inference from your local device, you can open a SSH tunnel t
 ssh -L 8081:172.17.8.29:8081 username@v.vectorinstitute.ai -N
 ```
 Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment
+
+## Python API Usage
+
+You can also use the `vec_inf` Python API to launch and manage inference servers.
+
+Check out the [Python API documentation](reference/api/index) for more details. There
+are also Python API usage examples in the [`examples`](https://github.com/VectorInstitute/vector-inference/tree/develop/examples/api) folder.
