@@ -2,6 +2,7 @@
 
 ----------------------------------------------------
 
+[![PyPI](https://img.shields.io/pypi/v/vec-inf)](https://pypi.org/project/vec-inf)
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs_deploy.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/develop/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/develop)
