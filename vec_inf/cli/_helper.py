@@ -117,10 +117,6 @@ class LaunchHelper:
         if params["max_model_len"] > 32_000:  # this is the default behavior of vLLM
             params["enable_chunked_prefill"] = True
 
-        params["max_num_batched_tokens"] = min(
-            params["max_num_batched_tokens"], params["max_model_len"]
-        )
-
         # Validate required fields
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
             raise click.ClickException(

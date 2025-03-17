@@ -47,8 +47,8 @@ class ModelConfig(BaseModel):
     max_num_seqs: int = Field(
         default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
     )
-    max_num_batched_tokens: int = Field(
-        default=2048,
+    max_num_batched_tokens: Optional[int] = Field(
+        default=None,
         gt=0,
         le=1_000_000,
         description="Maximum batched tokens per iteration",

@@ -52,7 +52,7 @@ def cli() -> None:
 @click.option(
     "--max-num-batched-tokens",
     type=int,
-    help="Maximum number of batched tokens per iteration, defaults to min(2048, max-num-seqs), pairs with --enable-chunked-prefill to control the batch size at the prefill stage",
+    help="Maximum number of batched tokens per iteration, defaults to 2048 if --enable-chunked-prefill is set, else None",
 )
 @click.option(
     "--partition",
