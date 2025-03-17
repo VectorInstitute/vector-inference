@@ -12,27 +12,14 @@ ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
 # Set the Python version
 ARG PYTHON_VERSION=3.10.12
 
-# Install dependencies for building Python
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    build-essential \
-    libssl-dev \
-    zlib1g-dev \
-    libbz2-dev \
-    libreadline-dev \
-    libsqlite3-dev \
-    libffi-dev \
-    libncursesw5-dev \
-    xz-utils \
-    tk-dev \
-    libxml2-dev \
-    libxmlsec1-dev \
-    liblzma-dev \
-    git \
-    vim \
+    wget build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev libffi-dev libncursesw5-dev \
+    xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev git vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install Python from precompiled binaries
+# Install Python
 RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz && \
     tar -xzf Python-$PYTHON_VERSION.tgz && \
     cd Python-$PYTHON_VERSION && \
@@ -42,38 +29,24 @@ RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSIO
     cd .. && \
     rm -rf Python-$PYTHON_VERSION.tgz Python-$PYTHON_VERSION
 
-# Download and install pip using get-pip.py
+# Install pip and core Python tools
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
     python3.10 get-pip.py && \
-    rm get-pip.py
+    rm get-pip.py && \
+    python3.10 -m pip install --upgrade pip setuptools wheel uv
 
-# Ensure pip for Python 3.10 is used
-RUN python3.10 -m pip install --upgrade pip setuptools wheel
-
-# Install Poetry using Python 3.10
-RUN python3.10 -m pip install poetry
-
-# Don't create venv
-RUN poetry config virtualenvs.create false
-
-# Set working directory
+# Set up project
 WORKDIR /vec-inf
-
-# Copy current directory
 COPY . /vec-inf
 
-# Update Poetry lock file if necessary
-RUN poetry lock
-
-# Install vec-inf
-RUN poetry install --extras "dev"
-
-# Install Flash Attention 2 backend
+# Install project dependencies with build requirements
+RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
+# Install Flash Attention
 RUN python3.10 -m pip install flash-attn --no-build-isolation
 
-# Move nccl to accessible location
-RUN mkdir -p /vec-inf/nccl
-RUN mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1;
+# Final configuration
+RUN mkdir -p /vec-inf/nccl && \
+    mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
 
 # Set the default command to start an interactive shell
 CMD ["bash"]
