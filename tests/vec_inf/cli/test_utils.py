@@ -11,7 +11,6 @@ from vec_inf.cli._utils import (
     convert_boolean_value,
     create_table,
     get_base_url,
-    get_latest_metric,
     is_server_running,
     load_config,
     model_health_check,
@@ -148,24 +147,6 @@ def test_create_table_without_header():
     """Test create_table without header."""
     table = create_table(show_header=False)
     assert table.show_header is False
-
-
-@pytest.mark.parametrize(
-    "log_lines,expected",
-    [
-        (
-            ["2023-01-01 [INFO] Avg prompt throughput: 5.2, Avg token throughput: 3.1"],
-            {"Avg prompt throughput": "5.2", "Avg token throughput": "3.1"},
-        ),
-        (["No metrics here"], {}),
-        ([], {}),
-        (["Invalid metric format"], {}),
-    ],
-)
-def test_get_latest_metric(log_lines, expected):
-    """Test that get_latest_metric returns the latest metric entry."""
-    result = get_latest_metric(log_lines)
-    assert result == expected
 
 
 def test_load_config_default_only():

@@ -2,10 +2,13 @@
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Optional, Union, cast
+from urllib.parse import urlparse, urlunparse
 
 import click
+import requests
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
@@ -314,6 +317,214 @@ class StatusHelper:
 
         table.add_row("Base URL", self.status_info["base_url"])
         console.print(table)
+
+
+class MetricsHelper:
+    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+        self.slurm_job_id = slurm_job_id
+        self.log_dir = log_dir
+        self.status_info = self._get_status_info()
+        self.metrics_url = self._build_metrics_url()
+
+        self._prev_prompt_tokens: float = 0.0
+        self._prev_generation_tokens: float = 0.0
+        self._last_updated: Optional[float] = None
+        self._last_throughputs = {"prompt": 0.0, "generation": 0.0}
+
+    def _get_status_info(self) -> dict[str, Union[str, None]]:
+        """Retrieve status info using existing StatusHelper."""
+        status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
+        output, stderr = utils.run_bash_command(status_cmd)
+        if stderr:
+            raise click.ClickException(f"Error: {stderr}")
+        status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
+        return status_helper.status_info
+
+    def _build_metrics_url(self) -> str:
+        """Construct metrics endpoint URL from base URL with version stripping."""
+        if self.status_info.get("state") == "PENDING":
+            return "Pending resources for server initialization"
+
+        base_url = utils.get_base_url(
+            cast(str, self.status_info["model_name"]),
+            self.slurm_job_id,
+            self.log_dir,
+        )
+        if not base_url.startswith("http"):
+            return "Server not ready"
+
+        parsed = urlparse(base_url)
+        clean_path = parsed.path.replace("/v1", "", 1).rstrip("/")
+        return urlunparse(
+            (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
+        )
+
+    def fetch_metrics(self) -> Union[dict[str, float], str]:
+        """Fetch metrics from the endpoint."""
+        try:
+            response = requests.get(self.metrics_url, timeout=3)
+            response.raise_for_status()
+            current_metrics = self._parse_metrics(response.text)
+            current_time = time.time()
+
+            # Set defaults using last known throughputs
+            current_metrics.setdefault(
+                "prompt_tokens_per_sec", self._last_throughputs["prompt"]
+            )
+            current_metrics.setdefault(
+                "generation_tokens_per_sec", self._last_throughputs["generation"]
+            )
+
+            if self._last_updated is None:
+                self._prev_prompt_tokens = current_metrics.get(
+                    "total_prompt_tokens", 0.0
+                )
+                self._prev_generation_tokens = current_metrics.get(
+                    "total_generation_tokens", 0.0
+                )
+                self._last_updated = current_time
+                return current_metrics
+
+            time_diff = current_time - self._last_updated
+            if time_diff > 0:
+                current_prompt = current_metrics.get("total_prompt_tokens", 0.0)
+                current_gen = current_metrics.get("total_generation_tokens", 0.0)
+
+                delta_prompt = current_prompt - self._prev_prompt_tokens
+                delta_gen = current_gen - self._prev_generation_tokens
+
+                # Only update throughputs when we have new tokens
+                prompt_tps = (
+                    delta_prompt / time_diff
+                    if delta_prompt > 0
+                    else self._last_throughputs["prompt"]
+                )
+                gen_tps = (
+                    delta_gen / time_diff
+                    if delta_gen > 0
+                    else self._last_throughputs["generation"]
+                )
+
+                current_metrics["prompt_tokens_per_sec"] = prompt_tps
+                current_metrics["generation_tokens_per_sec"] = gen_tps
+
+                # Persist calculated values regardless of activity
+                self._last_throughputs["prompt"] = prompt_tps
+                self._last_throughputs["generation"] = gen_tps
+
+                # Update tracking state
+                self._prev_prompt_tokens = current_prompt
+                self._prev_generation_tokens = current_gen
+                self._last_updated = current_time
+
+            # Calculate average latency if data is available
+            if (
+                "request_latency_sum" in current_metrics
+                and "request_latency_count" in current_metrics
+            ):
+                latency_sum = current_metrics["request_latency_sum"]
+                latency_count = current_metrics["request_latency_count"]
+                current_metrics["avg_request_latency"] = (
+                    latency_sum / latency_count if latency_count > 0 else 0.0
+                )
+
+            return current_metrics
+
+        except requests.RequestException as e:
+            return f"Metrics request failed, `metrics` endpoint might not be ready yet: {str(e)}"
+
+    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
+        """Parse metrics with latency count and sum."""
+        key_metrics = {
+            "vllm:prompt_tokens_total": "total_prompt_tokens",
+            "vllm:generation_tokens_total": "total_generation_tokens",
+            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
+            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
+            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
+            "vllm:request_success_total": "successful_requests_total",
+            "vllm:num_requests_running": "requests_running",
+            "vllm:num_requests_waiting": "requests_waiting",
+            "vllm:num_requests_swapped": "requests_swapped",
+            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
+            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
+        }
+
+        parsed: dict[str, float] = {}
+        for line in metrics_text.split("\n"):
+            if line.startswith("#") or not line.strip():
+                continue
+
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+
+            metric_name = parts[0].split("{")[0]
+            if metric_name in key_metrics:
+                try:
+                    parsed[key_metrics[metric_name]] = float(parts[1])
+                except (ValueError, IndexError):
+                    continue
+        return parsed
+
+    def display_failed_metrics(self, table: Table, metrics: str) -> None:
+        table.add_row("Server State", self.status_info["state"], style="yellow")
+        table.add_row("Message", metrics)
+
+    def display_metrics(self, table: Table, metrics: dict[str, float]) -> None:
+        # Throughput metrics
+        table.add_row(
+            "Prompt Throughput",
+            f"{metrics.get('prompt_tokens_per_sec', 0):.1f} tokens/s",
+        )
+        table.add_row(
+            "Generation Throughput",
+            f"{metrics.get('generation_tokens_per_sec', 0):.1f} tokens/s",
+        )
+
+        # Request queue metrics
+        table.add_row(
+            "Requests Running",
+            f"{metrics.get('requests_running', 0):.0f} reqs",
+        )
+        table.add_row(
+            "Requests Waiting",
+            f"{metrics.get('requests_waiting', 0):.0f} reqs",
+        )
+        table.add_row(
+            "Requests Swapped",
+            f"{metrics.get('requests_swapped', 0):.0f} reqs",
+        )
+
+        # Cache usage metrics
+        table.add_row(
+            "GPU Cache Usage",
+            f"{metrics.get('gpu_cache_usage', 0) * 100:.1f}%",
+        )
+        table.add_row(
+            "CPU Cache Usage",
+            f"{metrics.get('cpu_cache_usage', 0) * 100:.1f}%",
+        )
+
+        # Show average latency if available
+        if "avg_request_latency" in metrics:
+            table.add_row(
+                "Avg Request Latency",
+                f"{metrics['avg_request_latency']:.1f} s",
+            )
+
+        # Token counts
+        table.add_row(
+            "Total Prompt Tokens",
+            f"{metrics.get('total_prompt_tokens', 0):.0f} tokens",
+        )
+        table.add_row(
+            "Total Generation Tokens",
+            f"{metrics.get('total_generation_tokens', 0):.0f} tokens",
+        )
+        table.add_row(
+            "Successful Requests",
+            f"{metrics.get('successful_requests_total', 0):.0f} reqs",
+        )
 
 
 class ListHelper:
