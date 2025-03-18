@@ -9,6 +9,8 @@ from unittest.mock import mock_open, patch
 import pytest
 import yaml
 from click.testing import CliRunner
+import requests
+import time
 
 from vec_inf.cli._cli import cli
 
@@ -35,7 +37,7 @@ def mock_status_output():
 
     def _output(job_id, job_state):
         return f"""
-JobId={job_id} JobName=Meta-Llama-3.1-8B JobState={job_state} QOS=llm NumNodes=1-1 NumCPUs=16 NumTasks=1
+JobId={job_id} JobName=Meta-Llama-3.1-8B UserId=userid(54321) GroupId=groupid(12321) MCS_label=N/A Priority=2173 Nice=0 Account=vector QOS=m2 JobState={job_state} Reason=None
         """.strip()
 
     return _output
@@ -370,3 +372,102 @@ def test_list_single_model(runner):
     assert "Meta-Llama-3.1-8B" in result.output
     assert "LLM" in result.output
     assert "/model-weights" in result.output
+
+
+def test_metrics_command_pending_server(runner, mock_status_output, path_exists, debug_helper):
+    """Test metrics command when server is pending."""
+    with (
+        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("pathlib.Path.exists", new=path_exists),
+        patch("vec_inf.cli._utils.get_base_url", return_value="URL NOT FOUND"),
+    ):
+        job_id = 12345
+        mock_run.return_value = (mock_status_output(job_id, "PENDING"), "")
+
+        result = runner.invoke(cli, ["metrics", str(job_id)])
+        debug_helper.print_debug_info(result)
+
+        assert result.exit_code == 0
+        assert "Server State" in result.output
+        assert "PENDING" in result.output
+        assert "Metrics endpoint unavailable - Pending resources for server" in result.output
+
+
+def test_metrics_command_server_not_ready(runner, mock_status_output, path_exists, debug_helper):
+    """Test metrics command when server is running but not ready."""
+    with (
+        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("pathlib.Path.exists", new=path_exists),
+        patch("vec_inf.cli._utils.get_base_url", return_value="Server not ready"),
+    ):
+        job_id = 12345
+        mock_run.return_value = (mock_status_output(job_id, "RUNNING"), "")
+
+        result = runner.invoke(cli, ["metrics", str(job_id)])
+        debug_helper.print_debug_info(result)
+
+        assert result.exit_code == 0
+        assert "Server State" in result.output
+        assert "RUNNING" in result.output
+        assert "Server not ready" in result.output
+
+
+@patch("vec_inf.cli._helper.requests.get")
+def test_metrics_command_server_ready(mock_get, runner, mock_status_output, path_exists, debug_helper):
+    """Test metrics command when server is ready and returning metrics."""
+    metrics_response = """
+# HELP vllm:prompt_tokens_total Number of prefill tokens processed.
+# TYPE vllm:prompt_tokens_total counter
+vllm:prompt_tokens_total{model_name="test-model"} 100.0
+# HELP vllm:generation_tokens_total Number of generation tokens processed.
+# TYPE vllm:generation_tokens_total counter
+vllm:generation_tokens_total{model_name="test-model"} 500.0
+# HELP vllm:gpu_cache_usage_perc GPU KV-cache usage.
+# TYPE vllm:gpu_cache_usage_perc gauge
+vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
+"""
+    mock_response = mock_get.return_value
+    mock_response.text = metrics_response
+    mock_response.status_code = 200
+
+    with (
+        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("pathlib.Path.exists", new=path_exists),
+        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
+    ):
+        job_id = 12345
+        mock_run.return_value = (mock_status_output(job_id, "RUNNING"), "")
+
+        result = runner.invoke(cli, ["metrics", str(job_id)], catch_exceptions=False)
+        debug_helper.print_debug_info(result)
+
+        # KeyboardInterrupt is expected and ok
+        assert "Prompt Throughput" in result.output
+        assert "Generation Throughput" in result.output
+        assert "GPU Cache Usage" in result.output
+        assert "50.0%" in result.output  # 0.5 converted to percentage
+
+
+@patch("vec_inf.cli._helper.requests.get")
+def test_metrics_command_request_failed(mock_get, runner, mock_status_output, path_exists, debug_helper):
+    """Test metrics command when request to metrics endpoint fails."""
+    mock_get.side_effect = requests.exceptions.RequestException("Connection refused")
+
+    with (
+        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("pathlib.Path.exists", new=path_exists),
+        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
+    ):
+        job_id = 12345
+        mock_run.return_value = (mock_status_output(job_id, "RUNNING"), "")
+
+        result = runner.invoke(cli, ["metrics", str(job_id)], catch_exceptions=False)
+        debug_helper.print_debug_info(result)
+
+        # KeyboardInterrupt is expected and ok
+        assert "Server State" in result.output
+        assert "RUNNING" in result.output
+        assert "Metrics request failed, `metrics` endpoint might not be ready" in result.output
+        assert "Connection refused" in result.output
