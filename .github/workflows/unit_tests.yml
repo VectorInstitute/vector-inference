@@ -64,7 +64,6 @@ jobs:
         run: |
           uv run pytest -m "not integration_test" --cov vec_inf --cov-report=xml tests
 
-      # Uncomment this once this repo is configured on Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5.4.0
         with:
