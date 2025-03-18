@@ -181,6 +181,14 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
     helper = MetricsHelper(slurm_job_id, log_dir)
+
+    # Check if metrics URL is ready
+    if not helper.metrics_url.startswith("http"):
+        table = utils.create_table("Metric", "Value")    
+        helper.display_failed_metrics(table, f"Metrics endpoint unavailable - {helper.metrics_url}")
+        CONSOLE.print(table)
+        return
+
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
             metrics = helper.fetch_metrics()
@@ -188,47 +196,9 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
             if isinstance(metrics, str):
                 # Show status information if metrics aren't available
-                table.add_row(
-                    "System Status", helper.status_info["status"], style="yellow"
-                )
-                if helper.status_info["pending_reason"]:
-                    table.add_row(
-                        "Pending Reason", helper.status_info["pending_reason"]
-                    )
-                if helper.status_info["failed_reason"]:
-                    table.add_row("Failure Reason", helper.status_info["failed_reason"])
-                table.add_row("Message", metrics)
+                helper.display_failed_metrics(table, metrics)
             else:
-                # Show throughput with last known values
-                table.add_row(
-                    "Prompt Throughput (tokens/s)",
-                    f"{metrics.get('prompt_tokens_per_sec', 0):.2f}",
-                )
-                table.add_row(
-                    "Generation Throughput (tokens/s)",
-                    f"{metrics.get('generation_tokens_per_sec', 0):.2f}",
-                )
-
-                # Show average latency if available
-                if "avg_request_latency" in metrics:
-                    table.add_row(
-                        "Avg Request Latency (s)",
-                        f"{metrics['avg_request_latency']:.2f}",
-                    )
-
-                # Other metrics
-                table.add_row(
-                    "Total Prompt Tokens",
-                    f"{metrics.get('total_prompt_tokens', 0):.0f}",
-                )
-                table.add_row(
-                    "Total Generation Tokens",
-                    f"{metrics.get('total_generation_tokens', 0):.0f}",
-                )
-                table.add_row(
-                    "Successful Requests",
-                    f"{metrics.get('successful_requests_total', 0):.0f}",
-                )
+                helper.display_metrics(table, metrics)
 
             live.update(table)
             time.sleep(2)

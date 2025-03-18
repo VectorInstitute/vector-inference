@@ -334,23 +334,24 @@ class MetricsHelper:
     def _get_status_info(self) -> dict[str, Union[str, None]]:
         """Retrieve status info using existing StatusHelper."""
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
-        output = utils.run_bash_command(status_cmd)
+        output, stderr = utils.run_bash_command(status_cmd)
+        if stderr:
+            raise click.ClickException(f"Error: {stderr}")
         status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
-        status_helper.process_job_state()
         return status_helper.status_info
 
     def _build_metrics_url(self) -> Optional[str]:
         """Construct metrics endpoint URL from base URL with version stripping."""
-        if self.status_info.get("status") != "READY":
-            return None
+        if self.status_info.get("state") == "PENDING":
+            return "Pending resources for server initialization"
 
-        base_url = self.status_info.get("base_url")
-        if (
-            not base_url
-            or not isinstance(base_url, str)
-            or not base_url.startswith("http")
-        ):
-            return None
+        base_url = utils.get_base_url(
+            cast(str, self.status_info["model_name"]),
+            self.slurm_job_id,
+            self.log_dir,
+        )
+        if not base_url.startswith("http"):
+            return "Server not ready"
 
         parsed = urlparse(base_url)
         clean_path = parsed.path.replace("/v1", "", 1).rstrip("/")
@@ -359,9 +360,7 @@ class MetricsHelper:
         )
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
-        if not self.metrics_url:
-            return "Metrics endpoint unavailable - server not ready"
-
+        """Fetch metrics from the endpoint."""
         try:
             response = requests.get(self.metrics_url, timeout=3)
             response.raise_for_status()
@@ -418,6 +417,7 @@ class MetricsHelper:
                 self._prev_generation_tokens = current_gen
                 self._last_updated = current_time
 
+            # Calculate average latency if data is available
             if (
                 "request_latency_sum" in current_metrics
                 and "request_latency_count" in current_metrics
@@ -431,7 +431,7 @@ class MetricsHelper:
             return current_metrics
 
         except requests.RequestException as e:
-            return f"Metrics request failed: {str(e)}"
+            return f"Metrics request failed, `metrics` endpoint might not be ready yet: {str(e)}"
 
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
         """Parse metrics with latency count and sum."""
@@ -442,6 +442,11 @@ class MetricsHelper:
             "vllm:e2e_request_latency_seconds_count": "request_latency_count",
             "vllm:request_queue_time_seconds_sum": "queue_time_sum",
             "vllm:request_success_total": "successful_requests_total",
+            "vllm:num_requests_running": "requests_running",
+            "vllm:num_requests_waiting": "requests_waiting",
+            "vllm:num_requests_swapped": "requests_swapped",
+            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
+            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
         }
 
         parsed: dict[str, float] = {}
@@ -461,6 +466,67 @@ class MetricsHelper:
                     continue
         return parsed
 
+    def display_failed_metrics(self, table: Table, metrics: str) -> None:
+        table.add_row(
+            "Server State", self.status_info["state"], style="yellow"
+        )
+        table.add_row("Message", metrics)
+
+    def display_metrics(self, table: Table, metrics: dict[str, float]) -> None:
+        # Throughput metrics
+        table.add_row(
+            "Prompt Throughput",
+            f"{metrics.get('prompt_tokens_per_sec', 0):.1f} tokens/s",
+        )
+        table.add_row(
+            "Generation Throughput",
+            f"{metrics.get('generation_tokens_per_sec', 0):.1f} tokens/s",
+        )
+
+        # Request queue metrics
+        table.add_row(
+            "Requests Running",
+            f"{metrics.get('requests_running', 0):.0f} reqs",
+        )
+        table.add_row(
+            "Requests Waiting",
+            f"{metrics.get('requests_waiting', 0):.0f} reqs",
+        )
+        table.add_row(
+            "Requests Swapped",
+            f"{metrics.get('requests_swapped', 0):.0f} reqs",
+        )
+
+        # Cache usage metrics
+        table.add_row(
+            "GPU Cache Usage",
+            f"{metrics.get('gpu_cache_usage', 0) * 100:.1f}%",
+        )
+        table.add_row(
+            "CPU Cache Usage",
+            f"{metrics.get('cpu_cache_usage', 0) * 100:.1f}%",
+        )
+
+        # Show average latency if available
+        if "avg_request_latency" in metrics:
+            table.add_row(
+                "Avg Request Latency",
+                f"{metrics['avg_request_latency']:.1f} s",
+            )
+
+        # Token counts
+        table.add_row(
+            "Total Prompt Tokens",
+            f"{metrics.get('total_prompt_tokens', 0):.0f} tokens",
+        )
+        table.add_row(
+            "Total Generation Tokens",
+            f"{metrics.get('total_generation_tokens', 0):.0f} tokens",
+        )
+        table.add_row(
+            "Successful Requests",
+            f"{metrics.get('successful_requests_total', 0):.0f} reqs",
+        )
 
 class ListHelper:
     """Helper class for handling model listing functionality."""
