@@ -1,14 +1,14 @@
 """Command line interface for Vector Inference."""
 
 import time
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import click
 from rich.console import Console
 from rich.live import Live
 
 import vec_inf.cli._utils as utils
-from vec_inf.cli._helper import LaunchHelper, ListHelper, StatusHelper
+from vec_inf.cli._helper import LaunchHelper, ListHelper, MetricsHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -196,38 +196,33 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 @cli.command("metrics")
 @click.argument("slurm_job_id", type=int, nargs=1)
 @click.option(
-    "--log-dir",
-    type=str,
-    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
+    "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """Stream performance metrics to the console."""
-    status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output, stderr = utils.run_bash_command(status_cmd)
-    if stderr:
-        raise click.ClickException(f"Error: {stderr}")
-    slurm_job_name = output.split(" ")[1].split("=")[1]
+    """Stream real-time performance metrics from the model endpoint."""
+    helper = MetricsHelper(slurm_job_id, log_dir)
+
+    # Check if metrics URL is ready
+    if not helper.metrics_url.startswith("http"):
+        table = utils.create_table("Metric", "Value")
+        helper.display_failed_metrics(
+            table, f"Metrics endpoint unavailable - {helper.metrics_url}"
+        )
+        CONSOLE.print(table)
+        return
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(
-                slurm_job_name, slurm_job_id, "out", log_dir
-            )
-            # if out_logs is a string, then it is an error message
-            if isinstance(out_logs, str):
-                live.update(out_logs)
-                break
-            latest_metrics = utils.get_latest_metric(cast(list[str], out_logs))
-            # if latest_metrics is a string, then it is an error message
-            if isinstance(latest_metrics, str):
-                live.update(latest_metrics)
-                break
-            table = utils.create_table(key_title="Metric", value_title="Value")
-            for key, value in latest_metrics.items():
-                table.add_row(key, value)
+            metrics = helper.fetch_metrics()
+            table = utils.create_table("Metric", "Value")
+
+            if isinstance(metrics, str):
+                # Show status information if metrics aren't available
+                helper.display_failed_metrics(table, metrics)
+            else:
+                helper.display_metrics(table, metrics)
 
             live.update(table)
-
             time.sleep(2)
 
 

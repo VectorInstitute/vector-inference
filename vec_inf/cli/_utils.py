@@ -160,34 +160,6 @@ def load_config() -> list[ModelConfig]:
     ]
 
 
-def get_latest_metric(log_lines: list[str]) -> Union[str, dict[str, str]]:
-    """Read the latest metric entry from the log file."""
-    latest_metric = {}
-
-    try:
-        for line in reversed(log_lines):
-            if "Avg prompt throughput" in line:
-                # Parse the metric values from the line
-                metrics_str = line.split("] ")[1].strip().strip(".")
-                metrics_list = metrics_str.split(", ")
-                for metric in metrics_list:
-                    key, value = metric.split(": ")
-                    latest_metric[key] = value
-                break
-            if "Prefix cache hit rate" in line:
-                # Parse the metric values from the line
-                metrics_str = line.split("] ")[1].strip()
-                prefix, metrics_str = metrics_str.split(": ", 1)
-                metrics_list = metrics_str.split(", ")
-                for metric in metrics_list:
-                    key, value = metric.split(": ")
-                    latest_metric[f"{key} {prefix}"] = value
-    except Exception as e:
-        return f"[red]Error reading log file: {e}[/red]"
-
-    return latest_metric
-
-
 def convert_boolean_value(value: Union[str, int, bool]) -> bool:
     """Convert various input types to boolean strings."""
     if isinstance(value, str):
