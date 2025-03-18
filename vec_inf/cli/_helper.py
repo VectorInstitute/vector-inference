@@ -340,7 +340,7 @@ class MetricsHelper:
         status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
         return status_helper.status_info
 
-    def _build_metrics_url(self) -> Optional[str]:
+    def _build_metrics_url(self) -> str:
         """Construct metrics endpoint URL from base URL with version stripping."""
         if self.status_info.get("state") == "PENDING":
             return "Pending resources for server initialization"
@@ -467,9 +467,7 @@ class MetricsHelper:
         return parsed
 
     def display_failed_metrics(self, table: Table, metrics: str) -> None:
-        table.add_row(
-            "Server State", self.status_info["state"], style="yellow"
-        )
+        table.add_row("Server State", self.status_info["state"], style="yellow")
         table.add_row("Message", metrics)
 
     def display_metrics(self, table: Table, metrics: dict[str, float]) -> None:
@@ -527,6 +525,7 @@ class MetricsHelper:
             "Successful Requests",
             f"{metrics.get('successful_requests_total', 0):.0f} reqs",
         )
+
 
 class ListHelper:
     """Helper class for handling model listing functionality."""

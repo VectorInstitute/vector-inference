@@ -1,7 +1,7 @@
 """Command line interface for Vector Inference."""
 
 import time
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import click
 from rich.console import Console
@@ -184,8 +184,10 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
     # Check if metrics URL is ready
     if not helper.metrics_url.startswith("http"):
-        table = utils.create_table("Metric", "Value")    
-        helper.display_failed_metrics(table, f"Metrics endpoint unavailable - {helper.metrics_url}")
+        table = utils.create_table("Metric", "Value")
+        helper.display_failed_metrics(
+            table, f"Metrics endpoint unavailable - {helper.metrics_url}"
+        )
         CONSOLE.print(table)
         return
 
