@@ -7,10 +7,9 @@ from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
+import requests
 import yaml
 from click.testing import CliRunner
-import requests
-import time
 
 from vec_inf.cli._cli import cli
 
@@ -374,7 +373,9 @@ def test_list_single_model(runner):
     assert "/model-weights" in result.output
 
 
-def test_metrics_command_pending_server(runner, mock_status_output, path_exists, debug_helper):
+def test_metrics_command_pending_server(
+    runner, mock_status_output, path_exists, debug_helper
+):
     """Test metrics command when server is pending."""
     with (
         patch("vec_inf.cli._utils.run_bash_command") as mock_run,
@@ -390,10 +391,15 @@ def test_metrics_command_pending_server(runner, mock_status_output, path_exists,
         assert result.exit_code == 0
         assert "Server State" in result.output
         assert "PENDING" in result.output
-        assert "Metrics endpoint unavailable - Pending resources for server" in result.output
+        assert (
+            "Metrics endpoint unavailable - Pending resources for server"
+            in result.output
+        )
 
 
-def test_metrics_command_server_not_ready(runner, mock_status_output, path_exists, debug_helper):
+def test_metrics_command_server_not_ready(
+    runner, mock_status_output, path_exists, debug_helper
+):
     """Test metrics command when server is running but not ready."""
     with (
         patch("vec_inf.cli._utils.run_bash_command") as mock_run,
@@ -413,7 +419,9 @@ def test_metrics_command_server_not_ready(runner, mock_status_output, path_exist
 
 
 @patch("vec_inf.cli._helper.requests.get")
-def test_metrics_command_server_ready(mock_get, runner, mock_status_output, path_exists, debug_helper):
+def test_metrics_command_server_ready(
+    mock_get, runner, mock_status_output, path_exists, debug_helper
+):
     """Test metrics command when server is ready and returning metrics."""
     metrics_response = """
 # HELP vllm:prompt_tokens_total Number of prefill tokens processed.
@@ -450,7 +458,9 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
 
 
 @patch("vec_inf.cli._helper.requests.get")
-def test_metrics_command_request_failed(mock_get, runner, mock_status_output, path_exists, debug_helper):
+def test_metrics_command_request_failed(
+    mock_get, runner, mock_status_output, path_exists, debug_helper
+):
     """Test metrics command when request to metrics endpoint fails."""
     mock_get.side_effect = requests.exceptions.RequestException("Connection refused")
 
@@ -469,5 +479,8 @@ def test_metrics_command_request_failed(mock_get, runner, mock_status_output, pa
         # KeyboardInterrupt is expected and ok
         assert "Server State" in result.output
         assert "RUNNING" in result.output
-        assert "Metrics request failed, `metrics` endpoint might not be ready" in result.output
+        assert (
+            "Metrics request failed, `metrics` endpoint might not be ready"
+            in result.output
+        )
         assert "Connection refused" in result.output
