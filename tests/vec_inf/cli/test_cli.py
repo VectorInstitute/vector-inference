@@ -153,7 +153,7 @@ def mock_truediv(test_paths):
             if str(other) == ".vec-inf-logs":
                 return test_paths["log_dir"]
             return Path(str(other))
-        
+
         # Normal case with self and other
         self, other = args
         if str(self) == str(test_paths["weights_dir"]) and other == "unknown-model":
@@ -211,13 +211,17 @@ def base_patches(test_paths, mock_truediv, debug_helper):
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.expanduser", return_value=test_paths["log_dir"]),
         patch("pathlib.Path.resolve", return_value=debug_helper.config_file.parent),
-        patch("pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent),
+        patch(
+            "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
+        ),
         patch("pathlib.Path.__truediv__", side_effect=mock_truediv),
         patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
         patch("json.dump"),
         patch("pathlib.Path.touch"),
         patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"]),
-        patch("pathlib.Path.home", return_value=Path("/home/user")),  # Mock home directory
+        patch(
+            "pathlib.Path.home", return_value=Path("/home/user")
+        ),  # Mock home directory
     ]
 
 
