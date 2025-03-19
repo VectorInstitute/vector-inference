@@ -38,7 +38,7 @@ class ModelConfig(BaseModel):
     model_type: Literal["LLM", "VLM", "Text_Embedding", "Reward_Modeling"] = Field(
         ..., description="Type of model architecture"
     )
-    num_gpus: int = Field(..., gt=0, le=8, description="GPUs per node")
+    gpus_per_node: int = Field(..., gt=0, le=8, description="GPUs per node")
     num_nodes: int = Field(..., gt=0, le=16, description="Number of nodes")
     vocab_size: int = Field(..., gt=0, le=1_000_000)
     max_model_len: int = Field(
@@ -46,6 +46,15 @@ class ModelConfig(BaseModel):
     )
     max_num_seqs: int = Field(
         default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
+    )
+    compilation_config: int = Field(
+        default=0,
+        gt=-1,
+        le=4,
+        description="torch.compile optimization level",
+    )
+    gpu_memory_utilization: float = Field(
+        default=0.9, gt=0.0, le=1.0, description="GPU memory utilization"
     )
     pipeline_parallelism: bool = Field(
         default=True, description="Enable pipeline parallelism"

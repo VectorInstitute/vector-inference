@@ -4,13 +4,11 @@ import time
 from typing import Optional, Union
 
 import click
-from rich.columns import Columns
 from rich.console import Console
 from rich.live import Live
-from rich.panel import Panel
 
 import vec_inf.cli._utils as utils
-from vec_inf.cli._helper import LaunchHelper, StatusHelper
+from vec_inf.cli._helper import LaunchHelper, ListHelper, MetricsHelper, StatusHelper
 
 
 CONSOLE = Console()
@@ -37,6 +35,26 @@ def cli() -> None:
     help="Maximum number of sequences to process in a single request",
 )
 @click.option(
+    "--gpu-memory-utilization",
+    type=float,
+    help="GPU memory utilization, default to 0.9",
+)
+@click.option(
+    "--enable-prefix-caching",
+    is_flag=True,
+    help="Enables automatic prefix caching",
+)
+@click.option(
+    "--enable-chunked-prefill",
+    is_flag=True,
+    help="Enable chunked prefill, enabled by default if max number of sequences > 32k",
+)
+@click.option(
+    "--max-num-batched-tokens",
+    type=int,
+    help="Maximum number of batched tokens per iteration, defaults to 2048 if --enable-chunked-prefill is set, else None",
+)
+@click.option(
     "--partition",
     type=str,
     help="Type of compute partition",
@@ -47,7 +65,7 @@ def cli() -> None:
     help="Number of nodes to use, default to suggested resource allocation for model",
 )
 @click.option(
-    "--num-gpus",
+    "--gpus-per-node",
     type=int,
     help="Number of GPUs/node to use, default to suggested resource allocation for model",
 )
@@ -84,13 +102,18 @@ def cli() -> None:
 )
 @click.option(
     "--pipeline-parallelism",
-    type=str,
-    help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
+    is_flag=True,
+    help="Enable pipeline parallelism, enabled by default for supported models",
+)
+@click.option(
+    "--compilation-config",
+    type=click.Choice(["0", "1", "2", "3"]),
+    help="torch.compile optimization level, accepts '0', '1', '2', or '3', default to '0', which means no optimization is applied",
 )
 @click.option(
     "--enforce-eager",
-    type=str,
-    help="Always use eager-mode PyTorch, accepts 'True' or 'False', default to 'False' for custom models if not set",
+    is_flag=True,
+    help="Always use eager-mode PyTorch",
 )
 @click.option(
     "--json-mode",
@@ -105,11 +128,12 @@ def launch(
     try:
         launch_helper = LaunchHelper(model_name, cli_kwargs)
 
-        base_command = launch_helper.get_base_launch_command()
-        params = launch_helper.process_configuration()
-        launch_command = launch_helper.build_launch_command(base_command, params)
-        command_output = utils.run_bash_command(launch_command)
-        launch_helper.handle_launch_output(command_output, CONSOLE)
+        launch_helper.set_env_vars()
+        launch_command = launch_helper.build_launch_command()
+        command_output, stderr = utils.run_bash_command(launch_command)
+        if stderr:
+            raise click.ClickException(f"Error: {stderr}")
+        launch_helper.post_launch_processing(command_output, CONSOLE)
 
     except click.ClickException as e:
         raise e
@@ -134,7 +158,9 @@ def status(
 ) -> None:
     """Get the status of a running model on the cluster."""
     status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output = utils.run_bash_command(status_cmd)
+    output, stderr = utils.run_bash_command(status_cmd)
+    if stderr:
+        raise click.ClickException(f"Error: {stderr}")
 
     status_helper = StatusHelper(slurm_job_id, output, log_dir)
 
@@ -163,98 +189,40 @@ def shutdown(slurm_job_id: int) -> None:
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
-    model_configs = utils.load_config()
-
-    def list_single_model(target_name: str) -> None:
-        config = next((c for c in model_configs if c.model_name == target_name), None)
-        if not config:
-            raise click.ClickException(
-                f"Model '{target_name}' not found in configuration"
-            )
-
-        if json_mode:
-            # Exclude non-essential fields from JSON output
-            excluded = {"venv", "log_dir"}
-            output = config.model_dump(exclude=excluded)
-            click.echo(output)
-        else:
-            table = utils.create_table(key_title="Model Config", value_title="Value")
-            for field, value in config.model_dump().items():
-                if field not in {"venv", "log_dir"}:
-                    table.add_row(field, str(value))
-            CONSOLE.print(table)
-
-    def list_all_models() -> None:
-        if json_mode:
-            click.echo([config.model_name for config in model_configs])
-            return
-
-        # Sort by model type priority
-        type_priority = {"LLM": 0, "VLM": 1, "Text_Embedding": 2, "Reward_Modeling": 3}
-
-        sorted_configs = sorted(
-            model_configs, key=lambda x: type_priority.get(x.model_type, 4)
-        )
-
-        # Create panels with color coding
-        model_type_colors = {
-            "LLM": "cyan",
-            "VLM": "bright_blue",
-            "Text_Embedding": "purple",
-            "Reward_Modeling": "bright_magenta",
-        }
-
-        panels = []
-        for config in sorted_configs:
-            color = model_type_colors.get(config.model_type, "white")
-            variant = config.model_variant or ""
-            display_text = f"[magenta]{config.model_family}[/magenta]"
-            if variant:
-                display_text += f"-{variant}"
-
-            panels.append(Panel(display_text, expand=True, border_style=color))
-
-        CONSOLE.print(Columns(panels, equal=True))
-
-    if model_name:
-        list_single_model(model_name)
-    else:
-        list_all_models()
+    list_helper = ListHelper(model_name, json_mode)
+    list_helper.process_list_command(CONSOLE)
 
 
 @cli.command("metrics")
 @click.argument("slurm_job_id", type=int, nargs=1)
 @click.option(
-    "--log-dir",
-    type=str,
-    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
+    "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """Stream performance metrics to the console."""
-    status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output = utils.run_bash_command(status_cmd)
-    slurm_job_name = output.split(" ")[1].split("=")[1]
+    """Stream real-time performance metrics from the model endpoint."""
+    helper = MetricsHelper(slurm_job_id, log_dir)
+
+    # Check if metrics URL is ready
+    if not helper.metrics_url.startswith("http"):
+        table = utils.create_table("Metric", "Value")
+        helper.display_failed_metrics(
+            table, f"Metrics endpoint unavailable - {helper.metrics_url}"
+        )
+        CONSOLE.print(table)
+        return
 
     with Live(refresh_per_second=1, console=CONSOLE) as live:
         while True:
-            out_logs = utils.read_slurm_log(
-                slurm_job_name, slurm_job_id, "out", log_dir
-            )
-            # if out_logs is a string, then it is an error message
-            if isinstance(out_logs, str):
-                live.update(out_logs)
-                break
-            latest_metrics = utils.get_latest_metric(out_logs)
-            # if latest_metrics is a string, then it is an error message
-            if isinstance(latest_metrics, str):
-                live.update(latest_metrics)
-                break
-            table = utils.create_table(key_title="Metric", value_title="Value")
-            for key, value in latest_metrics.items():
-                table.add_row(key, value)
+            metrics = helper.fetch_metrics()
+            table = utils.create_table("Metric", "Value")
+
+            if isinstance(metrics, str):
+                # Show status information if metrics aren't available
+                helper.display_failed_metrics(table, metrics)
+            else:
+                helper.display_metrics(table, metrics)
 
             live.update(table)
-
             time.sleep(2)
 
 

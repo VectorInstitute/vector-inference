@@ -3,11 +3,12 @@ models:
     model_family: c4ai-command-r
     model_variant: plus
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 256000
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -15,17 +16,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   c4ai-command-r-plus-08-2024:
     model_family: c4ai-command-r
     model_variant: plus-08-2024
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 256000
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -33,17 +35,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   c4ai-command-r-08-2024:
     model_family: c4ai-command-r
     model_variant: 08-2024
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -51,17 +54,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-7b-hf:
     model_family: CodeLlama
     model_variant: 7b-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -69,17 +73,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-7b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 7b-Instruct-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -87,17 +92,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-13b-hf:
     model_family: CodeLlama
     model_variant: 13b-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -105,17 +111,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-13b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 13b-Instruct-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -123,17 +130,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-34b-hf:
     model_family: CodeLlama
     model_variant: 34b-hf
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -141,17 +149,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-34b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 34b-Instruct-hf
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -159,17 +168,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-70b-hf:
     model_family: CodeLlama
     model_variant: 70b-hf
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -177,17 +187,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   CodeLlama-70b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 70b-Instruct-hf
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -195,17 +206,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   dbrx-instruct:
     model_family: dbrx
     model_variant: instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 100352
     max_model_len: 32000
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -213,17 +225,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   gemma-2-9b:
     model_family: gemma-2
     model_variant: 9b
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -231,17 +244,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   gemma-2-9b-it:
     model_family: gemma-2
     model_variant: 9b-it
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -249,17 +263,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   gemma-2-27b:
     model_family: gemma-2
     model_variant: 27b
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -267,17 +282,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   gemma-2-27b-it:
     model_family: gemma-2
     model_variant: 27b-it
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -285,17 +301,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-7b-hf:
     model_family: Llama-2
     model_variant: 7b-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -303,17 +320,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-7b-chat-hf:
     model_family: Llama-2
     model_variant: 7b-chat-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -321,17 +339,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-13b-hf:
     model_family: Llama-2
     model_variant: 13b-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -339,17 +358,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-13b-chat-hf:
     model_family: Llama-2
     model_variant: 13b-chat-hf
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -357,17 +377,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-70b-hf:
     model_family: Llama-2
     model_variant: 70b-hf
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -375,17 +396,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-2-70b-chat-hf:
     model_family: Llama-2
     model_variant: 70b-chat-hf
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -393,17 +415,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   llava-1.5-7b-hf:
     model_family: llava-1.5
     model_variant: 7b-hf
     model_type: VLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -411,17 +434,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   llava-1.5-13b-hf:
     model_family: llava-1.5
     model_variant: 13b-hf
     model_type: VLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -429,17 +453,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   llava-v1.6-mistral-7b-hf:
     model_family: llava-v1.6
     model_variant: mistral-7b-hf
     model_type: VLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -447,17 +472,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   llava-v1.6-34b-hf:
     model_family: llava-v1.6
     model_variant: 34b-hf
     model_type: VLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 64064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -465,17 +491,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3-8B:
     model_family: Meta-Llama-3
     model_variant: 8B
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -483,17 +510,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3-8B-Instruct:
     model_family: Meta-Llama-3
     model_variant: 8B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -501,17 +529,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3-70B:
     model_family: Meta-Llama-3
     model_variant: 70B
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -519,17 +548,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3-70B-Instruct:
     model_family: Meta-Llama-3
     model_variant: 70B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -537,17 +567,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3.1-8B:
     model_family: Meta-Llama-3.1
     model_variant: 8B
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -555,17 +586,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3.1-8B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 8B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -573,17 +605,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3.1-70B:
     model_family: Meta-Llama-3.1
     model_variant: 70B
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -591,17 +624,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3.1-70B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 70B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -609,17 +643,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Meta-Llama-3.1-405B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 405B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 8
     vocab_size: 128256
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m4
@@ -627,17 +662,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-7B-v0.1:
     model_family: Mistral
     model_variant: 7B-v0.1
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -645,17 +681,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-7B-Instruct-v0.1:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.1
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -663,17 +700,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-7B-Instruct-v0.2:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.2
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -681,17 +719,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-7B-v0.3:
     model_family: Mistral
     model_variant: 7B-v0.3
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -699,17 +738,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-7B-Instruct-v0.3:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.3
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -717,17 +757,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-Large-Instruct-2407:
     model_family: Mistral
     model_variant: Large-Instruct-2407
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -735,17 +776,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mistral-Large-Instruct-2411:
     model_family: Mistral
     model_variant: Large-Instruct-2411
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -753,17 +795,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mixtral-8x7B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x7B-Instruct-v0.1
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -771,17 +814,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mixtral-8x22B-v0.1:
     model_family: Mixtral
     model_variant: 8x22B-v0.1
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -789,17 +833,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Mixtral-8x22B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x22B-Instruct-v0.1
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -807,17 +852,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Phi-3-medium-128k-instruct:
     model_family: Phi-3
     model_variant: medium-128k-instruct
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -825,17 +871,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Phi-3-vision-128k-instruct:
     model_family: Phi-3
     model_variant: vision-128k-instruct
     model_type: VLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -843,17 +890,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama3-OpenBioLLM-70B:
     model_family: Llama3-OpenBioLLM
     model_variant: 70B
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -861,17 +909,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.1-Nemotron-70B-Instruct-HF:
     model_family: Llama-3.1-Nemotron
     model_variant: 70B-Instruct-HF
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -879,17 +928,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-1B:
     model_family: Llama-3.2
     model_variant: 1B
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -897,17 +947,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-1B-Instruct:
     model_family: Llama-3.2
     model_variant: 1B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -915,17 +966,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-3B:
     model_family: Llama-3.2
     model_variant: 3B
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -933,17 +985,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-3B-Instruct:
     model_family: Llama-3.2
     model_variant: 3B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -951,17 +1004,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-11B-Vision:
     model_family: Llama-3.2
     model_variant: 11B-Vision
     model_type: VLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 64
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -969,17 +1023,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-11B-Vision-Instruct:
     model_family: Llama-3.2
     model_variant: 11B-Vision-Instruct
     model_type: VLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 64
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -987,17 +1042,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-90B-Vision:
     model_family: Llama-3.2
     model_variant: 90B-Vision
     model_type: VLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 32
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -1005,17 +1061,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.2-90B-Vision-Instruct:
     model_family: Llama-3.2
     model_variant: 90B-Vision-Instruct
     model_type: VLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
     max_model_len: 4096
     max_num_seqs: 32
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: false
     enforce_eager: true
     qos: m2
@@ -1023,17 +1080,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-0.5B-Instruct:
     model_family: Qwen2.5
     model_variant: 0.5B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1041,17 +1099,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-1.5B-Instruct:
     model_family: Qwen2.5
     model_variant: 1.5B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1059,17 +1118,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-3B-Instruct:
     model_family: Qwen2.5
     model_variant: 3B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1077,17 +1137,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-7B-Instruct:
     model_family: Qwen2.5
     model_variant: 7B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1095,17 +1156,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-14B-Instruct:
     model_family: Qwen2.5
     model_variant: 14B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1113,17 +1175,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-32B-Instruct:
     model_family: Qwen2.5
     model_variant: 32B-Instruct
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1131,17 +1194,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-72B-Instruct:
     model_family: Qwen2.5
     model_variant: 72B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 16384
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1149,17 +1213,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-Math-1.5B-Instruct:
     model_family: Qwen2.5
     model_variant: Math-1.5B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
+    max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1167,17 +1232,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-Math-7B-Instruct:
     model_family: Qwen2.5
     model_variant: Math-7B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
+    max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1185,17 +1251,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-Math-72B-Instruct:
     model_family: Qwen2.5
     model_variant: Math-72B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 16384
+    max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1203,17 +1270,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-Coder-7B-Instruct:
     model_family: Qwen2.5
     model_variant: Coder-7B-Instruct
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1221,17 +1289,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Qwen2.5-Math-RM-72B:
     model_family: Qwen2.5
     model_variant: Math-RM-72B
     model_type: Reward_Modeling
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1239,17 +1308,37 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
+    model_weights_parent_dir: /model-weights
+  Qwen2.5-Math-PRM-7B:
+    model_family: Qwen2.5
+    model_variant: Math-PRM-7B
+    model_type: Reward_Modeling
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+    max_model_len: 4096
+    max_num_seqs: 256
+    gpu_memory_utilization: 0.9
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    data_type: auto
+    venv: singularity
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   QwQ-32B-Preview:
     model_family: QwQ
     model_variant: 32B-Preview
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1257,17 +1346,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Pixtral-12B-2409:
     model_family: Pixtral
     model_variant: 12B-2409
     model_type: VLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 131072
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1275,17 +1365,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   e5-mistral-7b-instruct:
     model_family: e5
     model_variant: mistral-7b-instruct
     model_type: Text_Embedding
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
     max_model_len: 4096
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1293,17 +1384,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   bge-base-en-v1.5:
     model_family: bge
     model_variant: base-en-v1.5
     model_type: Text_Embedding
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
     max_model_len: 512
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1311,17 +1403,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   all-MiniLM-L6-v2:
     model_family: all-MiniLM
     model_variant: L6-v2
     model_type: Text_Embedding
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
     max_model_len: 512
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1329,17 +1422,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Llama-3.3-70B-Instruct:
     model_family: Llama-3.3
     model_variant: 70B-Instruct
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 65536
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1347,17 +1441,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   InternVL2_5-26B:
     model_family: InternVL2_5
     model_variant: 26B
     model_type: VLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 92553
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1365,17 +1460,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   InternVL2_5-38B:
     model_family: InternVL2_5
     model_variant: 38B
     model_type: VLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 92553
     max_model_len: 32768
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1383,17 +1479,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Aya-Expanse-32B:
     model_family: Aya-Expanse
     model_variant: 32B
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
     max_model_len: 8192
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1401,17 +1498,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Llama-70B:
     model_family: DeepSeek-R1
     model_variant: 'Distill-Llama-70B '
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1419,17 +1517,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Llama-8B:
     model_family: DeepSeek-R1
     model_variant: 'Distill-Llama-8B '
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1437,17 +1536,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Qwen-32B:
     model_family: DeepSeek-R1
     model_variant: Distill-Qwen-32B
     model_type: LLM
-    num_gpus: 4
+    gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1455,17 +1555,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Qwen-14B:
     model_family: DeepSeek-R1
     model_variant: Distill-Qwen-14B
     model_type: LLM
-    num_gpus: 2
+    gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1473,17 +1574,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Qwen-7B:
     model_family: DeepSeek-R1
     model_variant: Distill-Qwen-7B
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1491,17 +1593,18 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   DeepSeek-R1-Distill-Qwen-1.5B:
     model_family: DeepSeek-R1
     model_variant: Distill-Qwen-1.5B
-    model_type: VLM
-    num_gpus: 1
+    model_type: LLM
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 131072
     max_num_seqs: 256
+    gpu_memory_utilization: 0.9
     pipeline_parallelism: true
     enforce_eager: false
     qos: m2
@@ -1509,7 +1612,7 @@ models:
     partition: a40
     data_type: auto
     venv: singularity
-    log_dir: default
+    log_dir: ~/.vec-inf-logs
     model_weights_parent_dir: /model-weights
   Phi-3.5-vision-instruct:
     model_family: Phi-3.5-vision
