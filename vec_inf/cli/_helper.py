@@ -205,9 +205,13 @@ class LaunchHelper:
         if self.params.get("enable_prefix_caching"):
             table.add_row("Enable Prefix Caching", self.params["enable_prefix_caching"])
         if self.params.get("enable_chunked_prefill"):
-            table.add_row("Enable Chunked Prefill", self.params["enable_chunked_prefill"])
+            table.add_row(
+                "Enable Chunked Prefill", self.params["enable_chunked_prefill"]
+            )
         if self.params.get("max_num_batched_tokens"):
-            table.add_row("Max Num Batched Tokens", self.params["max_num_batched_tokens"])
+            table.add_row(
+                "Max Num Batched Tokens", self.params["max_num_batched_tokens"]
+            )
         if self.params.get("enforce_eager"):
             table.add_row("Enforce Eager", self.params["enforce_eager"])
         table.add_row("Model Weights Directory", os.environ.get("MODEL_WEIGHTS"))
