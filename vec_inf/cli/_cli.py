@@ -107,8 +107,8 @@ def cli() -> None:
 )
 @click.option(
     "--compilation-config",
-    type=click.Choice(["0", "1", "2", "3"]),
-    help="torch.compile optimization level, accepts '0', '1', '2', or '3', default to '0', which means no optimization is applied",
+    type=click.Choice(["0", "3"]),
+    help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
 )
 @click.option(
     "--enforce-eager",
