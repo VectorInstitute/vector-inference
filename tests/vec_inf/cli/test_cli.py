@@ -155,9 +155,14 @@ def mock_truediv(test_paths):
         # Normal case with self and other
         self, other = args
         specific_paths = {
-            (str(test_paths["weights_dir"]), "unknown-model"): test_paths["unknown_model"],
+            (str(test_paths["weights_dir"]), "unknown-model"): test_paths[
+                "unknown_model"
+            ],
             (str(test_paths["log_dir"]), other): test_paths["log_dir"] / other,
-            (str(test_paths["log_dir"] / "model_family_placeholder"), other): test_paths["log_dir"] / "model_family_placeholder" / other,
+            (
+                str(test_paths["log_dir"] / "model_family_placeholder"),
+                other,
+            ): test_paths["log_dir"] / "model_family_placeholder" / other,
             ("/home/user", ".vec-inf-logs"): test_paths["log_dir"],
         }
 
