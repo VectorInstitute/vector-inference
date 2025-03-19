@@ -8,7 +8,6 @@ import requests
 
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
-    convert_boolean_value,
     create_table,
     get_base_url,
     is_server_running,
@@ -223,19 +222,3 @@ models:
     assert "validation error" in str(excinfo.value).lower()
     assert "model_type" in str(excinfo.value)
     assert "num_gpus" in str(excinfo.value)
-
-
-def test_convert_boolean_value_with_string():
-    """Testing string inputs."""
-    assert convert_boolean_value("true") is True
-    assert convert_boolean_value("TRUE") is True
-    assert convert_boolean_value("false") is False
-    assert convert_boolean_value("random_string") is False
-
-
-def test_convert_boolean_value_with_numeric_and_boolean():
-    """Testing integer and boolean inputs."""
-    assert convert_boolean_value(1) is True
-    assert convert_boolean_value(0) is False
-    assert convert_boolean_value(True) is True
-    assert convert_boolean_value(False) is False
