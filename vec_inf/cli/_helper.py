@@ -34,6 +34,13 @@ REQUIRED_FIELDS = {
     "max_model_len",
 }
 
+BOOLEAN_FIELDS = {
+    "pipeline_parallelism",
+    "enforce_eager",
+    "enable_prefix_caching",
+    "enable_chunked_prefill",
+}
+
 LD_LIBRARY_PATH = "/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
 SRC_DIR = str(Path(__file__).parent.parent)
 
@@ -90,35 +97,17 @@ class LaunchHelper:
         params = self.model_config.model_dump()
 
         # Process boolean fields
-        for bool_field in [
-            "pipeline_parallelism",
-            "enforce_eager",
-            "enable_prefix_caching",
-            "enable_chunked_prefill",
-        ]:
-            if (value := self.cli_kwargs.get(bool_field)) is not None:
-                params[bool_field] = utils.convert_boolean_value(value)
+        for bool_field in BOOLEAN_FIELDS:
+            if self.cli_kwargs[bool_field]:
+                params[bool_field] = True
 
         # Merge other overrides
         for key, value in self.cli_kwargs.items():
             if value is not None and key not in [
                 "json_mode",
-                "pipeline_parallelism",
-                "enforce_eager",
-                "enable_prefix_caching",
-                "enable_chunked_prefill",
+                *BOOLEAN_FIELDS,
             ]:
                 params[key] = value
-
-        if "compilation_config" not in params:
-            params["compilation_config"] = "0"
-        if "enable_prefix_caching" not in params:
-            params["enable_prefix_caching"] = False
-        if "enable_chunked_prefill" not in params:
-            params["enable_chunked_prefill"] = False
-
-        if params["max_model_len"] > 32_000:  # this is the default behavior of vLLM
-            params["enable_chunked_prefill"] = True
 
         # Validate required fields
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
@@ -146,11 +135,7 @@ class LaunchHelper:
         os.environ["GPU_MEMORY_UTILIZATION"] = self.params["gpu_memory_utilization"]
         os.environ["TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
         os.environ["PIPELINE_PARALLELISM"] = self.params["pipeline_parallelism"]
-        os.environ["ENABLE_PREFIX_CACHING"] = self.params["enable_prefix_caching"]
-        os.environ["ENABLE_CHUNKED_PREFILL"] = self.params["enable_chunked_prefill"]
-        os.environ["MAX_NUM_BATCHED_TOKENS"] = self.params["max_num_batched_tokens"]
         os.environ["COMPILATION_CONFIG"] = self.params["compilation_config"]
-        os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
         os.environ["SRC_DIR"] = SRC_DIR
         os.environ["MODEL_WEIGHTS"] = str(
             Path(self.params["model_weights_parent_dir"], self.model_name)
@@ -158,6 +143,15 @@ class LaunchHelper:
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
         os.environ["VENV_BASE"] = self.params["venv"]
         os.environ["LOG_DIR"] = self.params["log_dir"]
+
+        if self.params.get("enable_prefix_caching"):
+            os.environ["ENABLE_PREFIX_CACHING"] = self.params["enable_prefix_caching"]
+        if self.params.get("enable_chunked_prefill"):
+            os.environ["ENABLE_CHUNKED_PREFILL"] = self.params["enable_chunked_prefill"]
+        if self.params.get("max_num_batched_tokens"):
+            os.environ["MAX_NUM_BATCHED_TOKENS"] = self.params["max_num_batched_tokens"]
+        if self.params.get("enforce_eager"):
+            os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
 
     def build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
@@ -206,12 +200,16 @@ class LaunchHelper:
         table.add_row("Max Model Length", self.params["max_model_len"])
         table.add_row("Max Num Seqs", self.params["max_num_seqs"])
         table.add_row("GPU Memory Utilization", self.params["gpu_memory_utilization"])
-        table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
-        table.add_row("Enable Prefix Caching", self.params["enable_prefix_caching"])
-        table.add_row("Enable Chunked Prefill", self.params["enable_chunked_prefill"])
-        table.add_row("Max Num Batched Tokens", self.params["max_num_batched_tokens"])
         table.add_row("Compilation Config", self.params["compilation_config"])
-        table.add_row("Enforce Eager", self.params["enforce_eager"])
+        table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
+        if self.params.get("enable_prefix_caching"):
+            table.add_row("Enable Prefix Caching", self.params["enable_prefix_caching"])
+        if self.params.get("enable_chunked_prefill"):
+            table.add_row("Enable Chunked Prefill", self.params["enable_chunked_prefill"])
+        if self.params.get("max_num_batched_tokens"):
+            table.add_row("Max Num Batched Tokens", self.params["max_num_batched_tokens"])
+        if self.params.get("enforce_eager"):
+            table.add_row("Enforce Eager", self.params["enforce_eager"])
         table.add_row("Model Weights Directory", os.environ.get("MODEL_WEIGHTS"))
         table.add_row("Log Directory", self.params["log_dir"])
 

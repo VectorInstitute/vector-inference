@@ -41,13 +41,13 @@ def cli() -> None:
 )
 @click.option(
     "--enable-prefix-caching",
-    type=click.Choice(["True", "False"]),
-    help="Enables automatic prefix caching, accepts 'True' or 'False', default to 'False'",
+    is_flag=True,
+    help="Enables automatic prefix caching",
 )
 @click.option(
     "--enable-chunked-prefill",
-    type=click.Choice(["True", "False"]),
-    help="Enable chunked prefill, accepts 'True' or 'False', default to 'True' if max-num-seqs > 32k, else 'False'",
+    is_flag=True,
+    help="Enable chunked prefill, enabled by default if max number of sequences > 32k",
 )
 @click.option(
     "--max-num-batched-tokens",
@@ -102,18 +102,18 @@ def cli() -> None:
 )
 @click.option(
     "--pipeline-parallelism",
-    type=str,
-    help="Enable pipeline parallelism, accepts 'True' or 'False', default to 'True' for supported models",
+    is_flag=True,
+    help="Enable pipeline parallelism, enabled by default for supported models",
 )
 @click.option(
     "--compilation-config",
-    type=click.Choice(["0", "3"]),
-    help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
+    type=click.Choice(["0", "1", "2", "3"]),
+    help="torch.compile optimization level, accepts '0', '1', '2', or '3', default to '0', which means no optimization is applied",
 )
 @click.option(
     "--enforce-eager",
-    type=str,
-    help="Always use eager-mode PyTorch, accepts 'True' or 'False', default to 'False' for custom models if not set",
+    is_flag=True,
+    help="Always use eager-mode PyTorch",
 )
 @click.option(
     "--json-mode",

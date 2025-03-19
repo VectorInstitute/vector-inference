@@ -47,11 +47,11 @@ class ModelConfig(BaseModel):
     max_num_seqs: int = Field(
         default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
     )
-    max_num_batched_tokens: Optional[int] = Field(
-        default=None,
-        gt=0,
-        le=1_000_000,
-        description="Maximum batched tokens per iteration",
+    compilation_config: int = Field(
+        default=0,
+        gt=-1,
+        le=4,
+        description="torch.compile optimization level",
     )
     gpu_memory_utilization: float = Field(
         default=0.9, gt=0.0, le=1.0, description="GPU memory utilization"
