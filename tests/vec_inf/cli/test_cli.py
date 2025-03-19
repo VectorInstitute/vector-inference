@@ -150,21 +150,18 @@ def mock_truediv(test_paths):
         # Handle the case where it's called with just one argument
         if len(args) == 1:
             other = args[0]
-            if str(other) == ".vec-inf-logs":
-                return test_paths["log_dir"]
-            return Path(str(other))
+            return test_paths.get(other, Path(str(other)))
 
         # Normal case with self and other
         self, other = args
-        if str(self) == str(test_paths["weights_dir"]) and other == "unknown-model":
-            return test_paths["unknown_model"]
-        if str(self) == str(test_paths["log_dir"]):
-            return test_paths["log_dir"] / other
-        if str(self) == str(test_paths["log_dir"] / "model_family_placeholder"):
-            return test_paths["log_dir"] / "model_family_placeholder" / other
-        if str(self) == "/home/user" and str(other) == ".vec-inf-logs":
-            return test_paths["log_dir"]
-        return Path(str(self)) / str(other)
+        specific_paths = {
+            (str(test_paths["weights_dir"]), "unknown-model"): test_paths["unknown_model"],
+            (str(test_paths["log_dir"]), other): test_paths["log_dir"] / other,
+            (str(test_paths["log_dir"] / "model_family_placeholder"), other): test_paths["log_dir"] / "model_family_placeholder" / other,
+            ("/home/user", ".vec-inf-logs"): test_paths["log_dir"],
+        }
+
+        return specific_paths.get((str(self), other), Path(str(self)) / str(other))
 
     return _mock_truediv
 
