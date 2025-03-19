@@ -93,7 +93,7 @@ fi
 if [ "$ENABLE_PREFIX_CACHING" = "True" ]; then
     export ENABLE_PREFIX_CACHING="--enable-prefix-caching"
 else
-    export ENABLE_PREFIX_CACHING="--no-enable-prefix-caching"
+    export ENABLE_PREFIX_CACHING=""
 fi
 
 if [ "$ENABLE_CHUNKED_PREFILL" = "True" ]; then
@@ -102,7 +102,7 @@ else
     export ENABLE_CHUNKED_PREFILL=""
 fi
 
-if [ -z "$MAX_NUM_BATCHED_TOKENS" ] || [ "$MAX_NUM_BATCHED_TOKENS" = "None" ]; then
+if [ -z "$MAX_NUM_BATCHED_TOKENS" ]; then
     export MAX_NUM_BATCHED_TOKENS=""
 else
     export MAX_NUM_BATCHED_TOKENS="--max-num-batched-tokens=$MAX_NUM_BATCHED_TOKENS"
