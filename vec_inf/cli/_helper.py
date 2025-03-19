@@ -395,6 +395,8 @@ class MetricsHelper:
             "json",
             self.log_dir,
         )
+        if isinstance(job_json, str):
+            return False
         return job_json.get("enable_prefix_caching", False)
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
