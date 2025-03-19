@@ -390,14 +390,14 @@ class MetricsHelper:
     def _check_prefix_caching(self) -> bool:
         """Check if prefix caching is enabled."""
         job_json = utils.read_slurm_log(
-            self.status_info["model_name"],
+            cast(str, self.status_info["model_name"]),
             self.slurm_job_id,
             "json",
             self.log_dir,
         )
         if isinstance(job_json, str):
             return False
-        return job_json.get("enable_prefix_caching", False)
+        return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
         """Fetch metrics from the endpoint."""
