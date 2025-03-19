@@ -158,10 +158,3 @@ def load_config() -> list[ModelConfig]:
         ModelConfig(model_name=name, **model_data)
         for name, model_data in config.get("models", {}).items()
     ]
-
-
-def convert_boolean_value(value: Union[str, int, bool]) -> bool:
-    """Convert various input types to boolean strings."""
-    if isinstance(value, str):
-        return value.lower() == "true"
-    return bool(value)
