@@ -31,7 +31,8 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
+<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/883e6a5b-8016-4837-8fdf-39097dfb18bf">
+
 
 #### Overrides
 
@@ -90,9 +91,13 @@ You can check the inference server status by providing the Slurm job ID to the `
 vec-inf status 13014393
 ```
 
-You should see an output like the following:
+If the server is pending for resources, you should see an output like this:
 
-<img width="400" alt="status_img" src="https://github.com/user-attachments/assets/7385b9ca-9159-4ca9-bae2-7e26d80d9747">
+<img width="400" alt="status_pending_img" src="https://github.com/user-attachments/assets/b659c302-eae1-4560-b7a9-14eb3a822a2f">
+
+When the server is ready, you should see an output like this:
+
+<img width="400" alt="status_ready_img" src="https://github.com/user-attachments/assets/672986c2-736c-41ce-ac7c-1fb585cdcb0d">
 
 There are 5 possible states:
 
@@ -110,9 +115,9 @@ Once your server is ready, you can check performance metrics by providing the Sl
 vec-inf metrics 13014393
 ```
 
-And you will see the performance metrics streamed to your console, note that the metrics are updated with a 10-second interval.
+And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.
 
-<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/e5ff2cd5-659b-4c88-8ebc-d8f3fdc023a4">
+<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/3ee143d0-1a71-4944-bbd7-4c3299bf0339">
 
 ### `shutdown` command
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
@@ -135,7 +140,7 @@ You can also view the default setup for a specific supported model by providing 
 ```bash
 vec-inf list Meta-Llama-3.1-70B-Instruct
 ```
-<img width="400" alt="list_model_img" src="https://github.com/user-attachments/assets/30e42ab7-dde2-4d20-85f0-187adffefc3d">
+<img width="500" alt="list_model_img" src="https://github.com/user-attachments/assets/34e53937-2d86-443e-85f6-34e408653ddb">
 
 `launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
 
