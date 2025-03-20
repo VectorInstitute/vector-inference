@@ -4,8 +4,7 @@
 
 ### `launch` command
 
-The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for
-the user to send requests for inference.
+The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.
 
 We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 
@@ -18,8 +17,7 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
-overriden. For example, if `qos` is to be overriden:
+Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
@@ -28,11 +26,11 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
 #### Custom models
 
 You can also launch your own custom model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
-* Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT`.
+* Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
-* You should create a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`
-Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model
-should be specified in that config file.
+* You should specify your model configuration by:
+  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`. Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Using launch command options to specify your model setup.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
 Here is an example to deploy a custom [Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M) model which is not
@@ -46,7 +44,7 @@ models:
     model_family: Qwen2.5
     model_variant: 7B-Instruct-1M
     model_type: LLM
-    num_gpus: 2
+    num_gpus: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 1010000
@@ -56,9 +54,6 @@ models:
     qos: m2
     time: 08:00:00
     partition: a40
-    data_type: auto
-    venv: singularity
-    log_dir: default
     model_weights_parent_dir: /h/<username>/model-weights
 ```
 
@@ -68,7 +63,7 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Alternatively, you can also use launch parameters to set these values instead of using a user-defined config.
+Note that there are other parameters that can also be added to the config but not shown in this example, such as `data_type` and `log_dir`. 
 
 ### `status` command
 
@@ -136,28 +131,37 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 
 ## Send inference requests
 
-Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](https://github.com/VectorInstitute/vector-inference/blob/main/examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/completions.py`, and you should expect to see an output like the following:
+Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](https://github.com/VectorInstitute/vector-inference/blob/main/examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/chat_completions.py`, and you should expect to see an output like the following:
 
 ```json
 {
-    "id": "cmpl-c08d8946224747af9cce9f4d9f36ceb3",
-    "object": "text_completion",
-    "created": 1725394970,
-    "model": "Meta-Llama-3.1-8B-Instruct",
+    "id":"chatcmpl-387c2579231948ffaf66cdda5439d3dc",
     "choices": [
         {
-            "index": 0,
-            "text": " is a question that many people may wonder. The answer is, of course, Ottawa. But if",
-            "logprobs": null,
-            "finish_reason": "length",
-            "stop_reason": null
+            "finish_reason":"stop",
+            "index":0,
+            "logprobs":null,
+            "message": {
+                "content":"Arrr, I be Captain Chatbeard, the scurviest chatbot on the seven seas! Ye be wantin' to know me identity, eh? Well, matey, I be a swashbucklin' AI, here to provide ye with answers and swappin' tales, savvy?",
+                "role":"assistant",
+                "function_call":null,
+                "tool_calls":[],
+                "reasoning_content":null
+            },
+            "stop_reason":null
         }
     ],
+    "created":1742496683,
+    "model":"Meta-Llama-3.1-8B-Instruct",
+    "object":"chat.completion",
+    "system_fingerprint":null,
     "usage": {
-        "prompt_tokens": 8,
-        "total_tokens": 28,
-        "completion_tokens": 20
-    }
+        "completion_tokens":66,
+        "prompt_tokens":32,
+        "total_tokens":98,
+        "prompt_tokens_details":null
+    },
+    "prompt_logprobs":null
 }
 ```
 
