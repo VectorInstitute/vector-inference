@@ -70,7 +70,7 @@ Note that there are other parameters that can also be added to the config but no
 You can check the inference server status by providing the Slurm job ID to the `status` command:
 
 ```bash
-vec-inf status 13014393
+vec-inf status 15373800
 ```
 
 If the server is pending for resources, you should see an output like this:
@@ -95,7 +95,7 @@ Note that the base URL is only available when model is in `READY` state, and if 
 
 Once your server is ready, you can check performance metrics by providing the Slurm job ID to the `metrics` command:
 ```bash
-vec-inf metrics 13014393
+vec-inf metrics 15373800
 ```
 
 And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.
@@ -106,9 +106,9 @@ And you will see the performance metrics streamed to your console, note that the
 
 Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
 ```bash
-vec-inf shutdown 13014393
+vec-inf shutdown 15373800
 
-> Shutting down model with Slurm Job ID: 13014393
+> Shutting down model with Slurm Job ID: 15373800
 ```
 
 (list-command)=
