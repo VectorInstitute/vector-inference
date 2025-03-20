@@ -261,33 +261,77 @@
         <article role="main">
           <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">¶</a></h1>
-<section id="launch-an-inference-server">
-<h2>Launch an inference server<a class="headerlink" href="#launch-an-inference-server" title="Link to this heading">¶</a></h2>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
 <section id="launch-command">
 <h3><code class="docutils literal notranslate"><span class="pre">launch</span></code> command<a class="headerlink" href="#launch-command" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">launch</span></code> command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.</p>
 <p>We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct
 </pre></div>
 </div>
 <p>You should see an output like the following:</p>
-<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/ab658552-18b2-47e0-bf70-e539c3b898d5">
-<p>The model would be launched using the <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/models/models.csv">default parameters</a>, you can override these values by providing additional parameters, use <code class="docutils literal notranslate"><span class="pre">--help</span></code> to see the full list. You can also launch your own customized model as long as the model architecture is <a class="reference external" href="https://docs.vllm.ai/en/stable/models/supported_models.html">supported by vLLM</a>, and make sure to follow the instructions below:</p>
+<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/883e6a5b-8016-4837-8fdf-39097dfb18bf">
+<section id="overrides">
+<h4>Overrides<a class="headerlink" href="#overrides" title="Link to this heading">¶</a></h4>
+<p>Models that are already supported by <code class="docutils literal notranslate"><span class="pre">vec-inf</span></code> would be launched using the <a class="reference internal" href="#vec_inf/config/models.yaml"><span class="xref myst">default parameters</span></a>. You can override these values by providing additional parameters. Use <code class="docutils literal notranslate"><span class="pre">vec-inf</span> <span class="pre">launch</span> <span class="pre">--help</span></code> to see the full list of parameters that can be overriden. For example, if <code class="docutils literal notranslate"><span class="pre">qos</span></code> is to be overriden:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct<span class="w"> </span>--qos<span class="w"> </span>&lt;new_qos&gt;
+</pre></div>
+</div>
+</section>
+<section id="custom-models">
+<h4>Custom models<a class="headerlink" href="#custom-models" title="Link to this heading">¶</a></h4>
+<p>You can also launch your own custom model as long as the model architecture is <a class="reference external" href="https://docs.vllm.ai/en/stable/models/supported_models.html">supported by vLLM</a>, and make sure to follow the instructions below:</p>
 <ul class="simple">
-<li><p>Your model weights directory naming convention should follow <code class="docutils literal notranslate"><span class="pre">$MODEL_FAMILY-$MODEL_VARIANT</span></code>.</p></li>
-<li><p>Your model weights directory should contain HF format weights.</p></li>
-<li><p>The following launch parameters will conform to default value if not specified: <code class="docutils literal notranslate"><span class="pre">--max-num-seqs</span></code>, <code class="docutils literal notranslate"><span class="pre">--partition</span></code>, <code class="docutils literal notranslate"><span class="pre">--data-type</span></code>, <code class="docutils literal notranslate"><span class="pre">--venv</span></code>, <code class="docutils literal notranslate"><span class="pre">--log-dir</span></code>, <code class="docutils literal notranslate"><span class="pre">--model-weights-parent-dir</span></code>, <code class="docutils literal notranslate"><span class="pre">--pipeline-parallelism</span></code>, <code class="docutils literal notranslate"><span class="pre">--enforce-eager</span></code>. All other launch parameters need to be specified for custom models.</p></li>
-<li><p>Example for setting the model weights parent directory: <code class="docutils literal notranslate"><span class="pre">--model-weights-parent-dir</span> <span class="pre">/h/user_name/my_weights</span></code>.</p></li>
+<li><p>Your model weights directory naming convention should follow <code class="docutils literal notranslate"><span class="pre">$MODEL_FAMILY-$MODEL_VARIANT</span></code> ($MODEL_VARIANT is OPTIONAL).</p></li>
+<li><p>Your model weights directory should contain HuggingFace format weights.</p></li>
+<li><p>You should specify your model configuration by:</p>
+<ul>
+<li><p>Creating a custom configuration file for your model and specify its path via setting the environment variable <code class="docutils literal notranslate"><span class="pre">VEC_INF_CONFIG</span></code>. Check the <a class="reference internal" href="#vec_inf/config/models.yaml"><span class="xref myst">default parameters</span></a> file for the format of the config file. All the parameters for the model should be specified in that config file.</p></li>
+<li><p>Using launch command options to specify your model setup.</p></li>
+</ul>
+</li>
 <li><p>For other model launch parameters you can reference the default values for similar models using the <a class="reference internal" href="#list-command"><code class="docutils literal notranslate"><span class="pre">list</span></code> command </a>.</p></li>
 </ul>
+<p>Here is an example to deploy a custom <a class="reference external" href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M">Qwen2.5-7B-Instruct-1M</a> model which is not
+supported in the default list of models using a user custom config. In this case, the model weights are assumed to be downloaded to
+a <code class="docutils literal notranslate"><span class="pre">model-weights</span></code> directory inside the user’s home directory. The weights directory of the model follows the naming convention so it
+would be named <code class="docutils literal notranslate"><span class="pre">Qwen2.5-7B-Instruct-1M</span></code>. The following yaml file would need to be created, lets say it is named <code class="docutils literal notranslate"><span class="pre">/h/&lt;username&gt;/my-model-config.yaml</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">models</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Qwen2.5-7B-Instruct-1M</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">model_family</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Qwen2.5</span>
+<span class="w">    </span><span class="nt">model_variant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7B-Instruct-1M</span>
+<span class="w">    </span><span class="nt">model_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LLM</span>
+<span class="w">    </span><span class="nt">num_gpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">vocab_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">152064</span>
+<span class="w">    </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1010000</span>
+<span class="w">    </span><span class="nt">max_num_seqs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
+<span class="w">    </span><span class="nt">pipeline_parallelism</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">enforce_eager</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">qos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">m2</span>
+<span class="w">    </span><span class="nt">time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">08:00:00</span>
+<span class="w">    </span><span class="nt">partition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a40</span>
+<span class="w">    </span><span class="nt">model_weights_parent_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/h/&lt;username&gt;/model-weights</span>
+</pre></div>
+</div>
+<p>You would then set the <code class="docutils literal notranslate"><span class="pre">VEC_INF_CONFIG</span></code> path using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">VEC_INF_CONFIG</span><span class="o">=</span>/h/&lt;username&gt;/my-model-config.yaml
+</pre></div>
+</div>
+<p>Note that there are other parameters that can also be added to the config but not shown in this example, such as <code class="docutils literal notranslate"><span class="pre">data_type</span></code> and <code class="docutils literal notranslate"><span class="pre">log_dir</span></code>.</p>
+</section>
 </section>
 <section id="status-command">
 <h3><code class="docutils literal notranslate"><span class="pre">status</span></code> command<a class="headerlink" href="#status-command" title="Link to this heading">¶</a></h3>
 <p>You can check the inference server status by providing the Slurm job ID to the <code class="docutils literal notranslate"><span class="pre">status</span></code> command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>status<span class="w"> </span><span class="m">13014393</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>status<span class="w"> </span><span class="m">15373800</span>
 </pre></div>
 </div>
-<p>You should see an output like the following:</p>
-<img width="400" alt="status_img" src="https://github.com/user-attachments/assets/7385b9ca-9159-4ca9-bae2-7e26d80d9747">
+<p>If the server is pending for resources, you should see an output like this:</p>
+<img width="400" alt="status_pending_img" src="https://github.com/user-attachments/assets/b659c302-eae1-4560-b7a9-14eb3a822a2f">
+<p>When the server is ready, you should see an output like this:</p>
+<img width="400" alt="status_ready_img" src="https://github.com/user-attachments/assets/672986c2-736c-41ce-ac7c-1fb585cdcb0d">
 <p>There are 5 possible states:</p>
 <ul class="simple">
 <li><p><strong>PENDING</strong>: Job submitted to Slurm, but not executed yet. Job pending reason will be shown.</p></li>
@@ -301,18 +345,18 @@
 <section id="metrics-command">
 <h3><code class="docutils literal notranslate"><span class="pre">metrics</span></code> command<a class="headerlink" href="#metrics-command" title="Link to this heading">¶</a></h3>
 <p>Once your server is ready, you can check performance metrics by providing the Slurm job ID to the <code class="docutils literal notranslate"><span class="pre">metrics</span></code> command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>metrics<span class="w"> </span><span class="m">13014393</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>metrics<span class="w"> </span><span class="m">15373800</span>
 </pre></div>
 </div>
-<p>And you will see the performance metrics streamed to your console, note that the metrics are updated with a 10-second interval.</p>
-<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/e5ff2cd5-659b-4c88-8ebc-d8f3fdc023a4">
+<p>And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.</p>
+<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/3ee143d0-1a71-4944-bbd7-4c3299bf0339">
 </section>
 <section id="shutdown-command">
 <h3><code class="docutils literal notranslate"><span class="pre">shutdown</span></code> command<a class="headerlink" href="#shutdown-command" title="Link to this heading">¶</a></h3>
 <p>Finally, when you’re finished using a model, you can shut it down by providing the Slurm job ID:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>shutdown<span class="w"> </span><span class="m">13014393</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>shutdown<span class="w"> </span><span class="m">15373800</span>
 
-&gt;<span class="w"> </span>Shutting<span class="w"> </span>down<span class="w"> </span>model<span class="w"> </span>with<span class="w"> </span>Slurm<span class="w"> </span>Job<span class="w"> </span>ID:<span class="w"> </span><span class="m">13014393</span>
+&gt;<span class="w"> </span>Shutting<span class="w"> </span>down<span class="w"> </span>model<span class="w"> </span>with<span class="w"> </span>Slurm<span class="w"> </span>Job<span class="w"> </span>ID:<span class="w"> </span><span class="m">15373800</span>
 </pre></div>
 </div>
 </section>
@@ -327,32 +371,41 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>list<span class="w"> </span>Meta-Llama-3.1-70B-Instruct
 </pre></div>
 </div>
-<img width="400" alt="list_model_img" src="https://github.com/user-attachments/assets/30e42ab7-dde2-4d20-85f0-187adffefc3d">
+<img width="500" alt="list_model_img" src="https://github.com/user-attachments/assets/34e53937-2d86-443e-85f6-34e408653ddb">
 <p><code class="docutils literal notranslate"><span class="pre">launch</span></code>, <code class="docutils literal notranslate"><span class="pre">list</span></code>, and <code class="docutils literal notranslate"><span class="pre">status</span></code> command supports <code class="docutils literal notranslate"><span class="pre">--json-mode</span></code>, where the command output would be structured as a JSON string.</p>
 </section>
 </section>
 <section id="send-inference-requests">
 <h2>Send inference requests<a class="headerlink" href="#send-inference-requests" title="Link to this heading">¶</a></h2>
-<p>Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/blob/main/examples"><code class="docutils literal notranslate"><span class="pre">examples</span></code></a> folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">examples/inference/llm/completions.py</span></code>, and you should expect to see an output like the following:</p>
+<p>Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/blob/main/examples"><code class="docutils literal notranslate"><span class="pre">examples</span></code></a> folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">examples/inference/llm/chat_completions.py</span></code>, and you should expect to see an output like the following:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cmpl-c08d8946224747af9cce9f4d9f36ceb3&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text_completion&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1725394970</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Meta-Llama-3.1-8B-Instruct&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;chatcmpl-387c2579231948ffaf66cdda5439d3dc&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot; is a question that many people may wonder. The answer is, of course, Ottawa. But if&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;logprobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;finish_reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;length&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;stop_reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">            </span><span class="nt">&quot;finish_reason&quot;</span><span class="p">:</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;logprobs&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="s2">&quot;Arrr, I be Captain Chatbeard, the scurviest chatbot on the seven seas! Ye be wantin&#39; to know me identity, eh? Well, matey, I be a swashbucklin&#39; AI, here to provide ye with answers and swappin&#39; tales, savvy?&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;function_call&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;tool_calls&quot;</span><span class="p">:[],</span>
+<span class="w">                </span><span class="nt">&quot;reasoning_content&quot;</span><span class="p">:</span><span class="kc">null</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;stop_reason&quot;</span><span class="p">:</span><span class="kc">null</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="mi">1742496683</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="s2">&quot;Meta-Llama-3.1-8B-Instruct&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="s2">&quot;chat.completion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;system_fingerprint&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;usage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;prompt_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;total_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;completion_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">        </span><span class="nt">&quot;completion_tokens&quot;</span><span class="p">:</span><span class="mi">66</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;prompt_tokens&quot;</span><span class="p">:</span><span class="mi">32</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;total_tokens&quot;</span><span class="p">:</span><span class="mi">98</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;prompt_tokens_details&quot;</span><span class="p">:</span><span class="kc">null</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;prompt_logprobs&quot;</span><span class="p">:</span><span class="kc">null</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -433,8 +486,12 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">User Guide</a><ul>
-<li><a class="reference internal" href="#launch-an-inference-server">Launch an inference server</a><ul>
-<li><a class="reference internal" href="#launch-command"><code class="docutils literal notranslate"><span class="pre">launch</span></code> command</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#launch-command"><code class="docutils literal notranslate"><span class="pre">launch</span></code> command</a><ul>
+<li><a class="reference internal" href="#overrides">Overrides</a></li>
+<li><a class="reference internal" href="#custom-models">Custom models</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#status-command"><code class="docutils literal notranslate"><span class="pre">status</span></code> command</a></li>
 <li><a class="reference internal" href="#metrics-command"><code class="docutils literal notranslate"><span class="pre">metrics</span></code> command</a></li>
 <li><a class="reference internal" href="#shutdown-command"><code class="docutils literal notranslate"><span class="pre">shutdown</span></code> command</a></li>
