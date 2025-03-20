@@ -31,19 +31,19 @@ jobs:
           submodules: 'true'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@4db96194c378173c656ce18a155ffc14a9fc4355
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231
         with:
           # Install a specific version of uv.
           version: "0.5.21"
           enable-cache: true
 
       - name: "Set up Python"
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+        uses: actions/setup-python@8039c45ed9a312fba91f3399cd0605ba2ebfe93c
         with:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --all-groups
+        run: uv sync --dev --group docs
 
       - name: Build docs
         run: |
@@ -53,7 +53,7 @@ jobs:
           touch build/html/.nojekyll
 
       - name: Deploy to Github pages
-        uses: JamesIves/github-pages-deploy-action@15de0f09300eea763baee31dff6c6184995c5f6a
+        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8
         with:
           branch: github_pages
           folder: docs/build/html

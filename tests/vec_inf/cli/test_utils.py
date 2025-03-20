@@ -8,28 +8,14 @@ import requests
 
 from vec_inf.cli._utils import (
     MODEL_READY_SIGNATURE,
-    SERVER_ADDRESS_SIGNATURE,
     create_table,
     get_base_url,
-    get_latest_metric,
     is_server_running,
-    load_default_args,
-    load_models_df,
+    load_config,
     model_health_check,
     read_slurm_log,
     run_bash_command,
 )
-
-
-@pytest.fixture
-def sample_models_csv(tmp_path):
-    """Create a sample models CSV file."""
-    csv_content = """model_name,model_type,param1,param2
-model_a,type1,value1,value2
-model_b,type2,value3,value4"""
-    path = tmp_path / "models.csv"
-    path.write_text(csv_content)
-    return path
 
 
 @pytest.fixture
@@ -46,8 +32,9 @@ def test_run_bash_command_success():
         mock_process = MagicMock()
         mock_process.communicate.return_value = ("test output", "")
         mock_popen.return_value = mock_process
-        result = run_bash_command("echo test")
+        result, stderr = run_bash_command("echo test")
         assert result == "test output"
+        assert stderr == ""
 
 
 def test_run_bash_command_error():
@@ -56,14 +43,16 @@ def test_run_bash_command_error():
         mock_process = MagicMock()
         mock_process.communicate.return_value = ("", "error output")
         mock_popen.return_value = mock_process
-        result = run_bash_command("invalid_command")
+        result, stderr = run_bash_command("invalid_command")
         assert result == ""
+        assert stderr == "error output"
 
 
 def test_read_slurm_log_found(mock_log_dir):
     """Test that read_slurm_log reads the content of a log file."""
     test_content = ["line1\n", "line2\n"]
-    log_file = mock_log_dir / "test_job.123.err"
+    log_file = mock_log_dir / "test_job.123" / "test_job.123.err"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
     log_file.write_text("".join(test_content))
     result = read_slurm_log("test_job", 123, "err", mock_log_dir)
     assert result == test_content
@@ -72,7 +61,9 @@ def test_read_slurm_log_found(mock_log_dir):
 def test_read_slurm_log_not_found():
     """Test read_slurm_log, return an error message if the log file is not found."""
     result = read_slurm_log("missing_job", 456, "err", "/nonexistent")
-    assert result == "LOG_FILE_NOT_FOUND"
+    assert (
+        result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456/missing_job.456.err"
+    )
 
 
 @pytest.mark.parametrize(
@@ -94,9 +85,9 @@ def test_is_server_running_statuses(log_content, expected):
 
 def test_get_base_url_found():
     """Test that get_base_url returns the correct base URL."""
-    test_line = f"{SERVER_ADDRESS_SIGNATURE}http://localhost:8000\n"
+    test_dict = {"server_address": "http://localhost:8000"}
     with patch("vec_inf.cli._utils.read_slurm_log") as mock_read:
-        mock_read.return_value = [test_line]
+        mock_read.return_value = test_dict
         result = get_base_url("test_job", 123, None)
         assert result == "http://localhost:8000"
 
@@ -104,9 +95,9 @@ def test_get_base_url_found():
 def test_get_base_url_not_found():
     """Test get_base_url when URL is not found in logs."""
     with patch("vec_inf.cli._utils.read_slurm_log") as mock_read:
-        mock_read.return_value = ["some other content"]
+        mock_read.return_value = {"random_key": "123"}
         result = get_base_url("test_job", 123, None)
-        assert result == "URL_NOT_FOUND"
+        assert result == "URL NOT FOUND"
 
 
 @pytest.mark.parametrize(
@@ -157,53 +148,77 @@ def test_create_table_without_header():
     assert table.show_header is False
 
 
-def test_load_models_df(sample_models_csv):
-    """Test that load_models_df loads the models CSV file correctly."""
-    models_dir = sample_models_csv.parent / "models"
-    models_dir.mkdir()
-    (models_dir / "models.csv").write_text(sample_models_csv.read_text())
+def test_load_config_default_only():
+    """Test loading the actual default configuration file from the filesystem."""
+    configs = load_config()
+
+    # Verify at least one known model exists
+    model_names = {m.model_name for m in configs}
+    assert "c4ai-command-r-plus" in model_names
+
+    # Verify full configuration of a sample model
+    model = next(m for m in configs if m.model_name == "c4ai-command-r-plus")
+    assert model.model_family == "c4ai-command-r"
+    assert model.model_type == "LLM"
+    assert model.gpus_per_node == 4
+    assert model.num_nodes == 2
+    assert model.max_model_len == 8192
+    assert model.pipeline_parallelism is True
+
+
+def test_load_config_with_user_override(tmp_path, monkeypatch):
+    """Test user config overriding default values."""
+    # Create user config with override and new model
+    user_config = tmp_path / "user_config.yaml"
+    user_config.write_text("""\
+models:
+  c4ai-command-r-plus:
+    gpus_per_node: 8
+  new-model:
+    model_family: new-family
+    model_type: VLM
+    gpus_per_node: 4
+    num_nodes: 1
+    vocab_size: 256000
+    max_model_len: 4096
+""")
+
+    with monkeypatch.context() as m:
+        m.setenv("VEC_INF_CONFIG", str(user_config))
+        configs = load_config()
+        config_map = {m.model_name: m for m in configs}
+
+    # Verify override (merged with defaults)
+    assert config_map["c4ai-command-r-plus"].gpus_per_node == 8
+    assert config_map["c4ai-command-r-plus"].num_nodes == 2
+    assert config_map["c4ai-command-r-plus"].vocab_size == 256000
+
+    # Verify new model
+    new_model = config_map["new-model"]
+    assert new_model.model_family == "new-family"
+    assert new_model.model_type == "VLM"
+    assert new_model.gpus_per_node == 4
+    assert new_model.vocab_size == 256000
+
+
+def test_load_config_invalid_user_model(tmp_path):
+    """Test validation of user-provided model configurations."""
+    invalid_config = tmp_path / "bad_config.yaml"
+    invalid_config.write_text("""\
+models:
+  invalid-model:
+    model_family: ""
+    model_type: INVALID_TYPE
+    num_gpus: 0
+    num_nodes: -1
+""")
 
     with (
-        patch.object(os.path, "dirname") as mock_dirname,
-        patch.object(os.path, "realpath") as mock_realpath,
+        pytest.raises(ValueError) as excinfo,
+        patch.dict(os.environ, {"VEC_INF_CONFIG": str(invalid_config)}),
     ):
-        mock_realpath.return_value = str(models_dir / "dummy_file.py")
-        mock_dirname.return_value = str(models_dir.parent)
-        df = load_models_df()
-        assert df.shape == (2, 4)
-        assert "model_name" in df.columns
+        load_config()
 
-
-def test_load_default_args(sample_models_csv):
-    """Test that load_default_args returns the default arguments for a model."""
-    models_dir = sample_models_csv.parent / "models"
-    models_dir.mkdir()
-    (models_dir / "models.csv").write_text(sample_models_csv.read_text())
-
-    with (
-        patch.object(os.path, "dirname") as mock_dirname,
-        patch.object(os.path, "realpath") as mock_realpath,
-    ):
-        mock_realpath.return_value = str(models_dir / "dummy_file.py")
-        mock_dirname.return_value = str(models_dir.parent)
-        df = load_models_df()
-        args = load_default_args(df, "model_a")
-        assert args == {"model_type": "type1", "param1": "value1", "param2": "value2"}
-
-
-@pytest.mark.parametrize(
-    "log_lines,expected",
-    [
-        (
-            ["2023-01-01 [INFO] Avg prompt throughput: 5.2, Avg token throughput: 3.1"],
-            {"Avg prompt throughput": "5.2", "Avg token throughput": "3.1"},
-        ),
-        (["No metrics here"], {}),
-        ([], {}),
-        (["Invalid metric format"], {}),
-    ],
-)
-def test_get_latest_metric(log_lines, expected):
-    """Test that get_latest_metric returns the latest metric entry."""
-    result = get_latest_metric(log_lines)
-    assert result == expected
+    assert "validation error" in str(excinfo.value).lower()
+    assert "model_type" in str(excinfo.value)
+    assert "num_gpus" in str(excinfo.value)

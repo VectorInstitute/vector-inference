@@ -18,4 +18,4 @@ completion = client.chat.completions.create(
     ],
 )
 
-print(completion)
+print(completion.model_dump_json())
