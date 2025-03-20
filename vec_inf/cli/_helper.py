@@ -352,6 +352,7 @@ class MetricsHelper:
         self.log_dir = log_dir
         self.status_info = self._get_status_info()
         self.metrics_url = self._build_metrics_url()
+        self.enabled_prefix_caching = self._check_prefix_caching()
 
         self._prev_prompt_tokens: float = 0.0
         self._prev_generation_tokens: float = 0.0
@@ -385,6 +386,18 @@ class MetricsHelper:
         return urlunparse(
             (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
         )
+
+    def _check_prefix_caching(self) -> bool:
+        """Check if prefix caching is enabled."""
+        job_json = utils.read_slurm_log(
+            cast(str, self.status_info["model_name"]),
+            self.slurm_job_id,
+            "json",
+            self.log_dir,
+        )
+        if isinstance(job_json, str):
+            return False
+        return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
         """Fetch metrics from the endpoint."""
@@ -476,6 +489,10 @@ class MetricsHelper:
             "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
         }
 
+        if self.enabled_prefix_caching:
+            key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
+            key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
+
         parsed: dict[str, float] = {}
         for line in metrics_text.split("\n"):
             if line.startswith("#") or not line.strip():
@@ -531,6 +548,16 @@ class MetricsHelper:
             "CPU Cache Usage",
             f"{metrics.get('cpu_cache_usage', 0) * 100:.1f}%",
         )
+
+        if self.enabled_prefix_caching:
+            table.add_row(
+                "GPU Prefix Cache Hit Rate",
+                f"{metrics.get('gpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
+            )
+            table.add_row(
+                "CPU Prefix Cache Hit Rate",
+                f"{metrics.get('cpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
+            )
 
         # Show average latency if available
         if "avg_request_latency" in metrics:

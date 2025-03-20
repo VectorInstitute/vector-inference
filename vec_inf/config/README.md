@@ -162,6 +162,13 @@ More profiling metrics coming soon!
 
 ## Vision Language Models
 
+### [allenai: Molmo](https://huggingface.co/collections/allenai/molmo-66f379e6fe3b8ef090a8ca19)
+
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`Molmo-7B-D-0924`](https://huggingface.co/allenai/Molmo-7B-D-0924) | 1x a40 | - tokens/s | - tokens/s |
+
+
 ### [LLaVa-1.5](https://huggingface.co/collections/llava-hf/llava-15-65f762d5b6941db5c2ba07e0)
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
@@ -181,6 +188,7 @@ More profiling metrics coming soon!
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 | [`Phi-3-vision-128k-instruct`](https://huggingface.co/microsoft/Phi-3-vision-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |
+| [`Phi-3.5-vision-instruct`](https://huggingface.co/microsoft/Phi-3.5-vision-instruct) | 2x a40 | - tokens/s | - tokens/s |
 
 ### [Meta: Llama 3.2](https://huggingface.co/collections/meta-llama/llama-32-66f448ffc8c32f949b04c8cf)
 
@@ -198,6 +206,27 @@ More profiling metrics coming soon!
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 | [`Pixtral-12B-2409`](https://huggingface.co/mistralai/Pixtral-12B-2409) | 1x a40 | - tokens/s | - tokens/s |
+
+### [OpenGVLab: InternVL2.5](https://huggingface.co/collections/OpenGVLab/internvl25-673e1019b66e2218f68d7c1c)
+
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`InternVL2_5-8B`](https://huggingface.co/OpenGVLab/InternVL2_5-8B) | 1x a40 | - tokens/s | - tokens/s |
+| [`InternVL2_5-26B`](https://huggingface.co/OpenGVLab/InternVL2_5-26B) | 2x a40 | - tokens/s | - tokens/s |
+| [`InternVL2_5-38B`](https://huggingface.co/OpenGVLab/InternVL2_5-38B) | 4x a40 | - tokens/s | - tokens/s |
+
+### [THUDM: GLM-4](https://huggingface.co/collections/THUDM/glm-4-665fcf188c414b03c2f7e3b7)
+
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`glm-4v-9b`](https://huggingface.co/THUDM/glm-4v-9b) | 1x a40 | - tokens/s | - tokens/s |
+
+### [DeepSeek: DeepSeek-VL2](https://huggingface.co/collections/deepseek-ai/deepseek-vl2-675c22accc456d3beb4613ab)
+| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
+|:----------:|:----------:|:----------:|:----------:|
+| [`deepseek-vl2`](https://huggingface.co/deepseek-ai/deepseek-vl2) | 2x a40 | - tokens/s | - tokens/s |
+| [`deepseek-vl2-small`](https://huggingface.co/deepseek-ai/deepseek-vl2-small) | 1x a40 | - tokens/s | - tokens/s |
+
 
 ## Text Embedding Models
 
@@ -225,3 +254,4 @@ More profiling metrics coming soon!
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 | [`Qwen2.5-Math-RM-72B`](https://huggingface.co/Qwen/Qwen2.5-Math-RM-72B) | 4x a40 | - tokens/s | - tokens/s |
+| [`Qwen2.5-Math-PRM-7B`](https://huggingface.co/Qwen/Qwen2.5-Math-PRM-7B) | 1x a40 | - tokens/s | - tokens/s |

@@ -68,6 +68,9 @@ def path_exists(mock_exists, test_config_dir):
         # Allow access to the default config file
         if str(p).endswith("config/models.yaml"):
             return True
+        # Allow access to the default log directory
+        if str(p).endswith(".vec-inf-logs"):
+            return True
         # Use mock_exists for other paths
         return mock_exists(p)
 
@@ -143,14 +146,27 @@ def test_paths():
 def mock_truediv(test_paths):
     """Fixture providing path joining mock."""
 
-    def _mock_truediv(self, other):
-        if str(self) == str(test_paths["weights_dir"]) and other == "unknown-model":
-            return test_paths["unknown_model"]
-        if str(self) == str(test_paths["log_dir"]):
-            return test_paths["log_dir"] / other
-        if str(self) == str(test_paths["log_dir"] / "model_family_placeholder"):
-            return test_paths["log_dir"] / "model_family_placeholder" / other
-        return Path(str(self)) / str(other)
+    def _mock_truediv(*args):
+        # Handle the case where it's called with just one argument
+        if len(args) == 1:
+            other = args[0]
+            return test_paths.get(other, Path(str(other)))
+
+        # Normal case with self and other
+        self, other = args
+        specific_paths = {
+            (str(test_paths["weights_dir"]), "unknown-model"): test_paths[
+                "unknown_model"
+            ],
+            (str(test_paths["log_dir"]), other): test_paths["log_dir"] / other,
+            (
+                str(test_paths["log_dir"] / "model_family_placeholder"),
+                other,
+            ): test_paths["log_dir"] / "model_family_placeholder" / other,
+            ("/home/user", ".vec-inf-logs"): test_paths["log_dir"],
+        }
+
+        return specific_paths.get((str(self), other), Path(str(self)) / str(other))
 
     return _mock_truediv
 
@@ -201,10 +217,24 @@ def base_patches(test_paths, mock_truediv, debug_helper):
             "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
         ),
         patch("pathlib.Path.__truediv__", side_effect=mock_truediv),
+        patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
         patch("json.dump"),
         patch("pathlib.Path.touch"),
         patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"]),
+        patch(
+            "pathlib.Path.home", return_value=Path("/home/user")
+        ),  # Mock home directory
     ]
+
+
+@pytest.fixture
+def apply_base_patches(base_patches):
+    """Fixture to apply all base patches."""
+    with ExitStack() as stack:
+        # Apply all patches
+        for patch_obj in base_patches:
+            stack.enter_context(patch_obj)
+        yield
 
 
 def test_launch_command_success(runner, mock_launch_output, path_exists, debug_helper):
@@ -374,7 +404,7 @@ def test_list_single_model(runner):
 
 
 def test_metrics_command_pending_server(
-    runner, mock_status_output, path_exists, debug_helper
+    runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
     """Test metrics command when server is pending."""
     with (
@@ -398,7 +428,7 @@ def test_metrics_command_pending_server(
 
 
 def test_metrics_command_server_not_ready(
-    runner, mock_status_output, path_exists, debug_helper
+    runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
     """Test metrics command when server is running but not ready."""
     with (
@@ -420,7 +450,7 @@ def test_metrics_command_server_not_ready(
 
 @patch("vec_inf.cli._helper.requests.get")
 def test_metrics_command_server_ready(
-    mock_get, runner, mock_status_output, path_exists, debug_helper
+    mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
     """Test metrics command when server is ready and returning metrics."""
     metrics_response = """
@@ -459,7 +489,7 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
 
 @patch("vec_inf.cli._helper.requests.get")
 def test_metrics_command_request_failed(
-    mock_get, runner, mock_status_output, path_exists, debug_helper
+    mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
     """Test metrics command when request to metrics endpoint fails."""
     mock_get.side_effect = requests.exceptions.RequestException("Connection refused")

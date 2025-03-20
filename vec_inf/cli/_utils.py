@@ -35,6 +35,8 @@ def read_slurm_log(
     if not log_dir:
         # Default log directory
         models_dir = Path.home() / ".vec-inf-logs"
+        if not models_dir.exists():
+            return "LOG DIR NOT FOUND"
         # Iterate over all dirs in models_dir, sorted by dir name length in desc order
         for directory in sorted(
             [d for d in models_dir.iterdir() if d.is_dir()],
