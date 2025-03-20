@@ -63,7 +63,7 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Note that there are other parameters that can also be added to the config but not shown in this example, such as `data_type` and `log_dir`. 
+Note that there are other parameters that can also be added to the config but not shown in this example, such as `data_type` and `log_dir`.
 
 ### `status` command
 
