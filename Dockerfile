@@ -6,8 +6,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 # No GPUs visible during build
 ARG CUDA_VISIBLE_DEVICES=none
 
-# Specify CUDA architectures -> 7.5: RTX 6000 & T4, 8.0: A100, 8.6+PTX
-ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
+# Specify CUDA architectures
+ARG TORCH_CUDA_ARCH_LIST="6.0;7.0"
 
 # Set the Python version
 ARG PYTHON_VERSION=3.10.12
@@ -16,7 +16,7 @@ ARG PYTHON_VERSION=3.10.12
 RUN apt-get update && apt-get install -y \
     wget build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev libffi-dev libncursesw5-dev \
-    xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev git vim \
+    xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev git vim libnuma-dev\
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python
