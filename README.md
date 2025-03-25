@@ -30,6 +30,7 @@ docker save -o vec-inf-image.tar vec-inf-image:latest
 Convert the Docker image `.tar` file to a `.sif` file using **Apptainer**:
 
 ```bash
+module load apptainer
 # apptainer build vec-inf-image.sif docker-daemon://vec-inf-image:latest
 apptainer build vec-inf-image.sif docker-archive://vec-inf-image.tar
 ```
