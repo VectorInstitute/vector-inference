@@ -159,7 +159,10 @@ class LaunchHelper:
         command_list = ["sbatch"]
         # Append options
         command_list.extend(["--job-name", f"{self.model_name}"])
-        command_list.extend(["--partition", f"{self.params['partition']}"])
+        # command_list.extend(["--partition", f"{self.params['partition']}"])
+        command_list.extend(["--partition", f"gpu"])
+        command_list.extend(["--account", f"gliugroup_gpu"])
+        command_list.extend(["-C", f"gpu16g"])
         command_list.extend(["--qos", f"{self.params['qos']}"])
         command_list.extend(["--time", f"{self.params['time']}"])
         command_list.extend(["--nodes", f"{self.params['num_nodes']}"])

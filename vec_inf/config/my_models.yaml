@@ -1,0 +1,16 @@
+models:
+  Mistral-7B-Instruct-v0.3:
+    model_family: Mistral
+    model_variant: 7B-Instruct-v0.3
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 32768
+    max_model_len: 500
+    max_num_seqs: 256
+    pipeline_parallelism: true
+    enforce_eager: false
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    model_weights_parent_dir: /cluster/projects/gliugroup/2BLAST/LLMs

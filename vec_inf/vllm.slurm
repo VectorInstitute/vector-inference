@@ -41,11 +41,14 @@ else
     export MAX_NUM_BATCHED_TOKENS="--max-num-batched-tokens=$MAX_NUM_BATCHED_TOKENS"
 fi
 
+# export SINGULARITY_IMAGE=/model-weights/vec-inf-shared/vector-inference_latest.sif
+# module load singularity-ce/3.8.2
+
 # Activate vllm venv
 if [ "$VENV_BASE" = "singularity" ]; then
-    export SINGULARITY_IMAGE=/model-weights/vec-inf-shared/vector-inference_latest.sif
+    export SINGULARITY_IMAGE=/cluster/projects/gliugroup/2BLAST/containers/vec-inf-image.sif
     export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
-    module load singularity-ce/3.8.2
+    module load singularity/3.11.0
     singularity exec $SINGULARITY_IMAGE ray stop
     singularity exec --nv --bind ${MODEL_WEIGHTS}:${MODEL_WEIGHTS} $SINGULARITY_IMAGE \
     python3.10 -m vllm.entrypoints.openai.api_server \
