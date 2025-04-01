@@ -24,11 +24,9 @@ from vec_inf.api.utils import (
     load_models,
 )
 from vec_inf.shared.config import ModelConfig
+from vec_inf.shared.helper import LaunchHelper
 from vec_inf.shared.models import ModelStatus, ModelType
-from vec_inf.shared.utils import (
-    ModelLauncher,
-    run_bash_command,
-)
+from vec_inf.shared.utils import run_bash_command
 
 
 class VecInfClient:
@@ -151,7 +149,7 @@ class VecInfClient:
                 options_dict = {k: v for k, v in vars(options).items() if v is not None}
 
             # Create and use the shared ModelLauncher
-            launcher = ModelLauncher(model_name, options_dict)
+            launcher = LaunchHelper(model_name, options_dict)
 
             # Launch the model
             job_id, config_dict, _ = launcher.launch()

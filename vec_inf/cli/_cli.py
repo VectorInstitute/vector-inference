@@ -7,8 +7,9 @@ import click
 from rich.console import Console
 from rich.live import Live
 
-from vec_inf.cli._helper import LaunchHelper, ListHelper, MetricsHelper, StatusHelper
+from vec_inf.cli._helper import ListHelper, MetricsHelper, StatusHelper
 from vec_inf.shared import utils
+from vec_inf.shared.helper import LaunchHelper
 
 
 CONSOLE = Console()
@@ -126,16 +127,15 @@ def launch(
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        launcher = utils.ModelLauncher(model_name, cli_kwargs)
-        job_id, config_dict, params = launcher.launch()
+        launch_helper = LaunchHelper(model_name, cli_kwargs)
 
-        json_mode = bool(cli_kwargs.get("json_mode", False))
-        launch_helper = LaunchHelper(job_id, model_name, params, json_mode)
+        launch_helper.set_env_vars()
+        launch_command = launch_helper.build_launch_command()
+        command_output, stderr = utils.run_bash_command(launch_command)
+        if stderr:
+            raise click.ClickException(f"Error: {stderr}")
+        launch_helper.post_launch_processing(command_output, CONSOLE)
 
-        if json_mode:
-            launch_helper.output_json()
-        else:
-            launch_helper.output_table(CONSOLE)
 
     except click.ClickException as e:
         raise e

@@ -36,6 +36,14 @@ REQUIRED_FIELDS = {
     "max_model_len",
 }
 
+# Boolean fields for model configuration
+BOOLEAN_FIELDS = {
+    "pipeline_parallelism",
+    "enforce_eager",
+    "enable_prefix_caching",
+    "enable_chunked_prefill",
+}
+
 
 def run_bash_command(command: str) -> tuple[str, str]:
     """Run a bash command and return the output."""
@@ -180,33 +188,6 @@ def load_config() -> list[ModelConfig]:
     ]
 
 
-def get_latest_metric(log_lines: list[str]) -> Union[str, Dict[str, str]]:
-    """Read the latest metric entry from the log file."""
-    latest_metric = {}
-
-    try:
-        for line in reversed(log_lines):
-            if "Avg prompt throughput" in line:
-                # Parse the metric values from the line
-                metrics_str = line.split("] ")[1].strip().strip(".")
-                metrics_list = metrics_str.split(", ")
-                for metric in metrics_list:
-                    key, value = metric.split(": ")
-                    latest_metric[key] = value
-                break
-    except Exception as e:
-        return f"[red]Error reading log file: {e}[/red]"
-
-    return latest_metric
-
-
-def convert_boolean_value(value: Union[str, int, bool]) -> bool:
-    """Convert various input types to boolean strings."""
-    if isinstance(value, str):
-        return value.lower() == "true"
-    return bool(value)
-
-
 def parse_launch_output(output: str) -> tuple[str, Dict[str, str]]:
     """Parse output from model launch command.
 
@@ -232,180 +213,3 @@ def parse_launch_output(output: str) -> tuple[str, Dict[str, str]]:
             config_dict[key.lower().replace(" ", "_")] = value
 
     return slurm_job_id, config_dict
-
-
-class ModelLauncher:
-    """Shared model launcher for both CLI and API."""
-
-    def __init__(self, model_name: str, options: Optional[Dict[str, Any]] = None):
-        """Initialize the model launcher.
-
-        Parameters
-        ----------
-        model_name: str
-            Name of the model to launch
-        options: Optional[Dict[str, Any]]
-            Optional launch options to override default configuration
-        """
-        self.model_name = model_name
-        self.options = options or {}
-        self.model_config = self._get_model_configuration()
-        self.params = self._get_launch_params()
-
-    def _get_model_configuration(self) -> ModelConfig:
-        """Load and validate model configuration."""
-        model_configs = load_config()
-        config = next(
-            (m for m in model_configs if m.model_name == self.model_name), None
-        )
-
-        if config:
-            return config
-
-        # If model config not found, check for path from options or use fallback
-        model_weights_parent_dir = self.options.get(
-            "model_weights_parent_dir",
-            model_configs[0].model_weights_parent_dir if model_configs else None,
-        )
-
-        if not model_weights_parent_dir:
-            raise ValueError(
-                f"Could not determine model_weights_parent_dir and '{self.model_name}' not found in configuration"
-            )
-
-        model_weights_path = Path(model_weights_parent_dir, self.model_name)
-
-        # Only give a warning if weights exist but config missing
-        if model_weights_path.exists():
-            print(
-                f"Warning: '{self.model_name}' configuration not found in config, please ensure model configuration are properly set in options"
-            )
-            # Return a dummy model config object with model name and weights parent dir
-            return ModelConfig(
-                model_name=self.model_name,
-                model_family="model_family_placeholder",
-                model_type="LLM",
-                gpus_per_node=1,
-                num_nodes=1,
-                vocab_size=1000,
-                max_model_len=8192,
-                model_weights_parent_dir=Path(str(model_weights_parent_dir)),
-            )
-
-        raise ValueError(
-            f"'{self.model_name}' not found in configuration and model weights "
-            f"not found at expected path '{model_weights_path}'"
-        )
-
-    def _get_launch_params(self) -> dict[str, Any]:
-        """Merge config defaults with overrides."""
-        params = self.model_config.model_dump()
-
-        # Process boolean fields
-        for bool_field in ["pipeline_parallelism", "enforce_eager"]:
-            if (value := self.options.get(bool_field)) is not None:
-                params[bool_field] = convert_boolean_value(value)
-
-        # Merge other overrides
-        for key, value in self.options.items():
-            if value is not None and key not in [
-                "json_mode",
-                "pipeline_parallelism",
-                "enforce_eager",
-            ]:
-                params[key] = value
-
-        # Validate required fields
-        if not REQUIRED_FIELDS.issubset(set(params.keys())):
-            missing_fields = REQUIRED_FIELDS - set(params.keys())
-            raise ValueError(f"Missing required fields: {missing_fields}")
-
-        # Create log directory
-        params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
-        params["log_dir"].mkdir(parents=True, exist_ok=True)
-
-        return params
-
-    def set_env_vars(self) -> None:
-        """Set environment variables for the launch command."""
-        os.environ["MODEL_NAME"] = self.model_name
-        os.environ["MAX_MODEL_LEN"] = str(self.params["max_model_len"])
-        os.environ["MAX_LOGPROBS"] = str(self.params["vocab_size"])
-        os.environ["DATA_TYPE"] = str(self.params["data_type"])
-        os.environ["MAX_NUM_SEQS"] = str(self.params["max_num_seqs"])
-        os.environ["GPU_MEMORY_UTILIZATION"] = str(
-            self.params["gpu_memory_utilization"]
-        )
-        os.environ["TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
-        os.environ["PIPELINE_PARALLELISM"] = str(self.params["pipeline_parallelism"])
-        os.environ["ENFORCE_EAGER"] = str(self.params["enforce_eager"])
-        os.environ["SRC_DIR"] = SRC_DIR
-        os.environ["MODEL_WEIGHTS"] = str(
-            Path(self.params["model_weights_parent_dir"], self.model_name)
-        )
-        os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
-        os.environ["VENV_BASE"] = str(self.params["venv"])
-        os.environ["LOG_DIR"] = str(self.params["log_dir"])
-
-    def build_launch_command(self) -> str:
-        """Construct the full launch command with parameters."""
-        # Base command
-        command_list = ["sbatch"]
-        # Append options
-        command_list.extend(["--job-name", f"{self.model_name}"])
-        command_list.extend(["--partition", f"{self.params['partition']}"])
-        command_list.extend(["--qos", f"{self.params['qos']}"])
-        command_list.extend(["--time", f"{self.params['time']}"])
-        command_list.extend(["--nodes", f"{self.params['num_nodes']}"])
-        command_list.extend(["--gpus-per-node", f"{self.params['gpus_per_node']}"])
-        command_list.extend(
-            [
-                "--output",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out",
-            ]
-        )
-        command_list.extend(
-            [
-                "--error",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err",
-            ]
-        )
-        # Add slurm script
-        slurm_script = "vllm.slurm"
-        if int(self.params["num_nodes"]) > 1:
-            slurm_script = "multinode_vllm.slurm"
-        command_list.append(f"{SRC_DIR}/{slurm_script}")
-        return " ".join(command_list)
-
-    def launch(self) -> tuple[str, Dict[str, str], Dict[str, Any]]:
-        """Launch the model and return job information.
-
-        Returns
-        -------
-        tuple[str, Dict[str, str], Dict[str, Any]]
-            Slurm job ID, config dictionary, and parameters dictionary
-        """
-        # Set environment variables
-        self.set_env_vars()
-
-        # Build and execute the command
-        command = self.build_launch_command()
-        output, _ = run_bash_command(command)
-
-        # Parse the output
-        job_id, config_dict = parse_launch_output(output)
-
-        # Save job configuration to JSON
-        job_json_dir = Path(self.params["log_dir"], f"{self.model_name}.{job_id}")
-        job_json_dir.mkdir(parents=True, exist_ok=True)
-
-        job_json_path = job_json_dir / f"{self.model_name}.{job_id}.json"
-
-        # Convert params for serialization
-        serializable_params = {k: str(v) for k, v in self.params.items()}
-        serializable_params["slurm_job_id"] = job_id
-
-        with job_json_path.open("w") as f:
-            json.dump(serializable_params, f, indent=4)
-
-        return job_id, config_dict, self.params
