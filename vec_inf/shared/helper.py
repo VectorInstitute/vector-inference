@@ -23,9 +23,7 @@ from vec_inf.shared.utils import (
 class LaunchHelper:
     """Shared launch helper for both CLI and API."""
 
-    def __init__(
-            self, model_name: str, cli_kwargs: Optional[dict[str, Any]]
-        ):
+    def __init__(self, model_name: str, cli_kwargs: Optional[dict[str, Any]]):
         """Initialize the model launcher.
 
         Parameters
@@ -50,7 +48,7 @@ class LaunchHelper:
         if config:
             return config
 
-        # If model config not found, check for path from keyword arguments or use fallback
+        # If model config not found, check for path from CLI kwargs or use fallback
         model_weights_parent_dir = self.cli_kwargs.get(
             "model_weights_parent_dir",
             model_configs[0].model_weights_parent_dir if model_configs else None,
@@ -277,4 +275,3 @@ class LaunchHelper:
         else:
             table = self.format_table_output(slurm_job_id)
             console.print(table)
-

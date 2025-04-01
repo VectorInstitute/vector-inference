@@ -136,7 +136,6 @@ def launch(
             raise click.ClickException(f"Error: {stderr}")
         launch_helper.post_launch_processing(command_output, CONSOLE)
 
-
     except click.ClickException as e:
         raise e
     except Exception as e:
