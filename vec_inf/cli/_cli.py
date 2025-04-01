@@ -7,9 +7,13 @@ import click
 from rich.console import Console
 from rich.live import Live
 
-from vec_inf.cli._helper import ListHelper, MetricsHelper, StatusHelper
-from vec_inf.shared import utils
-from vec_inf.shared.helper import LaunchHelper
+import vec_inf.shared._utils as utils
+from vec_inf.cli._helper import (
+    CLILaunchHelper,
+    CLIListHelper,
+    CLIMetricsHelper,
+    CLIStatusHelper,
+)
 
 
 CONSOLE = Console()
@@ -127,7 +131,7 @@ def launch(
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        launch_helper = LaunchHelper(model_name, cli_kwargs)
+        launch_helper = CLILaunchHelper(model_name, cli_kwargs)
 
         launch_helper.set_env_vars()
         launch_command = launch_helper.build_launch_command()
@@ -163,7 +167,7 @@ def status(
     if stderr:
         raise click.ClickException(f"Error: {stderr}")
 
-    status_helper = StatusHelper(slurm_job_id, output, log_dir)
+    status_helper = CLIStatusHelper(slurm_job_id, output, log_dir)
 
     status_helper.process_job_state()
     if json_mode:
@@ -176,8 +180,7 @@ def status(
 @click.argument("slurm_job_id", type=int, nargs=1)
 def shutdown(slurm_job_id: int) -> None:
     """Shutdown a running model on the cluster."""
-    shutdown_cmd = f"scancel {slurm_job_id}"
-    utils.run_bash_command(shutdown_cmd)
+    utils.shutdown_model(slurm_job_id)
     click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
 
 
@@ -190,7 +193,7 @@ def shutdown(slurm_job_id: int) -> None:
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
-    list_helper = ListHelper(model_name, json_mode)
+    list_helper = CLIListHelper(model_name, json_mode)
     list_helper.process_list_command(CONSOLE)
 
 
@@ -201,7 +204,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
-    helper = MetricsHelper(slurm_job_id, log_dir)
+    helper = CLIMetricsHelper(slurm_job_id, log_dir)
 
     # Check if metrics URL is ready
     if not helper.metrics_url.startswith("http"):

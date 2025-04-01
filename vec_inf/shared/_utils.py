@@ -10,7 +10,7 @@ import requests
 import yaml
 from rich.table import Table
 
-from vec_inf.shared.config import ModelConfig
+from vec_inf.shared._config import ModelConfig
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
@@ -186,6 +186,12 @@ def load_config() -> list[ModelConfig]:
         ModelConfig(model_name=name, **model_data)
         for name, model_data in config.get("models", {}).items()
     ]
+
+
+def shutdown_model(slurm_job_id: int) -> None:
+    """Shutdown a running model on the cluster."""
+    shutdown_cmd = f"scancel {slurm_job_id}"
+    run_bash_command(shutdown_cmd)
 
 
 def parse_launch_output(output: str) -> tuple[str, Dict[str, str]]:
