@@ -4,6 +4,7 @@ import json
 import traceback
 from contextlib import ExitStack
 from pathlib import Path
+from typing import Callable, Optional
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -171,13 +172,21 @@ def mock_truediv(test_paths):
     return _mock_truediv
 
 
-def create_path_exists(test_paths, path_exists, exists_paths=None):
+def create_path_exists(
+    test_paths: dict[Path, str],
+    path_exists: Callable[[Path], bool],
+    exists_paths: Optional[list[Path]] = None,
+):
     """Create a path existence checker.
 
-    Args:
-        test_paths: Dictionary containing test paths
-        path_exists: Default path existence checker
-        exists_paths: Optional list of paths that should exist
+    Parameters
+    ----------
+    test_paths: dict[Path, str]
+        Dictionary containing test paths
+    path_exists: Callable[[Path], bool]
+        Default path existence checker
+    exists_paths: Optional[list[Path]]
+        Optional list of paths that should exist
     """
 
     def _custom_path_exists(p):
@@ -220,7 +229,7 @@ def base_patches(test_paths, mock_truediv, debug_helper):
         patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
         patch("json.dump"),
         patch("pathlib.Path.touch"),
-        patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"]),
+        patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"]),
         patch(
             "pathlib.Path.home", return_value=Path("/home/user")
         ),  # Mock home directory
@@ -242,7 +251,7 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
     test_log_dir = Path("/tmp/test_vec_inf_logs")
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -273,7 +282,7 @@ def test_launch_command_with_json_output(
     """Test JSON output format for launch command."""
     test_log_dir = Path("/tmp/test_vec_inf_logs")
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -331,7 +340,7 @@ def test_launch_command_model_not_in_config_with_weights(
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
         # Apply specific patches for this test
-        mock_run = stack.enter_context(patch("vec_inf.cli._utils.run_bash_command"))
+        mock_run = stack.enter_context(patch("vec_inf.shared.utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=custom_path_exists))
 
         expected_job_id = "14933051"
@@ -340,9 +349,9 @@ def test_launch_command_model_not_in_config_with_weights(
         result = runner.invoke(cli, ["launch", "unknown-model"])
         debug_helper.print_debug_info(result)
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert (
-            "Warning: 'unknown-model' configuration not found in config"
+            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
             in result.output
         )
 
@@ -372,7 +381,7 @@ def test_launch_command_model_not_found(
 
         # Mock Path to return the weights dir path
         stack.enter_context(
-            patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"])
+            patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"])
         )
 
         result = runner.invoke(cli, ["launch", "unknown-model"])
@@ -380,7 +389,7 @@ def test_launch_command_model_not_found(
 
         assert result.exit_code == 1
         assert (
-            "'unknown-model' not found in configuration and model weights not found"
+            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
             in result.output
         )
 
