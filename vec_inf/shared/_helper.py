@@ -2,11 +2,11 @@
 
 import os
 import time
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
-import click
 import requests
 
 import vec_inf.shared._utils as utils
@@ -21,7 +21,7 @@ from vec_inf.shared._utils import (
 )
 
 
-class LaunchHelper:
+class LaunchHelper(ABC):
     """Helper class for handling inference server launch."""
 
     def __init__(self, model_name: str, cli_kwargs: Optional[dict[str, Any]]):
@@ -38,6 +38,11 @@ class LaunchHelper:
         self.cli_kwargs = cli_kwargs or {}
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
+
+    @abstractmethod
+    def _warn(self, message: str) -> None:
+        """Warn the user about a potential issue."""
+        pass
 
     def _get_model_configuration(self) -> ModelConfig:
         """Load and validate model configuration."""
@@ -64,11 +69,8 @@ class LaunchHelper:
 
         # Only give a warning if weights exist but config missing
         if model_weights_path.exists():
-            click.echo(
-                click.style(
-                    f"Warning: '{self.model_name}' configuration not found in config, please ensure model configuration are properly set in command arguments",
-                    fg="yellow",
-                )
+            self._warn(
+                f"Warning: '{self.model_name}' configuration not found in config, please ensure model configuration are properly set in command arguments",
             )
             # Return a dummy model config object with model name and weights parent dir
             return ModelConfig(
@@ -82,7 +84,7 @@ class LaunchHelper:
                 model_weights_parent_dir=Path(str(model_weights_parent_dir)),
             )
 
-        raise click.ClickException(
+        raise utils.ModelConfigurationError(
             f"'{self.model_name}' not found in configuration and model weights "
             f"not found at expected path '{model_weights_path}'"
         )
@@ -106,7 +108,7 @@ class LaunchHelper:
 
         # Validate required fields
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
-            raise click.ClickException(
+            raise utils.MissingRequiredFieldsError(
                 f"Missing required fields: {REQUIRED_FIELDS - set(params.keys())}"
             )
 
@@ -279,7 +281,7 @@ class MetricsHelper:
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output, stderr = utils.run_bash_command(status_cmd)
         if stderr:
-            raise click.ClickException(f"Error: {stderr}")
+            raise RuntimeError(f"Error: {stderr}")
         status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
         return status_helper.status_info
 
@@ -440,7 +442,7 @@ class ListHelper:
             (c for c in self.model_configs if c.model_name == self.model_name), None
         )
         if not config:
-            raise click.ClickException(
+            raise utils.ModelNotFoundError(
                 f"Model '{self.model_name}' not found in configuration"
             )
         return config
