@@ -216,27 +216,28 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
     try:
-        helper = CLIMetricsHelper(slurm_job_id, log_dir)
+        metrics_helper = CLIMetricsHelper(slurm_job_id, log_dir)
 
         # Check if metrics URL is ready
-        if not helper.metrics_url.startswith("http"):
+        if not metrics_helper.metrics_url.startswith("http"):
             table = utils.create_table("Metric", "Value")
-            helper.display_failed_metrics(
-                table, f"Metrics endpoint unavailable - {helper.metrics_url}"
+            metrics_helper.display_failed_metrics(
+                table,
+                f"Metrics endpoint unavailable or server not ready - {metrics_helper.metrics_url}",
             )
             CONSOLE.print(table)
             return
 
         with Live(refresh_per_second=1, console=CONSOLE) as live:
             while True:
-                metrics = helper.fetch_metrics()
+                metrics = metrics_helper.fetch_metrics()
                 table = utils.create_table("Metric", "Value")
 
                 if isinstance(metrics, str):
                     # Show status information if metrics aren't available
-                    helper.display_failed_metrics(table, metrics)
+                    metrics_helper.display_failed_metrics(table, metrics)
                 else:
-                    helper.display_metrics(table, metrics)
+                    metrics_helper.display_metrics(table, metrics)
 
                 live.update(table)
                 time.sleep(2)
