@@ -5,28 +5,28 @@ services programmatically.
 """
 
 import time
-from typing import List, Optional
+from typing import Any, Optional, cast
 
-from vec_inf.api.models import (
+import requests
+
+from vec_inf.api._helper import APILaunchHelper, APIListHelper
+from vec_inf.api._models import (
     LaunchOptions,
     LaunchResponse,
     MetricsResponse,
     ModelInfo,
     StatusResponse,
 )
-from vec_inf.api.utils import (
+from vec_inf.shared._config import ModelConfig
+from vec_inf.shared._exceptions import (
     APIError,
     ModelNotFoundError,
     ServerError,
     SlurmJobError,
-    get_metrics,
-    get_model_status,
-    load_models,
 )
-from vec_inf.shared.config import ModelConfig
-from vec_inf.shared.helper import LaunchHelper
-from vec_inf.shared.models import ModelStatus, ModelType
-from vec_inf.shared.utils import run_bash_command
+from vec_inf.shared._helper import MetricsHelper, StatusHelper
+from vec_inf.shared._models import ModelStatus
+from vec_inf.shared._utils import run_bash_command, shutdown_model
 
 
 class VecInfClient:
@@ -53,12 +53,12 @@ class VecInfClient:
         """Initialize the Vector Inference client."""
         pass
 
-    def list_models(self) -> List[ModelInfo]:
+    def list_models(self) -> list[ModelInfo]:
         """List all available models.
 
         Returns
         -------
-        List[ModelInfo]
+        list[ModelInfo]
             ModelInfo objects containing information about available models.
 
         Raises
@@ -68,20 +68,8 @@ class VecInfClient:
 
         """
         try:
-            model_configs = load_models()
-            result = []
-
-            for config in model_configs:
-                info = ModelInfo(
-                    name=config.model_name,
-                    family=config.model_family,
-                    variant=config.model_variant,
-                    type=ModelType(config.model_type),
-                    config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
-                )
-                result.append(info)
-
-            return result
+            list_helper = APIListHelper()
+            return list_helper.get_all_models()
         except Exception as e:
             raise APIError(f"Failed to list models: {str(e)}") from e
 
@@ -107,12 +95,8 @@ class VecInfClient:
 
         """
         try:
-            model_configs = load_models()
-            for config in model_configs:
-                if config.model_name == model_name:
-                    return config
-
-            raise ModelNotFoundError(f"Model '{model_name}' not found")
+            list_helper = APIListHelper()
+            return list_helper.get_single_model_config(model_name)
         except ModelNotFoundError:
             raise
         except Exception as e:
@@ -144,26 +128,24 @@ class VecInfClient:
         """
         try:
             # Convert LaunchOptions to dictionary if provided
-            options_dict = None
+            options_dict: dict[str, Any] = {}
             if options:
                 options_dict = {k: v for k, v in vars(options).items() if v is not None}
 
-            # Create and use the shared ModelLauncher
-            launcher = LaunchHelper(model_name, options_dict)
+            # Create and use the API Launch Helper
+            launch_helper = APILaunchHelper(model_name, options_dict)
 
-            # Launch the model
-            job_id, config_dict, _ = launcher.launch()
+            # Set environment variables
+            launch_helper.set_env_vars()
 
-            # Get the raw output
-            status_cmd = f"scontrol show job {job_id} --oneliner"
-            raw_output, _ = run_bash_command(status_cmd)
+            # Build and execute the launch command
+            launch_command = launch_helper.build_launch_command()
+            command_output, stderr = run_bash_command(launch_command)
+            if stderr:
+                raise SlurmJobError(f"Error: {stderr}")
 
-            return LaunchResponse(
-                slurm_job_id=job_id,
-                model_name=model_name,
-                config=config_dict,
-                raw_output=raw_output,
-            )
+            return launch_helper.post_launch_processing(command_output)
+
         except ValueError as e:
             if "not found in configuration" in str(e):
                 raise ModelNotFoundError(str(e)) from e
@@ -172,7 +154,7 @@ class VecInfClient:
             raise APIError(f"Failed to launch model: {str(e)}") from e
 
     def get_status(
-        self, slurm_job_id: str, log_dir: Optional[str] = None
+        self, slurm_job_id: int, log_dir: Optional[str] = None
     ) -> StatusResponse:
         """Get the status of a running model.
 
@@ -197,17 +179,20 @@ class VecInfClient:
         """
         try:
             status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-            output, _ = run_bash_command(status_cmd)
+            output, stderr = run_bash_command(status_cmd)
+            if stderr:
+                raise SlurmJobError(f"Error: {stderr}")
 
-            status, status_info = get_model_status(slurm_job_id, log_dir)
+            status_helper = StatusHelper(slurm_job_id, output, log_dir)
+            status_helper.process_job_state()
 
             return StatusResponse(
                 slurm_job_id=slurm_job_id,
-                model_name=status_info["model_name"],
-                status=status,
-                base_url=status_info["base_url"],
-                pending_reason=status_info["pending_reason"],
-                failed_reason=status_info["failed_reason"],
+                model_name=cast(str, status_helper.status_info["model_name"]),
+                status=cast(ModelStatus, status_helper.status_info["status"]),
+                base_url=status_helper.status_info["base_url"],
+                pending_reason=status_helper.status_info["pending_reason"],
+                failed_reason=status_helper.status_info["failed_reason"],
                 raw_output=output,
             )
         except SlurmJobError:
@@ -216,7 +201,7 @@ class VecInfClient:
             raise APIError(f"Failed to get status: {str(e)}") from e
 
     def get_metrics(
-        self, slurm_job_id: str, log_dir: Optional[str] = None
+        self, slurm_job_id: int, log_dir: Optional[str] = None
     ) -> MetricsResponse:
         """Get the performance metrics of a running model.
 
@@ -241,27 +226,30 @@ class VecInfClient:
 
         """
         try:
-            # First check if the job exists and get the job name
-            status_response = self.get_status(slurm_job_id, log_dir)
+            metrics_helper = MetricsHelper(slurm_job_id, log_dir)
 
-            # Get metrics
-            metrics = get_metrics(
-                status_response.model_name, int(slurm_job_id), log_dir
-            )
+            if not metrics_helper.metrics_url.startswith("http"):
+                raise ServerError(
+                    f"Metrics endpoint unavailable or server not ready - {metrics_helper.metrics_url}"
+                )
+
+            metrics = metrics_helper.fetch_metrics()
+
+            if isinstance(metrics, str):
+                raise requests.RequestException(metrics)
 
             return MetricsResponse(
                 slurm_job_id=slurm_job_id,
-                model_name=status_response.model_name,
+                model_name=cast(str, metrics_helper.status_info["model_name"]),
                 metrics=metrics,
                 timestamp=time.time(),
-                raw_output="",  # No raw output needed for metrics
             )
         except SlurmJobError:
             raise
         except Exception as e:
             raise APIError(f"Failed to get metrics: {str(e)}") from e
 
-    def shutdown_model(self, slurm_job_id: str) -> bool:
+    def shutdown_model(self, slurm_job_id: int) -> bool:
         """Shutdown a running model.
 
         Parameters
@@ -278,15 +266,14 @@ class VecInfClient:
             APIError: If there was an error shutting down the model.
         """
         try:
-            shutdown_cmd = f"scancel {slurm_job_id}"
-            run_bash_command(shutdown_cmd)
+            shutdown_model(slurm_job_id)
             return True
         except Exception as e:
             raise APIError(f"Failed to shutdown model: {str(e)}") from e
 
     def wait_until_ready(
         self,
-        slurm_job_id: str,
+        slurm_job_id: int,
         timeout_seconds: int = 1800,
         poll_interval_seconds: int = 10,
         log_dir: Optional[str] = None,

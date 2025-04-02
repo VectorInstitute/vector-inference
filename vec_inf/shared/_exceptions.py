@@ -23,3 +23,15 @@ class SlurmJobError(RuntimeError):
     """Raised when there's an error with a Slurm job."""
 
     pass
+
+
+class APIError(Exception):
+    """Base exception for API errors."""
+
+    pass
+
+
+class ServerError(Exception):
+    """Exception raised when there's an error with the inference server."""
+
+    pass

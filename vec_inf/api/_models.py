@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from vec_inf.shared.models import ModelStatus, ModelType
+from vec_inf.shared._models import ModelStatus, ModelType
 
 
 @dataclass
@@ -27,7 +27,7 @@ class ModelInfo:
 class LaunchResponse:
     """Response from launching a model."""
 
-    slurm_job_id: str
+    slurm_job_id: int
     model_name: str
     config: Dict[str, Any]
     raw_output: str = field(repr=False)
@@ -37,7 +37,7 @@ class LaunchResponse:
 class StatusResponse:
     """Response from checking a model's status."""
 
-    slurm_job_id: str
+    slurm_job_id: int
     model_name: str
     status: ModelStatus
     raw_output: str = field(repr=False)
@@ -50,11 +50,10 @@ class StatusResponse:
 class MetricsResponse:
     """Response from retrieving model metrics."""
 
-    slurm_job_id: str
+    slurm_job_id: int
     model_name: str
-    metrics: Dict[str, str]
+    metrics: Dict[str, float]
     timestamp: float
-    raw_output: str = field(repr=False)
 
 
 @dataclass
@@ -65,6 +64,10 @@ class LaunchOptions:
     model_variant: Optional[str] = None
     max_model_len: Optional[int] = None
     max_num_seqs: Optional[int] = None
+    gpu_memory_utilization: Optional[float] = None
+    enable_prefix_caching: Optional[bool] = None
+    enable_chunked_prefill: Optional[bool] = None
+    max_num_batched_tokens: Optional[int] = None
     partition: Optional[str] = None
     num_nodes: Optional[int] = None
     num_gpus: Optional[int] = None
@@ -76,6 +79,7 @@ class LaunchOptions:
     log_dir: Optional[str] = None
     model_weights_parent_dir: Optional[str] = None
     pipeline_parallelism: Optional[bool] = None
+    compilation_config: Optional[str] = None
     enforce_eager: Optional[bool] = None
 
 
@@ -86,6 +90,10 @@ class LaunchOptionsDict(TypedDict):
     model_variant: NotRequired[Optional[str]]
     max_model_len: NotRequired[Optional[int]]
     max_num_seqs: NotRequired[Optional[int]]
+    gpu_memory_utilization: NotRequired[Optional[float]]
+    enable_prefix_caching: NotRequired[Optional[bool]]
+    enable_chunked_prefill: NotRequired[Optional[bool]]
+    max_num_batched_tokens: NotRequired[Optional[int]]
     partition: NotRequired[Optional[str]]
     num_nodes: NotRequired[Optional[int]]
     num_gpus: NotRequired[Optional[int]]
@@ -97,4 +105,5 @@ class LaunchOptionsDict(TypedDict):
     log_dir: NotRequired[Optional[str]]
     model_weights_parent_dir: NotRequired[Optional[str]]
     pipeline_parallelism: NotRequired[Optional[bool]]
+    compilation_config: NotRequired[Optional[str]]
     enforce_eager: NotRequired[Optional[bool]]
