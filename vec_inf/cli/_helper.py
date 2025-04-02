@@ -26,7 +26,7 @@ class CLILaunchHelper(LaunchHelper):
         """Warn the user about a potential issue."""
         click.echo(click.style(f"Warning: {message}", fg="yellow"), err=True)
 
-    def format_table_output(self, job_id: str) -> Table:
+    def _format_table_output(self, job_id: str) -> Table:
         """Format output as rich Table."""
         table = utils.create_table(key_title="Job Config", value_title="Value")
 
@@ -89,7 +89,7 @@ class CLILaunchHelper(LaunchHelper):
         if json_mode:
             click.echo(self.params)
         else:
-            table = self.format_table_output(slurm_job_id)
+            table = self._format_table_output(slurm_job_id)
             console.print(table)
 
 
@@ -207,8 +207,8 @@ class CLIMetricsHelper(MetricsHelper):
 class CLIListHelper(ListHelper):
     """Helper class for handling model listing functionality."""
 
-    def __init__(self, model_name: Optional[str] = None, json_mode: bool = False):
-        super().__init__(model_name)
+    def __init__(self, json_mode: bool = False):
+        super().__init__()
         self.json_mode = json_mode
 
     def format_single_model_output(
@@ -267,12 +267,14 @@ class CLIListHelper(ListHelper):
 
         return panels
 
-    def process_list_command(self, console: Console) -> None:
+    def process_list_command(
+        self, console: Console, model_name: Optional[str] = None
+    ) -> None:
         """Process the list command and display output."""
         try:
-            if self.model_name:
+            if model_name:
                 # Handle single model case
-                config = self.get_single_model_config()
+                config = self.get_single_model_config(model_name)
                 output = self.format_single_model_output(config)
                 if self.json_mode:
                     click.echo(output)

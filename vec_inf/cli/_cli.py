@@ -200,8 +200,8 @@ def shutdown(slurm_job_id: int) -> None:
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
     try:
-        list_helper = CLIListHelper(model_name, json_mode)
-        list_helper.process_list_command(CONSOLE)
+        list_helper = CLIListHelper(json_mode)
+        list_helper.process_list_command(CONSOLE, model_name)
     except click.ClickException as e:
         raise e
     except Exception as e:

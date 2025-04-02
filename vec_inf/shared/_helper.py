@@ -101,7 +101,7 @@ class LaunchHelper(ABC):
 
         # Process boolean fields
         for bool_field in BOOLEAN_FIELDS:
-            if self.kwargs[bool_field]:
+            if self.kwargs.get(bool_field) and self.kwargs[bool_field]:
                 params[bool_field] = True
 
         # Merge other overrides
@@ -437,17 +437,14 @@ class MetricsHelper:
 class ListHelper:
     """Helper class for handling model listing functionality."""
 
-    def __init__(self, model_name: Optional[str] = None):
-        self.model_name = model_name
+    def __init__(self):
         self.model_configs = utils.load_config()
 
-    def get_single_model_config(self) -> ModelConfig:
+    def get_single_model_config(self, model_name: str) -> ModelConfig:
         """Get configuration for a specific model."""
         config = next(
-            (c for c in self.model_configs if c.model_name == self.model_name), None
+            (c for c in self.model_configs if c.model_name == model_name), None
         )
         if not config:
-            raise ModelNotFoundError(
-                f"Model '{self.model_name}' not found in configuration"
-            )
+            raise ModelNotFoundError(f"Model '{model_name}' not found in configuration")
         return config
