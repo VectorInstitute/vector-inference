@@ -436,9 +436,8 @@ class MetricsHelper:
 class ListHelper:
     """Helper class for handling model listing functionality."""
 
-    def __init__(self, model_name: Optional[str] = None, json_mode: bool = False):
+    def __init__(self, model_name: Optional[str] = None):
         self.model_name = model_name
-        self.json_mode = json_mode
         self.model_configs = utils.load_config()
 
     def get_single_model_config(self) -> ModelConfig:

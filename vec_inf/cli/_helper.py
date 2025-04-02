@@ -208,7 +208,8 @@ class CLIListHelper(ListHelper):
     """Helper class for handling model listing functionality."""
 
     def __init__(self, model_name: Optional[str] = None, json_mode: bool = False):
-        super().__init__(model_name, json_mode)
+        super().__init__(model_name)
+        self.json_mode = json_mode
 
     def format_single_model_output(
         self, config: ModelConfig
