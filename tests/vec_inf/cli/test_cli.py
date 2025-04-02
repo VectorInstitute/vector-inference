@@ -229,7 +229,7 @@ def base_patches(test_paths, mock_truediv, debug_helper):
         patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
         patch("json.dump"),
         patch("pathlib.Path.touch"),
-        patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"]),
+        patch("vec_inf.shared._utils.Path", return_value=test_paths["weights_dir"]),
         patch(
             "pathlib.Path.home", return_value=Path("/home/user")
         ),  # Mock home directory
@@ -251,7 +251,7 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
     test_log_dir = Path("/tmp/test_vec_inf_logs")
 
     with (
-        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -282,7 +282,7 @@ def test_launch_command_with_json_output(
     """Test JSON output format for launch command."""
     test_log_dir = Path("/tmp/test_vec_inf_logs")
     with (
-        patch("vec_inf.shared.utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -340,7 +340,7 @@ def test_launch_command_model_not_in_config_with_weights(
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
         # Apply specific patches for this test
-        mock_run = stack.enter_context(patch("vec_inf.shared.utils.run_bash_command"))
+        mock_run = stack.enter_context(patch("vec_inf.shared._utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=custom_path_exists))
 
         expected_job_id = "14933051"
@@ -381,7 +381,7 @@ def test_launch_command_model_not_found(
 
         # Mock Path to return the weights dir path
         stack.enter_context(
-            patch("vec_inf.shared.utils.Path", return_value=test_paths["weights_dir"])
+            patch("vec_inf.shared._utils.Path", return_value=test_paths["weights_dir"])
         )
 
         result = runner.invoke(cli, ["launch", "unknown-model"])
@@ -417,9 +417,9 @@ def test_metrics_command_pending_server(
 ):
     """Test metrics command when server is pending."""
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="URL NOT FOUND"),
+        patch("vec_inf.shared._utils.get_base_url", return_value="URL NOT FOUND"),
     ):
         job_id = 12345
         mock_run.return_value = (mock_status_output(job_id, "PENDING"), "")
@@ -431,7 +431,7 @@ def test_metrics_command_pending_server(
         assert "Server State" in result.output
         assert "PENDING" in result.output
         assert (
-            "Metrics endpoint unavailable - Pending resources for server"
+            "Metrics endpoint unavailable or server not ready - Pending"
             in result.output
         )
 
@@ -441,9 +441,9 @@ def test_metrics_command_server_not_ready(
 ):
     """Test metrics command when server is running but not ready."""
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="Server not ready"),
+        patch("vec_inf.shared._utils.get_base_url", return_value="Server not ready"),
     ):
         job_id = 12345
         mock_run.return_value = (mock_status_output(job_id, "RUNNING"), "")
@@ -454,10 +454,13 @@ def test_metrics_command_server_not_ready(
         assert result.exit_code == 0
         assert "Server State" in result.output
         assert "RUNNING" in result.output
-        assert "Server not ready" in result.output
+        assert (
+            "Metrics endpoint unavailable or server not ready - Server not"
+            in result.output
+        )
 
 
-@patch("vec_inf.cli._helper.requests.get")
+@patch("requests.get")
 def test_metrics_command_server_ready(
     mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
@@ -478,9 +481,9 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
     mock_response.status_code = 200
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("vec_inf.shared._utils.get_base_url", return_value="http://test:8000/v1"),
         patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
     ):
         job_id = 12345
@@ -496,7 +499,7 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
         assert "50.0%" in result.output  # 0.5 converted to percentage
 
 
-@patch("vec_inf.cli._helper.requests.get")
+@patch("requests.get")
 def test_metrics_command_request_failed(
     mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
@@ -504,9 +507,9 @@ def test_metrics_command_request_failed(
     mock_get.side_effect = requests.exceptions.RequestException("Connection refused")
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.shared._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("vec_inf.shared._utils.get_base_url", return_value="http://test:8000/v1"),
         patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
     ):
         job_id = 12345

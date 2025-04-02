@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from vec_inf.shared.utils import (
+from vec_inf.shared._utils import (
     MODEL_READY_SIGNATURE,
     create_table,
     get_base_url,
@@ -77,7 +77,7 @@ def test_read_slurm_log_not_found():
 )
 def test_is_server_running_statuses(log_content, expected):
     """Test that is_server_running returns the correct status."""
-    with patch("vec_inf.shared.utils.read_slurm_log") as mock_read:
+    with patch("vec_inf.shared._utils.read_slurm_log") as mock_read:
         mock_read.return_value = log_content
         result = is_server_running("test_job", 123, None)
         assert result == expected
@@ -86,7 +86,7 @@ def test_is_server_running_statuses(log_content, expected):
 def test_get_base_url_found():
     """Test that get_base_url returns the correct base URL."""
     test_dict = {"server_address": "http://localhost:8000"}
-    with patch("vec_inf.shared.utils.read_slurm_log") as mock_read:
+    with patch("vec_inf.shared._utils.read_slurm_log") as mock_read:
         mock_read.return_value = test_dict
         result = get_base_url("test_job", 123, None)
         assert result == "http://localhost:8000"
@@ -94,7 +94,7 @@ def test_get_base_url_found():
 
 def test_get_base_url_not_found():
     """Test get_base_url when URL is not found in logs."""
-    with patch("vec_inf.shared.utils.read_slurm_log") as mock_read:
+    with patch("vec_inf.shared._utils.read_slurm_log") as mock_read:
         mock_read.return_value = {"random_key": "123"}
         result = get_base_url("test_job", 123, None)
         assert result == "URL NOT FOUND"
@@ -110,7 +110,7 @@ def test_get_base_url_not_found():
 )
 def test_model_health_check(url, status_code, expected):
     """Test model_health_check with various scenarios."""
-    with patch("vec_inf.shared.utils.get_base_url") as mock_url:
+    with patch("vec_inf.shared._utils.get_base_url") as mock_url:
         mock_url.return_value = url
         if url.startswith("http"):
             with patch("requests.get") as mock_get:
@@ -125,7 +125,7 @@ def test_model_health_check(url, status_code, expected):
 def test_model_health_check_request_exception():
     """Test model_health_check when request raises an exception."""
     with (
-        patch("vec_inf.shared.utils.get_base_url") as mock_url,
+        patch("vec_inf.shared._utils.get_base_url") as mock_url,
         patch("requests.get") as mock_get,
     ):
         mock_url.return_value = "http://localhost:8000"
