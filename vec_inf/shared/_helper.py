@@ -11,8 +11,13 @@ import requests
 
 import vec_inf.shared._utils as utils
 from vec_inf.shared._config import ModelConfig
+from vec_inf.shared._exceptions import (
+    ModelConfigurationError,
+    MissingRequiredFieldsError,
+    ModelNotFoundError,
+)
 from vec_inf.shared._models import ModelStatus
-from vec_inf.shared._utils import (
+from vec_inf.shared._vars import (
     BOOLEAN_FIELDS,
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
@@ -84,7 +89,7 @@ class LaunchHelper(ABC):
                 model_weights_parent_dir=Path(str(model_weights_parent_dir)),
             )
 
-        raise utils.ModelConfigurationError(
+        raise ModelConfigurationError(
             f"'{self.model_name}' not found in configuration and model weights "
             f"not found at expected path '{model_weights_path}'"
         )
@@ -108,7 +113,7 @@ class LaunchHelper(ABC):
 
         # Validate required fields
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
-            raise utils.MissingRequiredFieldsError(
+            raise MissingRequiredFieldsError(
                 f"Missing required fields: {REQUIRED_FIELDS - set(params.keys())}"
             )
 
@@ -442,7 +447,7 @@ class ListHelper:
             (c for c in self.model_configs if c.model_name == self.model_name), None
         )
         if not config:
-            raise utils.ModelNotFoundError(
+            raise ModelNotFoundError(
                 f"Model '{self.model_name}' not found in configuration"
             )
         return config

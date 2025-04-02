@@ -11,57 +11,13 @@ import yaml
 from rich.table import Table
 
 from vec_inf.shared._config import ModelConfig
-
-
-MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
-CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "models.yaml")
-SRC_DIR = str(Path(__file__).parent.parent)
-LD_LIBRARY_PATH = "/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
-
-# Maps model types to vLLM tasks
-VLLM_TASK_MAP = {
-    "LLM": "generate",
-    "VLM": "generate",
-    "TEXT_EMBEDDING": "embed",
-    "REWARD_MODELING": "reward",
-}
-
-# Required fields for model configuration
-REQUIRED_FIELDS = {
-    "model_family",
-    "model_type",
-    "gpus_per_node",
-    "num_nodes",
-    "vocab_size",
-    "max_model_len",
-}
-
-# Boolean fields for model configuration
-BOOLEAN_FIELDS = {
-    "pipeline_parallelism",
-    "enforce_eager",
-    "enable_prefix_caching",
-    "enable_chunked_prefill",
-}
-
-
-class ModelConfigurationError(Exception):
-    """Raised when the model config or weights are missing or invalid."""
-
-    pass
-
-
-class MissingRequiredFieldsError(ValueError):
-    """Raised when required fields are missing from the provided parameters."""
-
-    pass
-
-
-class ModelNotFoundError(KeyError):
-    """Raised when the specified model name is not found in the configuration."""
-
-    pass
-
+from vec_inf.shared._vars import (
+    CACHED_CONFIG,
+    MODEL_READY_SIGNATURE,
+    VLLM_TASK_MAP,
+    REQUIRED_FIELDS,
+    BOOLEAN_FIELDS,
+)
 
 def run_bash_command(command: str) -> tuple[str, str]:
     """Run a bash command and return the output."""

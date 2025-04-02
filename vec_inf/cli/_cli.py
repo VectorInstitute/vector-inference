@@ -162,18 +162,24 @@ def status(
     slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
 ) -> None:
     """Get the status of a running model on the cluster."""
-    status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-    output, stderr = utils.run_bash_command(status_cmd)
-    if stderr:
-        raise click.ClickException(f"Error: {stderr}")
+    try:
+        status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
+        output, stderr = utils.run_bash_command(status_cmd)
+        if stderr:
+            raise click.ClickException(f"Error: {stderr}")
 
-    status_helper = CLIStatusHelper(slurm_job_id, output, log_dir)
+        status_helper = CLIStatusHelper(slurm_job_id, output, log_dir)
 
-    status_helper.process_job_state()
-    if json_mode:
-        status_helper.output_json()
-    else:
-        status_helper.output_table(CONSOLE)
+        status_helper.process_job_state()
+        if json_mode:
+            status_helper.output_json()
+        else:
+            status_helper.output_table(CONSOLE)
+
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"Status check failed: {str(e)}") from e
 
 
 @cli.command("shutdown")
@@ -193,8 +199,13 @@ def shutdown(slurm_job_id: int) -> None:
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
-    list_helper = CLIListHelper(model_name, json_mode)
-    list_helper.process_list_command(CONSOLE)
+    try:
+        list_helper = CLIListHelper(model_name, json_mode)
+        list_helper.process_list_command(CONSOLE)
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"List models failed: {str(e)}") from e
 
 
 @cli.command("metrics")
@@ -204,30 +215,35 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
-    helper = CLIMetricsHelper(slurm_job_id, log_dir)
+    try:
+        helper = CLIMetricsHelper(slurm_job_id, log_dir)
 
-    # Check if metrics URL is ready
-    if not helper.metrics_url.startswith("http"):
-        table = utils.create_table("Metric", "Value")
-        helper.display_failed_metrics(
-            table, f"Metrics endpoint unavailable - {helper.metrics_url}"
-        )
-        CONSOLE.print(table)
-        return
-
-    with Live(refresh_per_second=1, console=CONSOLE) as live:
-        while True:
-            metrics = helper.fetch_metrics()
+        # Check if metrics URL is ready
+        if not helper.metrics_url.startswith("http"):
             table = utils.create_table("Metric", "Value")
+            helper.display_failed_metrics(
+                table, f"Metrics endpoint unavailable - {helper.metrics_url}"
+            )
+            CONSOLE.print(table)
+            return
 
-            if isinstance(metrics, str):
-                # Show status information if metrics aren't available
-                helper.display_failed_metrics(table, metrics)
-            else:
-                helper.display_metrics(table, metrics)
+        with Live(refresh_per_second=1, console=CONSOLE) as live:
+            while True:
+                metrics = helper.fetch_metrics()
+                table = utils.create_table("Metric", "Value")
 
-            live.update(table)
-            time.sleep(2)
+                if isinstance(metrics, str):
+                    # Show status information if metrics aren't available
+                    helper.display_failed_metrics(table, metrics)
+                else:
+                    helper.display_metrics(table, metrics)
+
+                live.update(table)
+                time.sleep(2)
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"Metrics check failed: {str(e)}") from e
 
 
 if __name__ == "__main__":

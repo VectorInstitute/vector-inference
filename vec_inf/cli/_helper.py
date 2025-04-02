@@ -22,6 +22,10 @@ class CLILaunchHelper(LaunchHelper):
     def __init__(self, model_name: str, cli_kwargs: Optional[dict[str, Any]]):
         super().__init__(model_name, cli_kwargs)
 
+    def _warn(self, message: str) -> None:
+        """Warn the user about a potential issue."""
+        click.echo(click.style(f"Warning: {message}", fg="yellow"), err=True)
+
     def format_table_output(self, job_id: str) -> Table:
         """Format output as rich Table."""
         table = utils.create_table(key_title="Job Config", value_title="Value")
