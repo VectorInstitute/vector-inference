@@ -29,18 +29,18 @@ from vec_inf.shared._vars import (
 class LaunchHelper(ABC):
     """Helper class for handling inference server launch."""
 
-    def __init__(self, model_name: str, cli_kwargs: Optional[dict[str, Any]]):
+    def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
         """Initialize the model launcher.
 
         Parameters
         ----------
         model_name: str
             Name of the model to launch
-        cli_kwargs: Optional[dict[str, Any]]
+        kwargs: Optional[dict[str, Any]]
             Optional launch keyword arguments to override default configuration
         """
         self.model_name = model_name
-        self.cli_kwargs = cli_kwargs or {}
+        self.kwargs = kwargs or {}
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
 
@@ -60,7 +60,7 @@ class LaunchHelper(ABC):
             return config
 
         # If model config not found, check for path from CLI kwargs or use fallback
-        model_weights_parent_dir = self.cli_kwargs.get(
+        model_weights_parent_dir = self.kwargs.get(
             "model_weights_parent_dir",
             model_configs[0].model_weights_parent_dir if model_configs else None,
         )
@@ -100,11 +100,11 @@ class LaunchHelper(ABC):
 
         # Process boolean fields
         for bool_field in BOOLEAN_FIELDS:
-            if self.cli_kwargs[bool_field]:
+            if self.kwargs[bool_field]:
                 params[bool_field] = True
 
         # Merge other overrides
-        for key, value in self.cli_kwargs.items():
+        for key, value in self.kwargs.items():
             if value is not None and key not in [
                 "json_mode",
                 *BOOLEAN_FIELDS,

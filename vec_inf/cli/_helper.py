@@ -19,8 +19,8 @@ from vec_inf.shared._helper import LaunchHelper, ListHelper, MetricsHelper, Stat
 class CLILaunchHelper(LaunchHelper):
     """CLI Helper class for handling launch information."""
 
-    def __init__(self, model_name: str, cli_kwargs: Optional[dict[str, Any]]):
-        super().__init__(model_name, cli_kwargs)
+    def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
+        super().__init__(model_name, kwargs)
 
     def _warn(self, message: str) -> None:
         """Warn the user about a potential issue."""
@@ -73,7 +73,7 @@ class CLILaunchHelper(LaunchHelper):
 
     def post_launch_processing(self, output: str, console: Console) -> None:
         """Process and display launch output."""
-        json_mode = bool(self.cli_kwargs.get("json_mode", False))
+        json_mode = bool(self.kwargs.get("json_mode", False))
         slurm_job_id = output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = slurm_job_id
         job_json = Path(
