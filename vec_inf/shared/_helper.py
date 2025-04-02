@@ -12,9 +12,10 @@ import requests
 import vec_inf.shared._utils as utils
 from vec_inf.shared._config import ModelConfig
 from vec_inf.shared._exceptions import (
-    ModelConfigurationError,
     MissingRequiredFieldsError,
+    ModelConfigurationError,
     ModelNotFoundError,
+    SlurmJobError,
 )
 from vec_inf.shared._models import ModelStatus
 from vec_inf.shared._vars import (
@@ -286,7 +287,7 @@ class MetricsHelper:
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output, stderr = utils.run_bash_command(status_cmd)
         if stderr:
-            raise RuntimeError(f"Error: {stderr}")
+            raise SlurmJobError(f"Error: {stderr}")
         status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
         return status_helper.status_info
 

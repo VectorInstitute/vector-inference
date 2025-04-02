@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "models.yaml")
 SRC_DIR = str(Path(__file__).parent.parent)
@@ -13,7 +14,7 @@ VLLM_TASK_MAP = {
     "VLM": "generate",
     "TEXT_EMBEDDING": "embed",
     "REWARD_MODELING": "reward",
-}  
+}
 
 # Required fields for model configuration
 REQUIRED_FIELDS = {

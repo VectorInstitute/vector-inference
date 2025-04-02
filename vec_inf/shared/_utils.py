@@ -14,10 +14,8 @@ from vec_inf.shared._config import ModelConfig
 from vec_inf.shared._vars import (
     CACHED_CONFIG,
     MODEL_READY_SIGNATURE,
-    VLLM_TASK_MAP,
-    REQUIRED_FIELDS,
-    BOOLEAN_FIELDS,
 )
+
 
 def run_bash_command(command: str) -> tuple[str, str]:
     """Run a bash command and return the output."""

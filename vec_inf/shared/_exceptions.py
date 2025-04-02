@@ -1,5 +1,6 @@
 """Exceptions for the vector inference package."""
 
+
 class ModelConfigurationError(Exception):
     """Raised when the model config or weights are missing or invalid."""
 
@@ -14,5 +15,11 @@ class MissingRequiredFieldsError(ValueError):
 
 class ModelNotFoundError(KeyError):
     """Raised when the specified model name is not found in the configuration."""
+
+    pass
+
+
+class SlurmJobError(RuntimeError):
+    """Raised when there's an error with a Slurm job."""
 
     pass
