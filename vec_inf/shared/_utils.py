@@ -11,6 +11,7 @@ import yaml
 from rich.table import Table
 
 from vec_inf.shared._config import ModelConfig
+from vec_inf.shared._models import ModelStatus
 from vec_inf.shared._vars import (
     CACHED_CONFIG,
     MODEL_READY_SIGNATURE,
@@ -70,17 +71,17 @@ def read_slurm_log(
 
 def is_server_running(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
-) -> Union[str, tuple[str, str]]:
+) -> Union[str, ModelStatus, tuple[ModelStatus, str]]:
     """Check if a model is ready to serve requests."""
     log_content = read_slurm_log(slurm_job_name, slurm_job_id, "err", log_dir)
     if isinstance(log_content, str):
         return log_content
 
-    status: Union[str, tuple[str, str]] = "LAUNCHING"
+    status: Union[str, tuple[ModelStatus, str]] = ModelStatus.LAUNCHING
 
     for line in log_content:
         if "error" in line.lower():
-            status = ("FAILED", line.strip("\n"))
+            status = (ModelStatus.FAILED, line.strip("\n"))
         if MODEL_READY_SIGNATURE in line:
             status = "RUNNING"
 
@@ -99,21 +100,21 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 def model_health_check(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
-) -> tuple[str, Union[str, int]]:
+) -> tuple[ModelStatus, Union[str, int]]:
     """Check the health of a running model on the cluster."""
     base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
     if not base_url.startswith("http"):
-        return ("FAILED", base_url)
+        return (ModelStatus.FAILED, base_url)
     health_check_url = base_url.replace("v1", "health")
 
     try:
         response = requests.get(health_check_url)
         # Check if the request was successful
         if response.status_code == 200:
-            return ("READY", response.status_code)
-        return ("FAILED", response.status_code)
+            return (ModelStatus.READY, response.status_code)
+        return (ModelStatus.FAILED, response.status_code)
     except requests.exceptions.RequestException as e:
-        return ("FAILED", str(e))
+        return (ModelStatus.FAILED, str(e))
 
 
 def create_table(
