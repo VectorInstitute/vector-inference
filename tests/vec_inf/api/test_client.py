@@ -68,11 +68,11 @@ def test_launch_model(mock_model_config, mock_launch_output):
 
     with (
         patch(
-            "vec_inf.shared.utils.run_bash_command",
+            "vec_inf.shared._utils.run_bash_command",
             return_value=(mock_launch_output, ""),
         ),
         patch(
-            "vec_inf.shared.utils.parse_launch_output", return_value=("12345678", {})
+            "vec_inf.shared._utils.parse_launch_output", return_value=("12345678", {})
         ),
     ):
         # Create a mock response

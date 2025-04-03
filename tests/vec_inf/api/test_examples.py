@@ -1,6 +1,6 @@
 """Tests to verify the API examples function properly."""
 
-import os
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -44,12 +44,12 @@ def mock_client():
 
 
 @pytest.mark.skipif(
-    not os.path.exists(os.path.join("examples", "api", "basic_usage.py")),
+    not Path("../../../examples/api/basic_usage.py").exists(),
     reason="Example file not found",
 )
 def test_api_usage_example():
     """Test the basic API usage example."""
-    example_path = os.path.join("examples", "api", "basic_usage.py")
+    example_path = Path("../../../examples/api/basic_usage.py")
 
     # Create a mock client
     mock_client = MagicMock(spec=VecInfClient)
@@ -77,7 +77,7 @@ def test_api_usage_example():
     with (
         patch("vec_inf.api.VecInfClient", return_value=mock_client),
         patch("builtins.print"),
-        open(example_path) as f,
+        example_path.open() as f,
     ):
         exec(f.read())
 
