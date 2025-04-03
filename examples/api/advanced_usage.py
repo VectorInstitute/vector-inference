@@ -8,7 +8,7 @@ using the Vector Inference API programmatically.
 import argparse
 import json
 import time
-from typing import Dict, Union
+from typing import Union, cast
 
 from openai import OpenAI
 from rich.console import Console
@@ -59,8 +59,8 @@ def export_model_configs(output_file: str) -> None:
 
 
 def launch_with_custom_config(
-    model_name: str, custom_options: Dict[str, Union[str, int, bool]]
-) -> str:
+    model_name: str, custom_options: dict[str, Union[str, int, bool]]
+) -> int:
     """Launch a model with custom configuration options."""
     client = VecInfClient()
 
@@ -88,7 +88,7 @@ def launch_with_custom_config(
 
 
 def monitor_with_rich_ui(
-    job_id: str, poll_interval: int = 5, max_time: int = 1800
+    job_id: int, poll_interval: int = 5, max_time: int = 1800
 ) -> StatusResponse:
     """Monitor a model's status with a rich UI."""
     client = VecInfClient()
@@ -151,7 +151,7 @@ def monitor_with_rich_ui(
     return client.get_status(job_id)
 
 
-def stream_metrics(job_id: str, duration: int = 60, interval: int = 5) -> None:
+def stream_metrics(job_id: int, duration: int = 60, interval: int = 5) -> None:
     """Stream metrics for a specified duration."""
     client = VecInfClient()
 
@@ -168,7 +168,7 @@ def stream_metrics(job_id: str, duration: int = 60, interval: int = 5) -> None:
                 table.add_column("Value", style="green")
 
                 for key, value in metrics_response.metrics.items():
-                    table.add_row(key, value)
+                    table.add_row(key, cast(str, value))
 
                 console.print(table)
             else:
