@@ -1,4 +1,4 @@
-"""Helper class for the model launch."""
+"""Helper classes for the model."""
 
 import os
 import time
@@ -437,7 +437,7 @@ class MetricsHelper:
 class ListHelper:
     """Helper class for handling model listing functionality."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.model_configs = utils.load_config()
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
