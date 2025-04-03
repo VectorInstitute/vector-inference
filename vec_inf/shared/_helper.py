@@ -438,7 +438,12 @@ class ListHelper:
     """Helper class for handling model listing functionality."""
 
     def __init__(self) -> None:
-        self.model_configs = utils.load_config()
+        """Initialize the model lister."""
+        self.model_configs = self._get_model_configs()
+
+    def _get_model_configs(self) -> list[ModelConfig]:
+        """Get all model configurations."""
+        return utils.load_config()
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
         """Get configuration for a specific model."""

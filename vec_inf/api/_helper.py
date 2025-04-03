@@ -5,8 +5,9 @@ import warnings
 from pathlib import Path
 from typing import Any, Optional
 
-from vec_inf.api._models import LaunchResponse, ModelInfo, ModelType
+from vec_inf.api._models import LaunchResponse, ModelInfo
 from vec_inf.shared._helper import LaunchHelper, ListHelper
+from vec_inf.shared._models import ModelType
 
 
 class APILaunchHelper(LaunchHelper):
@@ -45,7 +46,7 @@ class APILaunchHelper(LaunchHelper):
 class APIListHelper(ListHelper):
     """API Helper class for handling model listing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def get_all_models(self) -> list[ModelInfo]:
