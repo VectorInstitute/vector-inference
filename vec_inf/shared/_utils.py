@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 import requests
 import yaml
@@ -31,7 +31,7 @@ def read_slurm_log(
     slurm_job_id: int,
     slurm_log_type: str,
     log_dir: Optional[Union[str, Path]],
-) -> Union[list[str], str, Dict[str, str]]:
+) -> Union[list[str], str, dict[str, str]]:
     """Read the slurm log file."""
     if not log_dir:
         # Default log directory
@@ -60,7 +60,7 @@ def read_slurm_log(
         )
         if slurm_log_type == "json":
             with file_path.open("r") as file:
-                json_content: Dict[str, str] = json.load(file)
+                json_content: dict[str, str] = json.load(file)
                 return json_content
         else:
             with file_path.open("r") as file:
@@ -94,7 +94,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
     if isinstance(log_content, str):
         return log_content
 
-    server_addr = cast(Dict[str, str], log_content).get("server_address")
+    server_addr = cast(dict[str, str], log_content).get("server_address")
     return server_addr if server_addr else "URL NOT FOUND"
 
 
@@ -135,7 +135,7 @@ def load_config() -> list[ModelConfig]:
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
 
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
     with open(default_path) as f:
         config = yaml.safe_load(f) or {}
 
@@ -167,7 +167,7 @@ def shutdown_model(slurm_job_id: int) -> None:
     run_bash_command(shutdown_cmd)
 
 
-def parse_launch_output(output: str) -> tuple[str, Dict[str, str]]:
+def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
     """Parse output from model launch command.
 
     Parameters
@@ -177,7 +177,7 @@ def parse_launch_output(output: str) -> tuple[str, Dict[str, str]]:
 
     Returns
     -------
-    tuple[str, Dict[str, str]]
+    tuple[str, dict[str, str]]
         Slurm job ID and dictionary of config parameters
 
     """

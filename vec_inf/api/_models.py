@@ -5,7 +5,7 @@ for both request parameters and response objects.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -20,7 +20,7 @@ class ModelInfo:
     family: str
     variant: Optional[str]
     type: ModelType
-    config: Dict[str, Any]
+    config: dict[str, Any]
 
 
 @dataclass
@@ -29,7 +29,7 @@ class LaunchResponse:
 
     slurm_job_id: int
     model_name: str
-    config: Dict[str, Any]
+    config: dict[str, Any]
     raw_output: str = field(repr=False)
 
 
@@ -52,7 +52,7 @@ class MetricsResponse:
 
     slurm_job_id: int
     model_name: str
-    metrics: Dict[str, float]
+    metrics: dict[str, float]
     timestamp: float
 
 
