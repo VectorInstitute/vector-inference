@@ -16,6 +16,7 @@ from rich.table import Table
 
 import vec_inf.cli._utils as utils
 from vec_inf.cli._config import ModelConfig
+from vec_inf.cli._slurm_script_generator import SlurmScriptGenerator
 
 
 VLLM_TASK_MAP = {
@@ -127,31 +128,7 @@ class LaunchHelper:
 
     def set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
-        os.environ["MODEL_NAME"] = self.model_name
-        os.environ["MAX_MODEL_LEN"] = self.params["max_model_len"]
-        os.environ["MAX_LOGPROBS"] = self.params["vocab_size"]
-        os.environ["DATA_TYPE"] = self.params["data_type"]
-        os.environ["MAX_NUM_SEQS"] = self.params["max_num_seqs"]
-        os.environ["GPU_MEMORY_UTILIZATION"] = self.params["gpu_memory_utilization"]
-        os.environ["TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
-        os.environ["PIPELINE_PARALLELISM"] = self.params["pipeline_parallelism"]
-        os.environ["COMPILATION_CONFIG"] = self.params["compilation_config"]
-        os.environ["SRC_DIR"] = SRC_DIR
-        os.environ["MODEL_WEIGHTS"] = str(
-            Path(self.params["model_weights_parent_dir"], self.model_name)
-        )
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
-        os.environ["VENV_BASE"] = self.params["venv"]
-        os.environ["LOG_DIR"] = self.params["log_dir"]
-
-        if self.params.get("enable_prefix_caching"):
-            os.environ["ENABLE_PREFIX_CACHING"] = self.params["enable_prefix_caching"]
-        if self.params.get("enable_chunked_prefill"):
-            os.environ["ENABLE_CHUNKED_PREFILL"] = self.params["enable_chunked_prefill"]
-        if self.params.get("max_num_batched_tokens"):
-            os.environ["MAX_NUM_BATCHED_TOKENS"] = self.params["max_num_batched_tokens"]
-        if self.params.get("enforce_eager"):
-            os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
 
     def build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
@@ -177,11 +154,19 @@ class LaunchHelper:
             ]
         )
         # Add slurm script
-        slurm_script = "vllm.slurm"
-        if int(self.params["num_nodes"]) > 1:
-            slurm_script = "multinode_vllm.slurm"
-        command_list.append(f"{SRC_DIR}/{slurm_script}")
+        # slurm_script = "vllm.slurm"
+        # if int(self.params["num_nodes"]) > 1:
+        #     slurm_script = "multinode_vllm.slurm"
+        # command_list.append(f"{SRC_DIR}/{slurm_script}")
+
+        slurm_script_path = SlurmScriptGenerator(
+            self.params, src_dir=SRC_DIR, is_multinode=int(self.params["num_nodes"]) > 1
+        ).write_to_log_dir()
+
+        command_list.append(str(slurm_script_path))
         return " ".join(command_list)
+    
+    
 
     def format_table_output(self, job_id: str) -> Table:
         """Format output as rich Table."""
@@ -214,7 +199,7 @@ class LaunchHelper:
             )
         if self.params.get("enforce_eager"):
             table.add_row("Enforce Eager", self.params["enforce_eager"])
-        table.add_row("Model Weights Directory", os.environ.get("MODEL_WEIGHTS"))
+        table.add_row("Model Weights Directory", str(Path(self.params["model_weights_parent_dir"], self.model_name)))
         table.add_row("Log Directory", self.params["log_dir"])
 
         return table
