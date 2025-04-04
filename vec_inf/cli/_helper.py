@@ -165,8 +165,6 @@ class LaunchHelper:
 
         command_list.append(str(slurm_script_path))
         return " ".join(command_list)
-    
-    
 
     def format_table_output(self, job_id: str) -> Table:
         """Format output as rich Table."""
@@ -199,7 +197,10 @@ class LaunchHelper:
             )
         if self.params.get("enforce_eager"):
             table.add_row("Enforce Eager", self.params["enforce_eager"])
-        table.add_row("Model Weights Directory", str(Path(self.params["model_weights_parent_dir"], self.model_name)))
+        table.add_row(
+            "Model Weights Directory",
+            str(Path(self.params["model_weights_parent_dir"], self.model_name)),
+        )
         table.add_row("Log Directory", self.params["log_dir"])
 
         return table
