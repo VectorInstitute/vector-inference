@@ -153,11 +153,6 @@ class LaunchHelper:
                 f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err",
             ]
         )
-        # Add slurm script
-        # slurm_script = "vllm.slurm"
-        # if int(self.params["num_nodes"]) > 1:
-        #     slurm_script = "multinode_vllm.slurm"
-        # command_list.append(f"{SRC_DIR}/{slurm_script}")
 
         slurm_script_path = SlurmScriptGenerator(
             self.params, src_dir=SRC_DIR, is_multinode=int(self.params["num_nodes"]) > 1
