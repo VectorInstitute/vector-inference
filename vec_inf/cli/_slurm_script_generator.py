@@ -122,14 +122,13 @@ module load singularity-ce/3.8.2
 singularity exec $SINGULARITY_IMAGE ray stop
 """)
 
-        cluster_setup.append(f"""nodes=$(scontrol show hostnames "${{SLURM_JOB_NODELIST}}")
-nodes_array=(${{nodes}})
+        cluster_setup.append(f"""nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")
+nodes_array=($nodes)
 
 head_node=${{nodes_array[0]}}
 head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)
 
 head_node_port=$(find_available_port $head_node_ip 8080 65535)
-vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 
 ip_head=$head_node_ip:$head_node_port
 export ip_head
@@ -159,7 +158,11 @@ for ((i = 1; i <= worker_num; i++)); do
     sleep 5
 done
 
-SERVER_ADDR="http://$head_node_ip:$vllm_port_number/v1"
+                             
+vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
+
+                             
+SERVER_ADDR="http://${{head_node_ip}}:${{vllm_port_number}}/v1"
 echo "Server address: $SERVER_ADDR"
 
 JSON_PATH="{self.params['log_dir']}/{self.params['model_name']}.$SLURM_JOB_ID/{self.params['model_name']}.$SLURM_JOB_ID.json"
