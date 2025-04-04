@@ -155,7 +155,7 @@ class LaunchHelper:
         )
 
         slurm_script_path = SlurmScriptGenerator(
-            self.params, src_dir=SRC_DIR, is_multinode=int(self.params["num_nodes"]) > 1
+            self.params, src_dir=SRC_DIR
         ).write_to_log_dir()
 
         command_list.append(str(slurm_script_path))
