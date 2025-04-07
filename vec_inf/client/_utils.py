@@ -10,9 +10,9 @@ import requests
 import yaml
 from rich.table import Table
 
-from vec_inf.shared._config import ModelConfig
-from vec_inf.shared._models import ModelStatus
-from vec_inf.shared._vars import (
+from vec_inf.client._config import ModelConfig
+from vec_inf.client._models import ModelStatus
+from vec_inf.client._vars import (
     CACHED_CONFIG,
     MODEL_READY_SIGNATURE,
 )

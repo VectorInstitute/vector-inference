@@ -5,7 +5,7 @@ This script demonstrates the core features of the Vector Inference API
 for launching and interacting with models.
 """
 
-from vec_inf.api import VecInfClient
+from vec_inf.client import VecInfClient
 
 
 # Create the API client

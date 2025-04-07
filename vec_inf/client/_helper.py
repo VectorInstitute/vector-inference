@@ -1,24 +1,25 @@
 """Helper classes for the model."""
 
+import json
 import os
 import time
-from abc import ABC, abstractmethod
+import warnings
 from pathlib import Path
 from typing import Any, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
 import requests
 
-import vec_inf.shared._utils as utils
-from vec_inf.shared._config import ModelConfig
-from vec_inf.shared._exceptions import (
+import vec_inf.client._utils as utils
+from vec_inf.client._config import ModelConfig
+from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
     ModelNotFoundError,
     SlurmJobError,
 )
-from vec_inf.shared._models import ModelStatus
-from vec_inf.shared._vars import (
+from vec_inf.client._models import LaunchResponse, ModelInfo, ModelStatus, ModelType
+from vec_inf.client._vars import (
     BOOLEAN_FIELDS,
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
@@ -27,7 +28,7 @@ from vec_inf.shared._vars import (
 )
 
 
-class LaunchHelper(ABC):
+class ModelLauncher:
     """Helper class for handling inference server launch."""
 
     def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
@@ -45,10 +46,9 @@ class LaunchHelper(ABC):
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
 
-    @abstractmethod
     def _warn(self, message: str) -> None:
         """Warn the user about a potential issue."""
-        pass
+        warnings.warn(message, UserWarning, stacklevel=2)
 
     def _get_model_configuration(self) -> ModelConfig:
         """Load and validate model configuration."""
@@ -97,7 +97,7 @@ class LaunchHelper(ABC):
 
     def _get_launch_params(self) -> dict[str, Any]:
         """Merge config defaults with CLI overrides."""
-        params = self.model_config.model_dump()
+        params = cast(dict[str, Any], self.model_config.model_dump())
 
         # Process boolean fields
         for bool_field in BOOLEAN_FIELDS:
@@ -186,9 +186,31 @@ class LaunchHelper(ABC):
         command_list.append(f"{SRC_DIR}/{slurm_script}")
         return " ".join(command_list)
 
+    def post_launch_processing(self, command_output: str) -> LaunchResponse:
+        """Process and display launch output."""
+        slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
+        self.params["slurm_job_id"] = slurm_job_id
+        job_json = Path(
+            self.params["log_dir"],
+            f"{self.model_name}.{slurm_job_id}",
+            f"{self.model_name}.{slurm_job_id}.json",
+        )
+        job_json.parent.mkdir(parents=True, exist_ok=True)
+        job_json.touch(exist_ok=True)
 
-class StatusHelper:
-    """Helper class for handling server status information."""
+        with job_json.open("w") as file:
+            json.dump(self.params, file, indent=4)
+
+        return LaunchResponse(
+            slurm_job_id=int(slurm_job_id),
+            model_name=self.model_name,
+            config=self.params,
+            raw_output=command_output,
+        )
+
+
+class ModelStatusMonitor:
+    """Class for handling server status information and monitoring."""
 
     def __init__(self, slurm_job_id: int, output: str, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
@@ -267,8 +289,8 @@ class StatusHelper:
             self.status_info["pending_reason"] = "Unknown pending reason"
 
 
-class MetricsHelper:
-    """Helper class for handling metrics information."""
+class PerformanceMetricsCollector:
+    """Class for handling metrics collection and processing."""
 
     def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
@@ -288,7 +310,7 @@ class MetricsHelper:
         output, stderr = utils.run_bash_command(status_cmd)
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
-        status_helper = StatusHelper(self.slurm_job_id, output, self.log_dir)
+        status_helper = ModelStatusMonitor(self.slurm_job_id, output, self.log_dir)
         return status_helper.status_info
 
     def _build_metrics_url(self) -> str:
@@ -434,16 +456,26 @@ class MetricsHelper:
         return parsed
 
 
-class ListHelper:
-    """Helper class for handling model listing functionality."""
+class ModelRegistry:
+    """Class for handling model listing and configuration management."""
 
     def __init__(self) -> None:
         """Initialize the model lister."""
-        self.model_configs = self._get_model_configs()
+        self.model_configs = utils.load_config()
 
-    def _get_model_configs(self) -> list[ModelConfig]:
-        """Get all model configurations."""
-        return utils.load_config()
+    def get_all_models(self) -> list[ModelInfo]:
+        """Get all available models."""
+        available_models = []
+        for config in self.model_configs:
+            info = ModelInfo(
+                name=config.model_name,
+                family=config.model_family,
+                variant=config.model_variant,
+                type=ModelType(config.model_type),
+                config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
+            )
+            available_models.append(info)
+        return available_models
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
         """Get configuration for a specific model."""

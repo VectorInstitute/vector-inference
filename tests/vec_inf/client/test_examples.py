@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from vec_inf.api import ModelStatus, ModelType, VecInfClient
+from vec_inf.client import ModelStatus, ModelType, VecInfClient
 
 
 @pytest.fixture
@@ -85,7 +85,7 @@ def test_api_usage_example():
 
     # Mock the VecInfClient class
     with (
-        patch("vec_inf.api.VecInfClient", return_value=mock_client),
+        patch("vec_inf.client.VecInfClient", return_value=mock_client),
         patch("builtins.print"),
         example_path.open() as f,
     ):

@@ -1,6 +1,6 @@
 """Tests for the Vector Inference API data models."""
 
-from vec_inf.api import LaunchOptions, ModelInfo, ModelStatus, ModelType
+from vec_inf.client import LaunchOptions, ModelInfo, ModelStatus, ModelType
 
 
 def test_model_info_creation():

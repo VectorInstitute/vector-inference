@@ -9,24 +9,28 @@ from typing import Any, Optional, cast
 
 import requests
 
-from vec_inf.api._helper import APILaunchHelper, APIListHelper
-from vec_inf.api._models import (
-    LaunchOptions,
-    LaunchResponse,
-    MetricsResponse,
-    ModelInfo,
-    StatusResponse,
-)
-from vec_inf.shared._config import ModelConfig
-from vec_inf.shared._exceptions import (
+from vec_inf.client._config import ModelConfig
+from vec_inf.client._exceptions import (
     APIError,
     ModelNotFoundError,
     ServerError,
     SlurmJobError,
 )
-from vec_inf.shared._helper import MetricsHelper, StatusHelper
-from vec_inf.shared._models import ModelStatus
-from vec_inf.shared._utils import run_bash_command, shutdown_model
+from vec_inf.client._helper import (
+    ModelLauncher,
+    ModelRegistry,
+    ModelStatusMonitor,
+    PerformanceMetricsCollector,
+)
+from vec_inf.client._models import (
+    LaunchOptions,
+    LaunchResponse,
+    MetricsResponse,
+    ModelInfo,
+    ModelStatus,
+    StatusResponse,
+)
+from vec_inf.client._utils import run_bash_command, shutdown_model
 
 
 class VecInfClient:
@@ -68,8 +72,8 @@ class VecInfClient:
 
         """
         try:
-            list_helper = APIListHelper()
-            return list_helper.get_all_models()
+            model_registry = ModelRegistry()
+            return cast(list[ModelInfo], model_registry.get_all_models())
         except Exception as e:
             raise APIError(f"Failed to list models: {str(e)}") from e
 
@@ -95,8 +99,8 @@ class VecInfClient:
 
         """
         try:
-            list_helper = APIListHelper()
-            return list_helper.get_single_model_config(model_name)
+            model_registry = ModelRegistry()
+            return model_registry.get_single_model_config(model_name)
         except ModelNotFoundError:
             raise
         except Exception as e:
@@ -133,18 +137,18 @@ class VecInfClient:
                 options_dict = {k: v for k, v in vars(options).items() if v is not None}
 
             # Create and use the API Launch Helper
-            launch_helper = APILaunchHelper(model_name, options_dict)
+            model_launcher = ModelLauncher(model_name, options_dict)
 
             # Set environment variables
-            launch_helper.set_env_vars()
+            model_launcher.set_env_vars()
 
             # Build and execute the launch command
-            launch_command = launch_helper.build_launch_command()
+            launch_command = model_launcher.build_launch_command()
             command_output, stderr = run_bash_command(launch_command)
             if stderr:
                 raise SlurmJobError(f"Error: {stderr}")
 
-            return launch_helper.post_launch_processing(command_output)
+            return model_launcher.post_launch_processing(command_output)
 
         except ValueError as e:
             if "not found in configuration" in str(e):
@@ -183,16 +187,16 @@ class VecInfClient:
             if stderr:
                 raise SlurmJobError(f"Error: {stderr}")
 
-            status_helper = StatusHelper(slurm_job_id, output, log_dir)
-            status_helper.process_job_state()
+            model_status_monitor = ModelStatusMonitor(slurm_job_id, output, log_dir)
+            model_status_monitor.process_job_state()
 
             return StatusResponse(
                 slurm_job_id=slurm_job_id,
-                model_name=cast(str, status_helper.status_info["model_name"]),
-                status=cast(ModelStatus, status_helper.status_info["status"]),
-                base_url=status_helper.status_info["base_url"],
-                pending_reason=status_helper.status_info["pending_reason"],
-                failed_reason=status_helper.status_info["failed_reason"],
+                model_name=cast(str, model_status_monitor.status_info["model_name"]),
+                status=cast(ModelStatus, model_status_monitor.status_info["status"]),
+                base_url=model_status_monitor.status_info["base_url"],
+                pending_reason=model_status_monitor.status_info["pending_reason"],
+                failed_reason=model_status_monitor.status_info["failed_reason"],
                 raw_output=output,
             )
         except SlurmJobError:
@@ -226,21 +230,25 @@ class VecInfClient:
 
         """
         try:
-            metrics_helper = MetricsHelper(slurm_job_id, log_dir)
+            performance_metrics_collector = PerformanceMetricsCollector(
+                slurm_job_id, log_dir
+            )
 
-            if not metrics_helper.metrics_url.startswith("http"):
+            if not performance_metrics_collector.metrics_url.startswith("http"):
                 raise ServerError(
-                    f"Metrics endpoint unavailable or server not ready - {metrics_helper.metrics_url}"
+                    f"Metrics endpoint unavailable or server not ready - {performance_metrics_collector.metrics_url}"
                 )
 
-            metrics = metrics_helper.fetch_metrics()
+            metrics = performance_metrics_collector.fetch_metrics()
 
             if isinstance(metrics, str):
                 raise requests.RequestException(metrics)
 
             return MetricsResponse(
                 slurm_job_id=slurm_job_id,
-                model_name=cast(str, metrics_helper.status_info["model_name"]),
+                model_name=cast(
+                    str, performance_metrics_collector.status_info["model_name"]
+                ),
                 metrics=metrics,
                 timestamp=time.time(),
             )

@@ -1,26 +1,35 @@
-"""Data models for Vector Inference API.
+"""
+Data models for Vector Inference API.
 
 This module contains the data model classes used by the Vector Inference API
 for both request parameters and response objects.
 """
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from vec_inf.shared._models import ModelStatus, ModelType
+
+class ModelStatus(str, Enum):
+    """Enum representing the possible status states of a model."""
+
+    PENDING = "PENDING"
+    LAUNCHING = "LAUNCHING"
+    READY = "READY"
+    FAILED = "FAILED"
+    SHUTDOWN = "SHUTDOWN"
+    UNAVAILABLE = "UNAVAILABLE"
 
 
-@dataclass
-class ModelInfo:
-    """Information about an available model."""
+class ModelType(str, Enum):
+    """Enum representing the possible model types."""
 
-    name: str
-    family: str
-    variant: Optional[str]
-    type: ModelType
-    config: dict[str, Any]
+    LLM = "LLM"
+    VLM = "VLM"
+    TEXT_EMBEDDING = "Text_Embedding"
+    REWARD_MODELING = "Reward_Modeling"
 
 
 @dataclass
@@ -107,3 +116,14 @@ class LaunchOptionsDict(TypedDict):
     pipeline_parallelism: NotRequired[Optional[bool]]
     compilation_config: NotRequired[Optional[str]]
     enforce_eager: NotRequired[Optional[bool]]
+
+
+@dataclass
+class ModelInfo:
+    """Information about an available model."""
+
+    name: str
+    family: str
+    variant: Optional[str]
+    type: ModelType
+    config: dict[str, Any]
