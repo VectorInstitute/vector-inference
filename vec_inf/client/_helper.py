@@ -205,6 +205,7 @@ class ModelLauncher:
 
         # Extract slurm job id from command output
         self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
+        self.params["slurm_job_id"] = self.slurm_job_id
 
         # Create log directory and job json file
         job_json = Path(
