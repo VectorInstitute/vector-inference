@@ -43,6 +43,7 @@ class ModelLauncher:
         """
         self.model_name = model_name
         self.kwargs = kwargs or {}
+        self.slurm_job_id = ""
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
 
@@ -197,14 +198,13 @@ class ModelLauncher:
             raise SlurmJobError(f"Error: {stderr}")
 
         # Extract slurm job id from command output
-        slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
-        self.params["slurm_job_id"] = slurm_job_id
+        self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
 
         # Create log directory and job json file
         job_json = Path(
             self.params["log_dir"],
-            f"{self.model_name}.{slurm_job_id}",
-            f"{self.model_name}.{slurm_job_id}.json",
+            f"{self.model_name}.{self.slurm_job_id}",
+            f"{self.model_name}.{self.slurm_job_id}.json",
         )
         job_json.parent.mkdir(parents=True, exist_ok=True)
         job_json.touch(exist_ok=True)
@@ -213,7 +213,7 @@ class ModelLauncher:
             json.dump(self.params, file, indent=4)
 
         return LaunchResponse(
-            slurm_job_id=int(slurm_job_id),
+            slurm_job_id=int(self.slurm_job_id),
             model_name=self.model_name,
             config=self.params,
             raw_output=command_output,
