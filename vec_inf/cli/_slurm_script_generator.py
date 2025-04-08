@@ -24,10 +24,9 @@ class SlurmScriptGenerator:
     def _generate_script_content(self) -> str:
         preamble = self._generate_preamble()
         server = self._generate_server_script()
-        env_exports = self._export_parallel_vars()
         launcher = self._generate_launcher()
         args = self._generate_shared_args()
-        return preamble + server + env_exports + launcher + args
+        return preamble + server + launcher + args
 
     def _generate_preamble(self) -> str:
         base = [
@@ -43,26 +42,20 @@ class SlurmScriptGenerator:
         base += [""]
         return "\n".join(base)
 
-    def _export_parallel_vars(self) -> str:
-        if self.is_multinode:
-            return """if [ "$PIPELINE_PARALLELISM" = "True" ]; then
-    export PIPELINE_PARALLEL_SIZE=$SLURM_JOB_NUM_NODES
-    export TENSOR_PARALLEL_SIZE=$SLURM_GPUS_PER_NODE
-else
-    export PIPELINE_PARALLEL_SIZE=1
-    export TENSOR_PARALLEL_SIZE=$((SLURM_JOB_NUM_NODES*SLURM_GPUS_PER_NODE))
-fi
-
-"""
-        return "export TENSOR_PARALLEL_SIZE=$SLURM_GPUS_PER_NODE\n\n"
-
     def _generate_shared_args(self) -> str:
+        if self.is_multinode and not self.params["pipeline_parallelism"]:
+            tensor_parallel_size = "$((SLURM_JOB_NUM_NODES*SLURM_GPUS_PER_NODE))"
+            pipeline_parallel_size = "1"
+        else:
+            tensor_parallel_size = "$SLURM_GPUS_PER_NODE"
+            pipeline_parallel_size = "$SLURM_JOB_NUM_NODES"
+
         args = [
             f"--model {self.model_weights_path} \\",
             f"--served-model-name {self.params['model_name']} \\",
             '--host "0.0.0.0" \\',
             "--port $vllm_port_number \\",
-            "--tensor-parallel-size ${TENSOR_PARALLEL_SIZE} \\",
+            f"--tensor-parallel-size {tensor_parallel_size} \\",
             f"--dtype {self.params['data_type']} \\",
             "--trust-remote-code \\",
             f"--max-logprobs {self.params['vocab_size']} \\",
@@ -73,7 +66,7 @@ fi
             f"--task {self.task} \\",
         ]
         if self.is_multinode:
-            args.insert(4, "--pipeline-parallel-size ${PIPELINE_PARALLEL_SIZE} \\")
+            args.insert(4, f"--pipeline-parallel-size {pipeline_parallel_size} \\")
         if self.params.get("max_num_batched_tokens"):
             args.append(
                 f"--max-num-batched-tokens={self.params['max_num_batched_tokens']} \\"
