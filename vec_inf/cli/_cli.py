@@ -7,12 +7,12 @@ import click
 from rich.console import Console
 from rich.live import Live
 
-import vec_inf.shared._utils as utils
+import vec_inf.client._utils as utils
 from vec_inf.cli._helper import (
-    CLILaunchHelper,
-    CLIListHelper,
-    CLIMetricsHelper,
-    CLIStatusHelper,
+    CLIMetricsCollector,
+    CLIModelLauncher,
+    CLIModelRegistry,
+    CLIModelStatusMonitor,
 )
 
 
@@ -131,14 +131,15 @@ def launch(
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        launch_helper = CLILaunchHelper(model_name, cli_kwargs)
-
-        launch_helper.set_env_vars()
-        launch_command = launch_helper.build_launch_command()
-        command_output, stderr = utils.run_bash_command(launch_command)
-        if stderr:
-            raise click.ClickException(f"Error: {stderr}")
-        launch_helper.post_launch_processing(command_output, CONSOLE)
+        model_launcher = CLIModelLauncher(model_name, cli_kwargs)
+        # Launch model inference server
+        model_launcher.launch()
+        # Display launch information
+        if cli_kwargs.get("json_mode"):
+            click.echo(model_launcher.params)
+        else:
+            launch_info_table = model_launcher.format_table_output()
+            CONSOLE.print(launch_info_table)
 
     except click.ClickException as e:
         raise e
@@ -163,18 +164,14 @@ def status(
 ) -> None:
     """Get the status of a running model on the cluster."""
     try:
-        status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-        output, stderr = utils.run_bash_command(status_cmd)
-        if stderr:
-            raise click.ClickException(f"Error: {stderr}")
-
-        status_helper = CLIStatusHelper(slurm_job_id, output, log_dir)
-
-        status_helper.process_job_state()
+        # Get model inference server status
+        model_status_monitor = CLIModelStatusMonitor(slurm_job_id, log_dir)
+        model_status_monitor.process_model_status()
+        # Display status information
         if json_mode:
-            status_helper.output_json()
+            model_status_monitor.output_json()
         else:
-            status_helper.output_table(CONSOLE)
+            model_status_monitor.output_table(CONSOLE)
 
     except click.ClickException as e:
         raise e
@@ -200,8 +197,8 @@ def shutdown(slurm_job_id: int) -> None:
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
     try:
-        list_helper = CLIListHelper(json_mode)
-        list_helper.process_list_command(CONSOLE, model_name)
+        model_registry = CLIModelRegistry(json_mode)
+        model_registry.process_list_command(CONSOLE, model_name)
     except click.ClickException as e:
         raise e
     except Exception as e:
@@ -216,28 +213,28 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
     try:
-        metrics_helper = CLIMetricsHelper(slurm_job_id, log_dir)
+        metrics_collector = CLIMetricsCollector(slurm_job_id, log_dir)
 
         # Check if metrics URL is ready
-        if not metrics_helper.metrics_url.startswith("http"):
+        if not metrics_collector.metrics_url.startswith("http"):
             table = utils.create_table("Metric", "Value")
-            metrics_helper.display_failed_metrics(
+            metrics_collector.display_failed_metrics(
                 table,
-                f"Metrics endpoint unavailable or server not ready - {metrics_helper.metrics_url}",
+                f"Metrics endpoint unavailable or server not ready - {metrics_collector.metrics_url}",
             )
             CONSOLE.print(table)
             return
 
         with Live(refresh_per_second=1, console=CONSOLE) as live:
             while True:
-                metrics = metrics_helper.fetch_metrics()
+                metrics = metrics_collector.fetch_metrics()
                 table = utils.create_table("Metric", "Value")
 
                 if isinstance(metrics, str):
                     # Show status information if metrics aren't available
-                    metrics_helper.display_failed_metrics(table, metrics)
+                    metrics_collector.display_failed_metrics(table, metrics)
                 else:
-                    metrics_helper.display_metrics(table, metrics)
+                    metrics_collector.display_metrics(table, metrics)
 
                 live.update(table)
                 time.sleep(2)

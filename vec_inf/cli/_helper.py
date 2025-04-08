@@ -11,13 +11,19 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-import vec_inf.shared._utils as utils
-from vec_inf.shared._config import ModelConfig
-from vec_inf.shared._helper import LaunchHelper, ListHelper, MetricsHelper, StatusHelper
+import vec_inf.client._utils as utils
+from vec_inf.cli._models import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
+from vec_inf.client._config import ModelConfig
+from vec_inf.client._helper import (
+    ModelLauncher,
+    ModelRegistry,
+    ModelStatusMonitor,
+    PerformanceMetricsCollector,
+)
 
 
-class CLILaunchHelper(LaunchHelper):
-    """CLI Helper class for handling launch information."""
+class CLIModelLauncher(ModelLauncher):
+    """CLI Helper class for handling inference server launch."""
 
     def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
         super().__init__(model_name, kwargs)
@@ -26,12 +32,12 @@ class CLILaunchHelper(LaunchHelper):
         """Warn the user about a potential issue."""
         click.echo(click.style(f"Warning: {message}", fg="yellow"), err=True)
 
-    def _format_table_output(self, job_id: str) -> Table:
+    def format_table_output(self) -> Table:
         """Format output as rich Table."""
         table = utils.create_table(key_title="Job Config", value_title="Value")
 
         # Add key information with consistent styling
-        table.add_row("Slurm Job ID", job_id, style="blue")
+        table.add_row("Slurm Job ID", self.slurm_job_id, style="blue")
         table.add_row("Job Name", self.model_name)
 
         # Add model details
@@ -71,33 +77,12 @@ class CLILaunchHelper(LaunchHelper):
 
         return table
 
-    def post_launch_processing(self, output: str, console: Console) -> None:
-        """Process and display launch output."""
-        json_mode = bool(self.kwargs.get("json_mode", False))
-        slurm_job_id = output.split(" ")[-1].strip().strip("\n")
-        self.params["slurm_job_id"] = slurm_job_id
-        job_json = Path(
-            self.params["log_dir"],
-            f"{self.model_name}.{slurm_job_id}",
-            f"{self.model_name}.{slurm_job_id}.json",
-        )
-        job_json.parent.mkdir(parents=True, exist_ok=True)
-        job_json.touch(exist_ok=True)
 
-        with job_json.open("w") as file:
-            json.dump(self.params, file, indent=4)
-        if json_mode:
-            click.echo(self.params)
-        else:
-            table = self._format_table_output(slurm_job_id)
-            console.print(table)
+class CLIModelStatusMonitor(ModelStatusMonitor):
+    """CLI Helper class for handling server status information and monitoring."""
 
-
-class CLIStatusHelper(StatusHelper):
-    """CLI Helper class for handling status information."""
-
-    def __init__(self, slurm_job_id: int, output: str, log_dir: Optional[str] = None):
-        super().__init__(slurm_job_id, output, log_dir)
+    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+        super().__init__(slurm_job_id, log_dir)
 
     def output_json(self) -> None:
         """Format and output JSON data."""
@@ -127,7 +112,7 @@ class CLIStatusHelper(StatusHelper):
         console.print(table)
 
 
-class CLIMetricsHelper(MetricsHelper):
+class CLIMetricsCollector(PerformanceMetricsCollector):
     """CLI Helper class for streaming metrics information."""
 
     def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
@@ -204,8 +189,8 @@ class CLIMetricsHelper(MetricsHelper):
         )
 
 
-class CLIListHelper(ListHelper):
-    """Helper class for handling model listing functionality."""
+class CLIModelRegistry(ModelRegistry):
+    """CLI Helper class for handling model listing functionality."""
 
     def __init__(self, json_mode: bool = False):
         super().__init__()
@@ -237,28 +222,15 @@ class CLIListHelper(ListHelper):
             return [config.model_name for config in self.model_configs]
 
         # Sort by model type priority
-        type_priority = {
-            "LLM": 0,
-            "VLM": 1,
-            "Text_Embedding": 2,
-            "Reward_Modeling": 3,
-        }
         sorted_configs = sorted(
             self.model_configs,
-            key=lambda x: type_priority.get(x.model_type, 4),
+            key=lambda x: MODEL_TYPE_PRIORITY.get(x.model_type, 4),
         )
 
         # Create panels with color coding
-        model_type_colors = {
-            "LLM": "cyan",
-            "VLM": "bright_blue",
-            "Text_Embedding": "purple",
-            "Reward_Modeling": "bright_magenta",
-        }
-
         panels = []
         for config in sorted_configs:
-            color = model_type_colors.get(config.model_type, "white")
+            color = MODEL_TYPE_COLORS.get(config.model_type, "white")
             variant = config.model_variant or ""
             display_text = f"[magenta]{config.model_family}[/magenta]"
             if variant:
