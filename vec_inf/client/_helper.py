@@ -128,7 +128,7 @@ class ModelLauncher:
 
         return params
 
-    def set_env_vars(self) -> None:
+    def _set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
         os.environ["MODEL_NAME"] = self.model_name
         os.environ["MAX_MODEL_LEN"] = self.params["max_model_len"]
@@ -156,7 +156,7 @@ class ModelLauncher:
         if self.params.get("enforce_eager"):
             os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
 
-    def build_launch_command(self) -> str:
+    def _build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
         # Base command
         command_list = ["sbatch"]
@@ -186,10 +186,21 @@ class ModelLauncher:
         command_list.append(f"{SRC_DIR}/{slurm_script}")
         return " ".join(command_list)
 
-    def post_launch_processing(self, command_output: str) -> LaunchResponse:
-        """Process and display launch output."""
+    def launch(self) -> LaunchResponse:
+        """Launch the model."""
+        # Set environment variables
+        self._set_env_vars()
+
+        # Build and execute the launch command
+        command_output, stderr = utils.run_bash_command(self._build_launch_command())
+        if stderr:
+            raise SlurmJobError(f"Error: {stderr}")
+
+        # Extract slurm job id from command output
         slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = slurm_job_id
+
+        # Create log directory and job json file
         job_json = Path(
             self.params["log_dir"],
             f"{self.model_name}.{slurm_job_id}",

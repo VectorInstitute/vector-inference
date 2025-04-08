@@ -139,16 +139,7 @@ class VecInfClient:
             # Create and use the API Launch Helper
             model_launcher = ModelLauncher(model_name, options_dict)
 
-            # Set environment variables
-            model_launcher.set_env_vars()
-
-            # Build and execute the launch command
-            launch_command = model_launcher.build_launch_command()
-            command_output, stderr = run_bash_command(launch_command)
-            if stderr:
-                raise SlurmJobError(f"Error: {stderr}")
-
-            return model_launcher.post_launch_processing(command_output)
+            return model_launcher.launch()
 
         except ValueError as e:
             if "not found in configuration" in str(e):
