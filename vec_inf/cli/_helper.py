@@ -1,8 +1,6 @@
 """Helper classes for the CLI."""
 
-import json
 import os
-from pathlib import Path
 from typing import Any, Optional, Union
 
 import click
