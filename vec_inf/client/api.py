@@ -30,7 +30,7 @@ from vec_inf.client._models import (
     ModelStatus,
     StatusResponse,
 )
-from vec_inf.client._utils import run_bash_command, shutdown_model
+from vec_inf.client._utils import shutdown_model
 
 
 class VecInfClient:
@@ -173,23 +173,8 @@ class VecInfClient:
             Error if there was an error retrieving the status.
         """
         try:
-            status_cmd = f"scontrol show job {slurm_job_id} --oneliner"
-            output, stderr = run_bash_command(status_cmd)
-            if stderr:
-                raise SlurmJobError(f"Error: {stderr}")
-
-            model_status_monitor = ModelStatusMonitor(slurm_job_id, output, log_dir)
-            model_status_monitor.process_job_state()
-
-            return StatusResponse(
-                slurm_job_id=slurm_job_id,
-                model_name=cast(str, model_status_monitor.status_info["model_name"]),
-                status=cast(ModelStatus, model_status_monitor.status_info["status"]),
-                base_url=model_status_monitor.status_info["base_url"],
-                pending_reason=model_status_monitor.status_info["pending_reason"],
-                failed_reason=model_status_monitor.status_info["failed_reason"],
-                raw_output=output,
-            )
+            model_status_monitor = ModelStatusMonitor(slurm_job_id, log_dir)
+            return model_status_monitor.process_model_status()
         except SlurmJobError:
             raise
         except Exception as e:

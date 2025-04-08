@@ -18,7 +18,13 @@ from vec_inf.client._exceptions import (
     ModelNotFoundError,
     SlurmJobError,
 )
-from vec_inf.client._models import LaunchResponse, ModelInfo, ModelStatus, ModelType
+from vec_inf.client._models import (
+    LaunchResponse,
+    ModelInfo,
+    ModelStatus,
+    ModelType,
+    StatusResponse,
+)
 from vec_inf.client._vars import (
     BOOLEAN_FIELDS,
     LD_LIBRARY_PATH,
@@ -223,11 +229,19 @@ class ModelLauncher:
 class ModelStatusMonitor:
     """Class for handling server status information and monitoring."""
 
-    def __init__(self, slurm_job_id: int, output: str, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
-        self.output = output
+        self.output = self._get_raw_status_output()
         self.log_dir = log_dir
         self.status_info = self._get_base_status_data()
+
+    def _get_raw_status_output(self) -> str:
+        """Get the raw server status output from slurm."""
+        status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
+        output, stderr = utils.run_bash_command(status_cmd)
+        if stderr:
+            raise SlurmJobError(f"Error: {stderr}")
+        return cast(str, output)
 
     def _get_base_status_data(self) -> dict[str, Union[str, None]]:
         """Extract basic job status information from scontrol output."""
@@ -247,12 +261,22 @@ class ModelStatusMonitor:
             "failed_reason": None,
         }
 
-    def process_job_state(self) -> None:
+    def process_model_status(self) -> StatusResponse:
         """Process different job states and update status information."""
         if self.status_info["state"] == ModelStatus.PENDING:
             self.process_pending_state()
         elif self.status_info["state"] == "RUNNING":
             self.process_running_state()
+
+        return StatusResponse(
+            slurm_job_id=self.slurm_job_id,
+            model_name=cast(str, self.status_info["model_name"]),
+            status=cast(ModelStatus, self.status_info["status"]),
+            raw_output=self.output,
+            base_url=self.status_info["base_url"],
+            pending_reason=self.status_info["pending_reason"],
+            failed_reason=self.status_info["failed_reason"],
+        )
 
     def check_model_health(self) -> None:
         """Check model health and update status accordingly."""
@@ -317,11 +341,7 @@ class PerformanceMetricsCollector:
 
     def _get_status_info(self) -> dict[str, Union[str, None]]:
         """Retrieve status info using existing StatusHelper."""
-        status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
-        output, stderr = utils.run_bash_command(status_cmd)
-        if stderr:
-            raise SlurmJobError(f"Error: {stderr}")
-        status_helper = ModelStatusMonitor(self.slurm_job_id, output, self.log_dir)
+        status_helper = ModelStatusMonitor(self.slurm_job_id, self.log_dir)
         return status_helper.status_info
 
     def _build_metrics_url(self) -> str:
