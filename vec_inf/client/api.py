@@ -73,7 +73,7 @@ class VecInfClient:
         """
         try:
             model_registry = ModelRegistry()
-            return cast(list[ModelInfo], model_registry.get_all_models())
+            return model_registry.get_all_models()
         except Exception as e:
             raise APIError(f"Failed to list models: {str(e)}") from e
 

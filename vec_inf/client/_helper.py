@@ -104,7 +104,7 @@ class ModelLauncher:
 
     def _get_launch_params(self) -> dict[str, Any]:
         """Merge config defaults with CLI overrides."""
-        params = cast(dict[str, Any], self.model_config.model_dump())
+        params = self.model_config.model_dump()
 
         # Process boolean fields
         for bool_field in BOOLEAN_FIELDS:
@@ -242,7 +242,7 @@ class ModelStatusMonitor:
         output, stderr = utils.run_bash_command(status_cmd)
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
-        return cast(str, output)
+        return output
 
     def _get_base_status_data(self) -> dict[str, Union[str, None]]:
         """Extract basic job status information from scontrol output."""
