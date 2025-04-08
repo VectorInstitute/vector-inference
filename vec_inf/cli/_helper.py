@@ -98,8 +98,8 @@ class LaunchHelper:
 
         # Process boolean fields
         for bool_field in BOOLEAN_FIELDS:
-            if self.cli_kwargs[bool_field]:
-                params[bool_field] = True
+            if self.cli_kwargs.get(bool_field) is not None:
+                params[bool_field] = self.cli_kwargs[bool_field]
 
         # Merge other overrides
         for key, value in self.cli_kwargs.items():

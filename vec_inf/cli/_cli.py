@@ -40,14 +40,14 @@ def cli() -> None:
     help="GPU memory utilization, default to 0.9",
 )
 @click.option(
-    "--enable-prefix-caching",
-    is_flag=True,
-    help="Enables automatic prefix caching",
+    "--enable-prefix-caching/--disable-prefix-caching",
+    default=None,
+    help="Enable or disable automatic prefix caching",
 )
 @click.option(
-    "--enable-chunked-prefill",
-    is_flag=True,
-    help="Enable chunked prefill, enabled by default if max number of sequences > 32k",
+    "--enable-chunked-prefill/--disable-chunked-prefill",
+    default=None,
+    help="Enable or disable chunked prefill, enabled by default if max number of sequences > 32k",
 )
 @click.option(
     "--max-num-batched-tokens",
@@ -101,9 +101,9 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
-    "--pipeline-parallelism",
-    is_flag=True,
-    help="Enable pipeline parallelism, enabled by default for supported models",
+    "--pipeline-parallelism/--no-pipeline-parallelism",
+    default=None,
+    help="Enable or disable pipeline parallelism, enabled by default for supported models",
 )
 @click.option(
     "--compilation-config",
@@ -111,14 +111,14 @@ def cli() -> None:
     help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
 )
 @click.option(
-    "--enforce-eager",
-    is_flag=True,
-    help="Always use eager-mode PyTorch",
+    "--enforce-eager/--no-enforce-eager",
+    default=None,
+    help="If enabled, always use eager-mode PyTorch",
 )
 @click.option(
     "--json-mode",
     is_flag=True,
-    help="Output in JSON string",
+    help="If enabled, output will be in JSON string format instead of a table",
 )
 def launch(
     model_name: str,

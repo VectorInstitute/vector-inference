@@ -57,7 +57,7 @@ class ModelConfig(BaseModel):
         default=0.9, gt=0.0, le=1.0, description="GPU memory utilization"
     )
     pipeline_parallelism: bool = Field(
-        default=True, description="Enable pipeline parallelism"
+        default=False, description="Enable pipeline parallelism"
     )
     enforce_eager: bool = Field(default=False, description="Force eager mode execution")
     qos: Union[QOS, str] = Field(default="m2", description="Quality of Service tier")
