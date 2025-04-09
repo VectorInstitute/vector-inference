@@ -322,6 +322,25 @@ def test_launch_command_with_json_output(
         assert str(test_log_dir) in output.get("log_dir", "")
 
 
+def test_launch_command_no_model_weights_parent_dir(runner, debug_helper, base_patches):
+    """Test handling when model weights parent dir is not set."""
+    with ExitStack() as stack:
+        # Apply all base patches
+        for patch_obj in base_patches:
+            stack.enter_context(patch_obj)
+
+        # Mock load_config to return empty list
+        stack.enter_context(
+            patch("vec_inf.client._utils.load_config", return_value=[])
+        )
+
+        result = runner.invoke(cli, ["launch", "test-model"])
+        debug_helper.print_debug_info(result)
+
+        assert result.exit_code == 1
+        assert "Could not determine model weights parent directory" in result.output
+
+
 def test_launch_command_model_not_in_config_with_weights(
     runner, mock_launch_output, path_exists, debug_helper, test_paths, base_patches
 ):
@@ -346,18 +365,19 @@ def test_launch_command_model_not_in_config_with_weights(
         expected_job_id = "14933051"
         mock_run.return_value = mock_launch_output(expected_job_id)
 
-        result = runner.invoke(cli, ["launch", "unknown-model"])
-        debug_helper.print_debug_info(result)
+        with pytest.warns(UserWarning) as record:
+            result = runner.invoke(cli, ["launch", "unknown-model"])
+            debug_helper.print_debug_info(result)
 
-        assert result.exit_code == 1
-        assert (
-            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
-            in result.output
+        assert result.exit_code == 0
+        assert len(record) == 1
+        assert str(record[0].message) == (
+            "Warning: 'unknown-model' configuration not found in config, please ensure model configuration are properly set in command arguments"
         )
 
 
 def test_launch_command_model_not_found(
-    runner, path_exists, debug_helper, test_paths, base_patches
+    runner, debug_helper, test_paths, base_patches
 ):
     """Test handling of a model that's neither in config nor has weights."""
 
@@ -389,7 +409,8 @@ def test_launch_command_model_not_found(
 
         assert result.exit_code == 1
         assert (
-            "Could not determine model_weights_parent_dir and 'unknown-model' not found in configuration"
+            "'unknown-model' not found in configuration and model weights "
+            "not found at expected path '/model-weights/unknown-model'"
             in result.output
         )
 
@@ -428,10 +449,9 @@ def test_metrics_command_pending_server(
         debug_helper.print_debug_info(result)
 
         assert result.exit_code == 0
-        assert "Server State" in result.output
-        assert "PENDING" in result.output
+        assert "ERROR" in result.output
         assert (
-            "Metrics endpoint unavailable or server not ready - Pending"
+            "Pending resources for server initialization"
             in result.output
         )
 
@@ -452,10 +472,9 @@ def test_metrics_command_server_not_ready(
         debug_helper.print_debug_info(result)
 
         assert result.exit_code == 0
-        assert "Server State" in result.output
-        assert "RUNNING" in result.output
+        assert "ERROR" in result.output
         assert (
-            "Metrics endpoint unavailable or server not ready - Server not"
+            "Server not ready"
             in result.output
         )
 
@@ -519,8 +538,7 @@ def test_metrics_command_request_failed(
         debug_helper.print_debug_info(result)
 
         # KeyboardInterrupt is expected and ok
-        assert "Server State" in result.output
-        assert "RUNNING" in result.output
+        assert "ERROR" in result.output
         assert (
             "Metrics request failed, `metrics` endpoint might not be ready"
             in result.output

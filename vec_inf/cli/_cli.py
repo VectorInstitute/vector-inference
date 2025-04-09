@@ -9,11 +9,13 @@ from rich.live import Live
 
 import vec_inf.client._utils as utils
 from vec_inf.cli._helper import (
-    CLIMetricsCollector,
-    CLIModelLauncher,
-    CLIModelRegistry,
-    CLIModelStatusMonitor,
+    LaunchResponseFormatter,
+    ListCmdDisplay,
+    MetricsResponseFormatter,
+    StatusResponseFormatter,
 )
+from vec_inf.client._models import LaunchOptions
+from vec_inf.client.api import VecInfClient
 
 
 CONSOLE = Console()
@@ -131,14 +133,19 @@ def launch(
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        model_launcher = CLIModelLauncher(model_name, cli_kwargs)
-        # Launch model inference server
-        model_launcher.launch()
+        # Convert cli_kwargs to LaunchOptions
+        launch_options = LaunchOptions(**{k: v for k, v in cli_kwargs.items() if k != "json_mode"})
+
+        # Start the client and launch model inference server
+        client = VecInfClient()
+        launch_response = client.launch_model(model_name, launch_options)
+
         # Display launch information
+        launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
         if cli_kwargs.get("json_mode"):
-            click.echo(model_launcher.params)
+            click.echo(launch_response.config)
         else:
-            launch_info_table = model_launcher.format_table_output()
+            launch_info_table = launch_formatter.format_table_output()
             CONSOLE.print(launch_info_table)
 
     except click.ClickException as e:
@@ -164,14 +171,16 @@ def status(
 ) -> None:
     """Get the status of a running model on the cluster."""
     try:
-        # Get model inference server status
-        model_status_monitor = CLIModelStatusMonitor(slurm_job_id, log_dir)
-        model_status_monitor.process_model_status()
+        # Start the client and get model inference server status
+        client = VecInfClient()
+        status_response = client.get_status(slurm_job_id, log_dir)
         # Display status information
+        status_formatter = StatusResponseFormatter(status_response)
         if json_mode:
-            model_status_monitor.output_json()
+            status_formatter.output_json()
         else:
-            model_status_monitor.output_table(CONSOLE)
+            status_info_table = status_formatter.output_table()
+            CONSOLE.print(status_info_table)
 
     except click.ClickException as e:
         raise e
@@ -197,8 +206,15 @@ def shutdown(slurm_job_id: int) -> None:
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model."""
     try:
-        model_registry = CLIModelRegistry(json_mode)
-        model_registry.process_list_command(CONSOLE, model_name)
+        # Start the client
+        client = VecInfClient()
+        list_display = ListCmdDisplay(CONSOLE, json_mode)
+        if model_name:
+            model_config = client.get_model_config(model_name)
+            list_display.display_single_model_output(model_config)
+        else:
+            model_infos = client.list_models()
+            list_display.display_all_models_output(model_infos)
     except click.ClickException as e:
         raise e
     except Exception as e:
@@ -213,30 +229,29 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     """Stream real-time performance metrics from the model endpoint."""
     try:
-        metrics_collector = CLIMetricsCollector(slurm_job_id, log_dir)
+        # Start the client and get inference server metrics
+        client = VecInfClient()
+        metrics_response = client.get_metrics(slurm_job_id, log_dir)
+        metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
-        # Check if metrics URL is ready
-        if not metrics_collector.metrics_url.startswith("http"):
-            table = utils.create_table("Metric", "Value")
-            metrics_collector.display_failed_metrics(
-                table,
-                f"Metrics endpoint unavailable or server not ready - {metrics_collector.metrics_url}",
-            )
-            CONSOLE.print(table)
+        # Check if metrics response is ready
+        if isinstance(metrics_response.metrics, str):
+            metrics_formatter.format_failed_metrics(metrics_response.metrics)
+            CONSOLE.print(metrics_formatter.table)
             return
 
         with Live(refresh_per_second=1, console=CONSOLE) as live:
             while True:
-                metrics = metrics_collector.fetch_metrics()
-                table = utils.create_table("Metric", "Value")
+                metrics_response = client.get_metrics(slurm_job_id, log_dir)
+                metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
-                if isinstance(metrics, str):
+                if isinstance(metrics_response.metrics, str):
                     # Show status information if metrics aren't available
-                    metrics_collector.display_failed_metrics(table, metrics)
+                    metrics_formatter.format_failed_metrics(metrics_response.metrics)
                 else:
-                    metrics_collector.display_metrics(table, metrics)
+                    metrics_formatter.format_metrics()
 
-                live.update(table)
+                live.update(metrics_formatter.table)
                 time.sleep(2)
     except click.ClickException as e:
         raise e
