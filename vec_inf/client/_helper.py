@@ -244,42 +244,26 @@ class ModelStatusMonitor:
             raise SlurmJobError(f"Error: {stderr}")
         return output
 
-    def _get_base_status_data(self) -> dict[str, Union[str, None]]:
+    def _get_base_status_data(self) -> StatusResponse:
         """Extract basic job status information from scontrol output."""
         try:
             job_name = self.output.split(" ")[1].split("=")[1]
             job_state = self.output.split(" ")[9].split("=")[1]
         except IndexError:
-            job_name = ModelStatus.UNAVAILABLE
+            job_name = "UNAVAILABLE"
             job_state = ModelStatus.UNAVAILABLE
 
-        return {
-            "model_name": job_name,
-            "status": ModelStatus.UNAVAILABLE,
-            "base_url": ModelStatus.UNAVAILABLE,
-            "state": job_state,
-            "pending_reason": None,
-            "failed_reason": None,
-        }
-
-    def process_model_status(self) -> StatusResponse:
-        """Process different job states and update status information."""
-        if self.status_info["state"] == ModelStatus.PENDING:
-            self.process_pending_state()
-        elif self.status_info["state"] == "RUNNING":
-            self.process_running_state()
-
         return StatusResponse(
-            slurm_job_id=self.slurm_job_id,
-            model_name=cast(str, self.status_info["model_name"]),
-            status=cast(ModelStatus, self.status_info["status"]),
+            model_name=job_name,
+            server_status=ModelStatus.UNAVAILABLE,
+            job_state=job_state,
             raw_output=self.output,
-            base_url=self.status_info["base_url"],
-            pending_reason=self.status_info["pending_reason"],
-            failed_reason=self.status_info["failed_reason"],
+            base_url="UNAVAILABLE",
+            pending_reason=None,
+            failed_reason=None,
         )
 
-    def check_model_health(self) -> None:
+    def _check_model_health(self) -> None:
         """Check model health and update status accordingly."""
         status, status_code = utils.model_health_check(
             cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
@@ -290,39 +274,48 @@ class ModelStatusMonitor:
                 self.slurm_job_id,
                 self.log_dir,
             )
-            self.status_info["status"] = status
+            self.status_info["server_status"] = status
         else:
-            self.status_info["status"], self.status_info["failed_reason"] = (
+            self.status_info["server_status"], self.status_info["failed_reason"] = (
                 status,
                 cast(str, status_code),
             )
 
-    def process_running_state(self) -> None:
+    def _process_running_state(self) -> None:
         """Process RUNNING job state and check server status."""
         server_status = utils.is_server_running(
             cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
         )
 
         if isinstance(server_status, tuple):
-            self.status_info["status"], self.status_info["failed_reason"] = (
+            self.status_info["server_status"], self.status_info["failed_reason"] = (
                 server_status
             )
             return
 
         if server_status == "RUNNING":
-            self.check_model_health()
+            self._check_model_health()
         else:
-            self.status_info["status"] = server_status
+            self.status_info["server_status"] = server_status
 
-    def process_pending_state(self) -> None:
+    def _process_pending_state(self) -> None:
         """Process PENDING job state."""
         try:
             self.status_info["pending_reason"] = self.output.split(" ")[10].split("=")[
                 1
             ]
-            self.status_info["status"] = ModelStatus.PENDING
+            self.status_info["server_status"] = ModelStatus.PENDING
         except IndexError:
             self.status_info["pending_reason"] = "Unknown pending reason"
+
+    def process_model_status(self) -> StatusResponse:
+        """Process different job states and update status information."""
+        if self.status_info["job_state"] == ModelStatus.PENDING:
+            self._process_pending_state()
+        elif self.status_info["job_state"] == "RUNNING":
+            self._process_running_state()
+
+        return self.status_info
 
 
 class PerformanceMetricsCollector:
@@ -340,18 +333,18 @@ class PerformanceMetricsCollector:
         self._last_updated: Optional[float] = None
         self._last_throughputs = {"prompt": 0.0, "generation": 0.0}
 
-    def _get_status_info(self) -> dict[str, Union[str, None]]:
+    def _get_status_info(self) -> StatusResponse:
         """Retrieve status info using existing StatusHelper."""
         status_helper = ModelStatusMonitor(self.slurm_job_id, self.log_dir)
-        return status_helper.status_info
+        return status_helper.process_model_status()
 
     def _build_metrics_url(self) -> str:
         """Construct metrics endpoint URL from base URL with version stripping."""
-        if self.status_info.get("state") == "PENDING":
+        if self.status_info.job_state == ModelStatus.PENDING:
             return "Pending resources for server initialization"
 
         base_url = utils.get_base_url(
-            cast(str, self.status_info["model_name"]),
+            self.status_info.model_name,
             self.slurm_job_id,
             self.log_dir,
         )

@@ -7,7 +7,7 @@ for both request parameters and response objects.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, TypedDict
+from typing import Any, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -46,9 +46,9 @@ class LaunchResponse:
 class StatusResponse:
     """Response from checking a model's status."""
 
-    slurm_job_id: int
     model_name: str
-    status: ModelStatus
+    server_status: ModelStatus
+    job_state: Union[str, ModelStatus]
     raw_output: str = field(repr=False)
     base_url: Optional[str] = None
     pending_reason: Optional[str] = None
@@ -59,9 +59,8 @@ class StatusResponse:
 class MetricsResponse:
     """Response from retrieving model metrics."""
 
-    slurm_job_id: int
     model_name: str
-    metrics: dict[str, float]
+    metrics: Union[dict[str, float], str]
     timestamp: float
 
 

@@ -5,9 +5,7 @@ services programmatically.
 """
 
 import time
-from typing import Any, Optional, cast
-
-import requests
+from typing import Any, Optional
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
@@ -138,7 +136,6 @@ class VecInfClient:
 
             # Create and use the API Launch Helper
             model_launcher = ModelLauncher(model_name, options_dict)
-
             return model_launcher.launch()
 
         except ValueError as e:
@@ -211,20 +208,12 @@ class VecInfClient:
             )
 
             if not performance_metrics_collector.metrics_url.startswith("http"):
-                raise ServerError(
-                    f"Metrics endpoint unavailable or server not ready - {performance_metrics_collector.metrics_url}"
-                )
-
-            metrics = performance_metrics_collector.fetch_metrics()
-
-            if isinstance(metrics, str):
-                raise requests.RequestException(metrics)
+                metrics = performance_metrics_collector.metrics_url
+            else:
+                metrics = performance_metrics_collector.fetch_metrics()
 
             return MetricsResponse(
-                slurm_job_id=slurm_job_id,
-                model_name=cast(
-                    str, performance_metrics_collector.status_info["model_name"]
-                ),
+                model_name=performance_metrics_collector.status_info.model_name,
                 metrics=metrics,
                 timestamp=time.time(),
             )
