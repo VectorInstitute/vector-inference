@@ -134,7 +134,9 @@ def launch(
     """Launch a model on the cluster."""
     try:
         # Convert cli_kwargs to LaunchOptions
-        launch_options = LaunchOptions(**{k: v for k, v in cli_kwargs.items() if k != "json_mode"})
+        launch_options = LaunchOptions(
+            **{k: v for k, v in cli_kwargs.items() if k != "json_mode"}
+        )
 
         # Start the client and launch model inference server
         client = VecInfClient()

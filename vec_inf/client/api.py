@@ -182,7 +182,6 @@ class VecInfClient:
             raise SlurmJobError(f"Failed to shutdown model: {stderr}")
         return True
 
-
     def wait_until_ready(
         self,
         slurm_job_id: int,

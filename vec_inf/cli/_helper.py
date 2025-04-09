@@ -15,7 +15,7 @@ from vec_inf.client._config import ModelConfig
 from vec_inf.client._models import ModelInfo, StatusResponse
 
 
-class LaunchResponseFormatter():
+class LaunchResponseFormatter:
     """CLI Helper class for formatting LaunchResponse."""
 
     def __init__(self, model_name: str, params: dict[str, Any]):
@@ -68,7 +68,7 @@ class LaunchResponseFormatter():
         return table
 
 
-class StatusResponseFormatter():
+class StatusResponseFormatter:
     """CLI Helper class for formatting StatusResponse."""
 
     def __init__(self, status_info: StatusResponse):
@@ -102,7 +102,7 @@ class StatusResponseFormatter():
         return table
 
 
-class MetricsResponseFormatter():
+class MetricsResponseFormatter:
     """CLI Helper class for formatting MetricsResponse."""
 
     def __init__(self, metrics: dict[str, float]):
@@ -189,7 +189,7 @@ class MetricsResponseFormatter():
         )
 
 
-class ListCmdDisplay():
+class ListCmdDisplay:
     """CLI Helper class for displaying model listing functionality."""
 
     def __init__(self, console: Console, json_mode: bool = False):
@@ -218,7 +218,9 @@ class ListCmdDisplay():
                 table.add_row(field, str(value))
         return table
 
-    def _format_all_models_output(self, model_infos: list[ModelInfo]) -> Union[list[str], list[Panel]]:
+    def _format_all_models_output(
+        self, model_infos: list[ModelInfo]
+    ) -> Union[list[str], list[Panel]]:
         """Format output table for all models."""
         # Sort by model type priority
         sorted_model_infos = sorted(
@@ -254,4 +256,3 @@ class ListCmdDisplay():
         else:
             panels = self._format_all_models_output(model_infos)
             self.console.print(Columns(panels, equal=True))
-

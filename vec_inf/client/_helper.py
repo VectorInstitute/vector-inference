@@ -74,7 +74,9 @@ class ModelLauncher:
         )
 
         if not model_weights_parent_dir:
-            raise ModelNotFoundError("Could not determine model weights parent directory")
+            raise ModelNotFoundError(
+                "Could not determine model weights parent directory"
+            )
 
         model_weights_path = Path(model_weights_parent_dir, self.model_name)
 
@@ -284,7 +286,9 @@ class ModelStatusMonitor:
         )
 
         if isinstance(server_status, tuple):
-            self.status_info.server_status, self.status_info.failed_reason = server_status
+            self.status_info.server_status, self.status_info.failed_reason = (
+                server_status
+            )
             return
 
         if server_status == "RUNNING":

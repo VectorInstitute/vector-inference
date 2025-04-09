@@ -330,9 +330,7 @@ def test_launch_command_no_model_weights_parent_dir(runner, debug_helper, base_p
             stack.enter_context(patch_obj)
 
         # Mock load_config to return empty list
-        stack.enter_context(
-            patch("vec_inf.client._utils.load_config", return_value=[])
-        )
+        stack.enter_context(patch("vec_inf.client._utils.load_config", return_value=[]))
 
         result = runner.invoke(cli, ["launch", "test-model"])
         debug_helper.print_debug_info(result)
@@ -376,9 +374,7 @@ def test_launch_command_model_not_in_config_with_weights(
         )
 
 
-def test_launch_command_model_not_found(
-    runner, debug_helper, test_paths, base_patches
-):
+def test_launch_command_model_not_found(runner, debug_helper, test_paths, base_patches):
     """Test handling of a model that's neither in config nor has weights."""
 
     def custom_path_exists(p):
@@ -410,8 +406,7 @@ def test_launch_command_model_not_found(
         assert result.exit_code == 1
         assert (
             "'unknown-model' not found in configuration and model weights "
-            "not found at expected path '/model-weights/unknown-model'"
-            in result.output
+            "not found at expected path '/model-weights/unknown-model'" in result.output
         )
 
 
@@ -450,10 +445,7 @@ def test_metrics_command_pending_server(
 
         assert result.exit_code == 0
         assert "ERROR" in result.output
-        assert (
-            "Pending resources for server initialization"
-            in result.output
-        )
+        assert "Pending resources for server initialization" in result.output
 
 
 def test_metrics_command_server_not_ready(
@@ -473,10 +465,7 @@ def test_metrics_command_server_not_ready(
 
         assert result.exit_code == 0
         assert "ERROR" in result.output
-        assert (
-            "Server not ready"
-            in result.output
-        )
+        assert "Server not ready" in result.output
 
 
 @patch("requests.get")

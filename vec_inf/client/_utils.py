@@ -153,8 +153,9 @@ def load_config() -> list[ModelConfig]:
                         config.setdefault("models", {})[name] = data
         else:
             warnings.warn(
-                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}", UserWarning,
-                stacklevel=2
+                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}",
+                UserWarning,
+                stacklevel=2,
             )
 
     return [
