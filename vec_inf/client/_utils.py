@@ -3,6 +3,7 @@
 import json
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Any, Optional, Union, cast
 
@@ -151,20 +152,15 @@ def load_config() -> list[ModelConfig]:
                     else:
                         config.setdefault("models", {})[name] = data
         else:
-            print(
-                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}"
+            warnings.warn(
+                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}", UserWarning,
+                stacklevel=2
             )
 
     return [
         ModelConfig(model_name=name, **model_data)
         for name, model_data in config.get("models", {}).items()
     ]
-
-
-def shutdown_model(slurm_job_id: int) -> None:
-    """Shutdown a running model on the cluster."""
-    shutdown_cmd = f"scancel {slurm_job_id}"
-    run_bash_command(shutdown_cmd)
 
 
 def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:

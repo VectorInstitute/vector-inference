@@ -78,7 +78,7 @@ class LaunchOptions:
     max_num_batched_tokens: Optional[int] = None
     partition: Optional[str] = None
     num_nodes: Optional[int] = None
-    num_gpus: Optional[int] = None
+    gpus_per_node: Optional[int] = None
     qos: Optional[str] = None
     time: Optional[str] = None
     vocab_size: Optional[int] = None
@@ -104,7 +104,7 @@ class LaunchOptionsDict(TypedDict):
     max_num_batched_tokens: NotRequired[Optional[int]]
     partition: NotRequired[Optional[str]]
     num_nodes: NotRequired[Optional[int]]
-    num_gpus: NotRequired[Optional[int]]
+    gpus_per_node: NotRequired[Optional[int]]
     qos: NotRequired[Optional[str]]
     time: NotRequired[Optional[str]]
     vocab_size: NotRequired[Optional[int]]

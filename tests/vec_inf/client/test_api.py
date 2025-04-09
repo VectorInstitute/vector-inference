@@ -113,10 +113,10 @@ def test_wait_until_ready():
     with patch.object(VecInfClient, "get_status") as mock_status:
         # First call returns LAUNCHING, second call returns READY
         status1 = MagicMock()
-        status1.status = ModelStatus.LAUNCHING
+        status1.server_status = ModelStatus.LAUNCHING
 
         status2 = MagicMock()
-        status2.status = ModelStatus.READY
+        status2.server_status = ModelStatus.READY
         status2.base_url = "http://gpu123:8080/v1"
 
         mock_status.side_effect = [status1, status2]
@@ -125,6 +125,6 @@ def test_wait_until_ready():
             client = VecInfClient()
             result = client.wait_until_ready("12345678", timeout_seconds=5)
 
-            assert result.status == ModelStatus.READY
+            assert result.server_status == ModelStatus.READY
             assert result.base_url == "http://gpu123:8080/v1"
             assert mock_status.call_count == 2

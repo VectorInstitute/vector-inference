@@ -74,9 +74,7 @@ class ModelLauncher:
         )
 
         if not model_weights_parent_dir:
-            raise ValueError(
-                f"Could not determine model_weights_parent_dir and '{self.model_name}' not found in configuration"
-            )
+            raise ModelNotFoundError("Could not determine model weights parent directory")
 
         model_weights_path = Path(model_weights_parent_dir, self.model_name)
 
@@ -266,53 +264,47 @@ class ModelStatusMonitor:
     def _check_model_health(self) -> None:
         """Check model health and update status accordingly."""
         status, status_code = utils.model_health_check(
-            cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
+            self.status_info.model_name, self.slurm_job_id, self.log_dir
         )
         if status == ModelStatus.READY:
-            self.status_info["base_url"] = utils.get_base_url(
-                cast(str, self.status_info["model_name"]),
+            self.status_info.base_url = utils.get_base_url(
+                self.status_info.model_name,
                 self.slurm_job_id,
                 self.log_dir,
             )
-            self.status_info["server_status"] = status
+            self.status_info.server_status = status
         else:
-            self.status_info["server_status"], self.status_info["failed_reason"] = (
-                status,
-                cast(str, status_code),
-            )
+            self.status_info.server_status = status
+            self.status_info.failed_reason = cast(str, status_code)
 
     def _process_running_state(self) -> None:
         """Process RUNNING job state and check server status."""
         server_status = utils.is_server_running(
-            cast(str, self.status_info["model_name"]), self.slurm_job_id, self.log_dir
+            self.status_info.model_name, self.slurm_job_id, self.log_dir
         )
 
         if isinstance(server_status, tuple):
-            self.status_info["server_status"], self.status_info["failed_reason"] = (
-                server_status
-            )
+            self.status_info.server_status, self.status_info.failed_reason = server_status
             return
 
         if server_status == "RUNNING":
             self._check_model_health()
         else:
-            self.status_info["server_status"] = server_status
+            self.status_info.server_status = server_status
 
     def _process_pending_state(self) -> None:
         """Process PENDING job state."""
         try:
-            self.status_info["pending_reason"] = self.output.split(" ")[10].split("=")[
-                1
-            ]
-            self.status_info["server_status"] = ModelStatus.PENDING
+            self.status_info.pending_reason = self.output.split(" ")[10].split("=")[1]
+            self.status_info.server_status = ModelStatus.PENDING
         except IndexError:
-            self.status_info["pending_reason"] = "Unknown pending reason"
+            self.status_info.pending_reason = "Unknown pending reason"
 
     def process_model_status(self) -> StatusResponse:
         """Process different job states and update status information."""
-        if self.status_info["job_state"] == ModelStatus.PENDING:
+        if self.status_info.job_state == ModelStatus.PENDING:
             self._process_pending_state()
-        elif self.status_info["job_state"] == "RUNNING":
+        elif self.status_info.job_state == "RUNNING":
             self._process_running_state()
 
         return self.status_info
@@ -360,7 +352,7 @@ class PerformanceMetricsCollector:
     def _check_prefix_caching(self) -> bool:
         """Check if prefix caching is enabled."""
         job_json = utils.read_slurm_log(
-            cast(str, self.status_info["model_name"]),
+            self.status_info.model_name,
             self.slurm_job_id,
             "json",
             self.log_dir,
@@ -368,6 +360,43 @@ class PerformanceMetricsCollector:
         if isinstance(job_json, str):
             return False
         return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
+
+    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
+        """Parse metrics with latency count and sum."""
+        key_metrics = {
+            "vllm:prompt_tokens_total": "total_prompt_tokens",
+            "vllm:generation_tokens_total": "total_generation_tokens",
+            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
+            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
+            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
+            "vllm:request_success_total": "successful_requests_total",
+            "vllm:num_requests_running": "requests_running",
+            "vllm:num_requests_waiting": "requests_waiting",
+            "vllm:num_requests_swapped": "requests_swapped",
+            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
+            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
+        }
+
+        if self.enabled_prefix_caching:
+            key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
+            key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
+
+        parsed: dict[str, float] = {}
+        for line in metrics_text.split("\n"):
+            if line.startswith("#") or not line.strip():
+                continue
+
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+
+            metric_name = parts[0].split("{")[0]
+            if metric_name in key_metrics:
+                try:
+                    parsed[key_metrics[metric_name]] = float(parts[1])
+                except (ValueError, IndexError):
+                    continue
+        return parsed
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
         """Fetch metrics from the endpoint."""
@@ -442,43 +471,6 @@ class PerformanceMetricsCollector:
 
         except requests.RequestException as e:
             return f"Metrics request failed, `metrics` endpoint might not be ready yet: {str(e)}"
-
-    def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
-        """Parse metrics with latency count and sum."""
-        key_metrics = {
-            "vllm:prompt_tokens_total": "total_prompt_tokens",
-            "vllm:generation_tokens_total": "total_generation_tokens",
-            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
-            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
-            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
-            "vllm:request_success_total": "successful_requests_total",
-            "vllm:num_requests_running": "requests_running",
-            "vllm:num_requests_waiting": "requests_waiting",
-            "vllm:num_requests_swapped": "requests_swapped",
-            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
-            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
-        }
-
-        if self.enabled_prefix_caching:
-            key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
-            key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
-
-        parsed: dict[str, float] = {}
-        for line in metrics_text.split("\n"):
-            if line.startswith("#") or not line.strip():
-                continue
-
-            parts = line.split()
-            if len(parts) < 2:
-                continue
-
-            metric_name = parts[0].split("{")[0]
-            if metric_name in key_metrics:
-                try:
-                    parsed[key_metrics[metric_name]] = float(parts[1])
-                except (ValueError, IndexError):
-                    continue
-        return parsed
 
 
 class ModelRegistry:
