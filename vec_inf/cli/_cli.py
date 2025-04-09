@@ -7,14 +7,13 @@ import click
 from rich.console import Console
 from rich.live import Live
 
-import vec_inf.client._utils as utils
 from vec_inf.cli._helper import (
     LaunchResponseFormatter,
     ListCmdDisplay,
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
-from vec_inf.client._models import LaunchOptions
+from vec_inf.client._models import LaunchOptions, LaunchOptionsDict
 from vec_inf.client.api import VecInfClient
 
 
@@ -129,14 +128,15 @@ def cli() -> None:
 )
 def launch(
     model_name: str,
-    **cli_kwargs: Optional[Union[str, int, bool]],
+    **cli_kwargs: Optional[Union[str, int, float, bool]],
 ) -> None:
     """Launch a model on the cluster."""
     try:
         # Convert cli_kwargs to LaunchOptions
-        launch_options = LaunchOptions(
-            **{k: v for k, v in cli_kwargs.items() if k != "json_mode"}
-        )
+        kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
+        # Cast the dictionary to LaunchOptionsDict
+        options_dict: LaunchOptionsDict = kwargs  # type: ignore
+        launch_options = LaunchOptions(**options_dict)
 
         # Start the client and launch model inference server
         client = VecInfClient()
@@ -194,8 +194,12 @@ def status(
 @click.argument("slurm_job_id", type=int, nargs=1)
 def shutdown(slurm_job_id: int) -> None:
     """Shutdown a running model on the cluster."""
-    utils.shutdown_model(slurm_job_id)
-    click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
+    try:
+        client = VecInfClient()
+        client.shutdown_model(slurm_job_id)
+        click.echo(f"Shutting down model with Slurm Job ID: {slurm_job_id}")
+    except Exception as e:
+        raise click.ClickException(f"Shutdown failed: {str(e)}") from e
 
 
 @cli.command("list")

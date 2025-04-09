@@ -33,7 +33,7 @@ print(f"Model is ready at: {status.base_url}")
 # Get metrics
 print("\nRetrieving metrics...")
 metrics = client.get_metrics(job_id)
-if metrics.metrics:
+if isinstance(metrics.metrics, dict):
     for key, value in metrics.metrics.items():
         print(f"- {key}: {value}")
 

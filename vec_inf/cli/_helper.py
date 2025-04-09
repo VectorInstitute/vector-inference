@@ -105,19 +105,18 @@ class StatusResponseFormatter:
 class MetricsResponseFormatter:
     """CLI Helper class for formatting MetricsResponse."""
 
-    def __init__(self, metrics: dict[str, float]):
-        self.metrics = metrics
+    def __init__(self, metrics: Union[dict[str, float], str]):
+        self.metrics = self._set_metrics(metrics)
         self.table = utils.create_table("Metric", "Value")
         self.enabled_prefix_caching = self._check_prefix_caching()
 
+    def _set_metrics(self, metrics: Union[dict[str, float], str]) -> dict[str, float]:
+        """Set the metrics attribute."""
+        return metrics if isinstance(metrics, dict) else {}
+
     def _check_prefix_caching(self) -> bool:
         """Check if prefix caching is enabled by looking for prefix cache metrics."""
-        if isinstance(self.metrics, str):
-            # If metrics is a string, it's an error message
-            return False
-
-        cache_rate = self.metrics.get("gpu_prefix_cache_hit_rate")
-        return cache_rate is not None
+        return self.metrics.get("gpu_prefix_cache_hit_rate") is not None
 
     def format_failed_metrics(self, message: str) -> None:
         self.table.add_row("ERROR", message)

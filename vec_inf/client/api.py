@@ -5,7 +5,7 @@ services programmatically.
 """
 
 import time
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
@@ -147,6 +147,7 @@ class VecInfClient:
             slurm_job_id, log_dir
         )
 
+        metrics: Union[dict[str, float], str]
         if not performance_metrics_collector.metrics_url.startswith("http"):
             metrics = performance_metrics_collector.metrics_url
         else:

@@ -294,7 +294,7 @@ class ModelStatusMonitor:
         if server_status == "RUNNING":
             self._check_model_health()
         else:
-            self.status_info.server_status = server_status
+            self.status_info.server_status = cast(ModelStatus, server_status)
 
     def _process_pending_state(self) -> None:
         """Process PENDING job state."""
