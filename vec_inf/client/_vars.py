@@ -7,6 +7,8 @@ MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "models.yaml")
 SRC_DIR = str(Path(__file__).parent.parent)
 LD_LIBRARY_PATH = "/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd001/pkgs/cuda-11.7/targets/x86_64-linux/lib/"
+VLLM_NCCL_SO_PATH = "/vec-inf/nccl/libnccl.so.2.18.1"
+SINGULARITY_IMAGE = "/model-weights/vec-inf-shared/vector-inference_latest.sif"
 
 # Maps model types to vLLM tasks
 VLLM_TASK_MAP = {

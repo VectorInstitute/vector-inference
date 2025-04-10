@@ -38,11 +38,11 @@ class SlurmScriptGenerator:
 
     def _generate_shared_args(self) -> str:
         if self.is_multinode and not self.params["pipeline_parallelism"]:
-            tensor_parallel_size = "$((SLURM_JOB_NUM_NODES*SLURM_GPUS_PER_NODE))"
-            pipeline_parallel_size = "1"
+            tensor_parallel_size = self.params["num_nodes"] * self.params["gpus_per_node"]
+            pipeline_parallel_size = 1
         else:
-            tensor_parallel_size = "$SLURM_GPUS_PER_NODE"
-            pipeline_parallel_size = "$SLURM_JOB_NUM_NODES"
+            tensor_parallel_size = self.params["gpus_per_node"]
+            pipeline_parallel_size = self.params["num_nodes"]
 
         args = [
             f"--model {self.model_weights_path} \\",
@@ -77,9 +77,7 @@ class SlurmScriptGenerator:
     def _generate_server_script(self) -> str:
         server_script = [""]
         if self.params["venv"] == "singularity":
-            server_script.append("""export SINGULARITY_IMAGE=/model-weights/vec-inf-shared/vector-inference_latest.sif
-export VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
-module load singularity-ce/3.8.2
+            server_script.append("""module load singularity-ce/3.8.2
 singularity exec $SINGULARITY_IMAGE ray stop
 """)
         server_script.append(f"source {self.src_dir}/find_port.sh\n")
@@ -88,13 +86,11 @@ singularity exec $SINGULARITY_IMAGE ray stop
             if self.is_multinode
             else self._generate_single_node_server_script()
         )
-        server_script.append(f"""echo "Updating server address in $JSON_PATH"
-JSON_PATH="{self.params["log_dir"]}/{self.params["model_name"]}.$SLURM_JOB_ID/{self.params["model_name"]}.$SLURM_JOB_ID.json"
-jq --arg server_addr "$SERVER_ADDR" \\
+        server_script.append(f"""json_path="{self.params["log_dir"]}/{self.params["model_name"]}.$SLURM_JOB_ID/{self.params["model_name"]}.$SLURM_JOB_ID.json"
+jq --arg server_addr "$server_address" \\
     '. + {{"server_address": $server_addr}}' \\
-    "$JSON_PATH" > temp.json \\
-    && mv temp.json "$JSON_PATH" \\
-    && rm -f temp.json
+    "$json_path" > temp.json \\
+    && mv temp.json "$json_path"
 
 """)
         return "\n".join(server_script)
@@ -103,8 +99,8 @@ jq --arg server_addr "$SERVER_ADDR" \\
         return """hostname=${SLURMD_NODENAME}
 vllm_port_number=$(find_available_port ${hostname} 8080 65535)
 
-SERVER_ADDR="http://${hostname}:${vllm_port_number}/v1"
-echo "Server address: $SERVER_ADDR"
+server_address="http://${hostname}:${vllm_port_number}/v1"
+echo "Server address: $server_address"
 """
 
     def _generate_multinode_server_script(self) -> str:
@@ -151,8 +147,8 @@ done
 
 vllm_port_number=$(find_available_port $head_node_ip 8080 65535)
 
-SERVER_ADDR="http://${head_node_ip}:${vllm_port_number}/v1"
-echo "Server address: $SERVER_ADDR"
+server_address="http://${head_node_ip}:${vllm_port_number}/v1"
+echo "Server address: $server_address"
 
 """)
         return "\n".join(server_script)

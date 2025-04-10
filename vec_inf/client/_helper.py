@@ -30,7 +30,9 @@ from vec_inf.client._vars import (
     BOOLEAN_FIELDS,
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
+    SINGULARITY_IMAGE,
     SRC_DIR,
+    VLLM_NCCL_SO_PATH,
 )
 
 
@@ -139,6 +141,8 @@ class ModelLauncher:
     def _set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
+        os.environ["VLLM_NCCL_SO_PATH"] = VLLM_NCCL_SO_PATH
+        os.environ["SINGULARITY_IMAGE"] = SINGULARITY_IMAGE
 
     def _build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
