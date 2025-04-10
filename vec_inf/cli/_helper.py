@@ -1,6 +1,5 @@
 """Helper classes for the CLI."""
 
-import os
 from typing import Any, Union
 
 import click

@@ -31,7 +31,6 @@ from vec_inf.client._vars import (
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
     SRC_DIR,
-    VLLM_TASK_MAP,
 )
 
 
