@@ -2,13 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
-VLLM_TASK_MAP = {
-    "LLM": "generate",
-    "VLM": "generate",
-    "Text_Embedding": "embed",
-    "Reward_Modeling": "reward",
-}
+from vec_inf.client._vars import VLLM_TASK_MAP
 
 
 class SlurmScriptGenerator:

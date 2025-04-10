@@ -4,6 +4,7 @@ import json
 import traceback
 from contextlib import ExitStack
 from pathlib import Path
+from typing import Callable, Optional
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -171,13 +172,21 @@ def mock_truediv(test_paths):
     return _mock_truediv
 
 
-def create_path_exists(test_paths, path_exists, exists_paths=None):
+def create_path_exists(
+    test_paths: dict[Path, str],
+    path_exists: Callable[[Path], bool],
+    exists_paths: Optional[list[Path]] = None,
+):
     """Create a path existence checker.
 
-    Args:
-        test_paths: Dictionary containing test paths
-        path_exists: Default path existence checker
-        exists_paths: Optional list of paths that should exist
+    Parameters
+    ----------
+    test_paths: dict[Path, str]
+        Dictionary containing test paths
+    path_exists: Callable[[Path], bool]
+        Default path existence checker
+    exists_paths: Optional[list[Path]]
+        Optional list of paths that should exist
     """
 
     def _custom_path_exists(p):
@@ -220,7 +229,7 @@ def base_patches(test_paths, mock_truediv, debug_helper):
         patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
         patch("json.dump"),
         patch("pathlib.Path.touch"),
-        patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"]),
+        patch("vec_inf.client._utils.Path", return_value=test_paths["weights_dir"]),
         patch(
             "pathlib.Path.home", return_value=Path("/home/user")
         ),  # Mock home directory
@@ -242,7 +251,7 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
     test_log_dir = Path("/tmp/test_vec_inf_logs")
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -273,7 +282,7 @@ def test_launch_command_with_json_output(
     """Test JSON output format for launch command."""
     test_log_dir = Path("/tmp/test_vec_inf_logs")
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.mkdir"),
         patch("builtins.open", debug_helper.tracked_mock_open),
         patch("pathlib.Path.open", debug_helper.tracked_mock_open),
@@ -313,6 +322,23 @@ def test_launch_command_with_json_output(
         assert str(test_log_dir) in output.get("log_dir", "")
 
 
+def test_launch_command_no_model_weights_parent_dir(runner, debug_helper, base_patches):
+    """Test handling when model weights parent dir is not set."""
+    with ExitStack() as stack:
+        # Apply all base patches
+        for patch_obj in base_patches:
+            stack.enter_context(patch_obj)
+
+        # Mock load_config to return empty list
+        stack.enter_context(patch("vec_inf.client._utils.load_config", return_value=[]))
+
+        result = runner.invoke(cli, ["launch", "test-model"])
+        debug_helper.print_debug_info(result)
+
+        assert result.exit_code == 1
+        assert "Could not determine model weights parent directory" in result.output
+
+
 def test_launch_command_model_not_in_config_with_weights(
     runner, mock_launch_output, path_exists, debug_helper, test_paths, base_patches
 ):
@@ -331,25 +357,24 @@ def test_launch_command_model_not_in_config_with_weights(
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
         # Apply specific patches for this test
-        mock_run = stack.enter_context(patch("vec_inf.cli._utils.run_bash_command"))
+        mock_run = stack.enter_context(patch("vec_inf.client._utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=custom_path_exists))
 
         expected_job_id = "14933051"
         mock_run.return_value = mock_launch_output(expected_job_id)
 
-        result = runner.invoke(cli, ["launch", "unknown-model"])
-        debug_helper.print_debug_info(result)
+        with pytest.warns(UserWarning) as record:
+            result = runner.invoke(cli, ["launch", "unknown-model"])
+            debug_helper.print_debug_info(result)
 
         assert result.exit_code == 0
-        assert (
-            "Warning: 'unknown-model' configuration not found in config"
-            in result.output
+        assert len(record) == 1
+        assert str(record[0].message) == (
+            "Warning: 'unknown-model' configuration not found in config, please ensure model configuration are properly set in command arguments"
         )
 
 
-def test_launch_command_model_not_found(
-    runner, path_exists, debug_helper, test_paths, base_patches
-):
+def test_launch_command_model_not_found(runner, debug_helper, test_paths, base_patches):
     """Test handling of a model that's neither in config nor has weights."""
 
     def custom_path_exists(p):
@@ -372,7 +397,7 @@ def test_launch_command_model_not_found(
 
         # Mock Path to return the weights dir path
         stack.enter_context(
-            patch("vec_inf.cli._helper.Path", return_value=test_paths["weights_dir"])
+            patch("vec_inf.client._utils.Path", return_value=test_paths["weights_dir"])
         )
 
         result = runner.invoke(cli, ["launch", "unknown-model"])
@@ -380,8 +405,8 @@ def test_launch_command_model_not_found(
 
         assert result.exit_code == 1
         assert (
-            "'unknown-model' not found in configuration and model weights not found"
-            in result.output
+            "'unknown-model' not found in configuration and model weights "
+            "not found at expected path '/model-weights/unknown-model'" in result.output
         )
 
 
@@ -408,9 +433,9 @@ def test_metrics_command_pending_server(
 ):
     """Test metrics command when server is pending."""
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="URL NOT FOUND"),
+        patch("vec_inf.client._utils.get_base_url", return_value="URL NOT FOUND"),
     ):
         job_id = 12345
         mock_run.return_value = (mock_status_output(job_id, "PENDING"), "")
@@ -419,12 +444,8 @@ def test_metrics_command_pending_server(
         debug_helper.print_debug_info(result)
 
         assert result.exit_code == 0
-        assert "Server State" in result.output
-        assert "PENDING" in result.output
-        assert (
-            "Metrics endpoint unavailable - Pending resources for server"
-            in result.output
-        )
+        assert "ERROR" in result.output
+        assert "Pending resources for server initialization" in result.output
 
 
 def test_metrics_command_server_not_ready(
@@ -432,9 +453,9 @@ def test_metrics_command_server_not_ready(
 ):
     """Test metrics command when server is running but not ready."""
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="Server not ready"),
+        patch("vec_inf.client._utils.get_base_url", return_value="Server not ready"),
     ):
         job_id = 12345
         mock_run.return_value = (mock_status_output(job_id, "RUNNING"), "")
@@ -443,12 +464,11 @@ def test_metrics_command_server_not_ready(
         debug_helper.print_debug_info(result)
 
         assert result.exit_code == 0
-        assert "Server State" in result.output
-        assert "RUNNING" in result.output
+        assert "ERROR" in result.output
         assert "Server not ready" in result.output
 
 
-@patch("vec_inf.cli._helper.requests.get")
+@patch("requests.get")
 def test_metrics_command_server_ready(
     mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
@@ -469,9 +489,9 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
     mock_response.status_code = 200
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("vec_inf.client._utils.get_base_url", return_value="http://test:8000/v1"),
         patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
     ):
         job_id = 12345
@@ -487,7 +507,7 @@ vllm:gpu_cache_usage_perc{model_name="test-model"} 0.5
         assert "50.0%" in result.output  # 0.5 converted to percentage
 
 
-@patch("vec_inf.cli._helper.requests.get")
+@patch("requests.get")
 def test_metrics_command_request_failed(
     mock_get, runner, mock_status_output, path_exists, debug_helper, apply_base_patches
 ):
@@ -495,9 +515,9 @@ def test_metrics_command_request_failed(
     mock_get.side_effect = requests.exceptions.RequestException("Connection refused")
 
     with (
-        patch("vec_inf.cli._utils.run_bash_command") as mock_run,
+        patch("vec_inf.client._utils.run_bash_command") as mock_run,
         patch("pathlib.Path.exists", new=path_exists),
-        patch("vec_inf.cli._utils.get_base_url", return_value="http://test:8000/v1"),
+        patch("vec_inf.client._utils.get_base_url", return_value="http://test:8000/v1"),
         patch("time.sleep", side_effect=KeyboardInterrupt),  # Break the infinite loop
     ):
         job_id = 12345
@@ -507,8 +527,7 @@ def test_metrics_command_request_failed(
         debug_helper.print_debug_info(result)
 
         # KeyboardInterrupt is expected and ok
-        assert "Server State" in result.output
-        assert "RUNNING" in result.output
+        assert "ERROR" in result.output
         assert (
             "Metrics request failed, `metrics` endpoint might not be ready"
             in result.output
