@@ -1,0 +1,7 @@
+vec\_inf.client.api module
+==========================
+
+.. automodule:: vec_inf.client.api
+   :members:
+   :undoc-members:
+   :show-inheritance:

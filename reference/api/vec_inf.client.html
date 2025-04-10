@@ -1,0 +1,1189 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark">
+    <meta name="google-site-verification" content="i0qQRaR9OA3tSz_9tDocdcXGY27Ox_cy4FrvTHD2C_0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+      <meta name="description" content="aieng-template Python API documentation">
+    <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <meta name="generator" content="sphinx-8.1.3, furo 2024.08.06"/>
+
+    
+    <meta name="msvalidate.01" content="8D2A5032F006424CAF54C0DDCD16F666" />
+      
+        <title>vec_inf.client package - vector-inference</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #faad1a;
+  --color-brand-content: #eb088a;
+  --color-foreground-secondary: #52c7de;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #faad1a;
+  --color-brand-content: #eb088a;
+  --color-foreground-secondary: #52c7de;
+  
+      }
+    }
+  }
+</style><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=ccdb6887"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/require.min.js?v=53367eec"></script>
+    <script src="../../_static/custom.js?v=275847af"></script>
+    
+    <script src="https://kit.fontawesome.com/2c1f516901.js" crossorigin="anonymous"></script>
+
+  </head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">vector-inference</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">vector-inference</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="index.html">Python API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Python API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="vec_inf.api.html">vec_inf.api package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of vec_inf.api package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.api.client.html">vec_inf.api.client module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.api.models.html">vec_inf.api.models module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.api.utils.html">vec_inf.api.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-vec_inf.client">
+<span id="vec-inf-client-package"></span><h1>vec_inf.client package<a class="headerlink" href="#module-vec_inf.client" title="Link to this heading">¶</a></h1>
+<p>Programmatic API for Vector Inference.</p>
+<p>This module provides a Python API for launching and managing inference servers
+using <cite>vec_inf</cite>. It is an alternative to the command-line interface, and allows
+users direct control over the lifecycle of inference servers via python scripts.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LaunchOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_family</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_variant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_model_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_seqs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu_memory_utilization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_prefix_caching</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_chunked_prefill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_batched_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus_per_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">venv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_weights_parent_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline_parallelism</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compilation_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_eager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#LaunchOptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.LaunchOptions" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Options for launching a model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.compilation_config">
+<span class="sig-name descname"><span class="pre">compilation_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.compilation_config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.data_type">
+<span class="sig-name descname"><span class="pre">data_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.data_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.enable_chunked_prefill">
+<span class="sig-name descname"><span class="pre">enable_chunked_prefill</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.enable_chunked_prefill" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.enable_prefix_caching">
+<span class="sig-name descname"><span class="pre">enable_prefix_caching</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.enable_prefix_caching" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.enforce_eager">
+<span class="sig-name descname"><span class="pre">enforce_eager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.enforce_eager" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.gpu_memory_utilization">
+<span class="sig-name descname"><span class="pre">gpu_memory_utilization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.gpu_memory_utilization" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.gpus_per_node">
+<span class="sig-name descname"><span class="pre">gpus_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.gpus_per_node" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.log_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.max_model_len">
+<span class="sig-name descname"><span class="pre">max_model_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.max_model_len" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.max_num_batched_tokens">
+<span class="sig-name descname"><span class="pre">max_num_batched_tokens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.max_num_batched_tokens" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.max_num_seqs">
+<span class="sig-name descname"><span class="pre">max_num_seqs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.max_num_seqs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.model_family">
+<span class="sig-name descname"><span class="pre">model_family</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.model_family" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.model_variant">
+<span class="sig-name descname"><span class="pre">model_variant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.model_variant" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.model_weights_parent_dir">
+<span class="sig-name descname"><span class="pre">model_weights_parent_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.model_weights_parent_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.num_nodes">
+<span class="sig-name descname"><span class="pre">num_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.num_nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.partition">
+<span class="sig-name descname"><span class="pre">partition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.partition" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.pipeline_parallelism">
+<span class="sig-name descname"><span class="pre">pipeline_parallelism</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.pipeline_parallelism" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.qos">
+<span class="sig-name descname"><span class="pre">qos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.qos" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.venv">
+<span class="sig-name descname"><span class="pre">venv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.venv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptions.vocab_size">
+<span class="sig-name descname"><span class="pre">vocab_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptions.vocab_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LaunchOptionsDict</span></span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#LaunchOptionsDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.TypedDict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
+<p>TypedDict for LaunchOptions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.compilation_config">
+<span class="sig-name descname"><span class="pre">compilation_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.compilation_config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.data_type">
+<span class="sig-name descname"><span class="pre">data_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.data_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.enable_chunked_prefill">
+<span class="sig-name descname"><span class="pre">enable_chunked_prefill</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.enable_chunked_prefill" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.enable_prefix_caching">
+<span class="sig-name descname"><span class="pre">enable_prefix_caching</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.enable_prefix_caching" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.enforce_eager">
+<span class="sig-name descname"><span class="pre">enforce_eager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.enforce_eager" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.gpu_memory_utilization">
+<span class="sig-name descname"><span class="pre">gpu_memory_utilization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.gpu_memory_utilization" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.gpus_per_node">
+<span class="sig-name descname"><span class="pre">gpus_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.gpus_per_node" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.log_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.max_model_len">
+<span class="sig-name descname"><span class="pre">max_model_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.max_model_len" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.max_num_batched_tokens">
+<span class="sig-name descname"><span class="pre">max_num_batched_tokens</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.max_num_batched_tokens" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.max_num_seqs">
+<span class="sig-name descname"><span class="pre">max_num_seqs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.max_num_seqs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.model_family">
+<span class="sig-name descname"><span class="pre">model_family</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.model_family" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.model_variant">
+<span class="sig-name descname"><span class="pre">model_variant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.model_variant" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.model_weights_parent_dir">
+<span class="sig-name descname"><span class="pre">model_weights_parent_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.model_weights_parent_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.num_nodes">
+<span class="sig-name descname"><span class="pre">num_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.num_nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.partition">
+<span class="sig-name descname"><span class="pre">partition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.partition" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.pipeline_parallelism">
+<span class="sig-name descname"><span class="pre">pipeline_parallelism</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.pipeline_parallelism" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.qos">
+<span class="sig-name descname"><span class="pre">qos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.qos" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.venv">
+<span class="sig-name descname"><span class="pre">venv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.venv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchOptionsDict.vocab_size">
+<span class="sig-name descname"><span class="pre">vocab_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">NotRequired</span></code><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#vec_inf.client.LaunchOptionsDict.vocab_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LaunchResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slurm_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#LaunchResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.LaunchResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Response from launching a model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchResponse.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.LaunchResponse.config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchResponse.model_name">
+<span class="sig-name descname"><span class="pre">model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.LaunchResponse.model_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchResponse.raw_output">
+<span class="sig-name descname"><span class="pre">raw_output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.LaunchResponse.raw_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.LaunchResponse.slurm_job_id">
+<span class="sig-name descname"><span class="pre">slurm_job_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.LaunchResponse.slurm_job_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.MetricsResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#MetricsResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.MetricsResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Response from retrieving model metrics.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.MetricsResponse.metrics">
+<span class="sig-name descname"><span class="pre">metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.MetricsResponse.metrics" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.MetricsResponse.model_name">
+<span class="sig-name descname"><span class="pre">model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.MetricsResponse.model_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.MetricsResponse.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em><a class="headerlink" href="#vec_inf.client.MetricsResponse.timestamp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_config.html#ModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.ModelConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Pydantic model for validating and managing model deployment configurations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.compilation_config">
+<span class="sig-name descname"><span class="pre">compilation_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.compilation_config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.data_type">
+<span class="sig-name descname"><span class="pre">data_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'auto'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'float16'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'bfloat16'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'float32'</span></code><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.data_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.enforce_eager">
+<span class="sig-name descname"><span class="pre">enforce_eager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.enforce_eager" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.gpu_memory_utilization">
+<span class="sig-name descname"><span class="pre">gpu_memory_utilization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.gpu_memory_utilization" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.gpus_per_node">
+<span class="sig-name descname"><span class="pre">gpus_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.gpus_per_node" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.log_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.max_model_len">
+<span class="sig-name descname"><span class="pre">max_model_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.max_model_len" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.max_num_seqs">
+<span class="sig-name descname"><span class="pre">max_num_seqs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.max_num_seqs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'str_strip_whitespace':</span> <span class="pre">True,</span> <span class="pre">'validate_default':</span> <span class="pre">True}</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_family">
+<span class="sig-name descname"><span class="pre">model_family</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_family" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_name">
+<span class="sig-name descname"><span class="pre">model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_type">
+<span class="sig-name descname"><span class="pre">model_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'LLM'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'VLM'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Text_Embedding'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'Reward_Modeling'</span></code><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_variant">
+<span class="sig-name descname"><span class="pre">model_variant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_variant" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.model_weights_parent_dir">
+<span class="sig-name descname"><span class="pre">model_weights_parent_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.model_weights_parent_dir" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.num_nodes">
+<span class="sig-name descname"><span class="pre">num_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.num_nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.partition">
+<span class="sig-name descname"><span class="pre">partition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'a40'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'a100'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'t4v1'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'t4v2'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'rtx6000'</span></code><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.partition" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.pipeline_parallelism">
+<span class="sig-name descname"><span class="pre">pipeline_parallelism</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.pipeline_parallelism" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.qos">
+<span class="sig-name descname"><span class="pre">qos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'normal'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'m'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'m2'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'m3'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'m4'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'m5'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'long'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'deadline'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'high'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'scavenger'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'llm'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'a100'</span></code><span class="pre">],</span> <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelConfig.qos" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.venv">
+<span class="sig-name descname"><span class="pre">venv</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.venv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelConfig.vocab_size">
+<span class="sig-name descname"><span class="pre">vocab_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelConfig.vocab_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">family</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#ModelInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.ModelInfo" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Information about an available model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelInfo.config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo.family">
+<span class="sig-name descname"><span class="pre">family</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelInfo.family" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelInfo.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#vec_inf.client.ModelType" title="vec_inf.client._models.ModelType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelType</span></code></a></em><a class="headerlink" href="#vec_inf.client.ModelInfo.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelInfo.variant">
+<span class="sig-name descname"><span class="pre">variant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.ModelInfo.variant" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#ModelStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.ModelStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.10/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Enum representing the possible status states of a model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.FAILED">
+<span class="sig-name descname"><span class="pre">FAILED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FAILED'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.FAILED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.LAUNCHING">
+<span class="sig-name descname"><span class="pre">LAUNCHING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LAUNCHING'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.LAUNCHING" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.PENDING">
+<span class="sig-name descname"><span class="pre">PENDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PENDING'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.PENDING" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.READY">
+<span class="sig-name descname"><span class="pre">READY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'READY'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.READY" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.SHUTDOWN">
+<span class="sig-name descname"><span class="pre">SHUTDOWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SHUTDOWN'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.SHUTDOWN" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelStatus.UNAVAILABLE">
+<span class="sig-name descname"><span class="pre">UNAVAILABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'UNAVAILABLE'</span></em><a class="headerlink" href="#vec_inf.client.ModelStatus.UNAVAILABLE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.ModelType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#ModelType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.ModelType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.10/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Enum representing the possible model types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelType.LLM">
+<span class="sig-name descname"><span class="pre">LLM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LLM'</span></em><a class="headerlink" href="#vec_inf.client.ModelType.LLM" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelType.REWARD_MODELING">
+<span class="sig-name descname"><span class="pre">REWARD_MODELING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Reward_Modeling'</span></em><a class="headerlink" href="#vec_inf.client.ModelType.REWARD_MODELING" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelType.TEXT_EMBEDDING">
+<span class="sig-name descname"><span class="pre">TEXT_EMBEDDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Text_Embedding'</span></em><a class="headerlink" href="#vec_inf.client.ModelType.TEXT_EMBEDDING" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.ModelType.VLM">
+<span class="sig-name descname"><span class="pre">VLM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'VLM'</span></em><a class="headerlink" href="#vec_inf.client.ModelType.VLM" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StatusResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pending_reason</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failed_reason</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/_models.html#StatusResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.StatusResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Response from checking a model’s status.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.StatusResponse.base_url" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.failed_reason">
+<span class="sig-name descname"><span class="pre">failed_reason</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.StatusResponse.failed_reason" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.job_state">
+<span class="sig-name descname"><span class="pre">job_state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference internal" href="#vec_inf.client.ModelStatus" title="vec_inf.client._models.ModelStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelStatus</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#vec_inf.client.StatusResponse.job_state" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.model_name">
+<span class="sig-name descname"><span class="pre">model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.StatusResponse.model_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.pending_reason">
+<span class="sig-name descname"><span class="pre">pending_reason</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#vec_inf.client.StatusResponse.pending_reason" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.raw_output">
+<span class="sig-name descname"><span class="pre">raw_output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><a class="headerlink" href="#vec_inf.client.StatusResponse.raw_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="vec_inf.client.StatusResponse.server_status">
+<span class="sig-name descname"><span class="pre">server_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#vec_inf.client.ModelStatus" title="vec_inf.client._models.ModelStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelStatus</span></code></a></em><a class="headerlink" href="#vec_inf.client.StatusResponse.server_status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VecInfClient</span></span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Client for interacting with Vector Inference programmatically.</p>
+<p>This class provides methods for launching models, checking their status,
+retrieving metrics, and shutting down models using the Vector Inference
+infrastructure.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">vec_inf.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">VecInfClient</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">VecInfClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">launch_model</span><span class="p">(</span><span class="s2">&quot;Meta-Llama-3.1-8B-Instruct&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">job_id</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">slurm_job_id</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">status</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">ModelStatus</span><span class="o">.</span><span class="n">READY</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model is ready at </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">shutdown_model</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the Vector Inference client.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slurm_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.get_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.get_metrics" title="Link to this definition">¶</a></dt>
+<dd><p>Get the performance metrics of a running model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slurm_job_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The Slurm job ID to get metrics for.</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path to the Slurm log directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Object containing the model’s performance metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#vec_inf.client.MetricsResponse" title="vec_inf.client.MetricsResponse">MetricsResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.get_model_config">
+<span class="sig-name descname"><span class="pre">get_model_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.get_model_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.get_model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Get the configuration for a specific model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of the model to get configuration for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#vec_inf.client.ModelConfig" title="vec_inf.client.ModelConfig">ModelConfig</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.get_status">
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slurm_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.get_status" title="Link to this definition">¶</a></dt>
+<dd><p>Get the status of a running model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slurm_job_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The Slurm job ID to check.</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path to the Slurm log directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model status information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#vec_inf.client.StatusResponse" title="vec_inf.client.StatusResponse">StatusResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.launch_model">
+<span class="sig-name descname"><span class="pre">launch_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.launch_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.launch_model" title="Link to this definition">¶</a></dt>
+<dd><p>Launch a model on the cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of the model to launch.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="#vec_inf.client.LaunchOptions" title="vec_inf.client.LaunchOptions"><em>LaunchOptions</em></a><em>, </em><em>optional</em>) – Optional launch options to override default configuration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Information about the launched model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#vec_inf.client.LaunchResponse" title="vec_inf.client.LaunchResponse">LaunchResponse</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.list_models">
+<span class="sig-name descname"><span class="pre">list_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.list_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.list_models" title="Link to this definition">¶</a></dt>
+<dd><p>List all available models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ModelInfo objects containing information about available models.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference internal" href="#vec_inf.client.ModelInfo" title="vec_inf.client.ModelInfo">ModelInfo</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.shutdown_model">
+<span class="sig-name descname"><span class="pre">shutdown_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slurm_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.shutdown_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.shutdown_model" title="Link to this definition">¶</a></dt>
+<dd><p>Shutdown a running model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>slurm_job_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The Slurm job ID to shut down.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the model was successfully shutdown, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>SlurmJobError</strong> – If there was an error shutting down the model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vec_inf.client.VecInfClient.wait_until_ready">
+<span class="sig-name descname"><span class="pre">wait_until_ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slurm_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_interval_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vec_inf/client/api.html#VecInfClient.wait_until_ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vec_inf.client.VecInfClient.wait_until_ready" title="Link to this definition">¶</a></dt>
+<dd><p>Wait until a model is ready or fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slurm_job_id</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The Slurm job ID to wait for.</p></li>
+<li><p><strong>timeout_seconds</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Maximum time to wait in seconds (default: 30 mins).</p></li>
+<li><p><strong>poll_interval_seconds</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – How often to check status in seconds (default: 10s).</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Optional path to the Slurm log directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Status, if the model is ready or failed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#vec_inf.client.StatusResponse" title="vec_inf.client.StatusResponse">StatusResponse</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>SlurmJobError</strong> – If the specified job is not found or there’s an error with the job.</p></li>
+<li><p><strong>ServerError</strong> – If the server fails to start within the timeout period.</p></li>
+<li><p><strong>APIError</strong> – If there was an error checking the status.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vec_inf.client.api.html">vec_inf.client.api module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient"><code class="docutils literal notranslate"><span class="pre">VecInfClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.__init__"><code class="docutils literal notranslate"><span class="pre">VecInfClient.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.get_metrics"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.get_model_config"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_model_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.get_status"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.launch_model"><code class="docutils literal notranslate"><span class="pre">VecInfClient.launch_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.list_models"><code class="docutils literal notranslate"><span class="pre">VecInfClient.list_models()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.shutdown_model"><code class="docutils literal notranslate"><span class="pre">VecInfClient.shutdown_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="vec_inf.client.api.html#vec_inf.client.api.VecInfClient.wait_until_ready"><code class="docutils literal notranslate"><span class="pre">VecInfClient.wait_until_ready()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Vector AI Engineering
+            </div>
+            <!--
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+            -->
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/VectorInstitute/vector-inference" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        <div class="footer-container" style="text-align: center;">
+          <div class="logo">
+            <a class="logo" href="https://vectorinstitute.ai/">
+              <span class="logo"></span>
+              <img alt="Logo of the Vector Institute" style="width:90px; max-width:90px;" src="../../_static/logos/vector_logo.png" />
+            </a>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">vec_inf.client package</a><ul>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions"><code class="docutils literal notranslate"><span class="pre">LaunchOptions</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.compilation_config"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.compilation_config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.data_type"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.data_type</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.enable_chunked_prefill"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.enable_chunked_prefill</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.enable_prefix_caching"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.enable_prefix_caching</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.enforce_eager"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.enforce_eager</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.gpu_memory_utilization"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.gpu_memory_utilization</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.gpus_per_node"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.gpus_per_node</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.log_dir"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.log_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.max_model_len"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.max_model_len</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.max_num_batched_tokens"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.max_num_batched_tokens</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.max_num_seqs"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.max_num_seqs</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.model_family"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.model_family</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.model_variant"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.model_variant</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.model_weights_parent_dir"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.model_weights_parent_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.num_nodes"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.num_nodes</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.partition"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.partition</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.pipeline_parallelism"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.pipeline_parallelism</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.qos"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.qos</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.time"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.time</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.venv"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.venv</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptions.vocab_size"><code class="docutils literal notranslate"><span class="pre">LaunchOptions.vocab_size</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.compilation_config"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.compilation_config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.data_type"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.data_type</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.enable_chunked_prefill"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.enable_chunked_prefill</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.enable_prefix_caching"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.enable_prefix_caching</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.enforce_eager"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.enforce_eager</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.gpu_memory_utilization"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.gpu_memory_utilization</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.gpus_per_node"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.gpus_per_node</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.log_dir"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.log_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.max_model_len"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.max_model_len</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.max_num_batched_tokens"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.max_num_batched_tokens</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.max_num_seqs"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.max_num_seqs</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.model_family"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.model_family</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.model_variant"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.model_variant</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.model_weights_parent_dir"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.model_weights_parent_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.num_nodes"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.num_nodes</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.partition"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.partition</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.pipeline_parallelism"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.pipeline_parallelism</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.qos"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.qos</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.time"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.time</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.venv"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.venv</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchOptionsDict.vocab_size"><code class="docutils literal notranslate"><span class="pre">LaunchOptionsDict.vocab_size</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchResponse"><code class="docutils literal notranslate"><span class="pre">LaunchResponse</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.LaunchResponse.config"><code class="docutils literal notranslate"><span class="pre">LaunchResponse.config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchResponse.model_name"><code class="docutils literal notranslate"><span class="pre">LaunchResponse.model_name</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchResponse.raw_output"><code class="docutils literal notranslate"><span class="pre">LaunchResponse.raw_output</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.LaunchResponse.slurm_job_id"><code class="docutils literal notranslate"><span class="pre">LaunchResponse.slurm_job_id</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.MetricsResponse"><code class="docutils literal notranslate"><span class="pre">MetricsResponse</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.MetricsResponse.metrics"><code class="docutils literal notranslate"><span class="pre">MetricsResponse.metrics</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.MetricsResponse.model_name"><code class="docutils literal notranslate"><span class="pre">MetricsResponse.model_name</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.MetricsResponse.timestamp"><code class="docutils literal notranslate"><span class="pre">MetricsResponse.timestamp</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig"><code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.compilation_config"><code class="docutils literal notranslate"><span class="pre">ModelConfig.compilation_config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.data_type"><code class="docutils literal notranslate"><span class="pre">ModelConfig.data_type</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.enforce_eager"><code class="docutils literal notranslate"><span class="pre">ModelConfig.enforce_eager</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.gpu_memory_utilization"><code class="docutils literal notranslate"><span class="pre">ModelConfig.gpu_memory_utilization</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.gpus_per_node"><code class="docutils literal notranslate"><span class="pre">ModelConfig.gpus_per_node</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.log_dir"><code class="docutils literal notranslate"><span class="pre">ModelConfig.log_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.max_model_len"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_model_len</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.max_num_seqs"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_num_seqs</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_family"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_family</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_name"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_name</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_type"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_type</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_variant"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_variant</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.model_weights_parent_dir"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_weights_parent_dir</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.num_nodes"><code class="docutils literal notranslate"><span class="pre">ModelConfig.num_nodes</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.partition"><code class="docutils literal notranslate"><span class="pre">ModelConfig.partition</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.pipeline_parallelism"><code class="docutils literal notranslate"><span class="pre">ModelConfig.pipeline_parallelism</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.qos"><code class="docutils literal notranslate"><span class="pre">ModelConfig.qos</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.time"><code class="docutils literal notranslate"><span class="pre">ModelConfig.time</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.venv"><code class="docutils literal notranslate"><span class="pre">ModelConfig.venv</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelConfig.vocab_size"><code class="docutils literal notranslate"><span class="pre">ModelConfig.vocab_size</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo"><code class="docutils literal notranslate"><span class="pre">ModelInfo</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo.config"><code class="docutils literal notranslate"><span class="pre">ModelInfo.config</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo.family"><code class="docutils literal notranslate"><span class="pre">ModelInfo.family</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo.name"><code class="docutils literal notranslate"><span class="pre">ModelInfo.name</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo.type"><code class="docutils literal notranslate"><span class="pre">ModelInfo.type</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelInfo.variant"><code class="docutils literal notranslate"><span class="pre">ModelInfo.variant</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus"><code class="docutils literal notranslate"><span class="pre">ModelStatus</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.FAILED"><code class="docutils literal notranslate"><span class="pre">ModelStatus.FAILED</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.LAUNCHING"><code class="docutils literal notranslate"><span class="pre">ModelStatus.LAUNCHING</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.PENDING"><code class="docutils literal notranslate"><span class="pre">ModelStatus.PENDING</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.READY"><code class="docutils literal notranslate"><span class="pre">ModelStatus.READY</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.SHUTDOWN"><code class="docutils literal notranslate"><span class="pre">ModelStatus.SHUTDOWN</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelStatus.UNAVAILABLE"><code class="docutils literal notranslate"><span class="pre">ModelStatus.UNAVAILABLE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.ModelType"><code class="docutils literal notranslate"><span class="pre">ModelType</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.ModelType.LLM"><code class="docutils literal notranslate"><span class="pre">ModelType.LLM</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelType.REWARD_MODELING"><code class="docutils literal notranslate"><span class="pre">ModelType.REWARD_MODELING</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelType.TEXT_EMBEDDING"><code class="docutils literal notranslate"><span class="pre">ModelType.TEXT_EMBEDDING</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.ModelType.VLM"><code class="docutils literal notranslate"><span class="pre">ModelType.VLM</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse"><code class="docutils literal notranslate"><span class="pre">StatusResponse</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.base_url"><code class="docutils literal notranslate"><span class="pre">StatusResponse.base_url</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.failed_reason"><code class="docutils literal notranslate"><span class="pre">StatusResponse.failed_reason</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.job_state"><code class="docutils literal notranslate"><span class="pre">StatusResponse.job_state</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.model_name"><code class="docutils literal notranslate"><span class="pre">StatusResponse.model_name</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.pending_reason"><code class="docutils literal notranslate"><span class="pre">StatusResponse.pending_reason</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.raw_output"><code class="docutils literal notranslate"><span class="pre">StatusResponse.raw_output</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.StatusResponse.server_status"><code class="docutils literal notranslate"><span class="pre">StatusResponse.server_status</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient"><code class="docutils literal notranslate"><span class="pre">VecInfClient</span></code></a><ul>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.__init__"><code class="docutils literal notranslate"><span class="pre">VecInfClient.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.get_metrics"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.get_model_config"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_model_config()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.get_status"><code class="docutils literal notranslate"><span class="pre">VecInfClient.get_status()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.launch_model"><code class="docutils literal notranslate"><span class="pre">VecInfClient.launch_model()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.list_models"><code class="docutils literal notranslate"><span class="pre">VecInfClient.list_models()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.shutdown_model"><code class="docutils literal notranslate"><span class="pre">VecInfClient.shutdown_model()</span></code></a></li>
+<li><a class="reference internal" href="#vec_inf.client.VecInfClient.wait_until_ready"><code class="docutils literal notranslate"><span class="pre">VecInfClient.wait_until_ready()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div></body>
+</html>

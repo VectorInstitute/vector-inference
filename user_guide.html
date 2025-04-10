@@ -7,7 +7,7 @@
 
     
       <meta name="description" content="aieng-template Python API documentation">
-    <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Vector Inference: Easy inference on Slurm clusters" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Python API" href="reference/api/index.html" /><link rel="prev" title="Vector Inference: Easy inference on Slurm clusters" href="index.html" />
 
     <meta name="generator" content="sphinx-8.1.3, furo 2024.08.06"/>
 
@@ -225,6 +225,15 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">User Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="reference/api/index.html">Python API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Python API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/api/vec_inf.api.html">vec_inf.api package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of vec_inf.api package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/api/vec_inf.api.client.html">vec_inf.api.client module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/api/vec_inf.api.models.html">vec_inf.api.models module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/api/vec_inf.api.utils.html">vec_inf.api.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -261,8 +270,8 @@
         <article role="main">
           <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">¶</a></h1>
-<section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<section id="cli-usage">
+<h2>CLI Usage<a class="headerlink" href="#cli-usage" title="Link to this heading">¶</a></h2>
 <section id="launch-command">
 <h3><code class="docutils literal notranslate"><span class="pre">launch</span></code> command<a class="headerlink" href="#launch-command" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">launch</span></code> command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.</p>
@@ -274,7 +283,7 @@
 <img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/883e6a5b-8016-4837-8fdf-39097dfb18bf">
 <section id="overrides">
 <h4>Overrides<a class="headerlink" href="#overrides" title="Link to this heading">¶</a></h4>
-<p>Models that are already supported by <code class="docutils literal notranslate"><span class="pre">vec-inf</span></code> would be launched using the <a class="reference internal" href="#vec_inf/config/models.yaml"><span class="xref myst">default parameters</span></a>. You can override these values by providing additional parameters. Use <code class="docutils literal notranslate"><span class="pre">vec-inf</span> <span class="pre">launch</span> <span class="pre">--help</span></code> to see the full list of parameters that can be overriden. For example, if <code class="docutils literal notranslate"><span class="pre">qos</span></code> is to be overriden:</p>
+<p>Models that are already supported by <code class="docutils literal notranslate"><span class="pre">vec-inf</span></code> would be launched using the <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml">default parameters</a>. You can override these values by providing additional parameters. Use <code class="docutils literal notranslate"><span class="pre">vec-inf</span> <span class="pre">launch</span> <span class="pre">--help</span></code> to see the full list of parameters that can be overriden. For example, if <code class="docutils literal notranslate"><span class="pre">qos</span></code> is to be overriden:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct<span class="w"> </span>--qos<span class="w"> </span>&lt;new_qos&gt;
 </pre></div>
 </div>
@@ -287,7 +296,7 @@
 <li><p>Your model weights directory should contain HuggingFace format weights.</p></li>
 <li><p>You should specify your model configuration by:</p>
 <ul>
-<li><p>Creating a custom configuration file for your model and specify its path via setting the environment variable <code class="docutils literal notranslate"><span class="pre">VEC_INF_CONFIG</span></code>. Check the <a class="reference internal" href="#vec_inf/config/models.yaml"><span class="xref myst">default parameters</span></a> file for the format of the config file. All the parameters for the model should be specified in that config file.</p></li>
+<li><p>Creating a custom configuration file for your model and specify its path via setting the environment variable <code class="docutils literal notranslate"><span class="pre">VEC_INF_CONFIG</span></code>. Check the <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml">default parameters</a> file for the format of the config file. All the parameters for the model should be specified in that config file.</p></li>
 <li><p>Using launch command options to specify your model setup.</p></li>
 </ul>
 </li>
@@ -419,6 +428,12 @@ would be named <code class="docutils literal notranslate"><span class="pre">Qwen
 </div>
 <p>Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment</p>
 </section>
+<section id="python-api-usage">
+<h2>Python API Usage<a class="headerlink" href="#python-api-usage" title="Link to this heading">¶</a></h2>
+<p>You can also use the <code class="docutils literal notranslate"><span class="pre">vec_inf</span></code> Python API to launch and manage inference servers.</p>
+<p>Check out the <a class="reference internal" href="reference/api/index.html"><span class="doc std std-doc">Python API documentation</span></a> for more details. There
+are also Python API usage examples in the <a class="reference external" href="https://github.com/VectorInstitute/vector-inference/tree/develop/examples/api"><code class="docutils literal notranslate"><span class="pre">examples</span></code></a> folder.</p>
+</section>
 </section>
 
         </article>
@@ -426,7 +441,15 @@ would be named <code class="docutils literal notranslate"><span class="pre">Qwen
       <footer>
         
         <div class="related-pages">
-          
+          <a class="next-page" href="reference/api/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Python API</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
           <a class="prev-page" href="index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
@@ -486,7 +509,7 @@ would be named <code class="docutils literal notranslate"><span class="pre">Qwen
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">User Guide</a><ul>
-<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#cli-usage">CLI Usage</a><ul>
 <li><a class="reference internal" href="#launch-command"><code class="docutils literal notranslate"><span class="pre">launch</span></code> command</a><ul>
 <li><a class="reference internal" href="#overrides">Overrides</a></li>
 <li><a class="reference internal" href="#custom-models">Custom models</a></li>
@@ -500,6 +523,7 @@ would be named <code class="docutils literal notranslate"><span class="pre">Qwen
 </li>
 <li><a class="reference internal" href="#send-inference-requests">Send inference requests</a></li>
 <li><a class="reference internal" href="#ssh-tunnel-from-your-local-device">SSH tunnel from your local device</a></li>
+<li><a class="reference internal" href="#python-api-usage">Python API Usage</a></li>
 </ul>
 </li>
 </ul>
