@@ -25,12 +25,14 @@ from vec_inf.client._models import (
     ModelType,
     StatusResponse,
 )
+from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
 from vec_inf.client._vars import (
     BOOLEAN_FIELDS,
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
+    SINGULARITY_IMAGE,
     SRC_DIR,
-    VLLM_TASK_MAP,
+    VLLM_NCCL_SO_PATH,
 )
 
 
@@ -50,6 +52,7 @@ class ModelLauncher:
         self.model_name = model_name
         self.kwargs = kwargs or {}
         self.slurm_job_id = ""
+        self.slurm_script_path = Path("")
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
 
@@ -137,31 +140,9 @@ class ModelLauncher:
 
     def _set_env_vars(self) -> None:
         """Set environment variables for the launch command."""
-        os.environ["MODEL_NAME"] = self.model_name
-        os.environ["MAX_MODEL_LEN"] = self.params["max_model_len"]
-        os.environ["MAX_LOGPROBS"] = self.params["vocab_size"]
-        os.environ["DATA_TYPE"] = self.params["data_type"]
-        os.environ["MAX_NUM_SEQS"] = self.params["max_num_seqs"]
-        os.environ["GPU_MEMORY_UTILIZATION"] = self.params["gpu_memory_utilization"]
-        os.environ["TASK"] = VLLM_TASK_MAP[self.params["model_type"]]
-        os.environ["PIPELINE_PARALLELISM"] = self.params["pipeline_parallelism"]
-        os.environ["COMPILATION_CONFIG"] = self.params["compilation_config"]
-        os.environ["SRC_DIR"] = SRC_DIR
-        os.environ["MODEL_WEIGHTS"] = str(
-            Path(self.params["model_weights_parent_dir"], self.model_name)
-        )
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
-        os.environ["VENV_BASE"] = self.params["venv"]
-        os.environ["LOG_DIR"] = self.params["log_dir"]
-
-        if self.params.get("enable_prefix_caching"):
-            os.environ["ENABLE_PREFIX_CACHING"] = self.params["enable_prefix_caching"]
-        if self.params.get("enable_chunked_prefill"):
-            os.environ["ENABLE_CHUNKED_PREFILL"] = self.params["enable_chunked_prefill"]
-        if self.params.get("max_num_batched_tokens"):
-            os.environ["MAX_NUM_BATCHED_TOKENS"] = self.params["max_num_batched_tokens"]
-        if self.params.get("enforce_eager"):
-            os.environ["ENFORCE_EAGER"] = self.params["enforce_eager"]
+        os.environ["VLLM_NCCL_SO_PATH"] = VLLM_NCCL_SO_PATH
+        os.environ["SINGULARITY_IMAGE"] = SINGULARITY_IMAGE
 
     def _build_launch_command(self) -> str:
         """Construct the full launch command with parameters."""
@@ -187,10 +168,10 @@ class ModelLauncher:
             ]
         )
         # Add slurm script
-        slurm_script = "vllm.slurm"
-        if int(self.params["num_nodes"]) > 1:
-            slurm_script = "multinode_vllm.slurm"
-        command_list.append(f"{SRC_DIR}/{slurm_script}")
+        self.slurm_script_path = SlurmScriptGenerator(
+            self.params, SRC_DIR
+        ).write_to_log_dir()
+        command_list.append(str(self.slurm_script_path))
         return " ".join(command_list)
 
     def launch(self) -> LaunchResponse:
@@ -207,14 +188,21 @@ class ModelLauncher:
         self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = self.slurm_job_id
 
-        # Create log directory and job json file
+        # Create log directory and job json file, move slurm script to job log directory
+        job_log_dir = Path(
+            self.params["log_dir"], f"{self.model_name}.{self.slurm_job_id}"
+        )
+        job_log_dir.mkdir(parents=True, exist_ok=True)
+
         job_json = Path(
-            self.params["log_dir"],
-            f"{self.model_name}.{self.slurm_job_id}",
+            job_log_dir,
             f"{self.model_name}.{self.slurm_job_id}.json",
         )
-        job_json.parent.mkdir(parents=True, exist_ok=True)
         job_json.touch(exist_ok=True)
+
+        self.slurm_script_path.rename(
+            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
+        )
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)

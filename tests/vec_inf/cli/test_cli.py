@@ -226,13 +226,12 @@ def base_patches(test_paths, mock_truediv, debug_helper):
             "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
         ),
         patch("pathlib.Path.__truediv__", side_effect=mock_truediv),
-        patch("pathlib.Path.iterdir", return_value=[]),  # Mock empty directory listing
+        patch("pathlib.Path.iterdir", return_value=[]),
         patch("json.dump"),
         patch("pathlib.Path.touch"),
         patch("vec_inf.client._utils.Path", return_value=test_paths["weights_dir"]),
-        patch(
-            "pathlib.Path.home", return_value=Path("/home/user")
-        ),  # Mock home directory
+        patch("pathlib.Path.home", return_value=Path("/home/user")),
+        patch("pathlib.Path.rename"),
     ]
 
 
@@ -246,25 +245,25 @@ def apply_base_patches(base_patches):
         yield
 
 
-def test_launch_command_success(runner, mock_launch_output, path_exists, debug_helper):
+def test_launch_command_success(
+    runner,
+    mock_launch_output,
+    path_exists,
+    debug_helper,
+    mock_truediv,
+    test_paths,
+    base_patches,
+):
     """Test successful model launch with minimal required arguments."""
-    test_log_dir = Path("/tmp/test_vec_inf_logs")
+    with ExitStack() as stack:
+        # Apply all base patches
+        for patch_obj in base_patches:
+            stack.enter_context(patch_obj)
 
-    with (
-        patch("vec_inf.client._utils.run_bash_command") as mock_run,
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", debug_helper.tracked_mock_open),
-        patch("pathlib.Path.open", debug_helper.tracked_mock_open),
-        patch("pathlib.Path.exists", new=path_exists),
-        patch("pathlib.Path.expanduser", return_value=test_log_dir),
-        patch("pathlib.Path.resolve", return_value=debug_helper.config_file.parent),
-        patch(
-            "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
-        ),
-        patch("json.dump"),
-        patch("pathlib.Path.touch"),
-        patch("pathlib.Path.__truediv__", return_value=test_log_dir),
-    ):
+        # Apply specific patches for this test
+        mock_run = stack.enter_context(patch("vec_inf.client._utils.run_bash_command"))
+        stack.enter_context(patch("pathlib.Path.exists", new=path_exists))
+
         expected_job_id = "14933053"
         mock_run.return_value = mock_launch_output(expected_job_id)
 
@@ -277,25 +276,24 @@ def test_launch_command_success(runner, mock_launch_output, path_exists, debug_h
 
 
 def test_launch_command_with_json_output(
-    runner, mock_launch_output, path_exists, debug_helper
+    runner,
+    mock_launch_output,
+    path_exists,
+    debug_helper,
+    mock_truediv,
+    test_paths,
+    base_patches,
 ):
     """Test JSON output format for launch command."""
-    test_log_dir = Path("/tmp/test_vec_inf_logs")
-    with (
-        patch("vec_inf.client._utils.run_bash_command") as mock_run,
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", debug_helper.tracked_mock_open),
-        patch("pathlib.Path.open", debug_helper.tracked_mock_open),
-        patch("pathlib.Path.exists", new=path_exists),
-        patch("pathlib.Path.expanduser", return_value=test_log_dir),
-        patch("pathlib.Path.resolve", return_value=debug_helper.config_file.parent),
-        patch(
-            "pathlib.Path.parent", return_value=debug_helper.config_file.parent.parent
-        ),
-        patch("json.dump"),
-        patch("pathlib.Path.touch"),
-        patch("pathlib.Path.__truediv__", return_value=test_log_dir),
-    ):
+    with ExitStack() as stack:
+        # Apply all base patches
+        for patch_obj in base_patches:
+            stack.enter_context(patch_obj)
+
+        # Apply specific patches for this test
+        mock_run = stack.enter_context(patch("vec_inf.client._utils.run_bash_command"))
+        stack.enter_context(patch("pathlib.Path.exists", new=path_exists))
+
         expected_job_id = "14933051"
         mock_run.return_value = mock_launch_output(expected_job_id)
 
@@ -319,7 +317,7 @@ def test_launch_command_with_json_output(
         assert output.get("slurm_job_id") == expected_job_id
         assert output.get("model_name") == "Meta-Llama-3.1-8B"
         assert output.get("model_type") == "LLM"
-        assert str(test_log_dir) in output.get("log_dir", "")
+        assert str(test_paths["log_dir"]) in output.get("log_dir", "")
 
 
 def test_launch_command_no_model_weights_parent_dir(runner, debug_helper, base_patches):
