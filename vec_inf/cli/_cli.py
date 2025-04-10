@@ -13,8 +13,7 @@ from vec_inf.cli._helper import (
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
-from vec_inf.client._models import LaunchOptions, LaunchOptionsDict
-from vec_inf.client.api import VecInfClient
+from vec_inf.client import LaunchOptions, LaunchOptionsDict, VecInfClient
 
 
 CONSOLE = Console()

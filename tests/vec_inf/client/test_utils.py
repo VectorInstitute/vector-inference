@@ -1,4 +1,4 @@
-"""Tests for the utility functions in the CLI module."""
+"""Tests for the utility functions in the vec-inf client."""
 
 import os
 from unittest.mock import MagicMock, patch
@@ -8,7 +8,6 @@ import requests
 
 from vec_inf.client._utils import (
     MODEL_READY_SIGNATURE,
-    create_table,
     get_base_url,
     is_server_running,
     load_config,
@@ -132,20 +131,6 @@ def test_model_health_check_request_exception():
         mock_get.side_effect = requests.exceptions.RequestException("Connection error")
         result = model_health_check("test_job", 123, None)
         assert result == ("FAILED", "Connection error")
-
-
-def test_create_table_with_header():
-    """Test that create_table creates a table with the correct header."""
-    table = create_table("Key", "Value")
-    assert table.columns[0].header == "Key"
-    assert table.columns[1].header == "Value"
-    assert table.show_header is True
-
-
-def test_create_table_without_header():
-    """Test create_table without header."""
-    table = create_table(show_header=False)
-    assert table.show_header is False
 
 
 def test_load_config_default_only():

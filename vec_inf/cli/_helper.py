@@ -9,10 +9,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-import vec_inf.client._utils as utils
 from vec_inf.cli._models import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
-from vec_inf.client._config import ModelConfig
-from vec_inf.client._models import ModelInfo, StatusResponse
+from vec_inf.cli._utils import create_table
+from vec_inf.client import ModelConfig, ModelInfo, StatusResponse
 
 
 class LaunchResponseFormatter:
@@ -24,7 +23,7 @@ class LaunchResponseFormatter:
 
     def format_table_output(self) -> Table:
         """Format output as rich Table."""
-        table = utils.create_table(key_title="Job Config", value_title="Value")
+        table = create_table(key_title="Job Config", value_title="Value")
 
         # Add key information with consistent styling
         table.add_row("Slurm Job ID", self.params["slurm_job_id"], style="blue")
@@ -89,7 +88,7 @@ class StatusResponseFormatter:
 
     def output_table(self) -> Table:
         """Create and display rich table."""
-        table = utils.create_table(key_title="Job Status", value_title="Value")
+        table = create_table(key_title="Job Status", value_title="Value")
         table.add_row("Model Name", self.status_info.model_name)
         table.add_row("Model Status", self.status_info.server_status, style="blue")
 
@@ -107,7 +106,7 @@ class MetricsResponseFormatter:
 
     def __init__(self, metrics: Union[dict[str, float], str]):
         self.metrics = self._set_metrics(metrics)
-        self.table = utils.create_table("Metric", "Value")
+        self.table = create_table("Metric", "Value")
         self.enabled_prefix_caching = self._check_prefix_caching()
 
     def _set_metrics(self, metrics: Union[dict[str, float], str]) -> dict[str, float]:
@@ -211,7 +210,7 @@ class ListCmdDisplay:
             )
             return config_dict
 
-        table = utils.create_table(key_title="Model Config", value_title="Value")
+        table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
             if field not in {"venv", "log_dir"}:
                 table.add_row(field, str(value))
