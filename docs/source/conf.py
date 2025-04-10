@@ -7,7 +7,6 @@
 
 import os
 import sys
-from typing import List
 
 
 sys.path.insert(0, os.path.abspath("../../vec_inf"))
@@ -51,8 +50,16 @@ autosectionlabel_prefix_document = True
 copybutton_prompt_text = r">>> |\.\.\. "
 copybutton_prompt_is_regexp = True
 
+apidoc_module_dir = "../../vec_inf"
+apidoc_excluded_paths = ["tests", "cli", "shared"]
+exclude_patterns = ["reference/api/vec_inf.rst"]
+apidoc_output_dir = "reference/api"
+apidoc_separate_modules = True
+apidoc_extra_args = ["-f", "-M", "-T", "--implicit-namespaces"]
+suppress_warnings = ["ref.python"]
+
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.9/", None),
+    "python": ("https://docs.python.org/3.10/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,7 +68,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns: List[str] = []
+exclude_patterns = ["reference/api/vec_inf.rst"]
 
 # -- Options for Markdown files ----------------------------------------------
 #
