@@ -170,11 +170,11 @@ echo "Server address: $SERVER_ADDR"
         return "\n".join(launcher_script)
 
     def write_to_log_dir(self) -> Path:
-        log_subdir: Path = Path(self.params["log_dir"]) / self.params["model_name"]
-        log_subdir.mkdir(parents=True, exist_ok=True)
-
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        script_path: Path = log_subdir / f"launch_{timestamp}.slurm"
+        script_path: Path = (
+            Path(self.params["log_dir"])
+            / f"launch_{self.params['model_name']}_{timestamp}.slurm"
+        )
 
         content = self._generate_script_content()
         script_path.write_text(content)

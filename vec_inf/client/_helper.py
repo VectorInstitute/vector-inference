@@ -50,6 +50,7 @@ class ModelLauncher:
         self.model_name = model_name
         self.kwargs = kwargs or {}
         self.slurm_job_id = ""
+        self.slurm_script_path = Path("")
         self.model_config = self._get_model_configuration()
         self.params = self._get_launch_params()
 
@@ -163,8 +164,10 @@ class ModelLauncher:
             ]
         )
         # Add slurm script
-        slurm_script = SlurmScriptGenerator(self.params, SRC_DIR).write_to_log_dir()
-        command_list.append(str(slurm_script))
+        self.slurm_script_path = SlurmScriptGenerator(
+            self.params, SRC_DIR
+        ).write_to_log_dir()
+        command_list.append(str(self.slurm_script_path))
         return " ".join(command_list)
 
     def launch(self) -> LaunchResponse:
@@ -181,14 +184,21 @@ class ModelLauncher:
         self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = self.slurm_job_id
 
-        # Create log directory and job json file
+        # Create log directory and job json file, move slurm script to job log directory
+        job_log_dir = Path(
+            self.params["log_dir"], f"{self.model_name}.{self.slurm_job_id}"
+        )
+        job_log_dir.mkdir(parents=True, exist_ok=True)
+
         job_json = Path(
-            self.params["log_dir"],
-            f"{self.model_name}.{self.slurm_job_id}",
+            job_log_dir,
             f"{self.model_name}.{self.slurm_job_id}.json",
         )
-        job_json.parent.mkdir(parents=True, exist_ok=True)
         job_json.touch(exist_ok=True)
+
+        self.slurm_script_path.rename(
+            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
+        )
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
