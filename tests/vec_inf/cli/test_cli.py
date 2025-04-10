@@ -246,14 +246,20 @@ def apply_base_patches(base_patches):
 
 
 def test_launch_command_success(
-    runner, mock_launch_output, path_exists, debug_helper, mock_truediv, test_paths, base_patches
+    runner,
+    mock_launch_output,
+    path_exists,
+    debug_helper,
+    mock_truediv,
+    test_paths,
+    base_patches,
 ):
     """Test successful model launch with minimal required arguments."""
     with ExitStack() as stack:
         # Apply all base patches
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
-            
+
         # Apply specific patches for this test
         mock_run = stack.enter_context(patch("vec_inf.client._utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=path_exists))
@@ -270,14 +276,20 @@ def test_launch_command_success(
 
 
 def test_launch_command_with_json_output(
-    runner, mock_launch_output, path_exists, debug_helper, mock_truediv, test_paths, base_patches
+    runner,
+    mock_launch_output,
+    path_exists,
+    debug_helper,
+    mock_truediv,
+    test_paths,
+    base_patches,
 ):
     """Test JSON output format for launch command."""
     with ExitStack() as stack:
         # Apply all base patches
         for patch_obj in base_patches:
             stack.enter_context(patch_obj)
-            
+
         # Apply specific patches for this test
         mock_run = stack.enter_context(patch("vec_inf.client._utils.run_bash_command"))
         stack.enter_context(patch("pathlib.Path.exists", new=path_exists))
