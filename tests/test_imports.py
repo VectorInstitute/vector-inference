@@ -2,16 +2,28 @@
 
 import unittest
 
+import pytest
+
 
 class TestVecInfImports(unittest.TestCase):
     """Test the imports of the vec_inf package."""
 
-    def test_import_cli_modules(self):
-        """Test the imports of the vec_inf.cli modules."""
+    def test_imports(self):
+        """Test that all modules can be imported."""
         try:
+            # CLI imports
+            import vec_inf.cli
             import vec_inf.cli._cli
-            import vec_inf.cli._config
             import vec_inf.cli._helper
-            import vec_inf.cli._utils  # noqa: F401
+
+            # Client imports
+            import vec_inf.client
+            import vec_inf.client._config
+            import vec_inf.client._exceptions
+            import vec_inf.client._helper
+            import vec_inf.client._models
+            import vec_inf.client._utils
+            import vec_inf.client._vars  # noqa: F401
+
         except ImportError as e:
-            self.fail(f"Import failed: {e}")
+            pytest.fail(f"Import failed: {e}")
