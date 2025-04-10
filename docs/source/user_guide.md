@@ -1,6 +1,6 @@
 # User Guide
 
-## Usage
+## CLI Usage
 
 ### `launch` command
 
@@ -17,7 +17,7 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the [default parameters](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
+Models that are already supported by `vec-inf` would be launched using the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
@@ -29,7 +29,7 @@ You can also launch your own custom model as long as the model architecture is [
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`. Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`. Check the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
   * Using launch command options to specify your model setup.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
@@ -179,3 +179,10 @@ If you want to run inference from your local device, you can open a SSH tunnel t
 ssh -L 8081:172.17.8.29:8081 username@v.vectorinstitute.ai -N
 ```
 Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment
+
+## Python API Usage
+
+You can also use the `vec_inf` Python API to launch and manage inference servers.
+
+Check out the [Python API documentation](reference/api/index) for more details. There
+are also Python API usage examples in the [`examples`](https://github.com/VectorInstitute/vector-inference/tree/develop/examples/api) folder.
