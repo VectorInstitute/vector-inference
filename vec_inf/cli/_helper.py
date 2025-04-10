@@ -1,5 +1,6 @@
 """Helper classes for the CLI."""
 
+from pathlib import Path
 from typing import Any, Union
 
 import click
