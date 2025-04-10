@@ -38,7 +38,9 @@ class SlurmScriptGenerator:
 
     def _generate_shared_args(self) -> str:
         if self.is_multinode and not self.params["pipeline_parallelism"]:
-            tensor_parallel_size = self.params["num_nodes"] * self.params["gpus_per_node"]
+            tensor_parallel_size = (
+                self.params["num_nodes"] * self.params["gpus_per_node"]
+            )
             pipeline_parallel_size = 1
         else:
             tensor_parallel_size = self.params["gpus_per_node"]
