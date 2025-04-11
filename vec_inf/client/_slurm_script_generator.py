@@ -124,7 +124,7 @@ srun --nodes=1 --ntasks=1 -w "$head_node" \\""")
 
         if self.params["venv"] == "singularity":
             server_script.append(
-                f"    singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} $SINGULARITY_IMAGE \\"
+                f"    singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} --containall $SINGULARITY_IMAGE \\"
             )
 
         server_script.append("""    ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \\
@@ -140,7 +140,7 @@ for ((i = 1; i <= worker_num; i++)); do
 
         if self.params["venv"] == "singularity":
             server_script.append(
-                f"""        singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} $SINGULARITY_IMAGE \\"""
+                f"""        singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} --containall $SINGULARITY_IMAGE \\"""
             )
         server_script.append("""        ray start --address "$ip_head" \\
         --num-cpus "${SLURM_CPUS_PER_TASK}" --num-gpus "${SLURM_GPUS_PER_NODE}" --block &
@@ -158,7 +158,7 @@ echo "Server address: $server_address"
     def _generate_launcher(self) -> str:
         if self.params["venv"] == "singularity":
             launcher_script = [
-                f"""singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} $SINGULARITY_IMAGE \\"""
+                f"""singularity exec --nv --bind {self.model_weights_path}:{self.model_weights_path} --containall $SINGULARITY_IMAGE \\"""
             ]
         else:
             launcher_script = [f"""source {self.params["venv"]}/bin/activate"""]
