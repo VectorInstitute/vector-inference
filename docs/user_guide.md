@@ -17,7 +17,7 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
+Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
@@ -44,7 +44,7 @@ models:
     model_family: Qwen2.5
     model_variant: 7B-Instruct-1M
     model_type: LLM
-    num_gpus: 1
+    gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
     max_model_len: 1010000
@@ -111,7 +111,6 @@ vec-inf shutdown 15373800
 > Shutting down model with Slurm Job ID: 15373800
 ```
 
-(list-command)=
 ### `list` command
 
 You call view the full list of available models by running the `list` command:
@@ -184,5 +183,5 @@ Where the last number in the URL is the GPU number (gpu029 in this case). The ex
 
 You can also use the `vec_inf` Python API to launch and manage inference servers.
 
-Check out the [Python API documentation](reference/api/index) for more details. There
-are also Python API usage examples in the [`examples`](https://github.com/VectorInstitute/vector-inference/tree/develop/examples/api) folder.
+Check out the [Python API documentation](api.md) for more details. There
+are also Python API usage examples in the [`examples/api`](https://github.com/VectorInstitute/vector-inference/blob/main/examples/api) folder.

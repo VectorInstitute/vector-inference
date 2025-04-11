@@ -1,0 +1,102 @@
+name: docs
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/docs.yml
+      - '**.py'
+      - '**.ipynb'
+      - '**.html'
+      - '**.js'
+      - '**.md'
+      - uv.lock
+      - pyproject.toml
+      - mkdocs.yml
+      - '**.png'
+      - '**.svg'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - .pre-commit-config.yaml
+      - .github/workflows/docs.yml
+      - '**.py'
+      - '**.ipynb'
+      - '**.js'
+      - '**.html'
+      - uv.lock
+      - pyproject.toml
+      - '**.md'
+      - mkdocs.yml
+      - '**.png'
+      - '**.svg'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.21"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install the project
+        run: uv sync --all-extras --group docs
+
+      - name: Build docs
+        run: uv run mkdocs build
+
+      - name: Create .nojekyll file
+        run: touch site/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: site/
+          retention-days: 1
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-site
+          path: site
+
+      - name: Ensure .nojekyll exists
+        run: touch site/.nojekyll
+
+      - name: Deploy to Github pages
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        with:
+          branch: gh-pages
+          folder: site

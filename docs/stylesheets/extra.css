@@ -1,0 +1,91 @@
+[data-md-color-primary="vector"] {
+  --md-primary-fg-color: #eb088a;
+  --md-primary-fg-color--light: #f252a5;
+  --md-primary-fg-color--dark: #b00068;
+  --md-primary-bg-color: hsla(0, 0%, 100%, 1);
+  --md-primary-bg-color--light: hsla(0, 0%, 100%, 0.7);
+}
+
+[data-md-color-primary="black"] {
+  --md-primary-fg-color: #181818;
+  --md-primary-fg-color--light: #f252a5;
+  --md-primary-fg-color--dark: #b00068;
+  --md-primary-bg-color: #eb088a;
+}
+
+[data-md-color-accent="vector-teal"] {
+  --md-accent-fg-color: #48c0d9;
+  --md-accent-fg-color--transparent: #526cfe1a;
+  --md-accent-bg-color: #fff;
+  --md-accent-bg-color--light: #ffffffb3;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary="black"] {
+  --md-typeset-a-color: #eb088a;
+}
+
+[data-md-color-scheme="default"] {
+  /* Default light mode styling */
+}
+
+[data-md-color-scheme="slate"] {
+  --md-typeset-a-color: #eb088a;
+  /* Dark mode styling */
+}
+
+/* Vector logo css styling to match overrides/partial/copyright.html */
+.md-footer-vector {
+  display: flex;
+  align-items: center;
+  padding: 0 0.6rem;
+}
+
+.md-footer-vector img {
+  height: 24px; /* Reduce height to a fixed value */
+  width: auto; /* Maintain aspect ratio */
+  transition: opacity 0.25s;
+  opacity: 0.7;
+}
+
+.md-footer-vector img:hover {
+  opacity: 1;
+}
+
+/* Make the inner footer grid elements distribute evenly */
+.md-footer-meta__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* To make socials and Vector logo not stack when viewing on mobile */
+@media screen and (max-width: 76.234375em) {
+  .md-footer-meta__inner.md-grid {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .md-copyright,
+  .md-social {
+    width: auto;
+    max-width: 49%;
+  }
+
+  /* Prevent margin that causes stacking */
+  .md-social {
+    margin: 0;
+  }
+}
+
+/* Reduce margins for h2 when using grid cards */
+.grid.cards h2 {
+  margin-top: 0; /* Remove top margin completely in cards */
+  margin-bottom: 0.5rem; /* Smaller bottom margin in cards */
+}
+
+.vector-icon {
+  color: #eb088a;
+  opacity: 0.7;
+  margin-right: 0.2em;
+}
