@@ -141,7 +141,7 @@ class SlurmScriptGenerator:
         server_script.append(
             f'json_path="{self.params["log_dir"]}/{self.params["model_name"]}.$SLURM_JOB_ID/{self.params["model_name"]}.$SLURM_JOB_ID.json"\n'
             'jq --arg server_addr "$server_address" \\\n'
-            '    \'. + {{"server_address": $server_addr}}\' \\\n'
+            "    '. + {{\"server_address\": $server_addr}}' \\\n"
             '    "$json_path" > temp.json \\\n'
             '    && mv temp.json "$json_path"\n\n'
         )
