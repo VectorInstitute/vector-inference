@@ -89,6 +89,7 @@ class LaunchOptions:
     pipeline_parallelism: Optional[bool] = None
     compilation_config: Optional[str] = None
     enforce_eager: Optional[bool] = None
+    vllm_optional_args: Optional[dict[str, Union[str, int, float, bool]]] = None
 
 
 class LaunchOptionsDict(TypedDict):
@@ -115,6 +116,7 @@ class LaunchOptionsDict(TypedDict):
     pipeline_parallelism: NotRequired[Optional[bool]]
     compilation_config: NotRequired[Optional[str]]
     enforce_eager: NotRequired[Optional[bool]]
+    vllm_optional_args: NotRequired[dict[str, Union[str, int, float, bool]]]
 
 
 @dataclass

@@ -1,7 +1,7 @@
 """Command line interface for Vector Inference."""
 
 import time
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import click
 from rich.console import Console
@@ -125,34 +125,67 @@ def cli() -> None:
     is_flag=True,
     help="Output in JSON string",
 )
+@click.option(
+    "--vllm-arg",
+    multiple=True,
+    help='Extra vLLM server args (use --vllm-arg "--foo=bar")',
+)
 def launch(
     model_name: str,
+    vllm_arg: tuple[str],
+    json_mode: bool,
     **cli_kwargs: Optional[Union[str, int, float, bool]],
 ) -> None:
     """Launch a model on the cluster."""
     try:
-        # Convert cli_kwargs to LaunchOptions
-        kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
-        # Cast the dictionary to LaunchOptionsDict
-        options_dict: LaunchOptionsDict = kwargs  # type: ignore
+        # Parse extra vLLM args
+        vllm_args = _parse_vllm_args(vllm_arg)
+
+        # Prepare LaunchOptions
+        kwargs: dict[
+            str, Union[str, int, float, bool, dict[str, Union[str, int, float, bool]]]
+        ] = {k: v for k, v in cli_kwargs.items() if v is not None}
+        kwargs["vllm_optional_args"] = vllm_args
+
+        options_dict: LaunchOptionsDict = cast(LaunchOptionsDict, kwargs)
         launch_options = LaunchOptions(**options_dict)
 
-        # Start the client and launch model inference server
+        # Launch
         client = VecInfClient()
         launch_response = client.launch_model(model_name, launch_options)
 
-        # Display launch information
-        launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
-        if cli_kwargs.get("json_mode"):
+        formatter = LaunchResponseFormatter(model_name, launch_response.config)
+        if json_mode:
             click.echo(launch_response.config)
         else:
-            launch_info_table = launch_formatter.format_table_output()
-            CONSOLE.print(launch_info_table)
+            CONSOLE.print(formatter.format_table_output())
 
     except click.ClickException as e:
         raise e
     except Exception as e:
         raise click.ClickException(f"Launch failed: {str(e)}") from e
+
+
+def _parse_vllm_args(vllm_arg: tuple[str]) -> dict[str, Union[str, int, float, bool]]:
+    parsed: dict[str, Union[str, int, float, bool]] = {}
+    for raw_arg in vllm_arg:
+        arg = raw_arg.removeprefix("--")
+        if "=" in arg:
+            key, val = arg.split("=", maxsplit=1)
+            if val.lower() == "true":
+                parsed[key.replace("-", "_")] = True
+            elif val.lower() == "false":
+                parsed[key.replace("-", "_")] = False
+            elif val.isdigit():
+                parsed[key.replace("-", "_")] = int(val)
+            else:
+                try:
+                    parsed[key.replace("-", "_")] = float(val)
+                except ValueError:
+                    parsed[key.replace("-", "_")] = val
+        else:
+            parsed[arg.replace("-", "_")] = True
+    return parsed
 
 
 @cli.command("status")

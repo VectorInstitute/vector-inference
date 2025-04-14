@@ -51,6 +51,7 @@ class ModelLauncher:
         """
         self.model_name = model_name
         self.kwargs = kwargs or {}
+        self.vllm_args: dict[str, Any] = self.kwargs.pop("vllm_optional_args", {}) or {}
         self.slurm_job_id = ""
         self.slurm_script_path = Path("")
         self.model_config = self._get_model_configuration()
@@ -169,7 +170,7 @@ class ModelLauncher:
         )
         # Add slurm script
         self.slurm_script_path = SlurmScriptGenerator(
-            self.params, SRC_DIR
+            self.params, self.vllm_args, SRC_DIR
         ).write_to_log_dir()
         command_list.append(str(self.slurm_script_path))
         return " ".join(command_list)
@@ -204,13 +205,18 @@ class ModelLauncher:
             job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
         )
 
-        with job_json.open("w") as file:
-            json.dump(self.params, file, indent=4)
+        json_payload = {
+            **self.params,
+            **self.vllm_args,
+        }
+
+        with job_json.open("w") as f:
+            json.dump(json_payload, f, indent=4)
 
         return LaunchResponse(
             slurm_job_id=int(self.slurm_job_id),
             model_name=self.model_name,
-            config=self.params,
+            config={**self.params, "vllm_args": self.vllm_args},
             raw_output=command_output,
         )
 
