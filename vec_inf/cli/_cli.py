@@ -139,13 +139,13 @@ def launch(
     """Launch a model on the cluster."""
     try:
         # Parse extra vLLM args
-        vllm_args = _parse_vllm_args(vllm_arg)
+        vllm_optional_args = _parse_vllm_optional_args(vllm_arg)
 
         # Prepare LaunchOptions
         kwargs: dict[
             str, Union[str, int, float, bool, dict[str, Union[str, int, float, bool]]]
         ] = {k: v for k, v in cli_kwargs.items() if v is not None}
-        kwargs["vllm_optional_args"] = vllm_args
+        kwargs["vllm_optional_args"] = vllm_optional_args
 
         options_dict: LaunchOptionsDict = cast(LaunchOptionsDict, kwargs)
         launch_options = LaunchOptions(**options_dict)
@@ -166,7 +166,9 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-def _parse_vllm_args(vllm_arg: tuple[str]) -> dict[str, Union[str, int, float, bool]]:
+def _parse_vllm_optional_args(
+    vllm_arg: tuple[str],
+) -> dict[str, Union[str, int, float, bool]]:
     parsed: dict[str, Union[str, int, float, bool]] = {}
     for raw_arg in vllm_arg:
         arg = raw_arg.removeprefix("--")

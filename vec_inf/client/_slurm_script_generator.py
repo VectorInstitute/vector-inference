@@ -6,9 +6,11 @@ from vec_inf.client._vars import VLLM_TASK_MAP
 
 
 class SlurmScriptGenerator:
-    def __init__(self, params: dict[str, Any], vllm_args: dict[str, Any], src_dir: str):
+    def __init__(
+        self, params: dict[str, Any], vllm_optional_args: dict[str, Any], src_dir: str
+    ):
         self.params = params
-        self.vllm_args = vllm_args
+        self.vllm_optional_args = vllm_optional_args
         self.src_dir = src_dir
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.model_weights_path = str(
@@ -75,7 +77,7 @@ class SlurmScriptGenerator:
         if self.params.get("enforce_eager") == "True":
             args.append("--enforce-eager")
 
-        for key, value in self.vllm_args.items():
+        for key, value in self.vllm_optional_args.items():
             cli_key = key.replace("_", "-")
             if isinstance(value, bool):
                 if value:

@@ -60,9 +60,9 @@ class LaunchResponseFormatter:
         if self.params.get("enforce_eager"):
             table.add_row("Enforce Eager", self.params["enforce_eager"])
 
-        vllm_args = self.params.get("vllm_args")
-        if isinstance(vllm_args, dict):
-            for key, val in vllm_args.items():
+        vllm_optional_args = self.params.get("vllm_optional_args")
+        if isinstance(vllm_optional_args, dict):
+            for key, val in vllm_optional_args.items():
                 label = f"VLLM: {key.replace('_', ' ').title()}"
                 table.add_row(label, str(val))
 
