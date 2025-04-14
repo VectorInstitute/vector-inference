@@ -1,6 +1,6 @@
 """Helper classes for the CLI."""
 
-import os
+from pathlib import Path
 from typing import Any, Union
 
 import click
@@ -59,9 +59,10 @@ class LaunchResponseFormatter:
             )
         if self.params.get("enforce_eager"):
             table.add_row("Enforce Eager", self.params["enforce_eager"])
-
-        # Add path details
-        table.add_row("Model Weights Directory", os.environ.get("MODEL_WEIGHTS"))
+        table.add_row(
+            "Model Weights Directory",
+            str(Path(self.params["model_weights_parent_dir"], self.model_name)),
+        )
         table.add_row("Log Directory", self.params["log_dir"])
 
         return table
