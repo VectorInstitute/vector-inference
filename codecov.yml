@@ -1,5 +1,5 @@
 codecov:
-  branch: develop
+  branch: main
   require_ci_to_pass: true
   notify:
     after_n_builds: 2
