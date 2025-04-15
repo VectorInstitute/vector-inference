@@ -1,30 +1,22 @@
 """Model configuration."""
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
+import yaml
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
 
 
-QOS = Literal[
-    "normal",
-    "m",
-    "m2",
-    "m3",
-    "m4",
-    "m5",
-    "long",
-    "deadline",
-    "high",
-    "scavenger",
-    "llm",
-    "a100",
-]
+# Load literals from Slurm config file and create Literal types
+config_path = Path(__file__).parent.parent / "config" / "slurm.yaml"
+with config_path.open() as f:
+    slurm_config = yaml.safe_load(f)
 
-PARTITION = Literal["a40", "a100", "t4v1", "t4v2", "rtx6000"]
-
-DATA_TYPE = Literal["auto", "float16", "bfloat16", "float32"]
+QOS: Any = Literal[tuple(slurm_config["qos"])]
+PARTITION: Any = Literal[tuple(slurm_config["partition"])]
+DATA_TYPE: Any = Literal[tuple(slurm_config["data_type"])]
+DEFAULT_ARGS = slurm_config["default"]
 
 
 class ModelConfig(BaseModel):
@@ -60,26 +52,29 @@ class ModelConfig(BaseModel):
         default=True, description="Enable pipeline parallelism"
     )
     enforce_eager: bool = Field(default=False, description="Force eager mode execution")
-    qos: Union[QOS, str] = Field(default="m2", description="Quality of Service tier")
+    qos: Union[QOS, str] = Field(
+        default=DEFAULT_ARGS["qos"], description="Quality of Service tier"
+    )
     time: str = Field(
-        default="08:00:00",
+        default=DEFAULT_ARGS["time"],
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
     partition: Union[PARTITION, str] = Field(
-        default="a40", description="GPU partition type"
+        default=DEFAULT_ARGS["partition"], description="GPU partition type"
     )
     data_type: Union[DATA_TYPE, str] = Field(
-        default="auto", description="Model precision format"
+        default=DEFAULT_ARGS["data_type"], description="Model precision format"
     )
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )
     log_dir: Path = Field(
-        default=Path("~/.vec-inf-logs").expanduser(), description="Log directory path"
+        default=Path(DEFAULT_ARGS["log_dir"]), description="Log directory path"
     )
     model_weights_parent_dir: Path = Field(
-        default=Path("/model-weights"), description="Base directory for model weights"
+        default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
+        description="Base directory for model weights",
     )
 
     model_config = ConfigDict(

@@ -1,0 +1,32 @@
+qos:
+  - normal
+  - m
+  - m2
+  - m3
+  - m4
+  - m5
+  - long
+  - deadline
+  - high
+  - scavenger
+  - llm
+  - a100
+
+partition:
+  - a40
+  - a100
+  - t4v1
+  - t4v2
+  - rtx6000
+
+data_type:
+  - auto
+  - float16
+  - bfloat16
+  - float32
+
+defaults:
+  qos: m2
+  time: 08:00:00
+  partition: a40
+  data_type: auto
