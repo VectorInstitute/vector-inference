@@ -28,6 +28,7 @@ from vec_inf.client._models import (
 from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
 from vec_inf.client._vars import (
     BOOLEAN_FIELDS,
+    KEY_METRICS,
     LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
     SINGULARITY_IMAGE,
@@ -355,19 +356,7 @@ class PerformanceMetricsCollector:
 
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
         """Parse metrics with latency count and sum."""
-        key_metrics = {
-            "vllm:prompt_tokens_total": "total_prompt_tokens",
-            "vllm:generation_tokens_total": "total_generation_tokens",
-            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
-            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
-            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
-            "vllm:request_success_total": "successful_requests_total",
-            "vllm:num_requests_running": "requests_running",
-            "vllm:num_requests_waiting": "requests_waiting",
-            "vllm:num_requests_swapped": "requests_swapped",
-            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
-            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
-        }
+        key_metrics = KEY_METRICS
 
         if self.enabled_prefix_caching:
             key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
