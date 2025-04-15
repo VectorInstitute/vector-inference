@@ -30,3 +30,5 @@ defaults:
   time: 08:00:00
   partition: a40
   data_type: auto
+  log_dir: ~/.vec-inf-logs
+  model_weights_parents_dir: /model-weights
