@@ -34,6 +34,7 @@ docs = [
     "mkdocstrings>=0.24.1",
     "mkdocstrings-python>=1.8.0",
     "pymdown-extensions>=10.7.1",
+    "mike>=2.0.0",
 ]
 
 [project.optional-dependencies]
