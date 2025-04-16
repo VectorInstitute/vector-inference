@@ -31,9 +31,7 @@ Thank you for your interest in contributing to Vector Inference! This guide will
     If you prefer using virtual environments, you can use `uv venv` to create one:
     ```bash
     uv venv
-    source .venv/bin/activate  # On Linux/macOS
-    # or
-    .venv\Scripts\activate  # On Windows
+    source .venv/bin/activate
     ```
 
 ## Development Workflow
