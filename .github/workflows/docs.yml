@@ -161,6 +161,9 @@ jobs:
             DEPLOY_ARGS="$DEPLOY_ARGS $ALIAS"
           fi
 
+          # Activate the virtual environment
+          source .venv/bin/activate
+
           echo "Running: mike deploy $DEPLOY_ARGS"
           mike deploy $DEPLOY_ARGS
 
