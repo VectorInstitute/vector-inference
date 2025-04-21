@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - develop
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/docs.yml
@@ -24,7 +23,6 @@ on:
   pull_request:
     branches:
       - main
-      - develop
     paths:
       - .pre-commit-config.yaml
       - .github/workflows/docs.yml
@@ -38,6 +36,15 @@ on:
       - mkdocs.yml
       - '**.png'
       - '**.svg'
+  release:
+    types: [published]
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., 0.5.0, latest)'
+        required: true
+        default: 'latest'
 
 jobs:
   build:
@@ -45,6 +52,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -75,11 +84,27 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.21"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install the project
+        run: uv sync --all-extras --group docs
 
       - name: Configure Git Credentials
         run: |
@@ -95,8 +120,54 @@ jobs:
       - name: Ensure .nojekyll exists
         run: touch site/.nojekyll
 
-      - name: Deploy to Github pages
-        uses: JamesIves/github-pages-deploy-action@v4.7.3
-        with:
-          branch: gh-pages
-          folder: site
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Use the version provided in the workflow dispatch
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "VERSION_ALIAS=latest" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            # Use the tag from the release
+            VERSION="${{ github.ref_name }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "VERSION_ALIAS=latest" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # For pushes to main, tag as "main"
+            echo "VERSION=main" >> $GITHUB_OUTPUT
+            # No alias for main
+            echo "VERSION_ALIAS=" >> $GITHUB_OUTPUT
+          else
+            # Get version from pyproject.toml as fallback
+            VERSION=$(grep -m 1 '^version = ' pyproject.toml | sed 's/^version = "\(.*\)"$/\1/')
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "VERSION_ALIAS=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy docs with mike
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          ALIAS=${{ steps.version.outputs.VERSION_ALIAS }}
+
+          # Add a temporary remote to fetch gh-pages if it exists
+          git remote add temp https://github.com/${{ github.repository }}.git || true
+          git fetch temp gh-pages || true
+
+          DEPLOY_ARGS="--push --update-aliases $VERSION"
+
+          if [[ ! -z "$ALIAS" ]]; then
+            DEPLOY_ARGS="$DEPLOY_ARGS $ALIAS"
+          fi
+
+          echo "Running: mike deploy $DEPLOY_ARGS"
+          mike deploy $DEPLOY_ARGS
+
+          # Set default version to latest only if we're deploying a version with the latest alias
+          if [[ ! -z "$ALIAS" && "$ALIAS" == "latest" ]]; then
+            mike set-default --push latest
+          fi
+
+          # Remove the temporary remote
+          git remote remove temp || true
