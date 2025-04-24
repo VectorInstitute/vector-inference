@@ -7,16 +7,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
 
-
-# Load literals from Slurm config file and create Literal types
-config_path = Path(__file__).parent.parent / "config" / "slurm.yaml"
-with config_path.open() as f:
-    slurm_config = yaml.safe_load(f)
-
-QOS: Any = Literal[tuple(slurm_config["qos"])]
-PARTITION: Any = Literal[tuple(slurm_config["partition"])]
-DATA_TYPE: Any = Literal[tuple(slurm_config["data_type"])]
-DEFAULT_ARGS = slurm_config["default"]
+from vec_inf.client.slurm_vars import QOS, PARTITION, DATA_TYPE, DEFAULT_ARGS
 
 
 class ModelConfig(BaseModel):
@@ -32,6 +23,18 @@ class ModelConfig(BaseModel):
     )
     gpus_per_node: int = Field(..., gt=0, le=8, description="GPUs per node")
     num_nodes: int = Field(..., gt=0, le=16, description="Number of nodes")
+    cpus_per_task: int = Field(
+        default=DEFAULT_ARGS["cpus_per_task"],
+        gt=0,
+        le=128,
+        description="CPUs per task",
+    )
+    mem_per_node: int = Field(
+        default=DEFAULT_ARGS["mem_per_node"],
+        gt=0,
+        le=1024,
+        description="Memory per node",
+    )
     vocab_size: int = Field(..., gt=0, le=1_000_000)
     max_model_len: int = Field(
         ..., gt=0, le=1_010_000, description="Maximum context length supported"
