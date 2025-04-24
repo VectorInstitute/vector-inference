@@ -12,7 +12,7 @@ import yaml
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._models import ModelStatus
-from vec_inf.client._vars import (
+from vec_inf.client._client_vars import (
     CACHED_CONFIG,
     MODEL_READY_SIGNATURE,
 )
