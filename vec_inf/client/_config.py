@@ -36,25 +36,6 @@ class ModelConfig(BaseModel):
         description="Memory per node",
     )
     vocab_size: int = Field(..., gt=0, le=1_000_000)
-    max_model_len: int = Field(
-        ..., gt=0, le=1_010_000, description="Maximum context length supported"
-    )
-    max_num_seqs: int = Field(
-        default=256, gt=0, le=1024, description="Maximum concurrent request sequences"
-    )
-    compilation_config: int = Field(
-        default=0,
-        gt=-1,
-        le=4,
-        description="torch.compile optimization level",
-    )
-    gpu_memory_utilization: float = Field(
-        default=0.9, gt=0.0, le=1.0, description="GPU memory utilization"
-    )
-    pipeline_parallelism: bool = Field(
-        default=True, description="Enable pipeline parallelism"
-    )
-    enforce_eager: bool = Field(default=False, description="Force eager mode execution")
     qos: Union[QOS, str] = Field(
         default=DEFAULT_ARGS["qos"], description="Quality of Service tier"
     )
@@ -66,9 +47,6 @@ class ModelConfig(BaseModel):
     partition: Union[PARTITION, str] = Field(
         default=DEFAULT_ARGS["partition"], description="GPU partition type"
     )
-    data_type: Union[DATA_TYPE, str] = Field(
-        default=DEFAULT_ARGS["data_type"], description="Model precision format"
-    )
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )
@@ -78,6 +56,9 @@ class ModelConfig(BaseModel):
     model_weights_parent_dir: Path = Field(
         default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
+    )
+    vllm_args: Optional[dict[str, Any]] = Field(
+        default=None, description="vLLM engine arguments"
     )
 
     model_config = ConfigDict(
