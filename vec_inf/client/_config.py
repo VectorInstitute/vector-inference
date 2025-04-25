@@ -57,7 +57,7 @@ class ModelConfig(BaseModel):
         default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
     )
-    vllm_args: Optional[dict[str, Any]] = Field(
+    vllm_args: Optional[list[dict[str, Any]]] = Field(
         default=None, description="vLLM engine arguments"
     )
 
