@@ -12,10 +12,8 @@ import yaml
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._models import ModelStatus
-from vec_inf.client._client_vars import (
-    CACHED_CONFIG,
-    MODEL_READY_SIGNATURE,
-)
+from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
+from vec_inf.client.slurm_vars import CACHED_CONFIG
 
 
 def run_bash_command(command: str) -> tuple[str, str]:
