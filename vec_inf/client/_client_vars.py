@@ -24,15 +24,6 @@ REQUIRED_FIELDS = {
     "gpus_per_node",
     "num_nodes",
     "vocab_size",
-    "max_model_len",
-}
-
-# Boolean fields for model configuration
-BOOLEAN_FIELDS = {
-    "pipeline_parallelism",
-    "enforce_eager",
-    "enable_prefix_caching",
-    "enable_chunked_prefill",
 }
 
 # Key production metrics for inference servers
