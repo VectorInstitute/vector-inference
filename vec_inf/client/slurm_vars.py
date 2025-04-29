@@ -31,13 +31,6 @@ PARTITION = Literal[
   "rtx6000",
 ]
 
-DATA_TYPE = Literal[
-  "auto",
-  "float16",
-  "bfloat16",
-  "float32",
-]
-
 DEFAULT_ARGS = {
   "cpus_per_task": 16,
   "mem_per_node": "64G",
