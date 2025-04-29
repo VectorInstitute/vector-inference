@@ -32,20 +32,7 @@ class SlurmScriptGenerator:
             Path(params["model_weights_parent_dir"], params["model_name"])
         )
         self.task = VLLM_TASK_MAP[self.params["model_type"]]
-        self.slurm_template = self._load_slurm_template("slurm_template.yaml")
-        self.vllm_args = self.slurm_template["templates"]["vllm_args"]
-
-    def _load_slurm_template(self, file_name: str) -> dict[str, str]:
-        """Load the SLURM template from the config file.
-
-        Returns
-        -------
-            dict[str, str]: The SLURM template
-        """
-        template_path = Path(__file__).parent.parent / "config" / file_name
-        with open(template_path, "r") as f:
-            return yaml.safe_load(f)
-
+        
     def _generate_script_content(self) -> str:
         """Generate the complete SLURM script content.
 
