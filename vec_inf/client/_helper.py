@@ -26,13 +26,14 @@ from vec_inf.client._models import (
     StatusResponse,
 )
 from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
-from vec_inf.client._vars import (
-    BOOLEAN_FIELDS,
+from vec_inf.client._client_vars import (
     KEY_METRICS,
-    LD_LIBRARY_PATH,
     REQUIRED_FIELDS,
-    SINGULARITY_IMAGE,
     SRC_DIR,
+)
+from vec_inf.client.slurm_vars import (
+    LD_LIBRARY_PATH,
+    SINGULARITY_IMAGE,
     VLLM_NCCL_SO_PATH,
 )
 
@@ -106,35 +107,55 @@ class ModelLauncher:
             f"not found at expected path '{model_weights_path}'"
         )
 
+    def _process_vllm_args(self, arg_string: str) -> dict[str, Any]:
+        """Process the vllm_args string into a dictionary."""
+        vllm_args = {}
+        for arg in arg_string.split(","):
+            if "=" in arg:
+                key, value = arg.split("=")
+                vllm_args[key] = value
+            else:
+                vllm_args[arg] = True
+        return vllm_args
+
     def _get_launch_params(self) -> dict[str, Any]:
-        """Merge config defaults with CLI overrides."""
+        """Merge config defaults with CLI arguments, set log dir, and validate required fields."""
         params = self.model_config.model_dump()
-
-        # Process boolean fields
-        for bool_field in BOOLEAN_FIELDS:
-            if self.kwargs.get(bool_field) and self.kwargs[bool_field]:
-                params[bool_field] = True
-
-        # Merge other overrides
+        
+        # Override config defaults with CLI arguments
+        if self.kwargs.get("vllm_args"):
+            vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
+            for key, value in vllm_args.items():
+                params["vllm_args"][key] = value
+            del self.kwargs["vllm_args"]
+        
         for key, value in self.kwargs.items():
-            if value is not None and key not in [
-                "json_mode",
-                *BOOLEAN_FIELDS,
-            ]:
-                params[key] = value
-
-        # Validate required fields
+            params[key] = value
+        
+        # Validate required fields and vllm args
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
             raise MissingRequiredFieldsError(
                 f"Missing required fields: {REQUIRED_FIELDS - set(params.keys())}"
             )
-
+        if int(params["gpus_per_node"]) > 1 and params["vllm_args"].get("--tensor-parallel-size") is None:
+            raise MissingRequiredFieldsError(
+                "--tensor-parallel-size is required when gpus_per_node > 1"
+            )
+        
         # Create log directory
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
         params["log_dir"].mkdir(parents=True, exist_ok=True)
+        params["src_dir"] = SRC_DIR
 
-        # Convert to string for JSON serialization
+        # Construct slurm log file paths
+        params["out_file"] = f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out"
+        params["err_file"] = f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err"
+        params["json_file"] = f"{params['log_dir']}/{self.model_name}.$SLURM_JOB_ID/{self.model_name}.$SLURM_JOB_ID.json"
+        
+        # Convert path to string for JSON serialization
         for field in params:
+            if field == "vllm_args":
+                continue
             params[field] = str(params[field])
 
         return params
@@ -146,34 +167,9 @@ class ModelLauncher:
         os.environ["SINGULARITY_IMAGE"] = SINGULARITY_IMAGE
 
     def _build_launch_command(self) -> str:
-        """Construct the full launch command with parameters."""
-        # Base command
-        command_list = ["sbatch"]
-        # Append options
-        command_list.extend(["--job-name", f"{self.model_name}"])
-        command_list.extend(["--partition", f"{self.params['partition']}"])
-        command_list.extend(["--qos", f"{self.params['qos']}"])
-        command_list.extend(["--time", f"{self.params['time']}"])
-        command_list.extend(["--nodes", f"{self.params['num_nodes']}"])
-        command_list.extend(["--gpus-per-node", f"{self.params['gpus_per_node']}"])
-        command_list.extend(
-            [
-                "--output",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out",
-            ]
-        )
-        command_list.extend(
-            [
-                "--error",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err",
-            ]
-        )
-        # Add slurm script
-        self.slurm_script_path = SlurmScriptGenerator(
-            self.params, SRC_DIR
-        ).write_to_log_dir()
-        command_list.append(str(self.slurm_script_path))
-        return " ".join(command_list)
+        """Generate the slurm script and construct the launch command."""
+        self.slurm_script_path = SlurmScriptGenerator(self.params).write_to_log_dir()
+        return f"sbatch {self.slurm_script_path}"
 
     def launch(self) -> LaunchResponse:
         """Launch the model."""
@@ -182,29 +178,30 @@ class ModelLauncher:
 
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
+        
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
-
+        
         # Extract slurm job id from command output
         self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
         self.params["slurm_job_id"] = self.slurm_job_id
-
+        
         # Create log directory and job json file, move slurm script to job log directory
         job_log_dir = Path(
             self.params["log_dir"], f"{self.model_name}.{self.slurm_job_id}"
         )
         job_log_dir.mkdir(parents=True, exist_ok=True)
-
+        
         job_json = Path(
             job_log_dir,
             f"{self.model_name}.{self.slurm_job_id}.json",
         )
         job_json.touch(exist_ok=True)
-
+        
         self.slurm_script_path.rename(
             job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
         )
-
+        
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
 
