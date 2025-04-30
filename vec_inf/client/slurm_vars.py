@@ -1,5 +1,6 @@
 """Slurm cluster configuration variables."""
 
+from pathlib import Path
 from typing_extensions import Literal
 
 CACHED_CONFIG = Path("/", "model-weights", "vec-inf-shared", "models.yaml")
@@ -39,5 +40,5 @@ DEFAULT_ARGS = {
   "partition": "a40",
   "data_type": "auto",
   "log_dir": "~/.vec-inf-logs",
-  "model_weights_parents_dir": "/model-weights",
+  "model_weights_parent_dir": "/model-weights",
 }
