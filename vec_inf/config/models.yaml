@@ -318,8 +318,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32064
-    max_model_len: 32768
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -441,8 +439,6 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    max_model_len: 65536
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -654,8 +650,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    max_model_len: 131072
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -874,8 +868,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 4096
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -903,8 +895,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -945,8 +935,6 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 32768
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -961,8 +949,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 131072
-    max_model_len: 8192
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
@@ -1085,8 +1071,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    max_model_len: 131072
-    max_num_seqs: 256
     qos: m2
     time: 08:00:00
     partition: a40
