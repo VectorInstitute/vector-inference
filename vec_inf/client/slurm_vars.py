@@ -10,6 +10,9 @@ LD_LIBRARY_PATH = "/scratch/ssd001/pkgs/cudnn-11.7-v8.5.0.96/lib/:/scratch/ssd00
 SINGULARITY_IMAGE = "/model-weights/vec-inf-shared/vector-inference_latest.sif"
 SINGULARITY_LOAD_CMD = "module load singularity-ce/3.8.2"
 VLLM_NCCL_SO_PATH = "/vec-inf/nccl/libnccl.so.2.18.1"
+MAX_GPUS_PER_NODE = 8
+MAX_NUM_NODES = 16
+MAX_CPUS_PER_TASK = 128
 
 QOS = Literal[
     "normal",
