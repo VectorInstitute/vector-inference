@@ -1,4 +1,8 @@
-"""Class for generating SLURM scripts to run vLLM servers."""
+"""Class for generating SLURM scripts to run vLLM servers.
+
+This module provides functionality to generate SLURM scripts for running vLLM servers
+in both single-node and multi-node configurations.
+"""
 
 from datetime import datetime
 from pathlib import Path
@@ -18,15 +22,20 @@ class SlurmScriptGenerator:
     multi-node configurations, supporting different virtualization environments
     (venv or singularity).
 
-    Args:
-        params (dict[str, Any]): Configuration parameters for the SLURM script
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Configuration parameters for the SLURM script. Contains settings for job
+        configuration, model parameters, and virtualization environment.
     """
 
     def __init__(self, params: dict[str, Any]):
         """Initialize the SlurmScriptGenerator with configuration parameters.
 
-        Args:
-            params (dict[str, Any]): Configuration parameters for the SLURM script
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Configuration parameters for the SLURM script.
         """
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
@@ -41,7 +50,8 @@ class SlurmScriptGenerator:
 
         Returns
         -------
-            str: The complete SLURM script as a string
+        str
+            The complete SLURM script as a string.
         """
         script_content = []
         script_content.append(self._generate_shebang())
@@ -54,7 +64,8 @@ class SlurmScriptGenerator:
 
         Returns
         -------
-            str: SLURM shebang containing job specifications
+        str
+            SLURM shebang containing job specifications.
         """
         shebang = [SLURM_SCRIPT_TEMPLATE["shebang"]["base"]]
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
@@ -71,7 +82,8 @@ class SlurmScriptGenerator:
 
         Returns
         -------
-            str: Server initialization script content
+        str
+            Server initialization script content.
         """
         server_script = ["\n"]
         if self.use_singularity:
@@ -111,7 +123,8 @@ class SlurmScriptGenerator:
 
         Returns
         -------
-            str: Server launch command
+        str
+            Server launch command.
         """
         launcher_script = ["\n"]
         if self.use_singularity:
@@ -146,7 +159,8 @@ class SlurmScriptGenerator:
 
         Returns
         -------
-            Path: Path to the generated SLURM script file
+        Path
+            Path to the generated SLURM script file.
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         script_path: Path = (

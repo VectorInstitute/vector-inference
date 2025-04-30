@@ -6,7 +6,8 @@ users direct control over the lifecycle of inference servers via python scripts.
 """
 
 from vec_inf.client._config import ModelConfig
-from vec_inf.client._models import (
+from vec_inf.client.api import VecInfClient
+from vec_inf.client.models import (
     LaunchOptions,
     LaunchOptionsDict,
     LaunchResponse,
@@ -16,7 +17,6 @@ from vec_inf.client._models import (
     ModelType,
     StatusResponse,
 )
-from vec_inf.client.api import VecInfClient
 
 
 __all__ = [

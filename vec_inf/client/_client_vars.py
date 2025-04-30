@@ -1,7 +1,28 @@
-"""Global variables for the vector inference package."""
+"""Global variables for Vector Inference.
+
+This module contains configuration constants and templates used throughout the
+Vector Inference package, including SLURM script templates, model configurations,
+and metric definitions.
+
+Constants
+---------
+MODEL_READY_SIGNATURE : str
+    Signature string indicating successful model server startup
+SRC_DIR : str
+    Absolute path to the package source directory
+VLLM_TASK_MAP : dict
+    Mapping of model types to their corresponding vLLM tasks
+REQUIRED_FIELDS : set
+    Set of required fields for model configuration
+KEY_METRICS : dict
+    Mapping of vLLM metrics to their human-readable names
+SLURM_JOB_CONFIG_ARGS : dict
+    Mapping of SLURM configuration arguments to their parameter names
+"""
 
 from pathlib import Path
 from typing import TypedDict
+
 from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
 
 
@@ -55,18 +76,63 @@ SLURM_JOB_CONFIG_ARGS = {
     "error": "err_file",
 }
 
+
 # Slurm script templates
 class ShebangConfig(TypedDict):
+    """TypedDict for SLURM script shebang configuration.
+
+    Parameters
+    ----------
+    base : str
+        Base shebang line for all SLURM scripts
+    multinode : list[str]
+        Additional SLURM directives for multi-node configurations
+    """
+
     base: str
     multinode: list[str]
 
 
 class ServerSetupConfig(TypedDict):
+    """TypedDict for server setup configuration.
+
+    Parameters
+    ----------
+    single_node : list[str]
+        Setup commands for single-node deployments
+    multinode : list[str]
+        Setup commands for multi-node deployments, including Ray initialization
+    """
+
     single_node: list[str]
     multinode: list[str]
 
 
 class SlurmScriptTemplate(TypedDict):
+    """TypedDict for complete SLURM script template configuration.
+
+    Parameters
+    ----------
+    shebang : ShebangConfig
+        Shebang and SLURM directive configuration
+    singularity_setup : list[str]
+        Commands for Singularity container setup
+    imports : str
+        Import statements and source commands
+    singularity_command : str
+        Template for Singularity execution command
+    activate_venv : str
+        Template for virtual environment activation
+    server_setup : ServerSetupConfig
+        Server initialization commands for different deployment modes
+    find_vllm_port : list[str]
+        Commands to find available ports for vLLM server
+    write_to_json : list[str]
+        Commands to write server configuration to JSON
+    launch_cmd : list[str]
+        vLLM server launch commands
+    """
+
     shebang: ShebangConfig
     singularity_setup: list[str]
     imports: str
