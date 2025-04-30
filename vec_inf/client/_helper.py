@@ -474,7 +474,7 @@ class ModelRegistry:
                 name=config.model_name,
                 family=config.model_family,
                 variant=config.model_variant,
-                type=ModelType(config.model_type),
+                model_type=ModelType(config.model_type),
                 config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
             )
             available_models.append(info)

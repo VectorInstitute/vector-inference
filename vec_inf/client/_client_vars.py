@@ -1,8 +1,7 @@
 """Global variables for the vector inference package."""
 
 from pathlib import Path
-
-from vec_inf.client._models import SlurmScriptTemplate
+from typing import TypedDict
 from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
 
 
@@ -57,6 +56,28 @@ SLURM_JOB_CONFIG_ARGS = {
 }
 
 # Slurm script templates
+class ShebangConfig(TypedDict):
+    base: str
+    multinode: list[str]
+
+
+class ServerSetupConfig(TypedDict):
+    single_node: list[str]
+    multinode: list[str]
+
+
+class SlurmScriptTemplate(TypedDict):
+    shebang: ShebangConfig
+    singularity_setup: list[str]
+    imports: str
+    singularity_command: str
+    activate_venv: str
+    server_setup: ServerSetupConfig
+    find_vllm_port: list[str]
+    write_to_json: list[str]
+    launch_cmd: list[str]
+
+
 SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "shebang": {
         "base": "#!/bin/bash",

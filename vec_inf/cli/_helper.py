@@ -217,13 +217,13 @@ class ListCmdDisplay:
         # Sort by model type priority
         sorted_model_infos = sorted(
             model_infos,
-            key=lambda x: MODEL_TYPE_PRIORITY.get(x.type, 4),
+            key=lambda x: MODEL_TYPE_PRIORITY.get(x.model_type, 4),
         )
 
         # Create panels with color coding
         panels = []
         for model_info in sorted_model_infos:
-            color = MODEL_TYPE_COLORS.get(model_info.type, "white")
+            color = MODEL_TYPE_COLORS.get(model_info.model_type, "white")
             variant = model_info.variant or ""
             display_text = f"[magenta]{model_info.family}[/magenta]"
             if variant:
