@@ -21,11 +21,11 @@ class TestVecInfImports(unittest.TestCase):
             import vec_inf.client._config
             import vec_inf.client._exceptions
             import vec_inf.client._helper
-            import vec_inf.client._models
             import vec_inf.client._slurm_script_generator
             import vec_inf.client._utils
             import vec_inf.client._client_vars  # noqa: F401
             import vec_inf.client.api
+            import vec_inf.client.models
             import vec_inf.client.slurm_vars
 
         except ImportError as e:
