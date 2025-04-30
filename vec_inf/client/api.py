@@ -6,6 +6,7 @@ services programmatically.
 
 import time
 from typing import Any, Optional, Union
+import warnings
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
@@ -235,6 +236,12 @@ class VecInfClient:
 
             # Check timeout
             if time.time() - start_time > timeout_seconds:
+                if status_info.server_status == ModelStatus.PENDING:
+                    warnings.warn(
+                        f"Model is still pending after {timeout_seconds} seconds, resetting timer...",
+                        UserWarning,
+                    )
+                    start_time = time.time()
                 raise ServerError(
                     f"Timed out waiting for model to become ready after {timeout_seconds} seconds"
                 )
