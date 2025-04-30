@@ -29,10 +29,9 @@ class ModelConfig(BaseModel):
         le=128,
         description="CPUs per task",
     )
-    mem_per_node: int = Field(
+    mem_per_node: str = Field(
         default=DEFAULT_ARGS["mem_per_node"],
-        gt=0,
-        le=1024,
+        pattern=r"^\d{1,4}G$",
         description="Memory per node",
     )
     vocab_size: int = Field(..., gt=0, le=1_000_000)
