@@ -10,9 +10,9 @@ from typing import Any, Optional, Union, cast
 import requests
 import yaml
 
+from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._models import ModelStatus
-from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
 from vec_inf.client.slurm_vars import CACHED_CONFIG
 
 

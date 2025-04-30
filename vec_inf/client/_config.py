@@ -3,11 +3,10 @@
 from pathlib import Path
 from typing import Any, Optional, Union
 
-import yaml
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
 
-from vec_inf.client.slurm_vars import QOS, PARTITION, DEFAULT_ARGS
+from vec_inf.client.slurm_vars import DEFAULT_ARGS, PARTITION, QOS
 
 
 class ModelConfig(BaseModel):

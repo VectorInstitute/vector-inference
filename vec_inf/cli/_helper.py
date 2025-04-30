@@ -206,8 +206,8 @@ class ListCmdDisplay:
                 table.add_row(field, str(value))
             if field == "vllm_args":
                 table.add_row("vLLM Arguments:", style="magenta")
-                for arg, value in value.items():
-                    table.add_row(f"  {arg}:", str(value))
+                for vllm_arg, vllm_value in value.items():
+                    table.add_row(f"  {vllm_arg}:", str(vllm_value))
         return table
 
     def _format_all_models_output(

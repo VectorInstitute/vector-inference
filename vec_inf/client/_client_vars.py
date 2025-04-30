@@ -62,7 +62,7 @@ SLURM_SCRIPT_TEMPLATE = {
         "multinode": [
             "#SBATCH --exclusive",
             "#SBATCH --tasks-per-node=1",
-        ]
+        ],
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
@@ -114,14 +114,14 @@ SLURM_SCRIPT_TEMPLATE = {
         'jq --arg server_addr "$server_address" \\',
         "    '. + {{\"server_address\": $server_addr}}' \\",
         '    "$json_path" > temp.json \\',
-        '    && mv temp.json "$json_path"'
+        '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
         "python3.10 -m vllm.entrypoints.openai.api_server \\",
         "    --model {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
-        "    --host \"0.0.0.0\" \\",
+        '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
-        "    --trust-remote-code \\"
-    ]
+        "    --trust-remote-code \\",
+    ],
 }

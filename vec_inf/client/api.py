@@ -5,8 +5,8 @@ services programmatically.
 """
 
 import time
-from typing import Any, Optional, Union
 import warnings
+from typing import Any, Optional, Union
 
 from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
@@ -240,6 +240,7 @@ class VecInfClient:
                     warnings.warn(
                         f"Model is still pending after {timeout_seconds} seconds, resetting timer...",
                         UserWarning,
+                        stacklevel=2,
                     )
                     start_time = time.time()
                 raise ServerError(

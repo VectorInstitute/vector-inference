@@ -3,9 +3,12 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-import yaml
 
-from vec_inf.client._client_vars import SLURM_JOB_CONFIG_ARGS, SLURM_SCRIPT_TEMPLATE, VLLM_TASK_MAP
+from vec_inf.client._client_vars import (
+    SLURM_JOB_CONFIG_ARGS,
+    SLURM_SCRIPT_TEMPLATE,
+    VLLM_TASK_MAP,
+)
 
 
 class SlurmScriptGenerator:
@@ -32,7 +35,7 @@ class SlurmScriptGenerator:
             Path(params["model_weights_parent_dir"], params["model_name"])
         )
         self.task = VLLM_TASK_MAP[self.params["model_type"]]
-        
+
     def _generate_script_content(self) -> str:
         """Generate the complete SLURM script content.
 
@@ -73,16 +76,31 @@ class SlurmScriptGenerator:
         server_script = ["\n"]
         if self.use_singularity:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]))
-        server_script.append(SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"]))
+        server_script.append(
+            SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
+        )
         if self.is_multinode:
-            server_setup_str = "\n".join(SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"])
+            server_setup_str = "\n".join(
+                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
+            )
             if self.use_singularity:
-                server_setup_str = server_setup_str.replace("SINGULARITY_PLACEHOLDER", SLURM_SCRIPT_TEMPLATE["singularity_command"].format(model_weights_path=self.model_weights_path))
+                server_setup_str = server_setup_str.replace(
+                    "SINGULARITY_PLACEHOLDER",
+                    SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
+                        model_weights_path=self.model_weights_path
+                    ),
+                )
         else:
-            server_setup_str = "\n".join(SLURM_SCRIPT_TEMPLATE["server_setup"]["single_node"])
+            server_setup_str = "\n".join(
+                SLURM_SCRIPT_TEMPLATE["server_setup"]["single_node"]
+            )
         server_script.append(server_setup_str)
         server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["find_vllm_port"]))
-        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["write_to_json"]).format(log_dir=self.params["log_dir"], model_name=self.params["model_name"]))
+        server_script.append(
+            "\n".join(SLURM_SCRIPT_TEMPLATE["write_to_json"]).format(
+                log_dir=self.params["log_dir"], model_name=self.params["model_name"]
+            )
+        )
         return "\n".join(server_script)
 
     def _generate_launch_cmd(self) -> str:
@@ -97,10 +115,22 @@ class SlurmScriptGenerator:
         """
         launcher_script = ["\n"]
         if self.use_singularity:
-            launcher_script.append(SLURM_SCRIPT_TEMPLATE["singularity_command"].format(model_weights_path=self.model_weights_path) + " \\")
+            launcher_script.append(
+                SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
+                    model_weights_path=self.model_weights_path
+                )
+                + " \\"
+            )
         else:
-            launcher_script.append(SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"]))
-        launcher_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(model_weights_path=self.model_weights_path, model_name=self.params["model_name"]))
+            launcher_script.append(
+                SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
+            )
+        launcher_script.append(
+            "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
+                model_weights_path=self.model_weights_path,
+                model_name=self.params["model_name"],
+            )
+        )
 
         for arg, value in self.params["vllm_args"].items():
             if isinstance(value, bool):
