@@ -44,7 +44,6 @@ class SlurmScriptGenerator:
         script_content.append(self._generate_shebang())
         script_content.append(self._generate_server_setup())
         script_content.append(self._generate_launch_cmd())
-
         return "\n".join(script_content)
 
     def _generate_shebang(self) -> str:
@@ -54,11 +53,11 @@ class SlurmScriptGenerator:
         -------
             str: SLURM shebang containing job specifications
         """
-        shebang = [SLURM_SCRIPT_TEMPLATE["shebang"]]
+        shebang = [SLURM_SCRIPT_TEMPLATE["shebang"]["base"]]
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             shebang.append(f"#SBATCH --{arg}={self.params[value]}")
         if self.is_multinode:
-            shebang += SLURM_SCRIPT_TEMPLATE["shebang_multinode"]
+            shebang += SLURM_SCRIPT_TEMPLATE["shebang"]["multinode"]
         return "\n".join(shebang)
 
     def _generate_server_setup(self) -> str:
@@ -71,10 +70,10 @@ class SlurmScriptGenerator:
         -------
             str: Server initialization script content
         """
-        server_script = []
+        server_script = ["\n"]
         if self.use_singularity:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]))
-        server_script.append(SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.src_dir))
+        server_script.append(SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"]))
         if self.is_multinode:
             server_setup_str = "\n".join(SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"])
             if self.use_singularity:
@@ -96,17 +95,18 @@ class SlurmScriptGenerator:
         -------
             str: Server launch command
         """
+        launcher_script = ["\n"]
         if self.use_singularity:
-            launcher_script = [SLURM_SCRIPT_TEMPLATE["singularity_command"].format(model_weights_path=self.model_weights_path)]
+            launcher_script.append(SLURM_SCRIPT_TEMPLATE["singularity_command"].format(model_weights_path=self.model_weights_path) + " \\")
         else:
-            launcher_script = [SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])]
-        launcher_script.append(SLURM_SCRIPT_TEMPLATE["launch_cmd"].format(model_weights_path=self.model_weights_path, model_name=self.params["model_name"]))
+            launcher_script.append(SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"]))
+        launcher_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(model_weights_path=self.model_weights_path, model_name=self.params["model_name"]))
+
         for arg, value in self.params["vllm_args"].items():
             if isinstance(value, bool):
-                if value:
-                    launcher_script.append(f"    {arg} \\")
+                launcher_script.append(f"    {arg} \\")
             else:
-                launcher_script.append(f"    {arg}={value} \\")
+                launcher_script.append(f"    {arg} {value} \\")
         return "\n".join(launcher_script)
 
     def write_to_log_dir(self) -> Path:
