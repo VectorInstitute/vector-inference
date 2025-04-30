@@ -105,7 +105,7 @@ SLURM_SCRIPT_TEMPLATE = {
             "    sleep 5",
             "done",
         ],
-    }
+    },
     "find_vllm_port": [
         "vllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
         'server_address="http://${head_node_ip}:${vllm_port_number}/v1"',
