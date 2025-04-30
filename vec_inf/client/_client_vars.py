@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from vec_inf.client._models import SlurmScriptTemplate
 from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
 
 
@@ -56,7 +57,7 @@ SLURM_JOB_CONFIG_ARGS = {
 }
 
 # Slurm script templates
-SLURM_SCRIPT_TEMPLATE = {
+SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "shebang": {
         "base": "#!/bin/bash",
         "multinode": [

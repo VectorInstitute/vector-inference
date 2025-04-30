@@ -110,3 +110,25 @@ class ModelInfo:
     variant: Optional[str]
     type: ModelType
     config: dict[str, Any]
+
+
+class ShebangConfig(TypedDict):
+    base: str
+    multinode: list[str]
+
+
+class ServerSetupConfig(TypedDict):
+    single_node: list[str]
+    multinode: list[str]
+
+
+class SlurmScriptTemplate(TypedDict):
+    shebang: ShebangConfig
+    singularity_setup: list[str]
+    imports: str
+    singularity_command: str
+    activate_venv: str
+    server_setup: ServerSetupConfig
+    find_vllm_port: list[str]
+    write_to_json: list[str]
+    launch_cmd: list[str]

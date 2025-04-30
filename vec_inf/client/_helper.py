@@ -98,7 +98,6 @@ class ModelLauncher:
                 gpus_per_node=1,
                 num_nodes=1,
                 vocab_size=1000,
-                max_model_len=8192,
                 model_weights_parent_dir=Path(str(model_weights_parent_dir)),
             )
 
@@ -109,7 +108,7 @@ class ModelLauncher:
 
     def _process_vllm_args(self, arg_string: str) -> dict[str, Any]:
         """Process the vllm_args string into a dictionary."""
-        vllm_args = {}
+        vllm_args: dict[str, str | bool] = {}
         for arg in arg_string.split(","):
             if "=" in arg:
                 key, value = arg.split("=")
