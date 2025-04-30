@@ -58,7 +58,7 @@ SLURM_JOB_CONFIG_ARGS = {
 # Slurm script templates
 SLURM_SCRIPT_TEMPLATE = {
     "shebang": {
-        "base": "!/bin/bash",
+        "base": "#!/bin/bash",
         "multinode": [
             "#SBATCH --exclusive",
             "#SBATCH --tasks-per-node=1",
@@ -68,9 +68,9 @@ SLURM_SCRIPT_TEMPLATE = {
         SINGULARITY_LOAD_CMD,
         "singularity exec $SINGULARITY_IMAGE ray stop",
     ],
+    "imports": "source {src_dir}/find_port.sh",
     "singularity_command": "singularity exec --nv --bind {model_weights_path}:{model_weights_path} --containall $SINGULARITY_IMAGE",
     "activate_venv": "source {venv}/bin/activate",
-    "imports": "source {src_dir}/find_port.sh",
     "server_setup": {
         "single_node": [
             "\n# Find available port",
@@ -85,8 +85,7 @@ SLURM_SCRIPT_TEMPLATE = {
             "\n# Start Ray head node",
             "head_node_port=$(find_available_port $head_node_ip 8080 65535)",
             "ray_head=$head_node_ip:$head_node_port",
-            "export ray_head",
-            'echo "IP Head: $ray_head"',
+            'echo "Ray Head IP: $ray_head"',
             'echo "Starting HEAD at $head_node"',
             'srun --nodes=1 --ntasks=1 -w "$head_node" \\',
             "    SINGULARITY_PLACEHOLDER \\",
@@ -107,11 +106,11 @@ SLURM_SCRIPT_TEMPLATE = {
         ],
     },
     "find_vllm_port": [
-        "vllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
+        "\nvllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
         'server_address="http://${head_node_ip}:${vllm_port_number}/v1"',
     ],
     "write_to_json": [
-        'json_path="{log_dir}/{model_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
+        '\njson_path="{log_dir}/{model_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
         'jq --arg server_addr "$server_address" \\',
         "    '. + {{\"server_address\": $server_addr}}' \\",
         '    "$json_path" > temp.json \\',
