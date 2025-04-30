@@ -30,36 +30,6 @@ def cli() -> None:
 @click.option("--model-family", type=str, help="The model family")
 @click.option("--model-variant", type=str, help="The model variant")
 @click.option(
-    "--max-model-len",
-    type=int,
-    help="Model context length. Default value set based on suggested resource allocation.",
-)
-@click.option(
-    "--max-num-seqs",
-    type=int,
-    help="Maximum number of sequences to process in a single request",
-)
-@click.option(
-    "--gpu-memory-utilization",
-    type=float,
-    help="GPU memory utilization, default to 0.9",
-)
-@click.option(
-    "--enable-prefix-caching",
-    is_flag=True,
-    help="Enables automatic prefix caching",
-)
-@click.option(
-    "--enable-chunked-prefill",
-    is_flag=True,
-    help="Enable chunked prefill, enabled by default if max number of sequences > 32k",
-)
-@click.option(
-    "--max-num-batched-tokens",
-    type=int,
-    help="Maximum number of batched tokens per iteration, defaults to 2048 if --enable-chunked-prefill is set, else None",
-)
-@click.option(
     "--partition",
     type=str,
     help="Type of compute partition",
@@ -85,12 +55,6 @@ def cli() -> None:
     help="Time limit for job, this should comply with QoS limits",
 )
 @click.option(
-    "--vocab-size",
-    type=int,
-    help="Vocabulary size, this option is intended for custom models",
-)
-@click.option("--data-type", type=str, help="Model data type")
-@click.option(
     "--venv",
     type=str,
     help="Path to virtual environment",
@@ -106,19 +70,9 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
-    "--pipeline-parallelism",
-    is_flag=True,
-    help="Enable pipeline parallelism, enabled by default for supported models",
-)
-@click.option(
-    "--compilation-config",
-    type=click.Choice(["0", "3"]),
-    help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
-)
-@click.option(
-    "--enforce-eager",
-    is_flag=True,
-    help="Always use eager-mode PyTorch",
+    "--vllm-args",
+    type=str,
+    help="vLLM engine arguments to be set, use the format as specified in vLLM documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
 )
 @click.option(
     "--json-mode",

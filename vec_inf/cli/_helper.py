@@ -31,6 +31,7 @@ class LaunchResponseFormatter:
 
         # Add model details
         table.add_row("Model Type", self.params["model_type"])
+        table.add_row("Vocabulary Size", self.params["vocab_size"])
 
         # Add resource allocation details
         table.add_row("Partition", self.params["partition"])
@@ -38,32 +39,20 @@ class LaunchResponseFormatter:
         table.add_row("Time Limit", self.params["time"])
         table.add_row("Num Nodes", self.params["num_nodes"])
         table.add_row("GPUs/Node", self.params["gpus_per_node"])
+        table.add_row("CPUs/Task", self.params["cpus_per_task"])
+        table.add_row("Memory/Node", self.params["mem_per_node"])
 
-        # Add model configuration details
-        table.add_row("Data Type", self.params["data_type"])
-        table.add_row("Vocabulary Size", self.params["vocab_size"])
-        table.add_row("Max Model Length", self.params["max_model_len"])
-        table.add_row("Max Num Seqs", self.params["max_num_seqs"])
-        table.add_row("GPU Memory Utilization", self.params["gpu_memory_utilization"])
-        table.add_row("Compilation Config", self.params["compilation_config"])
-        table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
-        if self.params.get("enable_prefix_caching"):
-            table.add_row("Enable Prefix Caching", self.params["enable_prefix_caching"])
-        if self.params.get("enable_chunked_prefill"):
-            table.add_row(
-                "Enable Chunked Prefill", self.params["enable_chunked_prefill"]
-            )
-        if self.params.get("max_num_batched_tokens"):
-            table.add_row(
-                "Max Num Batched Tokens", self.params["max_num_batched_tokens"]
-            )
-        if self.params.get("enforce_eager"):
-            table.add_row("Enforce Eager", self.params["enforce_eager"])
+        # Add job config details
         table.add_row(
             "Model Weights Directory",
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
         )
         table.add_row("Log Directory", self.params["log_dir"])
+
+        # Add vLLM configuration details
+        table.add_row("vLLM Arguments:", style="magenta")
+        for arg, value in self.params["vllm_args"].items():
+            table.add_row(f"  {arg}:", str(value))
 
         return table
 
@@ -213,8 +202,12 @@ class ListCmdDisplay:
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir"}:
+            if field not in {"venv", "log_dir", "vllm_args"}:
                 table.add_row(field, str(value))
+            if field == "vllm_args":
+                table.add_row("vLLM Arguments:", style="magenta")
+                for arg, value in value.items():
+                    table.add_row(f"  {arg}:", str(value))
         return table
 
     def _format_all_models_output(
