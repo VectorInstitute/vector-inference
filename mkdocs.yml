@@ -1,0 +1,99 @@
+extra_css:
+  - stylesheets/extra.css
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/discord
+      link: 404.html
+    - icon: fontawesome/brands/github
+      link: https://github.com/VectorInstitute/vector-inference
+  version:
+    provider: mike
+    default: latest
+markdown_extensions:
+  - attr_list
+  - admonition
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+  - meta
+  - footnotes
+nav:
+  - Home: index.md
+  - User Guide: user_guide.md
+  - API Reference: api.md
+  - Contributing: contributing.md
+plugins:
+  - search
+  - mike:
+      version_selector: true
+      css_dir: stylesheets
+      canonical_version: latest
+      alias_type: symlink
+      deploy_prefix: ''
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [../vec_inf]
+          options:
+            docstring_style: numpy
+            members_order: source
+            separate_signature: true
+            show_overloads: true
+            show_submodules: true
+            show_root_heading: false
+            show_root_full_path: true
+            show_root_toc_entry: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+repo_url: https://github.com/VectorInstitute/vector-inference
+repo_name: VectorInstitute/vector-inference
+site_name: Vector Inference
+site_url: https://vectorinstitute.github.io/vector-inference/
+theme:
+  name: material
+  custom_dir: docs/overrides
+  favicon: assets/favicon-48x48.svg
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/vector-logo.svg
+  logo_footer: assets/vector-logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: vector
+      accent: vector-teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: vector-teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
