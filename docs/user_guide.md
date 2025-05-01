@@ -13,7 +13,28 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/62fa818b-57dd-47de-b094-18aa91747f2d">
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Config              ┃ Value                                     ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Slurm Job ID            │ 16060964                                  │
+│ Job Name                │ Meta-Llama-3.1-8B-Instruct                │
+│ Model Type              │ LLM                                       │
+│ Vocabulary Size         │ 128256                                    │
+│ Partition               │ a40                                       │
+│ QoS                     │ m2                                        │
+│ Time Limit              │ 08:00:00                                  │
+│ Num Nodes               │ 1                                         │
+│ GPUs/Node               │ 1                                         │
+│ CPUs/Task               │ 16                                        │
+│ Memory/Node             │ 64G                                       │
+│ Model Weights Directory │ /model-weights/Meta-Llama-3.1-8B-Instruct │
+│ Log Directory           │ /h/vi_user/.vec-inf-logs/Meta-Llama-3.1   │
+│ vLLM Arguments:         │                                           │
+│   --max-model-len:      │ 131072                                    │
+│   --max-num-seqs:       │ 256                                       │
+└─────────────────────────┴───────────────────────────────────────────┘
+```
 
 #### Overrides
 
@@ -70,7 +91,7 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Note that there are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
+Note that there are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py) for details.
 
 ### `status` command
 
@@ -82,11 +103,28 @@ vec-inf status 15373800
 
 If the server is pending for resources, you should see an output like this:
 
-<img width="400" alt="status_pending_img" src="https://github.com/user-attachments/assets/b659c302-eae1-4560-b7a9-14eb3a822a2f">
+```
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Status     ┃ Value                      ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Model Name     │ Meta-Llama-3.1-8B-Instruct │
+│ Model Status   │ PENDING                    │
+│ Pending Reason │ Resources                  │
+│ Base URL       │ UNAVAILABLE                │
+└────────────────┴────────────────────────────┘
+```
 
 When the server is ready, you should see an output like this:
 
-<img width="400" alt="status_ready_img" src="https://github.com/user-attachments/assets/672986c2-736c-41ce-ac7c-1fb585cdcb0d">
+```
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Status   ┃ Value                      ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Model Name   │ Meta-Llama-3.1-8B-Instruct │
+│ Model Status │ READY                      │
+│ Base URL     │ http://gpu042:8080/v1      │
+└──────────────┴────────────────────────────┘
+```
 
 There are 5 possible states:
 
@@ -107,7 +145,23 @@ vec-inf metrics 15373800
 
 And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.
 
-<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/3ee143d0-1a71-4944-bbd7-4c3299bf0339">
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Metric                  ┃ Value           ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ Prompt Throughput       │ 10.9 tokens/s   │
+│ Generation Throughput   │ 34.2 tokens/s   │
+│ Requests Running        │ 1 reqs          │
+│ Requests Waiting        │ 0 reqs          │
+│ Requests Swapped        │ 0 reqs          │
+│ GPU Cache Usage         │ 0.1%            │
+│ CPU Cache Usage         │ 0.0%            │
+│ Avg Request Latency     │ 2.6 s           │
+│ Total Prompt Tokens     │ 441 tokens      │
+│ Total Generation Tokens │ 1748 tokens     │
+│ Successful Requests     │ 14 reqs         │
+└─────────────────────────┴─────────────────┘
+```
 
 ### `shutdown` command
 
@@ -135,7 +189,28 @@ You can also view the default setup for a specific supported model by providing 
 vec-inf list Meta-Llama-3.1-70B-Instruct
 ```
 
-<img width="500" alt="list_model_img" src="https://github.com/user-attachments/assets/34e53937-2d86-443e-85f6-34e408653ddb">
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Model Config             ┃ Value                      ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ model_name               │ Meta-Llama-3.1-8B-Instruct │
+│ model_family             │ Meta-Llama-3.1             │
+│ model_variant            │ 8B-Instruct                │
+│ model_type               │ LLM                        │
+│ gpus_per_node            │ 1                          │
+│ num_nodes                │ 1                          │
+│ cpus_per_task            │ 16                         │
+│ mem_per_node             │ 64G                        │
+│ vocab_size               │ 128256                     │
+│ qos                      │ m2                         │
+│ time                     │ 08:00:00                   │
+│ partition                │ a40                        │
+│ model_weights_parent_dir │ /model-weights             │
+│ vLLM Arguments:          │                            │
+│   --max-model-len:       │ 131072                     │
+│   --max-num-seqs:        │ 256                        │
+└──────────────────────────┴────────────────────────────┘
+```
 
 `launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
 
