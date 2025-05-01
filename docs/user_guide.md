@@ -13,7 +13,7 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/883e6a5b-8016-4837-8fdf-39097dfb18bf">
+<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/62fa818b-57dd-47de-b094-18aa91747f2d">
 
 #### Overrides
 
@@ -22,6 +22,14 @@ Models that are already supported by `vec-inf` would be launched using the cache
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
 ```
+
+To overwrite default vLLM engine arguments, you can specify the engine arguments in a comma separated string:
+
+```bash
+vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
+```
+
+For the full list of vLLM engine arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
 
 #### Custom models
 
@@ -47,14 +55,13 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 1010000
-    max_num_seqs: 256
-    pipeline_parallelism: true
-    enforce_eager: false
     qos: m2
     time: 08:00:00
     partition: a40
     model_weights_parent_dir: /h/<username>/model-weights
+    vllm_args:
+      --max-model-len: 1010000
+      --max-num-seqs: 256 
 ```
 
 You would then set the `VEC_INF_CONFIG` path using:
@@ -63,7 +70,7 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Note that there are other parameters that can also be added to the config but not shown in this example, such as `data_type` and `log_dir`.
+Note that there are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
 
 ### `status` command
 
@@ -131,6 +138,10 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 <img width="500" alt="list_model_img" src="https://github.com/user-attachments/assets/34e53937-2d86-443e-85f6-34e408653ddb">
 
 `launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
+
+## Check Job Configuration
+
+With every model launch, a Slurm script will be generated dynamically based on the job and model configuration. Once the Slurm job is queued, the generated Slurm script will be moved to the log directory for reproducibility, located at `$log_dir/$model_family/$model_name.$slurm_job_id/$model_name.$slurm_job_id.slurm`. In the same directory you can also find a JSON file with the same name that captures the launch configuration, and will have an entry of server URL once the server is ready. 
 
 ## Send inference requests
 

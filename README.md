@@ -3,12 +3,13 @@
 ----------------------------------------------------
 
 [![PyPI](https://img.shields.io/pypi/v/vec-inf)](https://pypi.org/project/vec-inf)
+[![downloads](https://img.shields.io/pypi/dm/vec-inf)]
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the environment variables in [`vec_inf/client/_vars.py`](vec_inf/client/_vars.py), [`vec_inf/client/_config.py`](vec_inf/client/_config.py), [`vllm.slurm`](vec_inf/vllm.slurm), [`multinode_vllm.slurm`](vec_inf/multinode_vllm.slurm) and [`models.yaml`](vec_inf/config/models.yaml) accordingly.
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the environment variables in [`vec_inf/client/slurm_vars.py`](vec_inf/client/slurm_vars.py), and the model config for cached model weights in [`vec_inf/config/models.yaml`](vec_inf/config/models.yaml) accordingly.
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
@@ -20,7 +21,9 @@ Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up 
 
 ## Usage
 
-### `launch` command
+Vector Inference provides 2 user interfaces, a CLI and an API
+
+### CLI
 
 The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.
 
@@ -31,17 +34,25 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_img" src="https://github.com/user-attachments/assets/883e6a5b-8016-4837-8fdf-39097dfb18bf">
+<img width="600" alt="launch_image" src="https://github.com/user-attachments/assets/a72a99fd-4bf2-408e-8850-359761d96c4f">
 
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
+Models that are already supported by `vec-inf` would be launched using the cached configuration (set in [slurm_vars.py](vec_inf/client/slurm_vars.py)) or [default configuration](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
 overriden. For example, if `qos` is to be overriden:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
 ```
+
+To overwrite default vLLM engine arguments, you can specify the engine arguments in a comma separated string:
+
+```bash
+vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
+```
+
+For the full list of vLLM engine arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
 
 #### Custom models
 
@@ -67,14 +78,14 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    max_model_len: 1010000
-    max_num_seqs: 256
-    pipeline_parallelism: true
-    enforce_eager: false
     qos: m2
     time: 08:00:00
     partition: a40
     model_weights_parent_dir: /h/<username>/model-weights
+    vllm_args:
+      --max-model-len: 1010000
+      --max-num-seqs: 256 
+      --compilation-confi: 3
 ```
 
 You would then set the `VEC_INF_CONFIG` path using:
@@ -83,68 +94,40 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-Note that there are other parameters that can also be added to the config but not shown in this example, such as `data_type` and `log_dir`.
+Note that there are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
 
-### `status` command
-You can check the inference server status by providing the Slurm job ID to the `status` command:
-```bash
-vec-inf status 15373800
+#### Other commands
+
+* `status`: Check the model status by providing its Slurm job ID, `--json-mode` supported.
+* `metrics`: Streams performance metrics to the console.
+* `shutdown`: Shutdown a model by providing its Slurm job ID.
+* `list`: List all available model names, or view the default/cached configuration of a specific model, `--json-mode` supported.
+
+For more details on the usage of these commands, refer to the [User Guide](https://vectorinstitute.github.io/vector-inference/user_guide/)
+
+### API
+
+Example:
+
+```python
+>>> from vec_inf.api import VecInfClient
+>>> client = VecInfClient()
+>>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
+>>> job_id = response.slurm_job_id
+>>> status = client.get_status(job_id)
+>>> if status.status == ModelStatus.READY:
+...     print(f"Model is ready at {status.base_url}")
+>>> client.shutdown_model(job_id)
 ```
 
-If the server is pending for resources, you should see an output like this:
+For details on the usage of the API, refer to the [API Reference](https://vectorinstitute.github.io/vector-inference/api/)
 
-<img width="400" alt="status_pending_img" src="https://github.com/user-attachments/assets/b659c302-eae1-4560-b7a9-14eb3a822a2f">
+## Check Job Configuration
 
-When the server is ready, you should see an output like this:
-
-<img width="400" alt="status_ready_img" src="https://github.com/user-attachments/assets/672986c2-736c-41ce-ac7c-1fb585cdcb0d">
-
-There are 5 possible states:
-
-* **PENDING**: Job submitted to Slurm, but not executed yet. Job pending reason will be shown.
-* **LAUNCHING**: Job is running but the server is not ready yet.
-* **READY**: Inference server running and ready to take requests.
-* **FAILED**: Inference server in an unhealthy state. Job failed reason will be shown.
-* **SHUTDOWN**: Inference server is shutdown/cancelled.
-
-Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
-
-### `metrics` command
-Once your server is ready, you can check performance metrics by providing the Slurm job ID to the `metrics` command:
-```bash
-vec-inf metrics 15373800
-```
-
-And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.
-
-<img width="400" alt="metrics_img" src="https://github.com/user-attachments/assets/3ee143d0-1a71-4944-bbd7-4c3299bf0339">
-
-### `shutdown` command
-Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
-```bash
-vec-inf shutdown 15373800
-
-> Shutting down model with Slurm Job ID: 15373800
-```
-
-### `list` command
-You call view the full list of available models by running the `list` command:
-```bash
-vec-inf list
-```
-<img width="940" alt="list_img" src="https://github.com/user-attachments/assets/8cf901c4-404c-4398-a52f-0486f00747a3">
-
-NOTE: The above screenshot does not represent the full list of models supported.
-
-You can also view the default setup for a specific supported model by providing the model name, for example `Meta-Llama-3.1-70B-Instruct`:
-```bash
-vec-inf list Meta-Llama-3.1-70B-Instruct
-```
-<img width="500" alt="list_model_img" src="https://github.com/user-attachments/assets/34e53937-2d86-443e-85f6-34e408653ddb">
-
-`launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
+With every model launch, a Slurm script will be generated dynamically based on the job and model configuration. Once the Slurm job is queued, the generated Slurm script will be moved to the log directory for reproducibility, located at `$log_dir/$model_family/$model_name.$slurm_job_id/$model_name.$slurm_job_id.slurm`. In the same directory you can also find a JSON file with the same name that captures the launch configuration, and will have an entry of server URL once the server is ready. 
 
 ## Send inference requests
+
 Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in [`examples`](examples) folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run `python examples/inference/llm/chat_completions.py`, and you should expect to see an output like the following:
 
 ```json
