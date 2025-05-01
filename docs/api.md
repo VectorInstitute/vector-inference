@@ -12,7 +12,7 @@ This section documents the Python API for vector-inference.
 
 ## Data Models
 
-::: vec_inf.client._models
+::: vec_inf.client.models
     options:
       show_root_heading: true
       members: true
