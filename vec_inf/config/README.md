@@ -24,12 +24,6 @@ More profiling metrics coming soon!
 | [`CodeLlama-70b-hf`](https://huggingface.co/meta-llama/CodeLlama-70b-hf) | 4x a40 | - tokens/s | - tokens/s |
 | [`CodeLlama-70b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-70b-Instruct-hf) | 4x a40 | - tokens/s | - tokens/s |
 
-### [Databricks: DBRX](https://huggingface.co/collections/databricks/dbrx-6601c0852a0cdd3c59f71962)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`dbrx-instruct`](https://huggingface.co/databricks/dbrx-instruct) | 8x a40 (2 nodes, 4 a40/node) | 107 tokens/s | 904 tokens/s |
-
 ### [Google: Gemma 2](https://huggingface.co/collections/google/gemma-2-release-667d6600fd5220e7b967f315)
 
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
@@ -103,12 +97,6 @@ More profiling metrics coming soon!
 | Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
 |:----------:|:----------:|:----------:|:----------:|
 | [`Phi-3-medium-128k-instruct`](https://huggingface.co/microsoft/Phi-3-medium-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |
-
-### [Aaditya Ura: Llama3-OpenBioLLM](https://huggingface.co/aaditya/Llama3-OpenBioLLM-70B)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Llama3-OpenBioLLM-70B`](https://huggingface.co/aaditya/Llama3-OpenBioLLM-70B) | 4x a40 | - tokens/s | - tokens/s |
 
 ### [Nvidia: Llama-3.1-Nemotron](https://huggingface.co/collections/nvidia/llama-31-nemotron-70b-670e93cd366feea16abc13d8)
 
