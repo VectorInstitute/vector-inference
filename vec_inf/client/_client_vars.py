@@ -10,8 +10,6 @@ MODEL_READY_SIGNATURE : str
     Signature string indicating successful model server startup
 SRC_DIR : str
     Absolute path to the package source directory
-VLLM_TASK_MAP : dict
-    Mapping of model types to their corresponding vLLM tasks
 REQUIRED_FIELDS : set
     Set of required fields for model configuration
 KEY_METRICS : dict
@@ -29,14 +27,6 @@ from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SRC_DIR = str(Path(__file__).parent.parent)
 
-
-# Maps model types to vLLM tasks
-VLLM_TASK_MAP = {
-    "LLM": "generate",
-    "VLM": "generate",
-    "TEXT_EMBEDDING": "embed",
-    "REWARD_MODELING": "reward",
-}
 
 # Required fields for model configuration
 REQUIRED_FIELDS = {

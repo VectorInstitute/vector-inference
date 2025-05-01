@@ -11,7 +11,6 @@ from typing import Any
 from vec_inf.client._client_vars import (
     SLURM_JOB_CONFIG_ARGS,
     SLURM_SCRIPT_TEMPLATE,
-    VLLM_TASK_MAP,
 )
 
 
@@ -43,7 +42,6 @@ class SlurmScriptGenerator:
         self.model_weights_path = str(
             Path(params["model_weights_parent_dir"], params["model_name"])
         )
-        self.task = VLLM_TASK_MAP[self.params["model_type"]]
 
     def _generate_script_content(self) -> str:
         """Generate the complete SLURM script content.
