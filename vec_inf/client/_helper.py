@@ -37,7 +37,6 @@ from vec_inf.client.models import (
 )
 from vec_inf.client.slurm_vars import (
     LD_LIBRARY_PATH,
-    SINGULARITY_IMAGE,
     VLLM_NCCL_SO_PATH,
 )
 
@@ -229,7 +228,6 @@ class ModelLauncher:
         """Set environment variables for the launch command."""
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
         os.environ["VLLM_NCCL_SO_PATH"] = VLLM_NCCL_SO_PATH
-        os.environ["SINGULARITY_IMAGE"] = SINGULARITY_IMAGE
 
     def _build_launch_command(self) -> str:
         """Generate the slurm script and construct the launch command.

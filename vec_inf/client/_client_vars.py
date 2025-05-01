@@ -144,10 +144,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
-        "singularity exec $SINGULARITY_IMAGE ray stop",
+        "singularity exec {singularity_image} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "singularity_command": "singularity exec --nv --bind {model_weights_path}:{model_weights_path} --containall $SINGULARITY_IMAGE",
+    "singularity_command": "singularity exec --nv --bind {model_weights_path}:{model_weights_path} --containall {singularity_image}",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
