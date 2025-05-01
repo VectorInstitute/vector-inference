@@ -14,7 +14,6 @@ import time
 import warnings
 from typing import Any, Optional, Union
 
-from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
     ServerError,
     SlurmJobError,
@@ -26,6 +25,7 @@ from vec_inf.client._helper import (
     PerformanceMetricsCollector,
 )
 from vec_inf.client._utils import run_bash_command
+from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     LaunchOptions,
     LaunchResponse,

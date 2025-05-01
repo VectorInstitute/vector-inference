@@ -20,7 +20,6 @@ from vec_inf.client._client_vars import (
     REQUIRED_FIELDS,
     SRC_DIR,
 )
-from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
@@ -28,6 +27,7 @@ from vec_inf.client._exceptions import (
     SlurmJobError,
 )
 from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
+from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     LaunchResponse,
     ModelInfo,
