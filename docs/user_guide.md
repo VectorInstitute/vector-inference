@@ -61,7 +61,7 @@ models:
     model_weights_parent_dir: /h/<username>/model-weights
     vllm_args:
       --max-model-len: 1010000
-      --max-num-seqs: 256 
+      --max-num-seqs: 256
 ```
 
 You would then set the `VEC_INF_CONFIG` path using:
@@ -141,7 +141,7 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 
 ## Check Job Configuration
 
-With every model launch, a Slurm script will be generated dynamically based on the job and model configuration. Once the Slurm job is queued, the generated Slurm script will be moved to the log directory for reproducibility, located at `$log_dir/$model_family/$model_name.$slurm_job_id/$model_name.$slurm_job_id.slurm`. In the same directory you can also find a JSON file with the same name that captures the launch configuration, and will have an entry of server URL once the server is ready. 
+With every model launch, a Slurm script will be generated dynamically based on the job and model configuration. Once the Slurm job is queued, the generated Slurm script will be moved to the log directory for reproducibility, located at `$log_dir/$model_family/$model_name.$slurm_job_id/$model_name.$slurm_job_id.slurm`. In the same directory you can also find a JSON file with the same name that captures the launch configuration, and will have an entry of server URL once the server is ready.
 
 ## Send inference requests
 
