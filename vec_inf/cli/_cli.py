@@ -31,7 +31,7 @@ from vec_inf.cli._helper import (
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
-from vec_inf.client import LaunchOptions, LaunchOptionsDict, VecInfClient
+from vec_inf.client import LaunchOptions, VecInfClient
 
 
 CONSOLE = Console()
@@ -142,9 +142,7 @@ def launch(
     try:
         # Convert cli_kwargs to LaunchOptions
         kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
-        # Cast the dictionary to LaunchOptionsDict
-        options_dict: LaunchOptionsDict = kwargs  # type: ignore
-        launch_options = LaunchOptions(**options_dict)
+        launch_options = LaunchOptions(**kwargs)
 
         # Start the client and launch model inference server
         client = VecInfClient()
