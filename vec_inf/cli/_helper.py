@@ -1,4 +1,8 @@
-"""Helper classes for the CLI."""
+"""Helper classes for the CLI.
+
+This module provides formatting and display classes for the command-line interface,
+handling the presentation of model information, status updates, and metrics.
+"""
 
 from pathlib import Path
 from typing import Any, Union
@@ -9,20 +13,41 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from vec_inf.cli._models import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
 from vec_inf.cli._utils import create_table
+from vec_inf.cli._vars import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
 from vec_inf.client import ModelConfig, ModelInfo, StatusResponse
 
 
 class LaunchResponseFormatter:
-    """CLI Helper class for formatting LaunchResponse."""
+    """CLI Helper class for formatting LaunchResponse.
+
+    A formatter class that handles the presentation of model launch information
+    in both table and JSON formats.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the launched model
+    params : dict[str, Any]
+        Launch parameters and configuration
+    """
 
     def __init__(self, model_name: str, params: dict[str, Any]):
         self.model_name = model_name
         self.params = params
 
     def format_table_output(self) -> Table:
-        """Format output as rich Table."""
+        """Format output as rich Table.
+
+        Returns
+        -------
+        Table
+            Rich table containing formatted launch information including:
+            - Job configuration
+            - Model details
+            - Resource allocation
+            - vLLM configuration
+        """
         table = create_table(key_title="Job Config", value_title="Value")
 
         # Add key information with consistent styling
@@ -31,6 +56,7 @@ class LaunchResponseFormatter:
 
         # Add model details
         table.add_row("Model Type", self.params["model_type"])
+        table.add_row("Vocabulary Size", self.params["vocab_size"])
 
         # Add resource allocation details
         table.add_row("Partition", self.params["partition"])
@@ -38,44 +64,49 @@ class LaunchResponseFormatter:
         table.add_row("Time Limit", self.params["time"])
         table.add_row("Num Nodes", self.params["num_nodes"])
         table.add_row("GPUs/Node", self.params["gpus_per_node"])
+        table.add_row("CPUs/Task", self.params["cpus_per_task"])
+        table.add_row("Memory/Node", self.params["mem_per_node"])
 
-        # Add model configuration details
-        table.add_row("Data Type", self.params["data_type"])
-        table.add_row("Vocabulary Size", self.params["vocab_size"])
-        table.add_row("Max Model Length", self.params["max_model_len"])
-        table.add_row("Max Num Seqs", self.params["max_num_seqs"])
-        table.add_row("GPU Memory Utilization", self.params["gpu_memory_utilization"])
-        table.add_row("Compilation Config", self.params["compilation_config"])
-        table.add_row("Pipeline Parallelism", self.params["pipeline_parallelism"])
-        if self.params.get("enable_prefix_caching"):
-            table.add_row("Enable Prefix Caching", self.params["enable_prefix_caching"])
-        if self.params.get("enable_chunked_prefill"):
-            table.add_row(
-                "Enable Chunked Prefill", self.params["enable_chunked_prefill"]
-            )
-        if self.params.get("max_num_batched_tokens"):
-            table.add_row(
-                "Max Num Batched Tokens", self.params["max_num_batched_tokens"]
-            )
-        if self.params.get("enforce_eager"):
-            table.add_row("Enforce Eager", self.params["enforce_eager"])
+        # Add job config details
         table.add_row(
             "Model Weights Directory",
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
         )
         table.add_row("Log Directory", self.params["log_dir"])
 
+        # Add vLLM configuration details
+        table.add_row("vLLM Arguments:", style="magenta")
+        for arg, value in self.params["vllm_args"].items():
+            table.add_row(f"  {arg}:", str(value))
+
         return table
 
 
 class StatusResponseFormatter:
-    """CLI Helper class for formatting StatusResponse."""
+    """CLI Helper class for formatting StatusResponse.
+
+    A formatter class that handles the presentation of model status information
+    in both table and JSON formats.
+
+    Parameters
+    ----------
+    status_info : StatusResponse
+        Status information to format
+    """
 
     def __init__(self, status_info: StatusResponse):
         self.status_info = status_info
 
     def output_json(self) -> None:
-        """Format and output JSON data."""
+        """Format and output JSON data.
+
+        Outputs a JSON object containing:
+        - model_name
+        - model_status
+        - base_url
+        - pending_reason (if applicable)
+        - failed_reason (if applicable)
+        """
         json_data = {
             "model_name": self.status_info.model_name,
             "model_status": self.status_info.server_status,
@@ -88,7 +119,17 @@ class StatusResponseFormatter:
         click.echo(json_data)
 
     def output_table(self) -> Table:
-        """Create and display rich table."""
+        """Create and display rich table.
+
+        Returns
+        -------
+        Table
+            Rich table containing formatted status information including:
+            - Model name
+            - Status
+            - Base URL
+            - Error information (if applicable)
+        """
         table = create_table(key_title="Job Status", value_title="Value")
         table.add_row("Model Name", self.status_info.model_name)
         table.add_row("Model Status", self.status_info.server_status, style="blue")
@@ -103,7 +144,16 @@ class StatusResponseFormatter:
 
 
 class MetricsResponseFormatter:
-    """CLI Helper class for formatting MetricsResponse."""
+    """CLI Helper class for formatting MetricsResponse.
+
+    A formatter class that handles the presentation of model metrics
+    in a table format.
+
+    Parameters
+    ----------
+    metrics : Union[dict[str, float], str]
+        Dictionary of metrics or error message
+    """
 
     def __init__(self, metrics: Union[dict[str, float], str]):
         self.metrics = self._set_metrics(metrics)
@@ -111,17 +161,51 @@ class MetricsResponseFormatter:
         self.enabled_prefix_caching = self._check_prefix_caching()
 
     def _set_metrics(self, metrics: Union[dict[str, float], str]) -> dict[str, float]:
-        """Set the metrics attribute."""
+        """Set the metrics attribute.
+
+        Parameters
+        ----------
+        metrics : Union[dict[str, float], str]
+            Raw metrics data
+
+        Returns
+        -------
+        dict[str, float]
+            Processed metrics dictionary
+        """
         return metrics if isinstance(metrics, dict) else {}
 
     def _check_prefix_caching(self) -> bool:
-        """Check if prefix caching is enabled by looking for prefix cache metrics."""
+        """Check if prefix caching is enabled.
+
+        Returns
+        -------
+        bool
+            True if prefix caching metrics are present
+        """
         return self.metrics.get("gpu_prefix_cache_hit_rate") is not None
 
     def format_failed_metrics(self, message: str) -> None:
+        """Format error message for failed metrics collection.
+
+        Parameters
+        ----------
+        message : str
+            Error message to display
+        """
         self.table.add_row("ERROR", message)
 
     def format_metrics(self) -> None:
+        """Format and display all available metrics.
+
+        Formats and adds to the table:
+        - Throughput metrics
+        - Request queue metrics
+        - Cache usage metrics
+        - Prefix cache metrics (if enabled)
+        - Latency metrics
+        - Token counts
+        """
         # Throughput metrics
         self.table.add_row(
             "Prompt Throughput",
@@ -189,7 +273,18 @@ class MetricsResponseFormatter:
 
 
 class ListCmdDisplay:
-    """CLI Helper class for displaying model listing functionality."""
+    """CLI Helper class for displaying model listing functionality.
+
+    A display class that handles the presentation of model listings
+    in both table and JSON formats.
+
+    Parameters
+    ----------
+    console : Console
+        Rich console instance for output
+    json_mode : bool, default=False
+        Whether to output in JSON format
+    """
 
     def __init__(self, console: Console, json_mode: bool = False):
         self.console = console
@@ -200,7 +295,18 @@ class ListCmdDisplay:
     def _format_single_model_output(
         self, config: ModelConfig
     ) -> Union[dict[str, Any], Table]:
-        """Format output table for a single model."""
+        """Format output table for a single model.
+
+        Parameters
+        ----------
+        config : ModelConfig
+            Model configuration to format
+
+        Returns
+        -------
+        Union[dict[str, Any], Table]
+            Either a dictionary for JSON output or a Rich table
+        """
         if self.json_mode:
             # Exclude non-essential fields from JSON output
             excluded = {"venv", "log_dir"}
@@ -213,24 +319,43 @@ class ListCmdDisplay:
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir"}:
+            if field not in {"venv", "log_dir", "vllm_args"}:
                 table.add_row(field, str(value))
+            if field == "vllm_args":
+                table.add_row("vLLM Arguments:", style="magenta")
+                for vllm_arg, vllm_value in value.items():
+                    table.add_row(f"  {vllm_arg}:", str(vllm_value))
         return table
 
     def _format_all_models_output(
         self, model_infos: list[ModelInfo]
     ) -> Union[list[str], list[Panel]]:
-        """Format output table for all models."""
+        """Format output table for all models.
+
+        Parameters
+        ----------
+        model_infos : list[ModelInfo]
+            List of model information to format
+
+        Returns
+        -------
+        Union[list[str], list[Panel]]
+            Either a list of model names or a list of formatted panels
+
+        Notes
+        -----
+        Models are sorted by type priority and color-coded based on their type.
+        """
         # Sort by model type priority
         sorted_model_infos = sorted(
             model_infos,
-            key=lambda x: MODEL_TYPE_PRIORITY.get(x.type, 4),
+            key=lambda x: MODEL_TYPE_PRIORITY.get(x.model_type, 4),
         )
 
         # Create panels with color coding
         panels = []
         for model_info in sorted_model_infos:
-            color = MODEL_TYPE_COLORS.get(model_info.type, "white")
+            color = MODEL_TYPE_COLORS.get(model_info.model_type, "white")
             variant = model_info.variant or ""
             display_text = f"[magenta]{model_info.family}[/magenta]"
             if variant:
@@ -240,7 +365,13 @@ class ListCmdDisplay:
         return panels
 
     def display_single_model_output(self, config: ModelConfig) -> None:
-        """Display the output for a single model."""
+        """Display the output for a single model.
+
+        Parameters
+        ----------
+        config : ModelConfig
+            Model configuration to display
+        """
         output = self._format_single_model_output(config)
         if self.json_mode:
             click.echo(output)
@@ -248,7 +379,19 @@ class ListCmdDisplay:
             self.console.print(output)
 
     def display_all_models_output(self, model_infos: list[ModelInfo]) -> None:
-        """Display the output for all models."""
+        """Display the output for all models.
+
+        Parameters
+        ----------
+        model_infos : list[ModelInfo]
+            List of model information to display
+
+        Notes
+        -----
+        Output format depends on json_mode:
+        - JSON: List of model names
+        - Table: Color-coded panels with model information
+        """
         if self.json_mode:
             model_names = [info.name for info in model_infos]
             click.echo(model_names)

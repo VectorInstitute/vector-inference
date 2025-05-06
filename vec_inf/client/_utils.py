@@ -1,4 +1,8 @@
-"""Utility functions shared between CLI and API."""
+"""Utility functions shared between CLI and API.
+
+This module provides utility functions for managing SLURM jobs, server status checks,
+and configuration handling for the vector inference package.
+"""
 
 import json
 import os
@@ -10,16 +14,25 @@ from typing import Any, Optional, Union, cast
 import requests
 import yaml
 
-from vec_inf.client._config import ModelConfig
-from vec_inf.client._models import ModelStatus
-from vec_inf.client._vars import (
-    CACHED_CONFIG,
-    MODEL_READY_SIGNATURE,
-)
+from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
+from vec_inf.client.config import ModelConfig
+from vec_inf.client.models import ModelStatus
+from vec_inf.client.slurm_vars import CACHED_CONFIG
 
 
 def run_bash_command(command: str) -> tuple[str, str]:
-    """Run a bash command and return the output."""
+    """Run a bash command and return the output.
+
+    Parameters
+    ----------
+    command : str
+        The bash command to execute
+
+    Returns
+    -------
+    tuple[str, str]
+        A tuple containing (stdout, stderr) from the command execution
+    """
     process = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
@@ -32,7 +45,27 @@ def read_slurm_log(
     slurm_log_type: str,
     log_dir: Optional[Union[str, Path]],
 ) -> Union[list[str], str, dict[str, str]]:
-    """Read the slurm log file."""
+    """Read the slurm log file.
+
+    Parameters
+    ----------
+    slurm_job_name : str
+        Name of the SLURM job
+    slurm_job_id : int
+        ID of the SLURM job
+    slurm_log_type : str
+        Type of log file to read ('out', 'err', or 'json')
+    log_dir : Optional[Union[str, Path]]
+        Directory containing log files, if None uses default location
+
+    Returns
+    -------
+    Union[list[str], str, dict[str, str]]
+        Contents of the log file:
+        - list[str] for 'out' and 'err' logs
+        - dict[str, str] for 'json' logs
+        - str for error messages if file not found
+    """
     if not log_dir:
         # Default log directory
         models_dir = Path.home() / ".vec-inf-logs"
@@ -72,7 +105,24 @@ def read_slurm_log(
 def is_server_running(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
 ) -> Union[str, ModelStatus, tuple[ModelStatus, str]]:
-    """Check if a model is ready to serve requests."""
+    """Check if a model is ready to serve requests.
+
+    Parameters
+    ----------
+    slurm_job_name : str
+        Name of the SLURM job
+    slurm_job_id : int
+        ID of the SLURM job
+    log_dir : Optional[str]
+        Directory containing log files
+
+    Returns
+    -------
+    Union[str, ModelStatus, tuple[ModelStatus, str]]
+        - str: Error message if logs cannot be read
+        - ModelStatus: Current status of the server
+        - tuple[ModelStatus, str]: Status and error message if server failed
+    """
     log_content = read_slurm_log(slurm_job_name, slurm_job_id, "err", log_dir)
     if isinstance(log_content, str):
         return log_content
@@ -89,7 +139,22 @@ def is_server_running(
 
 
 def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
-    """Get the base URL of a model."""
+    """Get the base URL of a model.
+
+    Parameters
+    ----------
+    slurm_job_name : str
+        Name of the SLURM job
+    slurm_job_id : int
+        ID of the SLURM job
+    log_dir : Optional[str]
+        Directory containing log files
+
+    Returns
+    -------
+    str
+        Base URL of the model server or error message if not found
+    """
     log_content = read_slurm_log(slurm_job_name, slurm_job_id, "json", log_dir)
     if isinstance(log_content, str):
         return log_content
@@ -101,7 +166,24 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 def model_health_check(
     slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
 ) -> tuple[ModelStatus, Union[str, int]]:
-    """Check the health of a running model on the cluster."""
+    """Check the health of a running model on the cluster.
+
+    Parameters
+    ----------
+    slurm_job_name : str
+        Name of the SLURM job
+    slurm_job_id : int
+        ID of the SLURM job
+    log_dir : Optional[str]
+        Directory containing log files
+
+    Returns
+    -------
+    tuple[ModelStatus, Union[str, int]]
+        Tuple containing:
+        - ModelStatus: Current status of the model
+        - Union[str, int]: Either HTTP status code or error message
+    """
     base_url = get_base_url(slurm_job_name, slurm_job_id, log_dir)
     if not base_url.startswith("http"):
         return (ModelStatus.FAILED, base_url)
@@ -118,7 +200,25 @@ def model_health_check(
 
 
 def load_config() -> list[ModelConfig]:
-    """Load the model configuration."""
+    """Load the model configuration.
+
+    Loads configuration from default and user-specified paths, merging them
+    if both exist. User configuration takes precedence over default values.
+
+    Returns
+    -------
+    list[ModelConfig]
+        List of validated model configurations
+
+    Notes
+    -----
+    Configuration is loaded from:
+    1. Default path: package's config/models.yaml
+    2. User path: specified by VEC_INF_CONFIG environment variable
+
+    If user configuration exists, it will be merged with default configuration,
+    with user values taking precedence for overlapping fields.
+    """
     default_path = (
         CACHED_CONFIG
         if CACHED_CONFIG.exists()
@@ -158,14 +258,21 @@ def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
 
     Parameters
     ----------
-    output: str
-        Output from the launch command
+    output : str
+        Raw output from the launch command
 
     Returns
     -------
     tuple[str, dict[str, str]]
-        Slurm job ID and dictionary of config parameters
+        Tuple containing:
+        - str: SLURM job ID
+        - dict[str, str]: Dictionary of parsed configuration parameters
 
+    Notes
+    -----
+    Extracts the SLURM job ID and configuration parameters from the launch
+    command output. Configuration parameters are parsed from key-value pairs
+    in the output text.
     """
     slurm_job_id = output.split(" ")[-1].strip().strip("\n")
 

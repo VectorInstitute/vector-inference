@@ -1,13 +1,19 @@
 """Vector Inference client for programmatic access.
 
 This module provides the main client class for interacting with Vector Inference
-services programmatically.
+services programmatically. It includes functionality for launching models, monitoring
+their status, collecting metrics, and managing their lifecycle.
+
+See Also
+--------
+vec_inf.client._helper : Helper classes for model inference server management
+vec_inf.client.models : Data models for API responses
 """
 
 import time
+import warnings
 from typing import Any, Optional, Union
 
-from vec_inf.client._config import ModelConfig
 from vec_inf.client._exceptions import (
     ServerError,
     SlurmJobError,
@@ -18,7 +24,9 @@ from vec_inf.client._helper import (
     ModelStatusMonitor,
     PerformanceMetricsCollector,
 )
-from vec_inf.client._models import (
+from vec_inf.client._utils import run_bash_command
+from vec_inf.client.config import ModelConfig
+from vec_inf.client.models import (
     LaunchOptions,
     LaunchResponse,
     MetricsResponse,
@@ -26,7 +34,6 @@ from vec_inf.client._models import (
     ModelStatus,
     StatusResponse,
 )
-from vec_inf.client._utils import run_bash_command
 
 
 class VecInfClient:
@@ -35,6 +42,23 @@ class VecInfClient:
     This class provides methods for launching models, checking their status,
     retrieving metrics, and shutting down models using the Vector Inference
     infrastructure.
+
+    Methods
+    -------
+    list_models()
+        List all available models
+    get_model_config(model_name)
+        Get configuration for a specific model
+    launch_model(model_name, options)
+        Launch a model on the cluster
+    get_status(slurm_job_id, log_dir)
+        Get status of a running model
+    get_metrics(slurm_job_id, log_dir)
+        Get performance metrics of a running model
+    shutdown_model(slurm_job_id)
+        Shutdown a running model
+    wait_until_ready(slurm_job_id, timeout_seconds, poll_interval_seconds, log_dir)
+        Wait for a model to become ready
 
     Examples
     --------
@@ -46,7 +70,6 @@ class VecInfClient:
     >>> if status.status == ModelStatus.READY:
     ...     print(f"Model is ready at {status.base_url}")
     >>> client.shutdown_model(job_id)
-
     """
 
     def __init__(self) -> None:
@@ -59,7 +82,8 @@ class VecInfClient:
         Returns
         -------
         list[ModelInfo]
-            ModelInfo objects containing information about available models.
+            List of ModelInfo objects containing information about available models,
+            including their configurations and specifications.
         """
         model_registry = ModelRegistry()
         return model_registry.get_all_models()
@@ -69,13 +93,18 @@ class VecInfClient:
 
         Parameters
         ----------
-        model_name: str
-            Name of the model to get configuration for.
+        model_name : str
+            Name of the model to get configuration for
 
         Returns
         -------
         ModelConfig
-            Model configuration.
+            Complete configuration for the specified model
+
+        Raises
+        ------
+        ModelNotFoundError
+            If the specified model is not found in the configuration
         """
         model_registry = ModelRegistry()
         return model_registry.get_single_model_config(model_name)
@@ -87,15 +116,25 @@ class VecInfClient:
 
         Parameters
         ----------
-        model_name: str
-            Name of the model to launch.
-        options: LaunchOptions, optional
-            Optional launch options to override default configuration.
+        model_name : str
+            Name of the model to launch
+        options : LaunchOptions, optional
+            Launch options to override default configuration
 
         Returns
         -------
         LaunchResponse
-            Information about the launched model.
+            Response containing launch details including:
+            - SLURM job ID
+            - Model configuration
+            - Launch status
+
+        Raises
+        ------
+        ModelConfigurationError
+            If the model configuration is invalid
+        SlurmJobError
+            If there's an error launching the SLURM job
         """
         # Convert LaunchOptions to dictionary if provided
         options_dict: dict[str, Any] = {}
@@ -113,15 +152,20 @@ class VecInfClient:
 
         Parameters
         ----------
-        slurm_job_id: str
-            The Slurm job ID to check.
-        log_dir: str, optional
-            Optional path to the Slurm log directory.
+        slurm_job_id : int
+            The SLURM job ID to check
+        log_dir : str, optional
+            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
         StatusResponse
-            Model status information.
+            Status information including:
+            - Model name
+            - Server status
+            - Job state
+            - Base URL (if ready)
+            - Error information (if failed)
         """
         model_status_monitor = ModelStatusMonitor(slurm_job_id, log_dir)
         return model_status_monitor.process_model_status()
@@ -133,15 +177,18 @@ class VecInfClient:
 
         Parameters
         ----------
-        slurm_job_id : str
-            The Slurm job ID to get metrics for.
+        slurm_job_id : int
+            The SLURM job ID to get metrics for
         log_dir : str, optional
-            Optional path to the Slurm log directory.
+            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
         MetricsResponse
-            Object containing the model's performance metrics.
+            Response containing:
+            - Model name
+            - Performance metrics or error message
+            - Timestamp of collection
         """
         performance_metrics_collector = PerformanceMetricsCollector(
             slurm_job_id, log_dir
@@ -164,18 +211,18 @@ class VecInfClient:
 
         Parameters
         ----------
-        slurm_job_id: str
-            The Slurm job ID to shut down.
+        slurm_job_id : int
+            The SLURM job ID to shut down
 
         Returns
         -------
         bool
-            True if the model was successfully shutdown, False otherwise.
+            True if the model was successfully shutdown
 
         Raises
         ------
         SlurmJobError
-            If there was an error shutting down the model.
+            If there was an error shutting down the model
         """
         shutdown_cmd = f"scancel {slurm_job_id}"
         _, stderr = run_bash_command(shutdown_cmd)
@@ -194,29 +241,34 @@ class VecInfClient:
 
         Parameters
         ----------
-        slurm_job_id: str
-            The Slurm job ID to wait for.
-        timeout_seconds: int
-            Maximum time to wait in seconds (default: 30 mins).
-        poll_interval_seconds: int
-            How often to check status in seconds (default: 10s).
-        log_dir: str, optional
-            Optional path to the Slurm log directory.
+        slurm_job_id : int
+            The SLURM job ID to wait for
+        timeout_seconds : int, optional
+            Maximum time to wait in seconds, by default 1800 (30 mins)
+        poll_interval_seconds : int, optional
+            How often to check status in seconds, by default 10
+        log_dir : str, optional
+            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
         StatusResponse
-            Status, if the model is ready or failed.
+            Status information when the model becomes ready
 
         Raises
         ------
         SlurmJobError
-            If the specified job is not found or there's an error with the job.
+            If the specified job is not found or there's an error with the job
         ServerError
-            If the server fails to start within the timeout period.
+            If the server fails to start within the timeout period
         APIError
-            If there was an error checking the status.
+            If there was an error checking the status
 
+        Notes
+        -----
+        The timeout is reset if the model is still in PENDING state after the
+        initial timeout period. This allows for longer queue times in the SLURM
+        scheduler.
         """
         start_time = time.time()
 
@@ -235,6 +287,13 @@ class VecInfClient:
 
             # Check timeout
             if time.time() - start_time > timeout_seconds:
+                if status_info.server_status == ModelStatus.PENDING:
+                    warnings.warn(
+                        f"Model is still pending after {timeout_seconds} seconds, resetting timer...",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                    start_time = time.time()
                 raise ServerError(
                     f"Timed out waiting for model to become ready after {timeout_seconds} seconds"
                 )

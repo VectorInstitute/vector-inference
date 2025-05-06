@@ -1,4 +1,8 @@
-"""Helper classes for the model."""
+"""Helper classes for the model.
+
+This module provides utility classes for managing model deployment, status monitoring,
+metrics collection, and model registry operations.
+"""
 
 import json
 import os
@@ -11,33 +15,45 @@ from urllib.parse import urlparse, urlunparse
 import requests
 
 import vec_inf.client._utils as utils
-from vec_inf.client._config import ModelConfig
+from vec_inf.client._client_vars import (
+    KEY_METRICS,
+    REQUIRED_FIELDS,
+    SRC_DIR,
+)
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
     ModelNotFoundError,
     SlurmJobError,
 )
-from vec_inf.client._models import (
+from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
+from vec_inf.client.config import ModelConfig
+from vec_inf.client.models import (
     LaunchResponse,
     ModelInfo,
     ModelStatus,
     ModelType,
     StatusResponse,
 )
-from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
-from vec_inf.client._vars import (
-    BOOLEAN_FIELDS,
+from vec_inf.client.slurm_vars import (
     LD_LIBRARY_PATH,
-    REQUIRED_FIELDS,
-    SINGULARITY_IMAGE,
-    SRC_DIR,
     VLLM_NCCL_SO_PATH,
 )
 
 
 class ModelLauncher:
-    """Helper class for handling inference server launch."""
+    """Helper class for handling inference server launch.
+
+    A class that manages the launch process of inference servers, including
+    configuration validation, parameter preparation, and SLURM job submission.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the model to launch
+    kwargs : dict[str, Any], optional
+        Optional launch keyword arguments to override default configuration
+    """
 
     def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
         """Initialize the model launcher.
@@ -57,11 +73,30 @@ class ModelLauncher:
         self.params = self._get_launch_params()
 
     def _warn(self, message: str) -> None:
-        """Warn the user about a potential issue."""
+        """Warn the user about a potential issue.
+
+        Parameters
+        ----------
+        message : str
+            Warning message to display
+        """
         warnings.warn(message, UserWarning, stacklevel=2)
 
     def _get_model_configuration(self) -> ModelConfig:
-        """Load and validate model configuration."""
+        """Load and validate model configuration.
+
+        Returns
+        -------
+        ModelConfig
+            Validated configuration for the model
+
+        Raises
+        ------
+        ModelNotFoundError
+            If model weights parent directory cannot be determined
+        ModelConfigurationError
+            If model configuration is not found and weights don't exist
+        """
         model_configs = utils.load_config()
         config = next(
             (m for m in model_configs if m.model_name == self.model_name), None
@@ -96,7 +131,6 @@ class ModelLauncher:
                 gpus_per_node=1,
                 num_nodes=1,
                 vocab_size=1000,
-                max_model_len=8192,
                 model_weights_parent_dir=Path(str(model_weights_parent_dir)),
             )
 
@@ -105,35 +139,87 @@ class ModelLauncher:
             f"not found at expected path '{model_weights_path}'"
         )
 
+    def _process_vllm_args(self, arg_string: str) -> dict[str, Any]:
+        """Process the vllm_args string into a dictionary.
+
+        Parameters
+        ----------
+        arg_string : str
+            Comma-separated string of vLLM arguments
+
+        Returns
+        -------
+        dict[str, Any]
+            Processed vLLM arguments as key-value pairs
+        """
+        vllm_args: dict[str, str | bool] = {}
+        for arg in arg_string.split(","):
+            if "=" in arg:
+                key, value = arg.split("=")
+                vllm_args[key] = value
+            else:
+                vllm_args[arg] = True
+        return vllm_args
+
     def _get_launch_params(self) -> dict[str, Any]:
-        """Merge config defaults with CLI overrides."""
+        """Prepare launch parameters, set log dir, and validate required fields.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of prepared launch parameters
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If required fields are missing or tensor parallel size is not specified
+            when using multiple GPUs
+        """
         params = self.model_config.model_dump()
 
-        # Process boolean fields
-        for bool_field in BOOLEAN_FIELDS:
-            if self.kwargs.get(bool_field) and self.kwargs[bool_field]:
-                params[bool_field] = True
+        # Override config defaults with CLI arguments
+        if self.kwargs.get("vllm_args"):
+            vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
+            for key, value in vllm_args.items():
+                params["vllm_args"][key] = value
+            del self.kwargs["vllm_args"]
 
-        # Merge other overrides
         for key, value in self.kwargs.items():
-            if value is not None and key not in [
-                "json_mode",
-                *BOOLEAN_FIELDS,
-            ]:
-                params[key] = value
+            params[key] = value
 
-        # Validate required fields
+        # Validate required fields and vllm args
         if not REQUIRED_FIELDS.issubset(set(params.keys())):
             raise MissingRequiredFieldsError(
                 f"Missing required fields: {REQUIRED_FIELDS - set(params.keys())}"
+            )
+        if (
+            int(params["gpus_per_node"]) > 1
+            and params["vllm_args"].get("--tensor-parallel-size") is None
+        ):
+            raise MissingRequiredFieldsError(
+                "--tensor-parallel-size is required when gpus_per_node > 1"
             )
 
         # Create log directory
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
         params["log_dir"].mkdir(parents=True, exist_ok=True)
+        params["src_dir"] = SRC_DIR
 
-        # Convert to string for JSON serialization
+        # Construct slurm log file paths
+        params["out_file"] = (
+            f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out"
+        )
+        params["err_file"] = (
+            f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err"
+        )
+        params["json_file"] = (
+            f"{params['log_dir']}/{self.model_name}.$SLURM_JOB_ID/{self.model_name}.$SLURM_JOB_ID.json"
+        )
+
+        # Convert path to string for JSON serialization
         for field in params:
+            if field == "vllm_args":
+                continue
             params[field] = str(params[field])
 
         return params
@@ -142,45 +228,37 @@ class ModelLauncher:
         """Set environment variables for the launch command."""
         os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
         os.environ["VLLM_NCCL_SO_PATH"] = VLLM_NCCL_SO_PATH
-        os.environ["SINGULARITY_IMAGE"] = SINGULARITY_IMAGE
 
     def _build_launch_command(self) -> str:
-        """Construct the full launch command with parameters."""
-        # Base command
-        command_list = ["sbatch"]
-        # Append options
-        command_list.extend(["--job-name", f"{self.model_name}"])
-        command_list.extend(["--partition", f"{self.params['partition']}"])
-        command_list.extend(["--qos", f"{self.params['qos']}"])
-        command_list.extend(["--time", f"{self.params['time']}"])
-        command_list.extend(["--nodes", f"{self.params['num_nodes']}"])
-        command_list.extend(["--gpus-per-node", f"{self.params['gpus_per_node']}"])
-        command_list.extend(
-            [
-                "--output",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out",
-            ]
-        )
-        command_list.extend(
-            [
-                "--error",
-                f"{self.params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.err",
-            ]
-        )
-        # Add slurm script
-        self.slurm_script_path = SlurmScriptGenerator(
-            self.params, SRC_DIR
-        ).write_to_log_dir()
-        command_list.append(str(self.slurm_script_path))
-        return " ".join(command_list)
+        """Generate the slurm script and construct the launch command.
+
+        Returns
+        -------
+        str
+            Complete SLURM launch command
+        """
+        self.slurm_script_path = SlurmScriptGenerator(self.params).write_to_log_dir()
+        return f"sbatch {self.slurm_script_path}"
 
     def launch(self) -> LaunchResponse:
-        """Launch the model."""
+        """Launch the model.
+
+        Returns
+        -------
+        LaunchResponse
+            Response object containing launch details and status
+
+        Raises
+        ------
+        SlurmJobError
+            If SLURM job submission fails
+        """
         # Set environment variables
         self._set_env_vars()
 
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
+
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
 
@@ -216,7 +294,18 @@ class ModelLauncher:
 
 
 class ModelStatusMonitor:
-    """Class for handling server status information and monitoring."""
+    """Class for handling server status information and monitoring.
+
+    A class that monitors and reports the status of deployed model servers,
+    including job state and health checks.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the SLURM job to monitor
+    log_dir : str, optional
+        Base directory containing log files
+    """
 
     def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
@@ -225,7 +314,18 @@ class ModelStatusMonitor:
         self.status_info = self._get_base_status_data()
 
     def _get_raw_status_output(self) -> str:
-        """Get the raw server status output from slurm."""
+        """Get the raw server status output from slurm.
+
+        Returns
+        -------
+        str
+            Raw output from scontrol command
+
+        Raises
+        ------
+        SlurmJobError
+            If status check fails
+        """
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output, stderr = utils.run_bash_command(status_cmd)
         if stderr:
@@ -233,7 +333,13 @@ class ModelStatusMonitor:
         return output
 
     def _get_base_status_data(self) -> StatusResponse:
-        """Extract basic job status information from scontrol output."""
+        """Extract basic job status information from scontrol output.
+
+        Returns
+        -------
+        StatusResponse
+            Basic status information for the job
+        """
         try:
             job_name = self.output.split(" ")[1].split("=")[1]
             job_state = self.output.split(" ")[9].split("=")[1]
@@ -285,7 +391,7 @@ class ModelStatusMonitor:
             self.status_info.server_status = cast(ModelStatus, server_status)
 
     def _process_pending_state(self) -> None:
-        """Process PENDING job state."""
+        """Process PENDING job state and update status information."""
         try:
             self.status_info.pending_reason = self.output.split(" ")[10].split("=")[1]
             self.status_info.server_status = ModelStatus.PENDING
@@ -293,7 +399,13 @@ class ModelStatusMonitor:
             self.status_info.pending_reason = "Unknown pending reason"
 
     def process_model_status(self) -> StatusResponse:
-        """Process different job states and update status information."""
+        """Process different job states and update status information.
+
+        Returns
+        -------
+        StatusResponse
+            Complete status information for the model
+        """
         if self.status_info.job_state == ModelStatus.PENDING:
             self._process_pending_state()
         elif self.status_info.job_state == "RUNNING":
@@ -303,7 +415,18 @@ class ModelStatusMonitor:
 
 
 class PerformanceMetricsCollector:
-    """Class for handling metrics collection and processing."""
+    """Class for handling metrics collection and processing.
+
+    A class that collects and processes performance metrics from running model servers,
+    including throughput and latency measurements.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the SLURM job to collect metrics from
+    log_dir : str, optional
+        Directory containing log files
+    """
 
     def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
@@ -318,12 +441,24 @@ class PerformanceMetricsCollector:
         self._last_throughputs = {"prompt": 0.0, "generation": 0.0}
 
     def _get_status_info(self) -> StatusResponse:
-        """Retrieve status info using existing StatusHelper."""
+        """Retrieve status info using existing StatusHelper.
+
+        Returns
+        -------
+        StatusResponse
+            Current status information for the model
+        """
         status_helper = ModelStatusMonitor(self.slurm_job_id, self.log_dir)
         return status_helper.process_model_status()
 
     def _build_metrics_url(self) -> str:
-        """Construct metrics endpoint URL from base URL with version stripping."""
+        """Construct metrics endpoint URL from base URL with version stripping.
+
+        Returns
+        -------
+        str
+            Complete metrics endpoint URL or status message
+        """
         if self.status_info.job_state == ModelStatus.PENDING:
             return "Pending resources for server initialization"
 
@@ -342,7 +477,13 @@ class PerformanceMetricsCollector:
         )
 
     def _check_prefix_caching(self) -> bool:
-        """Check if prefix caching is enabled."""
+        """Check if prefix caching is enabled.
+
+        Returns
+        -------
+        bool
+            True if prefix caching is enabled, False otherwise
+        """
         job_json = utils.read_slurm_log(
             self.status_info.model_name,
             self.slurm_job_id,
@@ -354,20 +495,19 @@ class PerformanceMetricsCollector:
         return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
 
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
-        """Parse metrics with latency count and sum."""
-        key_metrics = {
-            "vllm:prompt_tokens_total": "total_prompt_tokens",
-            "vllm:generation_tokens_total": "total_generation_tokens",
-            "vllm:e2e_request_latency_seconds_sum": "request_latency_sum",
-            "vllm:e2e_request_latency_seconds_count": "request_latency_count",
-            "vllm:request_queue_time_seconds_sum": "queue_time_sum",
-            "vllm:request_success_total": "successful_requests_total",
-            "vllm:num_requests_running": "requests_running",
-            "vllm:num_requests_waiting": "requests_waiting",
-            "vllm:num_requests_swapped": "requests_swapped",
-            "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
-            "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
-        }
+        """Parse metrics with latency count and sum.
+
+        Parameters
+        ----------
+        metrics_text : str
+            Raw metrics text from the server
+
+        Returns
+        -------
+        dict[str, float]
+            Parsed metrics as key-value pairs
+        """
+        key_metrics = KEY_METRICS
 
         if self.enabled_prefix_caching:
             key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
@@ -391,7 +531,13 @@ class PerformanceMetricsCollector:
         return parsed
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
-        """Fetch metrics from the endpoint."""
+        """Fetch metrics from the endpoint.
+
+        Returns
+        -------
+        Union[dict[str, float], str]
+            Dictionary of metrics or error message if request fails
+        """
         try:
             response = requests.get(self.metrics_url, timeout=3)
             response.raise_for_status()
@@ -466,28 +612,54 @@ class PerformanceMetricsCollector:
 
 
 class ModelRegistry:
-    """Class for handling model listing and configuration management."""
+    """Class for handling model listing and configuration management.
+
+    A class that provides functionality for listing available models and
+    managing their configurations.
+    """
 
     def __init__(self) -> None:
         """Initialize the model lister."""
         self.model_configs = utils.load_config()
 
     def get_all_models(self) -> list[ModelInfo]:
-        """Get all available models."""
+        """Get all available models.
+
+        Returns
+        -------
+        list[ModelInfo]
+            List of information about all available models
+        """
         available_models = []
         for config in self.model_configs:
             info = ModelInfo(
                 name=config.model_name,
                 family=config.model_family,
                 variant=config.model_variant,
-                type=ModelType(config.model_type),
+                model_type=ModelType(config.model_type),
                 config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
             )
             available_models.append(info)
         return available_models
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
-        """Get configuration for a specific model."""
+        """Get configuration for a specific model.
+
+        Parameters
+        ----------
+        model_name : str
+            Name of the model to retrieve configuration for
+
+        Returns
+        -------
+        ModelConfig
+            Configuration for the specified model
+
+        Raises
+        ------
+        ModelNotFoundError
+            If the specified model is not found in configuration
+        """
         config = next(
             (c for c in self.model_configs if c.model_name == model_name), None
         )

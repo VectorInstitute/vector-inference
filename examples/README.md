@@ -9,4 +9,3 @@
   - [`logits.py`](logits/logits.py): Python example of getting logits from hosted model.
 - [`api`](api): Examples for using the Python API
   - [`basic_usage.py`](api/basic_usage.py): Basic Python example demonstrating the Vector Inference API
-  - [`advanced_usage.py`](api/advanced_usage.py): Advanced Python example with rich UI for the Vector Inference API

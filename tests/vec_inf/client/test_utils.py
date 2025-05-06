@@ -147,8 +147,7 @@ def test_load_config_default_only():
     assert model.model_type == "LLM"
     assert model.gpus_per_node == 4
     assert model.num_nodes == 2
-    assert model.max_model_len == 8192
-    assert model.pipeline_parallelism is True
+    assert model.vllm_args["--max-model-len"] == 8192
 
 
 def test_load_config_with_user_override(tmp_path, monkeypatch):
@@ -165,7 +164,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 256000
-    max_model_len: 4096
+    vllm_args:
+      --max-model-len: 4096
 """)
 
     with monkeypatch.context() as m:
@@ -184,6 +184,7 @@ models:
     assert new_model.model_type == "VLM"
     assert new_model.gpus_per_node == 4
     assert new_model.vocab_size == 256000
+    assert new_model.vllm_args["--max-model-len"] == 4096
 
 
 def test_load_config_invalid_user_model(tmp_path):
