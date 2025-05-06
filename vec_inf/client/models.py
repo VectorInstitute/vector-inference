@@ -164,6 +164,8 @@ class LaunchOptions:
         Number of nodes to allocate
     gpus_per_node : int, optional
         Number of GPUs per node
+    account : str, optional
+        Account name for job scheduling
     qos : str, optional
         Quality of Service level
     time : str, optional
@@ -187,6 +189,7 @@ class LaunchOptions:
     partition: Optional[str] = None
     num_nodes: Optional[int] = None
     gpus_per_node: Optional[int] = None
+    account: Optional[str] = None
     qos: Optional[str] = None
     time: Optional[str] = None
     vocab_size: Optional[int] = None

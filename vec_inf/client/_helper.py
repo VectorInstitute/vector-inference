@@ -175,7 +175,7 @@ class ModelLauncher:
             If required fields are missing or tensor parallel size is not specified
             when using multiple GPUs
         """
-        params = self.model_config.model_dump()
+        params = self.model_config.model_dump(exclude_none=True)
 
         # Override config defaults with CLI arguments
         if self.kwargs.get("vllm_args"):

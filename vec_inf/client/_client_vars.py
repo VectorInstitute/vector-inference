@@ -56,6 +56,7 @@ KEY_METRICS = {
 SLURM_JOB_CONFIG_ARGS = {
     "job-name": "model_name",
     "partition": "partition",
+    "account": "account",
     "qos": "qos",
     "time": "time",
     "nodes": "num_nodes",

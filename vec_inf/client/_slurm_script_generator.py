@@ -68,7 +68,8 @@ class SlurmScriptGenerator:
         """
         shebang = [SLURM_SCRIPT_TEMPLATE["shebang"]["base"]]
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
-            shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+            if self.params.get(value):
+                shebang.append(f"#SBATCH --{arg}={self.params[value]}")
         if self.is_multinode:
             shebang += SLURM_SCRIPT_TEMPLATE["shebang"]["multinode"]
         return "\n".join(shebang)

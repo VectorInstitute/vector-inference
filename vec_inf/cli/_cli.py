@@ -63,6 +63,11 @@ def cli() -> None:
     help="Number of GPUs/node to use, default to suggested resource allocation for model",
 )
 @click.option(
+    "--account",
+    type=str,
+    help="Charge resources used by this job to specified account.",
+)
+@click.option(
     "--qos",
     type=str,
     help="Quality of service",
