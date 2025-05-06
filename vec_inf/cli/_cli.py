@@ -18,6 +18,7 @@ metrics
     Stream real-time performance metrics
 """
 
+import json
 import time
 from typing import Optional, Union
 
@@ -153,7 +154,7 @@ def launch(
         # Display launch information
         launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
         if cli_kwargs.get("json_mode"):
-            click.echo(launch_response.config)
+            click.echo(json.dumps(launch_response.config))
         else:
             launch_info_table = launch_formatter.format_table_output()
             CONSOLE.print(launch_info_table)
