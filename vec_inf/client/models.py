@@ -25,7 +25,7 @@ ModelInfo : datacitten
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, TypedDict, Union
+from typing import Any, Optional, Union
 
 
 class ModelStatus(str, Enum):
