@@ -9,13 +9,14 @@ on:
     paths:
       - Dockerfile
       - .github/workflows/docker.yml
+      - uv.lock
   pull_request:
     branches:
       - main
-      - develop
     paths:
       - Dockerfile
       - .github/workflows/docker.yml
+      - uv.lock
 
 jobs:
   push_to_registry:
