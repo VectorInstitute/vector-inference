@@ -16,7 +16,7 @@ print("Listing available models...")
 models = client.list_models()
 print(f"Found {len(models)} models")
 for model in models[:3]:  # Show just the first few
-    print(f"- {model.name} ({model.type})")
+    print(f"- {model.name} ({model.model_type})")
 
 # Launch a model (replace with an actual model name from your environment)
 model_name = "Meta-Llama-3.1-8B-Instruct"  # Use an available model from your list

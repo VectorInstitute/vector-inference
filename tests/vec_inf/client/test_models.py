@@ -9,14 +9,14 @@ def test_model_info_creation():
         name="test-model",
         family="test-family",
         variant="test-variant",
-        type=ModelType.LLM,
+        model_type=ModelType.LLM,
         config={"gpus_per_node": 1},
     )
 
     assert model.name == "test-model"
     assert model.family == "test-family"
     assert model.variant == "test-variant"
-    assert model.type == ModelType.LLM
+    assert model.model_type == ModelType.LLM
     assert model.config["gpus_per_node"] == 1
 
 
@@ -26,14 +26,14 @@ def test_model_info_optional_fields():
         name="test-model",
         family="test-family",
         variant=None,
-        type=ModelType.LLM,
+        model_type=ModelType.LLM,
         config={},
     )
 
     assert model.name == "test-model"
     assert model.family == "test-family"
     assert model.variant is None
-    assert model.type == ModelType.LLM
+    assert model.model_type == ModelType.LLM
 
 
 def test_launch_options_default_values():

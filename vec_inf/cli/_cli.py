@@ -1,4 +1,22 @@
-"""Command line interface for Vector Inference."""
+"""Command line interface for Vector Inference.
+
+This module provides the command-line interface for interacting with Vector
+Inference services, including model launching, status checking, metrics
+monitoring, and shutdown operations.
+
+Commands
+--------
+launch
+    Launch a model on the cluster
+status
+    Check the status of a running model
+shutdown
+    Stop a running model
+list
+    List available models or get specific model configuration
+metrics
+    Stream real-time performance metrics
+"""
 
 import time
 from typing import Optional, Union
@@ -30,36 +48,6 @@ def cli() -> None:
 @click.option("--model-family", type=str, help="The model family")
 @click.option("--model-variant", type=str, help="The model variant")
 @click.option(
-    "--max-model-len",
-    type=int,
-    help="Model context length. Default value set based on suggested resource allocation.",
-)
-@click.option(
-    "--max-num-seqs",
-    type=int,
-    help="Maximum number of sequences to process in a single request",
-)
-@click.option(
-    "--gpu-memory-utilization",
-    type=float,
-    help="GPU memory utilization, default to 0.9",
-)
-@click.option(
-    "--enable-prefix-caching",
-    is_flag=True,
-    help="Enables automatic prefix caching",
-)
-@click.option(
-    "--enable-chunked-prefill",
-    is_flag=True,
-    help="Enable chunked prefill, enabled by default if max number of sequences > 32k",
-)
-@click.option(
-    "--max-num-batched-tokens",
-    type=int,
-    help="Maximum number of batched tokens per iteration, defaults to 2048 if --enable-chunked-prefill is set, else None",
-)
-@click.option(
     "--partition",
     type=str,
     help="Type of compute partition",
@@ -85,12 +73,6 @@ def cli() -> None:
     help="Time limit for job, this should comply with QoS limits",
 )
 @click.option(
-    "--vocab-size",
-    type=int,
-    help="Vocabulary size, this option is intended for custom models",
-)
-@click.option("--data-type", type=str, help="Model data type")
-@click.option(
     "--venv",
     type=str,
     help="Path to virtual environment",
@@ -106,19 +88,9 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
-    "--pipeline-parallelism",
-    is_flag=True,
-    help="Enable pipeline parallelism, enabled by default for supported models",
-)
-@click.option(
-    "--compilation-config",
-    type=click.Choice(["0", "3"]),
-    help="torch.compile optimization level, accepts '0' or '3', default to '0', which means no optimization is applied",
-)
-@click.option(
-    "--enforce-eager",
-    is_flag=True,
-    help="Always use eager-mode PyTorch",
+    "--vllm-args",
+    type=str,
+    help="vLLM engine arguments to be set, use the format as specified in vLLM documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
 )
 @click.option(
     "--json-mode",
@@ -129,7 +101,44 @@ def launch(
     model_name: str,
     **cli_kwargs: Optional[Union[str, int, float, bool]],
 ) -> None:
-    """Launch a model on the cluster."""
+    """Launch a model on the cluster.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the model to launch
+    **cli_kwargs : dict
+        Additional launch options including:
+        - model_family : str, optional
+            Family/architecture of the model
+        - model_variant : str, optional
+            Specific variant of the model
+        - partition : str, optional
+            Type of compute partition
+        - num_nodes : int, optional
+            Number of nodes to use
+        - gpus_per_node : int, optional
+            Number of GPUs per node
+        - qos : str, optional
+            Quality of service tier
+        - time : str, optional
+            Time limit for job
+        - venv : str, optional
+            Path to virtual environment
+        - log_dir : str, optional
+            Path to SLURM log directory
+        - model_weights_parent_dir : str, optional
+            Path to model weights directory
+        - vllm_args : str, optional
+            vLLM engine arguments
+        - json_mode : bool, optional
+            Output in JSON format
+
+    Raises
+    ------
+    click.ClickException
+        If launch fails for any reason
+    """
     try:
         # Convert cli_kwargs to LaunchOptions
         kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
@@ -170,7 +179,22 @@ def launch(
 def status(
     slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
 ) -> None:
-    """Get the status of a running model on the cluster."""
+    """Get the status of a running model on the cluster.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the SLURM job to check
+    log_dir : str, optional
+        Path to SLURM log directory
+    json_mode : bool, default=False
+        Whether to output in JSON format
+
+    Raises
+    ------
+    click.ClickException
+        If status check fails
+    """
     try:
         # Start the client and get model inference server status
         client = VecInfClient()
@@ -192,7 +216,18 @@ def status(
 @cli.command("shutdown")
 @click.argument("slurm_job_id", type=int, nargs=1)
 def shutdown(slurm_job_id: int) -> None:
-    """Shutdown a running model on the cluster."""
+    """Shutdown a running model on the cluster.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the SLURM job to shut down
+
+    Raises
+    ------
+    click.ClickException
+        If shutdown operation fails
+    """
     try:
         client = VecInfClient()
         client.shutdown_model(slurm_job_id)
@@ -209,7 +244,20 @@ def shutdown(slurm_job_id: int) -> None:
     help="Output in JSON string",
 )
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
-    """List all available models, or get default setup of a specific model."""
+    """List all available models, or get default setup of a specific model.
+
+    Parameters
+    ----------
+    model_name : str, optional
+        Name of specific model to get information for
+    json_mode : bool, default=False
+        Whether to output in JSON format
+
+    Raises
+    ------
+    click.ClickException
+        If list operation fails
+    """
     try:
         # Start the client
         client = VecInfClient()
@@ -232,7 +280,26 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
     "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
 )
 def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
-    """Stream real-time performance metrics from the model endpoint."""
+    """Stream real-time performance metrics from the model endpoint.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the SLURM job to monitor
+    log_dir : str, optional
+        Path to SLURM log directory
+
+    Raises
+    ------
+    click.ClickException
+        If metrics collection fails
+
+    Notes
+    -----
+    This command continuously streams metrics with a 2-second refresh interval
+    until interrupted. If metrics are not available, it will display status
+    information instead.
+    """
     try:
         # Start the client and get inference server metrics
         client = VecInfClient()

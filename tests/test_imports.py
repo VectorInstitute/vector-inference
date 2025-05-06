@@ -18,12 +18,15 @@ class TestVecInfImports(unittest.TestCase):
 
             # Client imports
             import vec_inf.client
-            import vec_inf.client._config
+            import vec_inf.client._client_vars  # noqa: F401
             import vec_inf.client._exceptions
             import vec_inf.client._helper
-            import vec_inf.client._models
+            import vec_inf.client._slurm_script_generator
             import vec_inf.client._utils
-            import vec_inf.client._vars  # noqa: F401
+            import vec_inf.client.api
+            import vec_inf.client.config
+            import vec_inf.client.models
+            import vec_inf.client.slurm_vars  # noqa: F401
 
         except ImportError as e:
             pytest.fail(f"Import failed: {e}")
