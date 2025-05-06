@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.3.1-devel-ubuntu20.04
+FROM nvidia/cuda:12.4.1-devel-ubuntu20.04
 
 # Non-interactive apt-get commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -41,8 +41,10 @@ COPY . /vec-inf
 
 # Install project dependencies with build requirements
 RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
-# Install Flash Attention
+# Install FlashAttention
 RUN python3.10 -m pip install flash-attn --no-build-isolation
+# Install FlashInfer
+RUN python3.10 -m pip install flashinfer-python -i https://flashinfer.ai/whl/cu124/torch2.6/
 
 # Final configuration
 RUN mkdir -p /vec-inf/nccl && \
