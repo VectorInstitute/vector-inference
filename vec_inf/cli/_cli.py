@@ -146,8 +146,10 @@ def launch(
     """
     try:
         # Convert cli_kwargs to LaunchOptions
-        kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
-        launch_options = LaunchOptions(**kwargs)
+        json_mode = cli_kwargs["json_mode"]
+        del cli_kwargs["json_mode"]
+
+        launch_options = LaunchOptions(**cli_kwargs)  # type: ignore
 
         # Start the client and launch model inference server
         client = VecInfClient()
@@ -155,7 +157,7 @@ def launch(
 
         # Display launch information
         launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
-        if cli_kwargs.get("json_mode"):
+        if json_mode:
             click.echo(launch_response.config)
         else:
             launch_info_table = launch_formatter.format_table_output()
