@@ -160,12 +160,11 @@ class ModelLauncher:
                 if key.strip() in VLLM_SHORT_TO_LONG_MAP:
                     key = VLLM_SHORT_TO_LONG_MAP[key.strip()]
                 vllm_args[key.strip()] = value.strip()
+            elif "-O" in arg.strip():
+                key = VLLM_SHORT_TO_LONG_MAP["-O"]
+                vllm_args[key] = arg.strip()[2:].strip()
             else:
-                if "-O" in arg.strip():
-                    key = VLLM_SHORT_TO_LONG_MAP["-O"]
-                    vllm_args[key] = arg.strip()[2:].strip()
-                else:
-                    vllm_args[arg.strip()] = True
+                vllm_args[arg.strip()] = True
         return vllm_args
 
     def _get_launch_params(self) -> dict[str, Any]:
