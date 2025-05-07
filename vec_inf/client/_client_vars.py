@@ -67,6 +67,12 @@ SLURM_JOB_CONFIG_ARGS = {
     "error": "err_file",
 }
 
+# vLLM engine args mapping between short and long names 
+VLLM_SHORT_TO_LONG_MAP = {
+    "-tp": "--tensor-parallel-size",
+    "-pp": "--pipeline-parallel-size",
+    "-O": "--compilation-config",
+}
 
 # Slurm script templates
 class ShebangConfig(TypedDict):

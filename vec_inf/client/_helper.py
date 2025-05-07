@@ -19,6 +19,7 @@ from vec_inf.client._client_vars import (
     KEY_METRICS,
     REQUIRED_FIELDS,
     SRC_DIR,
+    VLLM_SHORT_TO_LONG_MAP,
 )
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
@@ -156,9 +157,15 @@ class ModelLauncher:
         for arg in arg_string.split(","):
             if "=" in arg:
                 key, value = arg.split("=")
-                vllm_args[key] = value
+                if key.strip() in VLLM_SHORT_TO_LONG_MAP:
+                    key = VLLM_SHORT_TO_LONG_MAP[key.strip()]
+                vllm_args[key.strip()] = value.strip()
             else:
-                vllm_args[arg] = True
+                if "-O" in arg.strip():
+                    key = VLLM_SHORT_TO_LONG_MAP["-O"]
+                    vllm_args[key] = arg.strip()[2:].strip()
+                else:
+                    vllm_args[arg.strip()] = True
         return vllm_args
 
     def _get_launch_params(self) -> dict[str, Any]:
