@@ -31,7 +31,7 @@ from vec_inf.cli._helper import (
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
-from vec_inf.client import LaunchOptions, LaunchOptionsDict, VecInfClient
+from vec_inf.client import LaunchOptions, VecInfClient
 
 
 CONSOLE = Console()
@@ -61,6 +61,11 @@ def cli() -> None:
     "--gpus-per-node",
     type=int,
     help="Number of GPUs/node to use, default to suggested resource allocation for model",
+)
+@click.option(
+    "--account",
+    type=str,
+    help="Charge resources used by this job to specified account.",
 )
 @click.option(
     "--qos",
@@ -141,10 +146,10 @@ def launch(
     """
     try:
         # Convert cli_kwargs to LaunchOptions
-        kwargs = {k: v for k, v in cli_kwargs.items() if k != "json_mode"}
-        # Cast the dictionary to LaunchOptionsDict
-        options_dict: LaunchOptionsDict = kwargs  # type: ignore
-        launch_options = LaunchOptions(**options_dict)
+        json_mode = cli_kwargs["json_mode"]
+        del cli_kwargs["json_mode"]
+
+        launch_options = LaunchOptions(**cli_kwargs)  # type: ignore
 
         # Start the client and launch model inference server
         client = VecInfClient()
@@ -152,7 +157,7 @@ def launch(
 
         # Display launch information
         launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
-        if cli_kwargs.get("json_mode"):
+        if json_mode:
             click.echo(launch_response.config)
         else:
             launch_info_table = launch_formatter.format_table_output()

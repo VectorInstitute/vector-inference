@@ -56,6 +56,7 @@ KEY_METRICS = {
 SLURM_JOB_CONFIG_ARGS = {
     "job-name": "model_name",
     "partition": "partition",
+    "account": "account",
     "qos": "qos",
     "time": "time",
     "nodes": "num_nodes",
@@ -64,6 +65,13 @@ SLURM_JOB_CONFIG_ARGS = {
     "mem": "mem_per_node",
     "output": "out_file",
     "error": "err_file",
+}
+
+# vLLM engine args mapping between short and long names
+VLLM_SHORT_TO_LONG_MAP = {
+    "-tp": "--tensor-parallel-size",
+    "-pp": "--pipeline-parallel-size",
+    "-O": "--compilation-config",
 }
 
 
