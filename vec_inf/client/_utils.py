@@ -199,11 +199,16 @@ def model_health_check(
         return (ModelStatus.FAILED, str(e))
 
 
-def load_config() -> list[ModelConfig]:
+def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     """Load the model configuration.
 
     Loads configuration from default and user-specified paths, merging them
     if both exist. User configuration takes precedence over default values.
+
+    Parameters
+    ----------
+    config_path : Optional[str]
+        Path to the configuration file
 
     Returns
     -------
@@ -213,33 +218,51 @@ def load_config() -> list[ModelConfig]:
     Notes
     -----
     Configuration is loaded from:
-    1. Default path: package's config/models.yaml
-    2. User path: specified by VEC_INF_CONFIG environment variable
+    1. User path: specified by config_path
+    2. Default path: package's config/models.yaml or CACHED_CONFIG if it exists
+    3. User path: specified by VEC_INF_CONFIG environment variable and merged with default config
 
     If user configuration exists, it will be merged with default configuration,
     with user values taking precedence for overlapping fields.
     """
+
+    def load_yaml_config(path: Path) -> dict[str, Any]:
+    """Helper to load YAML config with error handling."""
+        try:
+            with path.open() as f:
+                return yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Could not find config: {path}")
+        except yaml.YAMLError as e:
+            raise ValueError(f"Error parsing YAML config at {path}: {e}")
+
+    # 1. If config_path is given, use only that
+    if config_path:
+        config = load_yaml_config(Path(config_path))
+        return [
+            ModelConfig(model_name=name, **model_data)
+            for name, model_data in config.get("models", {}).items()
+        ]
+
+    # 2. Otherwise, load default config
     default_path = (
         CACHED_CONFIG
         if CACHED_CONFIG.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
+    config = load_yaml_config(default_path)
 
-    config: dict[str, Any] = {}
-    with open(default_path) as f:
-        config = yaml.safe_load(f) or {}
-
+    # 3. If user config exists, merge it
     user_path = os.getenv("VEC_INF_CONFIG")
     if user_path:
         user_path_obj = Path(user_path)
         if user_path_obj.exists():
-            with open(user_path_obj) as f:
-                user_config = yaml.safe_load(f) or {}
-                for name, data in user_config.get("models", {}).items():
-                    if name in config.get("models", {}):
-                        config["models"][name].update(data)
-                    else:
-                        config.setdefault("models", {})[name] = data
+            user_config = load_yaml_config(user_path_obj)
+            for name, data in user_config.get("models", {}).items():
+                if name in config.get("models", {}):
+                    config["models"][name].update(data)
+                else:
+                    config.setdefault("models", {})[name] = data
         else:
             warnings.warn(
                 f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}",
