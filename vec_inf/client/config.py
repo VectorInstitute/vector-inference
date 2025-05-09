@@ -47,6 +47,8 @@ class ModelConfig(BaseModel):
         Memory allocation per node in GB format (e.g., '32G')
     vocab_size : int
         Size of the model's vocabulary (1-1,000,000)
+    account : Optional[str], optional
+        Charge resources used by this job to specified account.
     qos : Union[QOS, str], optional
         Quality of Service tier for job scheduling
     time : str, optional
@@ -92,6 +94,9 @@ class ModelConfig(BaseModel):
         description="Memory per node",
     )
     vocab_size: int = Field(..., gt=0, le=1_000_000)
+    account: Optional[str] = Field(
+        default=None, description="Account name for job scheduling"
+    )
     qos: Union[QOS, str] = Field(
         default=cast(str, DEFAULT_ARGS["qos"]), description="Quality of Service tier"
     )

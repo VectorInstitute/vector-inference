@@ -25,7 +25,7 @@ ModelInfo : datacitten
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, TypedDict, Union
+from typing import Any, Optional, Union
 
 
 class ModelStatus(str, Enum):
@@ -164,6 +164,8 @@ class LaunchOptions:
         Number of nodes to allocate
     gpus_per_node : int, optional
         Number of GPUs per node
+    account : str, optional
+        Account name for job scheduling
     qos : str, optional
         Quality of Service level
     time : str, optional
@@ -187,6 +189,7 @@ class LaunchOptions:
     partition: Optional[str] = None
     num_nodes: Optional[int] = None
     gpus_per_node: Optional[int] = None
+    account: Optional[str] = None
     qos: Optional[str] = None
     time: Optional[str] = None
     vocab_size: Optional[int] = None
@@ -195,43 +198,6 @@ class LaunchOptions:
     log_dir: Optional[str] = None
     model_weights_parent_dir: Optional[str] = None
     vllm_args: Optional[str] = None
-
-
-class LaunchOptionsDict(TypedDict):
-    """TypedDict for LaunchOptions.
-
-    A TypedDict representation of LaunchOptions for type checking and
-    serialization purposes. All fields are optional and may be None.
-
-    Attributes
-    ----------
-    model_family : str, optional
-        Family/architecture of the model
-    model_variant : str, optional
-        Specific variant/version of the model
-    partition : str, optional
-        SLURM partition to use
-    num_nodes : int, optional
-        Number of nodes to allocate
-    gpus_per_node : int, optional
-        Number of GPUs per node
-    qos : str, optional
-        Quality of Service level
-    time : str, optional
-        Time limit for the job
-    vocab_size : int, optional
-        Size of model vocabulary
-    data_type : str, optional
-        Data type for model weights
-    venv : str, optional
-        Virtual environment to use
-    log_dir : str, optional
-        Directory for logs
-    model_weights_parent_dir : str, optional
-        Parent directory containing model weights
-    vllm_args : str, optional
-        Additional arguments for vLLM
-    """
 
 
 @dataclass

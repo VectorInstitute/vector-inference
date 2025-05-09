@@ -9,7 +9,6 @@ from vec_inf.client.api import VecInfClient
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     LaunchOptions,
-    LaunchOptionsDict,
     LaunchResponse,
     MetricsResponse,
     ModelInfo,
@@ -28,6 +27,5 @@ __all__ = [
     "ModelStatus",
     "ModelType",
     "LaunchOptions",
-    "LaunchOptionsDict",
     "ModelConfig",
 ]
