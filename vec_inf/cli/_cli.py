@@ -159,7 +159,7 @@ def launch(
         # Display launch information
         launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
 
-        if cli_kwargs.get("json_mode"):
+        if json_mode:
             click.echo(json.dumps(launch_response.config))
         else:
             launch_info_table = launch_formatter.format_table_output()
