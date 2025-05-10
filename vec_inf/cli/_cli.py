@@ -336,5 +336,60 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
         raise click.ClickException(f"Metrics check failed: {str(e)}") from e
 
 
+@cli.command("cleanup")
+@click.option("--log-dir", type=str, help="Path to SLURM log directory")
+@click.option("--model-family", type=str, help="Filter by model family")
+@click.option("--model-name", type=str, help="Filter by model name")
+@click.option(
+    "--job-id", type=int, help="Only remove logs with this exact SLURM job ID"
+)
+@click.option("--dry-run", is_flag=True, help="List matching logs without deleting")
+def cleanup_logs_cli(
+    log_dir: Optional[str],
+    model_family: Optional[str],
+    model_name: Optional[str],
+    job_id: Optional[int],
+    dry_run: bool,
+) -> None:
+    """Clean up log files based on optional filters.
+
+    Parameters
+    ----------
+    log_dir : str or Path, optional
+        Root directory containing log files. Defaults to ~/.vec-inf-logs.
+    model_family : str, optional
+        Only delete logs for this model family.
+    model_name : str, optional
+        Only delete logs for this model name.
+    job_id : int, optional
+        If provided, only match directories with this exact SLURM job ID.
+    dry_run : bool
+        If True, return matching files without deleting them.
+    """
+    try:
+        client = VecInfClient()
+        matched = client.cleanup_logs(
+            log_dir=log_dir,
+            model_family=model_family,
+            model_name=model_name,
+            job_id=job_id,
+            dry_run=dry_run,
+        )
+
+        if not matched:
+            if dry_run:
+                click.echo("Dry run: no matching log directories found.")
+            else:
+                click.echo("No matching log directories were deleted.")
+        elif dry_run:
+            click.echo(f"Dry run: {len(matched)} directories would be deleted:")
+            for f in matched:
+                click.echo(f"  - {f}")
+        else:
+            click.echo(f"Deleted {len(matched)} log directory(ies).")
+    except Exception as e:
+        raise click.ClickException(f"Cleanup failed: {str(e)}") from e
+
+
 if __name__ == "__main__":
     cli()

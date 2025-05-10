@@ -5,5 +5,6 @@
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
 * `list`: List all available model names, or view the default/cached configuration of a specific model, `--json-mode` supported.
+* `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, and/or `--job-id`. Use `--dry-run` to preview what would be deleted.
 
 Use `--help` to see all available options
