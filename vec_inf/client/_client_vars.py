@@ -71,7 +71,9 @@ SLURM_JOB_CONFIG_ARGS = {
 VLLM_SHORT_TO_LONG_MAP = {
     "-tp": "--tensor-parallel-size",
     "-pp": "--pipeline-parallel-size",
+    "-dp": "--data-parallel-size",
     "-O": "--compilation-config",
+    "-q": "--quantization",
 }
 
 
