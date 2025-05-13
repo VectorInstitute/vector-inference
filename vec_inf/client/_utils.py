@@ -227,7 +227,7 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     """
 
     def load_yaml_config(path: Path) -> dict[str, Any]:
-    """Helper to load YAML config with error handling."""
+        """Helper to load YAML config with error handling."""
         try:
             with path.open() as f:
                 return yaml.safe_load(f) or {}
