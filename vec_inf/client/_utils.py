@@ -292,6 +292,7 @@ def find_matching_dirs(
     model_family: Optional[str] = None,
     model_name: Optional[str] = None,
     job_id: Optional[int] = None,
+    before_job_id: Optional[int] = None,
 ) -> list[Path]:
     """
     Find log directories based on filtering criteria.
@@ -306,6 +307,8 @@ def find_matching_dirs(
         Filter to only match model names.
     job_id : int, optional
         Filter to only match this exact SLURM job ID.
+    before_job_id : int, optional
+        Filter to only include job IDs less than this value.
 
     Returns
     -------
@@ -317,17 +320,16 @@ def find_matching_dirs(
     if not log_dir.exists() or not log_dir.is_dir():
         raise FileNotFoundError(f"Log directory does not exist: {log_dir}")
 
-    if not model_family and not model_name and not job_id:
+    if not model_family and not model_name and not job_id and not before_job_id:
         return [log_dir]
 
-    # Iterate over model families
     for family_dir in log_dir.iterdir():
         if not family_dir.is_dir():
             continue
         if model_family and family_dir.name != model_family:
             continue
 
-        if model_family and not model_name and not job_id:
+        if model_family and not model_name and not job_id and not before_job_id:
             return [family_dir]
 
         for job_dir in family_dir.iterdir():
@@ -344,6 +346,9 @@ def find_matching_dirs(
                 continue
             if job_id is not None and parsed_id != job_id:
                 continue
+            if before_job_id is not None and parsed_id >= before_job_id:
+                continue
 
             matched.append(job_dir)
+
     return matched

@@ -312,6 +312,7 @@ class VecInfClient:
         model_family: Optional[str] = None,
         model_name: Optional[str] = None,
         job_id: Optional[int] = None,
+        before_job_id: Optional[int] = None,
         dry_run: bool = False,
     ) -> list[Path]:
         """Remove logs from the log directory.
@@ -326,6 +327,8 @@ class VecInfClient:
             Only delete logs for this model name.
         job_id : int, optional
             If provided, only match directories with this exact SLURM job ID.
+        before_job_id : int, optional
+            If provided, only delete logs with job ID less than this value.
         dry_run : bool
             If True, return matching files without deleting them.
 
@@ -340,6 +343,7 @@ class VecInfClient:
             model_family=model_family,
             model_name=model_name,
             job_id=job_id,
+            before_job_id=before_job_id,
         )
 
         if dry_run:

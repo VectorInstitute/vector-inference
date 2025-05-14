@@ -102,7 +102,7 @@ Note that there are other parameters that can also be added to the config but no
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
 * `list`: List all available model names, or view the default/cached configuration of a specific model, `--json-mode` supported.
-* `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, and/or `--job-id`. Use `--dry-run` to preview what would be deleted.
+* `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, `--job-id`, and/or `--before-job-id`. Use `--dry-run` to preview what would be deleted.
 
 For more details on the usage of these commands, refer to the [User Guide](https://vectorinstitute.github.io/vector-inference/user_guide/)
 
