@@ -531,3 +531,77 @@ def test_metrics_command_request_failed(
             in result.output
         )
         assert "Connection refused" in result.output
+
+
+def test_cli_cleanup_logs_dry_run(runner, tmp_path):
+    """Test CLI cleanup command in dry-run mode."""
+    model_dir = tmp_path / "fam_a" / "model_a.123"
+    model_dir.mkdir(parents=True)
+
+    result = runner.invoke(
+        cli,
+        [
+            "cleanup",
+            "--log-dir",
+            str(tmp_path),
+            "--model-family",
+            "fam_a",
+            "--model-name",
+            "model_a",
+            "--dry-run",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "would be deleted" in result.output
+    assert "model_a.123" in result.output
+
+
+def test_cli_cleanup_logs_delete(tmp_path):
+    """Test cleanup_logs CLI deletes matching directories when not in dry-run mode."""
+    fam_dir = tmp_path / "fam_a"
+    fam_dir.mkdir()
+    (fam_dir / "model_a.1").mkdir()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "cleanup",
+            "--log-dir",
+            str(tmp_path),
+            "--model-family",
+            "fam_a",
+            "--model-name",
+            "model_a",
+            "--job-id",
+            "1",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Deleted 1 log directory" in result.output
+    assert not (fam_dir / "model_a.1").exists()
+
+
+def test_cli_cleanup_logs_no_match(tmp_path):
+    """Test cleanup_logs CLI when no directories match the filters."""
+    fam_dir = tmp_path / "fam_a"
+    fam_dir.mkdir()
+    (fam_dir / "model_a.1").mkdir()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "cleanup",
+            "--log-dir",
+            str(tmp_path),
+            "--model-family",
+            "fam_b",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "No matching log directories were deleted." in result.output
+    assert (fam_dir / "model_a.1").exists()
