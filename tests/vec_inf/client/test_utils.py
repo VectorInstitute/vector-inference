@@ -213,28 +213,28 @@ models:
 
 def test_find_matching_dirs_only_model_family(tmp_path):
     """Return model_family directory when only model_family is provided."""
-    fam_dir = tmp_path / "famA"
+    fam_dir = tmp_path / "fam_a"
     fam_dir.mkdir()
-    (fam_dir / "modelA.1").mkdir()
-    (fam_dir / "modelB.2").mkdir()
+    (fam_dir / "model_a.1").mkdir()
+    (fam_dir / "model_b.2").mkdir()
 
-    other_dir = tmp_path / "famB"
+    other_dir = tmp_path / "fam_b"
     other_dir.mkdir()
-    (other_dir / "modelC.3").mkdir()
+    (other_dir / "model_c.3").mkdir()
 
-    matches = find_matching_dirs(log_dir=tmp_path, model_family="famA")
+    matches = find_matching_dirs(log_dir=tmp_path, model_family="fam_a")
     assert len(matches) == 1
-    assert matches[0].name == "famA"
+    assert matches[0].name == "fam_a"
 
 
 def test_find_matching_dirs_only_model_name(tmp_path):
     """Return directories matching when only model_name is provided."""
-    fam_a = tmp_path / "famA"
+    fam_a = tmp_path / "fam_a"
     fam_a.mkdir()
     (fam_a / "target.1").mkdir()
     (fam_a / "other.2").mkdir()
 
-    fam_b = tmp_path / "famB"
+    fam_b = tmp_path / "fam_b"
     fam_b.mkdir()
     (fam_b / "different.3").mkdir()
 
@@ -250,53 +250,53 @@ def test_find_matching_dirs_only_job_id(tmp_path):
     """Return directories matching exact job_id."""
     fam_dir = tmp_path / "fam"
     fam_dir.mkdir()
-    (fam_dir / "modelA.10").mkdir()
-    (fam_dir / "modelB.20").mkdir()
-    (fam_dir / "modelC.30").mkdir()
+    (fam_dir / "model_a.10").mkdir()
+    (fam_dir / "model_b.20").mkdir()
+    (fam_dir / "model_c.30").mkdir()
 
     matches = find_matching_dirs(log_dir=tmp_path, job_id=10)
     result_names = [p.name for p in matches]
 
-    assert "modelA.10" in result_names
-    assert "modelB.20" not in result_names
-    assert "modelC.30" not in result_names
+    assert "model_a.10" in result_names
+    assert "model_b.20" not in result_names
+    assert "model_c.30" not in result_names
 
 
 def test_find_matching_dirs_only_before_job_id(tmp_path):
     """Return directories with job_id < before_job_id."""
-    fam_dir = tmp_path / "famA"
+    fam_dir = tmp_path / "fam_a"
     fam_dir.mkdir()
-    (fam_dir / "modelA.1").mkdir()
-    (fam_dir / "modelA.5").mkdir()
-    (fam_dir / "modelA.100").mkdir()
+    (fam_dir / "model_a.1").mkdir()
+    (fam_dir / "model_a.5").mkdir()
+    (fam_dir / "model_a.100").mkdir()
 
-    fam_dir = tmp_path / "famB"
+    fam_dir = tmp_path / "fam_b"
     fam_dir.mkdir()
-    (fam_dir / "modelB.30").mkdir()
+    (fam_dir / "model_b.30").mkdir()
 
     matches = find_matching_dirs(log_dir=tmp_path, before_job_id=50)
     result_names = [p.name for p in matches]
 
-    assert "modelA.1" in result_names
-    assert "modelA.5" in result_names
-    assert "modelA.100" not in result_names
-    assert "modelB.30" in result_names
+    assert "model_a.1" in result_names
+    assert "model_a.5" in result_names
+    assert "model_a.100" not in result_names
+    assert "model_b.30" in result_names
 
 
 def test_find_matching_dirs_family_and_before_job_id(tmp_path):
     """Return directories under a given family with job IDs less than before_job_id."""
     fam_dir = tmp_path / "targetfam"
     fam_dir.mkdir()
-    (fam_dir / "modelA.10").mkdir()
-    (fam_dir / "modelA.20").mkdir()
-    (fam_dir / "modelA.99").mkdir()
-    (fam_dir / "modelA.150").mkdir()
+    (fam_dir / "model_a.10").mkdir()
+    (fam_dir / "model_a.20").mkdir()
+    (fam_dir / "model_a.99").mkdir()
+    (fam_dir / "model_a.150").mkdir()
 
     other_fam = tmp_path / "otherfam"
     other_fam.mkdir()
-    (other_fam / "modelB.5").mkdir()
-    (other_fam / "modelB.10").mkdir()
-    (other_fam / "modelB.100").mkdir()
+    (other_fam / "model_b.5").mkdir()
+    (other_fam / "model_b.10").mkdir()
+    (other_fam / "model_b.100").mkdir()
 
     matches = find_matching_dirs(
         log_dir=tmp_path,
@@ -306,10 +306,10 @@ def test_find_matching_dirs_family_and_before_job_id(tmp_path):
 
     result_names = [p.name for p in matches]
 
-    assert "modelA.10" in result_names
-    assert "modelA.20" in result_names
-    assert "modelA.99" in result_names
-    assert "modelA.150" not in result_names
+    assert "model_a.10" in result_names
+    assert "model_a.20" in result_names
+    assert "model_a.99" in result_names
+    assert "model_a.150" not in result_names
     assert all("otherfam" not in str(p) for p in matches)
 
 
@@ -317,27 +317,27 @@ def test_find_matching_dirs_with_family_model_name_and_before_job_id(tmp_path):
     """Return matching dirs with model_family, model_name, and before_job_id filters."""
     fam_dir = tmp_path / "targetfam"
     fam_dir.mkdir()
-    (fam_dir / "modelA.1").mkdir()
-    (fam_dir / "modelA.50").mkdir()
-    (fam_dir / "modelA.150").mkdir()
-    (fam_dir / "modelB.40").mkdir()
+    (fam_dir / "model_a.1").mkdir()
+    (fam_dir / "model_a.50").mkdir()
+    (fam_dir / "model_a.150").mkdir()
+    (fam_dir / "model_b.40").mkdir()
 
     other_fam = tmp_path / "otherfam"
     other_fam.mkdir()
-    (other_fam / "modelC.20").mkdir()
+    (other_fam / "model_c.20").mkdir()
 
     matches = find_matching_dirs(
         log_dir=tmp_path,
         model_family="targetfam",
-        model_name="modelA",
+        model_name="model_a",
         before_job_id=100,
     )
 
     result_names = [p.name for p in matches]
 
-    assert "modelA.1" in result_names
-    assert "modelA.50" in result_names
-    assert "modelA.150" not in result_names
-    assert "modelB.40" not in result_names
-    assert all("modelB" not in p for p in result_names)
+    assert "model_a.1" in result_names
+    assert "model_a.50" in result_names
+    assert "model_a.150" not in result_names
+    assert "model_b.40" not in result_names
+    assert all("model_b" not in p for p in result_names)
     assert all("otherfam" not in str(p) for p in matches)
