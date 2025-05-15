@@ -145,6 +145,29 @@ class VecInfClient:
         model_launcher = ModelLauncher(model_name, options_dict)
         return model_launcher.launch()
 
+    def launch_multiple_models(
+        self, model_names: list[str]
+    ) -> list[LaunchResponse]:
+        """Launch multiple models on the cluster.
+
+        Parameters
+        ----------
+        model_names : list[str]
+            List of model names to launch
+
+        Returns
+        -------
+        list[LaunchResponse]
+            List of LaunchResponse objects containing launch details for each model
+
+        Raises
+        ------
+        ModelConfigurationError
+            If the model configuration is invalid
+        """
+        model_launcher = ModelLauncher(model_names)
+        return model_launcher.launch()
+    
     def get_status(
         self, slurm_job_id: int, log_dir: Optional[str] = None
     ) -> StatusResponse:

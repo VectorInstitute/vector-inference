@@ -299,6 +299,27 @@ class ModelLauncher:
         )
 
 
+class BatchModelLauncher:
+    """Helper class for handling batch inference server launch.
+
+    A class that manages the launch process of multiple inference servers, including
+    configuration validation, and SLURM job submission.
+    
+    Parameters
+    ----------
+    model_names : list[str]
+        List of model names to launch
+    """
+
+    def __init__(self, model_names: list[str]):
+        self.model_names = model_names
+
+    def launch(self) -> list[LaunchResponse]:
+        """Launch the models.
+        """
+    
+
+
 class ModelStatusMonitor:
     """Class for handling server status information and monitoring.
 
