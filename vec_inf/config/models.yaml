@@ -14,7 +14,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 8192
       --max-num-seqs: 256
-      --compilation-config: 3
   c4ai-command-r-plus-08-2024:
     model_family: c4ai-command-r
     model_variant: plus-08-2024
@@ -30,7 +29,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 65536
       --max-num-seqs: 256
-      --compilation-config: 3
   c4ai-command-r-08-2024:
     model_family: c4ai-command-r
     model_variant: 08-2024
@@ -494,7 +492,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 16384
       --max-num-seqs: 256
-      --compilation-config: 3
   Mistral-7B-Instruct-v0.1:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.1
@@ -566,7 +563,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 32768
       --max-num-seqs: 256
-      --compilation-config: 3
   Mistral-Large-Instruct-2411:
     model_family: Mistral
     model_variant: Large-Instruct-2411
@@ -582,7 +578,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 32768
       --max-num-seqs: 256
-      --compilation-config: 3
   Mixtral-8x7B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x7B-Instruct-v0.1
@@ -613,7 +608,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 65536
       --max-num-seqs: 256
-      --compilation-config: 3
   Mixtral-8x22B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x22B-Instruct-v0.1
@@ -629,7 +623,6 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 65536
       --max-num-seqs: 256
-      --compilation-config: 3
   Phi-3-medium-128k-instruct:
     model_family: Phi-3
     model_variant: medium-128k-instruct
