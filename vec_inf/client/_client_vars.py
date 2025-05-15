@@ -21,7 +21,12 @@ SLURM_JOB_CONFIG_ARGS : dict
 from pathlib import Path
 from typing import TypedDict
 
-from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
+from vec_inf.client.slurm_vars import (
+    LD_LIBRARY_PATH,
+    SINGULARITY_IMAGE,
+    SINGULARITY_LOAD_CMD,
+    VLLM_NCCL_SO_PATH,
+)
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
@@ -152,10 +157,14 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
-        "singularity exec {singularity_image} ray stop",
+        f"singularity exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "singularity_command": "singularity exec --nv --bind {model_weights_path}:{model_weights_path} --containall {singularity_image}",
+    "env_vars": [
+        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
+        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
+    ],
+    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}:{{model_weights_path}} --containall {SINGULARITY_IMAGE}",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [

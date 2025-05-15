@@ -12,7 +12,6 @@ from vec_inf.client._client_vars import (
     SLURM_JOB_CONFIG_ARGS,
     SLURM_SCRIPT_TEMPLATE,
 )
-from vec_inf.client.slurm_vars import SINGULARITY_IMAGE
 
 
 class SlurmScriptGenerator:
@@ -88,10 +87,11 @@ class SlurmScriptGenerator:
         server_script = ["\n"]
         if self.use_singularity:
             server_script.append(
-                "\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]).format(
-                    singularity_image=SINGULARITY_IMAGE,
-                )
+                "\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"])
             )
+        server_script.append(
+            "\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"])
+        )
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
@@ -104,7 +104,6 @@ class SlurmScriptGenerator:
                     "SINGULARITY_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                         model_weights_path=self.model_weights_path,
-                        singularity_image=SINGULARITY_IMAGE,
                     ),
                 )
         else:
@@ -136,7 +135,6 @@ class SlurmScriptGenerator:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                     model_weights_path=self.model_weights_path,
-                    singularity_image=SINGULARITY_IMAGE,
                 )
                 + " \\"
             )
