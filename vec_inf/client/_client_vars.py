@@ -78,7 +78,12 @@ SLURM_JOB_CONFIG_ARGS = {
 VLLM_SHORT_TO_LONG_MAP = {
     "-tp": "--tensor-parallel-size",
     "-pp": "--pipeline-parallel-size",
+    "-dp": "--data-parallel-size",
+    "-dpl": "--data-parallel-size-local",
+    "-dpa": "--data-parallel-address",
+    "-dpp": "--data-parallel-rpc-port",
     "-O": "--compilation-config",
+    "-q": "--quantization",
 }
 
 
@@ -214,7 +219,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
-        "python3.10 -m vllm.entrypoints.openai.api_server \\",
+        "vllm serve \\",
         "    --model {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
