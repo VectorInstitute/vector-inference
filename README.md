@@ -94,11 +94,11 @@ You would then set the `VEC_INF_CONFIG` path using:
 export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-**NOTE** 
+**NOTE**
 * There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
 * Check [vLLM Engine Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html) for the full list of available vLLM engine arguments, the default parallel size for any parallelization is default to 1, so none of the sizes were set specifically in this example
 * For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`
-* Setting `--compilation-config` to `3` currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs. 
+* Setting `--compilation-config` to `3` currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.
 
 #### Other commands
 
