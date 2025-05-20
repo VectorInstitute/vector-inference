@@ -39,7 +39,7 @@ class SlurmScriptGenerator:
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_singularity = self.params["venv"] == "singularity"
-        self.additional_binds = self.params.get("binds", "")
+        self.additional_binds = self.params.get("bind", "")
         if self.additional_binds:
             self.additional_binds = f" --bind {self.additional_binds}"
         self.model_weights_path = str(

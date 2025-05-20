@@ -114,7 +114,7 @@ class ModelConfig(BaseModel):
     node_list: Optional[str] = Field(
         default=None, description="Request a specific list of nodes for deployment"
     )
-    binds: Optional[str] = Field(
+    bind: Optional[str] = Field(
         default=None, description="Additional binds for the singularity container"
     )
     venv: str = Field(
