@@ -222,8 +222,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
-        "vllm serve \\",
-        "    --model {model_weights_path} \\",
+        "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
