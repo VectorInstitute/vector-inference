@@ -39,6 +39,9 @@ class SlurmScriptGenerator:
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_singularity = self.params["venv"] == "singularity"
+        self.additional_binds = self.params.get("binds", "")
+        if self.additional_binds:
+            self.additional_binds = f" --bind {self.additional_binds}"
         self.model_weights_path = str(
             Path(params["model_weights_parent_dir"], params["model_name"])
         )
@@ -104,6 +107,7 @@ class SlurmScriptGenerator:
                     "SINGULARITY_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                         model_weights_path=self.model_weights_path,
+                        additional_binds=self.additional_binds,
                     ),
                 )
         else:
@@ -135,6 +139,7 @@ class SlurmScriptGenerator:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                     model_weights_path=self.model_weights_path,
+                    additional_binds=self.additional_binds,
                 )
                 + " \\"
             )

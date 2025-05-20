@@ -65,6 +65,8 @@ SLURM_JOB_CONFIG_ARGS = {
     "qos": "qos",
     "time": "time",
     "nodes": "num_nodes",
+    "exclude": "exclude",
+    "nodelist": "node_list",
     "gpus-per-node": "gpus_per_node",
     "cpus-per-task": "cpus_per_task",
     "mem": "mem_per_node",
@@ -164,7 +166,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
     ],
-    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}:{{model_weights_path}} --containall {SINGULARITY_IMAGE}",
+    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}:{{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE}",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
