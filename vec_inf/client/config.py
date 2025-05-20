@@ -109,7 +109,8 @@ class ModelConfig(BaseModel):
         default=cast(str, DEFAULT_ARGS["partition"]), description="GPU partition type"
     )
     exclude: Optional[str] = Field(
-        default=None, description="Exclude certain nodes from the resources granted to the job"
+        default=None,
+        description="Exclude certain nodes from the resources granted to the job",
     )
     node_list: Optional[str] = Field(
         default=None, description="Request a specific list of nodes for deployment"

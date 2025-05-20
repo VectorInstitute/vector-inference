@@ -129,6 +129,8 @@ class SlurmScriptTemplate(TypedDict):
         Commands for Singularity container setup
     imports : str
         Import statements and source commands
+    env_vars : list[str]
+        Environment variables to set
     singularity_command : str
         Template for Singularity execution command
     activate_venv : str
@@ -146,6 +148,7 @@ class SlurmScriptTemplate(TypedDict):
     shebang: ShebangConfig
     singularity_setup: list[str]
     imports: str
+    env_vars: list[str]
     singularity_command: str
     activate_venv: str
     server_setup: ServerSetupConfig

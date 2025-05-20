@@ -89,12 +89,8 @@ class SlurmScriptGenerator:
         """
         server_script = ["\n"]
         if self.use_singularity:
-            server_script.append(
-                "\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"])
-            )
-        server_script.append(
-            "\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"])
-        )
+            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]))
+        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"]))
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )

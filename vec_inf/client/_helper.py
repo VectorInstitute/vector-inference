@@ -5,7 +5,6 @@ metrics collection, and model registry operations.
 """
 
 import json
-import os
 import time
 import warnings
 from pathlib import Path
