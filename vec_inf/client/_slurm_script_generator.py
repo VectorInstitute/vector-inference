@@ -12,7 +12,6 @@ from vec_inf.client._client_vars import (
     SLURM_JOB_CONFIG_ARGS,
     SLURM_SCRIPT_TEMPLATE,
 )
-from vec_inf.client.slurm_vars import SINGULARITY_IMAGE
 
 
 class SlurmScriptGenerator:
@@ -40,6 +39,9 @@ class SlurmScriptGenerator:
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_singularity = self.params["venv"] == "singularity"
+        self.additional_binds = self.params.get("bind", "")
+        if self.additional_binds:
+            self.additional_binds = f" --bind {self.additional_binds}"
         self.model_weights_path = str(
             Path(params["model_weights_parent_dir"], params["model_name"])
         )
@@ -87,11 +89,8 @@ class SlurmScriptGenerator:
         """
         server_script = ["\n"]
         if self.use_singularity:
-            server_script.append(
-                "\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]).format(
-                    singularity_image=SINGULARITY_IMAGE,
-                )
-            )
+            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]))
+        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"]))
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
@@ -104,7 +103,7 @@ class SlurmScriptGenerator:
                     "SINGULARITY_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                         model_weights_path=self.model_weights_path,
-                        singularity_image=SINGULARITY_IMAGE,
+                        additional_binds=self.additional_binds,
                     ),
                 )
         else:
@@ -136,7 +135,7 @@ class SlurmScriptGenerator:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                     model_weights_path=self.model_weights_path,
-                    singularity_image=SINGULARITY_IMAGE,
+                    additional_binds=self.additional_binds,
                 )
                 + " \\"
             )

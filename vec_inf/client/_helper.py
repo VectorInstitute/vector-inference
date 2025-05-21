@@ -5,7 +5,6 @@ metrics collection, and model registry operations.
 """
 
 import json
-import os
 import time
 import warnings
 from pathlib import Path
@@ -35,10 +34,6 @@ from vec_inf.client.models import (
     ModelStatus,
     ModelType,
     StatusResponse,
-)
-from vec_inf.client.slurm_vars import (
-    LD_LIBRARY_PATH,
-    VLLM_NCCL_SO_PATH,
 )
 
 
@@ -230,11 +225,6 @@ class ModelLauncher:
 
         return params
 
-    def _set_env_vars(self) -> None:
-        """Set environment variables for the launch command."""
-        os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH
-        os.environ["VLLM_NCCL_SO_PATH"] = VLLM_NCCL_SO_PATH
-
     def _build_launch_command(self) -> str:
         """Generate the slurm script and construct the launch command.
 
@@ -259,9 +249,6 @@ class ModelLauncher:
         SlurmJobError
             If SLURM job submission fails
         """
-        # Set environment variables
-        self._set_env_vars()
-
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
 
