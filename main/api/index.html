@@ -3941,6 +3941,54 @@ for both request parameters and response objects.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>exclude</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Exclude certain nodes from the resources granted to the job</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>node_list</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Request a specific list of nodes for deployment</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>bind</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional binds for the singularity container</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>vocab_size</code>
             </td>
             <td>
@@ -4095,7 +4143,16 @@ for both request parameters and response objects.</p>
 <span class="normal"><a href="#__codelineno-0-197">197</a></span>
 <span class="normal"><a href="#__codelineno-0-198">198</a></span>
 <span class="normal"><a href="#__codelineno-0-199">199</a></span>
-<span class="normal"><a href="#__codelineno-0-200">200</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="nd">@dataclass</span>
+<span class="normal"><a href="#__codelineno-0-200">200</a></span>
+<span class="normal"><a href="#__codelineno-0-201">201</a></span>
+<span class="normal"><a href="#__codelineno-0-202">202</a></span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span>
+<span class="normal"><a href="#__codelineno-0-204">204</a></span>
+<span class="normal"><a href="#__codelineno-0-205">205</a></span>
+<span class="normal"><a href="#__codelineno-0-206">206</a></span>
+<span class="normal"><a href="#__codelineno-0-207">207</a></span>
+<span class="normal"><a href="#__codelineno-0-208">208</a></span>
+<span class="normal"><a href="#__codelineno-0-209">209</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="nd">@dataclass</span>
 </span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="k">class</span><span class="w"> </span><span class="nc">LaunchOptions</span><span class="p">:</span>
 </span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for launching a model.</span>
 </span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a>
@@ -4117,34 +4174,43 @@ for both request parameters and response objects.</p>
 </span><span id="__span-0-170"><a id="__codelineno-0-170" name="__codelineno-0-170"></a><span class="sd">        Quality of Service level</span>
 </span><span id="__span-0-171"><a id="__codelineno-0-171" name="__codelineno-0-171"></a><span class="sd">    time : str, optional</span>
 </span><span id="__span-0-172"><a id="__codelineno-0-172" name="__codelineno-0-172"></a><span class="sd">        Time limit for the job</span>
-</span><span id="__span-0-173"><a id="__codelineno-0-173" name="__codelineno-0-173"></a><span class="sd">    vocab_size : int, optional</span>
-</span><span id="__span-0-174"><a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="sd">        Size of model vocabulary</span>
-</span><span id="__span-0-175"><a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="sd">    data_type : str, optional</span>
-</span><span id="__span-0-176"><a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="sd">        Data type for model weights</span>
-</span><span id="__span-0-177"><a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="sd">    venv : str, optional</span>
-</span><span id="__span-0-178"><a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="sd">        Virtual environment to use</span>
-</span><span id="__span-0-179"><a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="sd">    log_dir : str, optional</span>
-</span><span id="__span-0-180"><a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">        Directory for logs</span>
-</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    model_weights_parent_dir : str, optional</span>
-</span><span id="__span-0-182"><a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">        Parent directory containing model weights</span>
-</span><span id="__span-0-183"><a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    vllm_args : str, optional</span>
-</span><span id="__span-0-184"><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        Additional arguments for vLLM</span>
-</span><span id="__span-0-185"><a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-186"><a id="__codelineno-0-186" name="__codelineno-0-186"></a>
-</span><span id="__span-0-187"><a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="n">model_family</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-188"><a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="n">model_variant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-189"><a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="n">partition</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-190"><a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="n">num_nodes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-191"><a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="n">gpus_per_node</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-192"><a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="n">account</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-193"><a id="__codelineno-0-193" name="__codelineno-0-193"></a>    <span class="n">qos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-194"><a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-195"><a id="__codelineno-0-195" name="__codelineno-0-195"></a>    <span class="n">vocab_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a>    <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a>    <span class="n">venv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a>    <span class="n">log_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a>    <span class="n">model_weights_parent_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>    <span class="n">vllm_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-173"><a id="__codelineno-0-173" name="__codelineno-0-173"></a><span class="sd">    exclude : str, optional</span>
+</span><span id="__span-0-174"><a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="sd">        Exclude certain nodes from the resources granted to the job</span>
+</span><span id="__span-0-175"><a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="sd">    node_list : str, optional</span>
+</span><span id="__span-0-176"><a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="sd">        Request a specific list of nodes for deployment</span>
+</span><span id="__span-0-177"><a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="sd">    bind : str, optional</span>
+</span><span id="__span-0-178"><a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="sd">        Additional binds for the singularity container</span>
+</span><span id="__span-0-179"><a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="sd">    vocab_size : int, optional</span>
+</span><span id="__span-0-180"><a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">        Size of model vocabulary</span>
+</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    data_type : str, optional</span>
+</span><span id="__span-0-182"><a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">        Data type for model weights</span>
+</span><span id="__span-0-183"><a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    venv : str, optional</span>
+</span><span id="__span-0-184"><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        Virtual environment to use</span>
+</span><span id="__span-0-185"><a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">    log_dir : str, optional</span>
+</span><span id="__span-0-186"><a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">        Directory for logs</span>
+</span><span id="__span-0-187"><a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">    model_weights_parent_dir : str, optional</span>
+</span><span id="__span-0-188"><a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">        Parent directory containing model weights</span>
+</span><span id="__span-0-189"><a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="sd">    vllm_args : str, optional</span>
+</span><span id="__span-0-190"><a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="sd">        Additional arguments for vLLM</span>
+</span><span id="__span-0-191"><a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-192"><a id="__codelineno-0-192" name="__codelineno-0-192"></a>
+</span><span id="__span-0-193"><a id="__codelineno-0-193" name="__codelineno-0-193"></a>    <span class="n">model_family</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-194"><a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="n">model_variant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-195"><a id="__codelineno-0-195" name="__codelineno-0-195"></a>    <span class="n">partition</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a>    <span class="n">num_nodes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a>    <span class="n">gpus_per_node</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a>    <span class="n">account</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a>    <span class="n">qos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>    <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a>    <span class="n">node_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a>    <span class="n">bind</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a>    <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a>    <span class="n">vocab_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a>    <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a>    <span class="n">venv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a>    <span class="n">log_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="n">model_weights_parent_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a>    <span class="n">vllm_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 </span></code></pre></div></td></tr></table></div>
               </details>
 
@@ -4291,16 +4357,7 @@ for both request parameters and response objects.</p>
 
               <details class="quote">
                 <summary>Source code in <code>vec_inf/client/models.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-203">203</a></span>
-<span class="normal"><a href="#__codelineno-0-204">204</a></span>
-<span class="normal"><a href="#__codelineno-0-205">205</a></span>
-<span class="normal"><a href="#__codelineno-0-206">206</a></span>
-<span class="normal"><a href="#__codelineno-0-207">207</a></span>
-<span class="normal"><a href="#__codelineno-0-208">208</a></span>
-<span class="normal"><a href="#__codelineno-0-209">209</a></span>
-<span class="normal"><a href="#__codelineno-0-210">210</a></span>
-<span class="normal"><a href="#__codelineno-0-211">211</a></span>
-<span class="normal"><a href="#__codelineno-0-212">212</a></span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-212">212</a></span>
 <span class="normal"><a href="#__codelineno-0-213">213</a></span>
 <span class="normal"><a href="#__codelineno-0-214">214</a></span>
 <span class="normal"><a href="#__codelineno-0-215">215</a></span>
@@ -4313,29 +4370,38 @@ for both request parameters and response objects.</p>
 <span class="normal"><a href="#__codelineno-0-222">222</a></span>
 <span class="normal"><a href="#__codelineno-0-223">223</a></span>
 <span class="normal"><a href="#__codelineno-0-224">224</a></span>
-<span class="normal"><a href="#__codelineno-0-225">225</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="nd">@dataclass</span>
-</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="k">class</span><span class="w"> </span><span class="nc">ModelInfo</span><span class="p">:</span>
-</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Information about an available model.</span>
-</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a>
-</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">    Parameters</span>
-</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">    ----------</span>
-</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="sd">    name : str</span>
-</span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">        Name of the model</span>
-</span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="sd">    family : str</span>
-</span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">        Family/architecture of the model</span>
-</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">    variant : str, optional</span>
-</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">        Specific variant/version of the model</span>
-</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">    model_type : ModelType</span>
-</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">        Type of the model</span>
-</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    config : dict[str, Any]</span>
-</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">        Additional configuration parameters</span>
-</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a>
-</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
-</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a>    <span class="n">variant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="n">model_type</span><span class="p">:</span> <span class="n">ModelType</span>
-</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+<span class="normal"><a href="#__codelineno-0-226">226</a></span>
+<span class="normal"><a href="#__codelineno-0-227">227</a></span>
+<span class="normal"><a href="#__codelineno-0-228">228</a></span>
+<span class="normal"><a href="#__codelineno-0-229">229</a></span>
+<span class="normal"><a href="#__codelineno-0-230">230</a></span>
+<span class="normal"><a href="#__codelineno-0-231">231</a></span>
+<span class="normal"><a href="#__codelineno-0-232">232</a></span>
+<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="nd">@dataclass</span>
+</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="k">class</span><span class="w"> </span><span class="nc">ModelInfo</span><span class="p">:</span>
+</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Information about an available model.</span>
+</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a>
+</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">    Parameters</span>
+</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    ----------</span>
+</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">    name : str</span>
+</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">        Name of the model</span>
+</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">    family : str</span>
+</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">        Family/architecture of the model</span>
+</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a><span class="sd">    variant : str, optional</span>
+</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">        Specific variant/version of the model</span>
+</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a><span class="sd">    model_type : ModelType</span>
+</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="sd">        Type of the model</span>
+</span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="sd">    config : dict[str, Any]</span>
+</span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227"></a><span class="sd">        Additional configuration parameters</span>
+</span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a>
+</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a>    <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a>    <span class="n">variant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a>    <span class="n">model_type</span><span class="p">:</span> <span class="n">ModelType</span>
+</span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </span></code></pre></div></td></tr></table></div>
               </details>
 
