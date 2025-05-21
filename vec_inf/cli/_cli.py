@@ -73,6 +73,21 @@ def cli() -> None:
     help="Quality of service",
 )
 @click.option(
+    "--exclude",
+    type=str,
+    help="Exclude certain nodes from the resources granted to the job",
+)
+@click.option(
+    "--node-list",
+    type=str,
+    help="Request a specific list of nodes for deployment",
+)
+@click.option(
+    "--bind",
+    type=str,
+    help="Additional binds for the singularity container as a comma separated list of bind paths",
+)
+@click.option(
     "--time",
     type=str,
     help="Time limit for job, this should comply with QoS limits",
@@ -124,8 +139,16 @@ def launch(
             Number of nodes to use
         - gpus_per_node : int, optional
             Number of GPUs per node
+        - account : str, optional
+            Charge resources used by this job to specified account
         - qos : str, optional
             Quality of service tier
+        - exclude : str, optional
+            Exclude certain nodes from the resources granted to the job
+        - node_list : str, optional
+            Request a specific list of nodes for deployment
+        - bind : str, optional
+            Additional binds for the singularity container
         - time : str, optional
             Time limit for job
         - venv : str, optional
