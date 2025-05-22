@@ -285,3 +285,70 @@ def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
             config_dict[key.lower().replace(" ", "_")] = value
 
     return slurm_job_id, config_dict
+
+
+def find_matching_dirs(
+    log_dir: Path,
+    model_family: Optional[str] = None,
+    model_name: Optional[str] = None,
+    job_id: Optional[int] = None,
+    before_job_id: Optional[int] = None,
+) -> list[Path]:
+    """
+    Find log directories based on filtering criteria.
+
+    Parameters
+    ----------
+    log_dir : Path
+        The base directory containing model family directories.
+    model_family : str, optional
+        Filter to only search inside this family.
+    model_name : str, optional
+        Filter to only match model names.
+    job_id : int, optional
+        Filter to only match this exact SLURM job ID.
+    before_job_id : int, optional
+        Filter to only include job IDs less than this value.
+
+    Returns
+    -------
+    list[Path]
+        List of directories that match the criteria and can be deleted.
+    """
+    matched = []
+
+    if not log_dir.exists() or not log_dir.is_dir():
+        raise FileNotFoundError(f"Log directory does not exist: {log_dir}")
+
+    if not model_family and not model_name and not job_id and not before_job_id:
+        return [log_dir]
+
+    for family_dir in log_dir.iterdir():
+        if not family_dir.is_dir():
+            continue
+        if model_family and family_dir.name != model_family:
+            continue
+
+        if model_family and not model_name and not job_id and not before_job_id:
+            return [family_dir]
+
+        for job_dir in family_dir.iterdir():
+            if not job_dir.is_dir():
+                continue
+
+            try:
+                name_part, id_part = job_dir.name.rsplit(".", 1)
+                parsed_id = int(id_part)
+            except ValueError:
+                continue
+
+            if model_name and name_part != model_name:
+                continue
+            if job_id is not None and parsed_id != job_id:
+                continue
+            if before_job_id is not None and parsed_id >= before_job_id:
+                continue
+
+            matched.append(job_dir)
+
+    return matched
