@@ -108,6 +108,16 @@ class ModelConfig(BaseModel):
     partition: Union[PARTITION, str] = Field(
         default=cast(str, DEFAULT_ARGS["partition"]), description="GPU partition type"
     )
+    exclude: Optional[str] = Field(
+        default=None,
+        description="Exclude certain nodes from the resources granted to the job",
+    )
+    node_list: Optional[str] = Field(
+        default=None, description="Request a specific list of nodes for deployment"
+    )
+    bind: Optional[str] = Field(
+        default=None, description="Additional binds for the singularity container"
+    )
     venv: str = Field(
         default="singularity", description="Virtual environment/container system"
     )

@@ -170,6 +170,12 @@ class LaunchOptions:
         Quality of Service level
     time : str, optional
         Time limit for the job
+    exclude : str, optional
+        Exclude certain nodes from the resources granted to the job
+    node_list : str, optional
+        Request a specific list of nodes for deployment
+    bind : str, optional
+        Additional binds for the singularity container
     vocab_size : int, optional
         Size of model vocabulary
     data_type : str, optional
@@ -191,6 +197,9 @@ class LaunchOptions:
     gpus_per_node: Optional[int] = None
     account: Optional[str] = None
     qos: Optional[str] = None
+    exclude: Optional[str] = None
+    node_list: Optional[str] = None
+    bind: Optional[str] = None
     time: Optional[str] = None
     vocab_size: Optional[int] = None
     data_type: Optional[str] = None

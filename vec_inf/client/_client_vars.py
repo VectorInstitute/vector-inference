@@ -21,7 +21,12 @@ SLURM_JOB_CONFIG_ARGS : dict
 from pathlib import Path
 from typing import TypedDict
 
-from vec_inf.client.slurm_vars import SINGULARITY_LOAD_CMD
+from vec_inf.client.slurm_vars import (
+    LD_LIBRARY_PATH,
+    SINGULARITY_IMAGE,
+    SINGULARITY_LOAD_CMD,
+    VLLM_NCCL_SO_PATH,
+)
 
 
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
@@ -60,6 +65,8 @@ SLURM_JOB_CONFIG_ARGS = {
     "qos": "qos",
     "time": "time",
     "nodes": "num_nodes",
+    "exclude": "exclude",
+    "nodelist": "node_list",
     "gpus-per-node": "gpus_per_node",
     "cpus-per-task": "cpus_per_task",
     "mem": "mem_per_node",
@@ -71,7 +78,12 @@ SLURM_JOB_CONFIG_ARGS = {
 VLLM_SHORT_TO_LONG_MAP = {
     "-tp": "--tensor-parallel-size",
     "-pp": "--pipeline-parallel-size",
+    "-dp": "--data-parallel-size",
+    "-dpl": "--data-parallel-size-local",
+    "-dpa": "--data-parallel-address",
+    "-dpp": "--data-parallel-rpc-port",
     "-O": "--compilation-config",
+    "-q": "--quantization",
 }
 
 
@@ -117,6 +129,8 @@ class SlurmScriptTemplate(TypedDict):
         Commands for Singularity container setup
     imports : str
         Import statements and source commands
+    env_vars : list[str]
+        Environment variables to set
     singularity_command : str
         Template for Singularity execution command
     activate_venv : str
@@ -134,6 +148,7 @@ class SlurmScriptTemplate(TypedDict):
     shebang: ShebangConfig
     singularity_setup: list[str]
     imports: str
+    env_vars: list[str]
     singularity_command: str
     activate_venv: str
     server_setup: ServerSetupConfig
@@ -152,10 +167,14 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
-        "singularity exec {singularity_image} ray stop",
+        f"singularity exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "singularity_command": "singularity exec --nv --bind {model_weights_path}:{model_weights_path} --containall {singularity_image}",
+    "env_vars": [
+        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
+        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
+    ],
+    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE}",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -203,8 +222,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
-        "python3.10 -m vllm.entrypoints.openai.api_server \\",
-        "    --model {model_weights_path} \\",
+        "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
