@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from vec_inf.client import ModelStatus, ModelType, VecInfClient
+from vec_inf.client._exceptions import ServerError, SlurmJobError
 
 
 @pytest.fixture
@@ -128,3 +129,84 @@ def test_wait_until_ready():
             assert result.server_status == ModelStatus.READY
             assert result.base_url == "http://gpu123:8080/v1"
             assert mock_status.call_count == 2
+
+
+def test_shutdown_model_success():
+    """Test model shutdown success."""
+    client = VecInfClient()
+    with patch("vec_inf.client.api.run_bash_command") as mock_command:
+        mock_command.return_value = ("", "")
+        result = client.shutdown_model(12345)
+
+        assert result is True
+        mock_command.assert_called_once_with("scancel 12345")
+
+
+def test_shutdown_model_failure():
+    """Test model shutdown failure."""
+    client = VecInfClient()
+    with patch("vec_inf.client.api.run_bash_command") as mock_command:
+        mock_command.return_value = ("", "Error: Job not found")
+        with pytest.raises(
+            SlurmJobError, match="Failed to shutdown model: Error: Job not found"
+        ):
+            client.shutdown_model(12345)
+
+
+def test_wait_until_ready_timeout():
+    """Test timeout in wait_until_ready."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.LAUNCHING
+        mock_status.return_value = mock_response
+
+        with (
+            patch("time.sleep"),
+            pytest.raises(ServerError, match="Timed out waiting for model"),
+        ):
+            client.wait_until_ready(12345, timeout_seconds=1, poll_interval_seconds=0.5)
+
+
+def test_wait_until_ready_failed_status():
+    """Test wait_until_ready when model fails."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.FAILED
+        mock_response.failed_reason = "Out of memory"
+        mock_status.return_value = mock_response
+
+        with pytest.raises(ServerError, match="Model failed to start: Out of memory"):
+            client.wait_until_ready(12345)
+
+
+def test_wait_until_ready_failed_no_reason():
+    """Test wait_until_ready when model fails without reason."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.FAILED
+        mock_response.failed_reason = None
+        mock_status.return_value = mock_response
+
+        with pytest.raises(ServerError, match="Model failed to start: Unknown error"):
+            client.wait_until_ready(12345)
+
+
+def test_wait_until_ready_shutdown():
+    """Test wait_until_ready when model is shutdown."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.SHUTDOWN
+        mock_status.return_value = mock_response
+
+        with pytest.raises(
+            ServerError, match="Model was shutdown before it became ready"
+        ):
+            client.wait_until_ready(12345)
