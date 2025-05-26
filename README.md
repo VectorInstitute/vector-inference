@@ -17,7 +17,7 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 pip install vec-inf
 ```
-Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package
+Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.8.5.post1`.
 
 ## Usage
 
@@ -164,8 +164,9 @@ Once the inference server is ready, you can start sending in inference requests.
     },
     "prompt_logprobs":null
 }
+
 ```
-**NOTE**: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via `--chat-template: TEMPLATE_PATH`
+**NOTE**: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via `--chat-template: TEMPLATE_PATH`.
 
 ## SSH tunnel from your local device
 If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
