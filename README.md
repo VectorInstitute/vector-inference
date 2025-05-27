@@ -7,6 +7,7 @@
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
+[![vLLM](https://img.shields.io/badge/vllm-0.8.5.post1-blue)](https://docs.vllm.ai/en/v0.8.5.post1/index.html)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
 This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the environment variables in [`vec_inf/client/slurm_vars.py`](vec_inf/client/slurm_vars.py), and the model config for cached model weights in [`vec_inf/config/models.yaml`](vec_inf/config/models.yaml) accordingly.
@@ -17,7 +18,7 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 pip install vec-inf
 ```
-Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package
+Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.8.5.post1`.
 
 ## Usage
 
@@ -164,8 +165,9 @@ Once the inference server is ready, you can start sending in inference requests.
     },
     "prompt_logprobs":null
 }
+
 ```
-**NOTE**: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via `--chat-template: TEMPLATE_PATH`
+**NOTE**: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via `--chat-template: TEMPLATE_PATH`.
 
 ## SSH tunnel from your local device
 If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
