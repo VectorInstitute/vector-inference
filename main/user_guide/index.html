@@ -829,7 +829,11 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 <p>You would then set the <code>VEC_INF_CONFIG</code> path using:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VEC_INF_CONFIG</span><span class="o">=</span>/h/&lt;username&gt;/my-model-config.yaml
 </span></code></pre></div>
-<p>Note that there are other parameters that can also be added to the config but not shown in this example, check the <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py"><code>ModelConfig</code></a> for details.</p>
+<p><strong>NOTE</strong>
+* There are other parameters that can also be added to the config but not shown in this example, check the <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py"><code>ModelConfig</code></a> for details.
+* Check <a href="https://docs.vllm.ai/en/stable/serving/engine_args.html">vLLM Engine Arguments</a> for the full list of available vLLM engine arguments. The default parallel size for any parallelization defaults to 1, so none of the sizes were set specifically in this example.
+* For GPU partitions with non-Ampere architectures, e.g. <code>rtx6000</code>, <code>t4v2</code>, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. <code>--dtype: float16</code>.
+* Setting <code>--compilation-config</code> to <code>3</code> currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.</p>
 <h3 id="status-command"><code>status</code> command<a class="headerlink" href="#status-command" title="Permanent link">&para;</a></h3>
 <p>You can check the inference server status by providing the Slurm job ID to the <code>status</code> command:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>vec-inf<span class="w"> </span>status<span class="w"> </span><span class="m">15373800</span>
@@ -953,7 +957,7 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 </span><span id="__span-15-28"><a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a><span class="w">    </span><span class="nt">&quot;prompt_logprobs&quot;</span><span class="p">:</span><span class="kc">null</span>
 </span><span id="__span-15-29"><a id="__codelineno-15-29" name="__codelineno-15-29" href="#__codelineno-15-29"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><strong>NOTE</strong>: For multimodal models, currently only <code>ChatCompletion</code> is available, and only one image can be provided for each prompt.</p>
+<p><strong>NOTE</strong>: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via <code>--chat-template: TEMPLATE_PATH</code>.</p>
 <h2 id="ssh-tunnel-from-your-local-device">SSH tunnel from your local device<a class="headerlink" href="#ssh-tunnel-from-your-local-device" title="Permanent link">&para;</a></h2>
 <p>If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8081</span>:172.17.8.29:8081<span class="w"> </span>username@v.vectorinstitute.ai<span class="w"> </span>-N
