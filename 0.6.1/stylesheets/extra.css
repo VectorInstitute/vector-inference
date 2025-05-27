@@ -1,0 +1,235 @@
+[data-md-color-primary="vector"] {
+  --md-primary-fg-color: #eb088a;
+  --md-primary-fg-color--light: #f252a5;
+  --md-primary-fg-color--dark: #b00068;
+  --md-primary-bg-color: hsla(0, 0%, 100%, 1);
+  --md-primary-bg-color--light: hsla(0, 0%, 100%, 0.7);
+}
+
+[data-md-color-primary="black"] {
+  --md-primary-fg-color: #181818;
+  --md-primary-fg-color--light: #f252a5;
+  --md-primary-fg-color--dark: #b00068;
+  --md-primary-bg-color: #eb088a;
+}
+
+[data-md-color-accent="vector-teal"] {
+  --md-accent-fg-color: #48c0d9;
+  --md-accent-fg-color--transparent: #526cfe1a;
+  --md-accent-bg-color: #fff;
+  --md-accent-bg-color--light: #ffffffb3;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary="black"] {
+  --md-typeset-a-color: #eb088a;
+}
+
+[data-md-color-scheme="default"] {
+  /* Default light mode styling */
+}
+
+[data-md-color-scheme="slate"] {
+  --md-typeset-a-color: #eb088a;
+  /* Dark mode styling */
+}
+
+/* Vector logo css styling to match overrides/partial/copyright.html */
+.md-footer-vector {
+  display: flex;
+  align-items: center;
+  padding: 0 0.6rem;
+}
+
+.md-footer-vector img {
+  height: 24px; /* Reduce height to a fixed value */
+  width: auto; /* Maintain aspect ratio */
+  transition: opacity 0.25s;
+  opacity: 0.7;
+}
+
+.md-footer-vector img:hover {
+  opacity: 1;
+}
+
+/* Make the inner footer grid elements distribute evenly */
+.md-footer-meta__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* To make socials and Vector logo not stack when viewing on mobile */
+@media screen and (max-width: 76.234375em) {
+  .md-footer-meta__inner.md-grid {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .md-copyright,
+  .md-social {
+    width: auto;
+    max-width: 49%;
+  }
+
+  /* Prevent margin that causes stacking */
+  .md-social {
+    margin: 0;
+  }
+}
+
+/* Reduce margins for h2 when using grid cards */
+.grid.cards h2 {
+  margin-top: 0; /* Remove top margin completely in cards */
+  margin-bottom: 0.5rem; /* Smaller bottom margin in cards */
+}
+
+.vector-icon {
+  color: #eb088a;
+  opacity: 0.7;
+  margin-right: 0.2em;
+}
+
+/* Version selector styling - Material theme */
+
+/* Version selector container */
+.md-version {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.25rem;
+}
+
+/* Current version button styling */
+.md-version__current {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--md-primary-bg-color);
+  padding: 0.4rem 0.8rem;
+  margin: 0.4rem 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Hover effect for current version button */
+.md-version__current:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Down arrow for version dropdown */
+.md-version__current:after {
+  display: inline-block;
+  margin-left: 0.5rem;
+  content: "";
+  vertical-align: middle;
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+/* Dropdown menu */
+.md-version__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 125%;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  background-color: var(--md-primary-fg-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+}
+
+/* Show dropdown when parent is hovered */
+.md-version:hover .md-version__list {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Version list items */
+.md-version__item {
+  list-style: none;
+  padding: 0;
+}
+
+/* Version links */
+.md-version__link {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--md-primary-bg-color);
+  transition: background-color 0.15s;
+  text-decoration: none;
+}
+
+/* Version link hover */
+.md-version__link:hover {
+  background-color: var(--md-primary-fg-color--dark);
+  text-decoration: none;
+}
+
+/* Active version in dropdown */
+.md-version__link--active {
+  background-color: var(--md-accent-fg-color);
+  color: var(--md-accent-bg-color);
+  font-weight: 700;
+}
+
+/* For the Material selector */
+.md-header__option {
+  display: flex;
+  align-items: center;
+}
+
+/* Version selector in Material 9.x */
+.md-select {
+  position: relative;
+  margin-left: 0.5rem;
+}
+
+.md-select__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--md-primary-bg-color);
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.15s ease-in-out;
+}
+
+.md-select__label:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Version selector in Material 9.2+ */
+.md-header__button.md-select {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.8rem;
+}
+
+/* For Material 9.x+ with specific version selector */
+.md-typeset .md-version-warn {
+  padding: 0.6rem 1rem;
+  margin: 1.5rem 0;
+  background-color: rgba(235, 8, 138, 0.1);
+  border-left: 4px solid #eb088a;
+  border-radius: 0.2rem;
+  color: var(--md-default-fg-color);
+  font-size: 0.8rem;
+}
