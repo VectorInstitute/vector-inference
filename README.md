@@ -7,6 +7,7 @@
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
+[![vLLM](https://img.shields.io/badge/vllm-0.8.5.post1-blue)](https://docs.vllm.ai/en/v0.8.5.post1/index.html)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
 This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the environment variables in [`vec_inf/client/slurm_vars.py`](vec_inf/client/slurm_vars.py), and the model config for cached model weights in [`vec_inf/config/models.yaml`](vec_inf/config/models.yaml) accordingly.
