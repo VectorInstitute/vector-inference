@@ -19,7 +19,7 @@ class TestSlurmScriptGenerator:
         """Generate basic SLURM configuration parameters."""
         return {
             "model_name": "test-model",
-            "model_weights_parent_dir": "/path/to/model_wieghts",
+            "model_weights_parent_dir": "/path/to/model_weights",
             "src_dir": "/path/to/src",
             "log_dir": "/path/to/logs",
             "num_nodes": "1",
@@ -72,7 +72,7 @@ class TestSlurmScriptGenerator:
         assert not generator.is_multinode
         assert not generator.use_singularity
         assert generator.additional_binds == ""
-        assert generator.model_weights_path == "/path/to/model_wieghts/test-model"
+        assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
     def test_init_multinode(self, multinode_params):
         """Test initialization with multi-node configuration."""
@@ -82,7 +82,7 @@ class TestSlurmScriptGenerator:
         assert generator.is_multinode
         assert not generator.use_singularity
         assert generator.additional_binds == ""
-        assert generator.model_weights_path == "/path/to/model_wieghts/test-model"
+        assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
     def test_init_singularity(self, singularity_params):
         """Test initialization with Singularity configuration."""
@@ -92,7 +92,7 @@ class TestSlurmScriptGenerator:
         assert generator.use_singularity
         assert not generator.is_multinode
         assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
-        assert generator.model_weights_path == "/path/to/model_wieghts/test-model"
+        assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
     def test_init_singularity_no_bind(self, basic_params):
         """Test Singularity initialization without additional binds."""
@@ -104,7 +104,7 @@ class TestSlurmScriptGenerator:
         assert generator.use_singularity
         assert not generator.is_multinode
         assert generator.additional_binds == ""
-        assert generator.model_weights_path == "/path/to/model_wieghts/test-model"
+        assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
     def test_generate_shebang_single_node(self, basic_params):
         """Test shebang generation for single-node setup."""
@@ -161,7 +161,7 @@ class TestSlurmScriptGenerator:
         launch_cmd = generator._generate_launch_cmd()
 
         assert "source /path/to/venv/bin/activate" in launch_cmd
-        assert "vllm serve /path/to/model_wieghts/test-model" in launch_cmd
+        assert "vllm serve /path/to/model_weights/test-model" in launch_cmd
         assert "--served-model-name test-model" in launch_cmd
         assert "--tensor-parallel-size 4" in launch_cmd
         assert "--max-model-len 8192" in launch_cmd
@@ -173,7 +173,7 @@ class TestSlurmScriptGenerator:
         launch_cmd = generator._generate_launch_cmd()
 
         assert "singularity exec --nv" in launch_cmd
-        assert "--bind /path/to/model_wieghts/test-model" in launch_cmd
+        assert "--bind /path/to/model_weights/test-model" in launch_cmd
         assert "--bind /scratch:/scratch,/data:/data" in launch_cmd
         assert "source" not in launch_cmd
 
