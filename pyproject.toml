@@ -1,6 +1,6 @@
 [project]
 name = "vec-inf"
-version = "0.6.0"
+version = "0.6.1"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
 readme = "README.md"
 authors = [{name = "Marshall Wang", email = "marshall.wang@vectorinstitute.ai"}]
