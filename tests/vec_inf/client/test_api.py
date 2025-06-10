@@ -131,6 +131,77 @@ def test_wait_until_ready():
             assert mock_status.call_count == 2
 
 
+def test_cleanup_logs_no_match(tmp_path):
+    """Test when cleanup_logs returns empty list."""
+    fam_a = tmp_path / "fam_a"
+    model_a = fam_a / "model_a.999"
+    model_a.mkdir(parents=True)
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_b",
+        dry_run=False,
+    )
+
+    assert deleted == []
+    assert fam_a.exists()
+    assert model_a.exists()
+
+
+def test_cleanup_logs_deletes_matching_dirs(tmp_path):
+    """Test that cleanup_logs deletes model directories matching filters."""
+    fam_a = tmp_path / "fam_a"
+    fam_a.mkdir()
+
+    model_a_1 = fam_a / "model_a.10"
+    model_a_2 = fam_a / "model_a.20"
+    model_b = fam_a / "model_b.30"
+
+    model_a_1.mkdir()
+    model_a_2.mkdir()
+    model_b.mkdir()
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_a",
+        model_name="model_a",
+        before_job_id=15,
+        dry_run=False,
+    )
+
+    assert deleted == [model_a_1]
+    assert not model_a_1.exists()
+    assert model_a_2.exists()
+    assert model_b.exists()
+
+
+def test_cleanup_logs_matching_dirs_dry_run(tmp_path):
+    """Test that cleanup_logs find model directories matching filters."""
+    fam_a = tmp_path / "fam_a"
+    fam_a.mkdir()
+
+    model_a_1 = fam_a / "model_a.10"
+    model_a_2 = fam_a / "model_a.20"
+
+    model_a_1.mkdir()
+    model_a_2.mkdir()
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_a",
+        model_name="model_a",
+        before_job_id=15,
+        dry_run=True,
+    )
+
+    assert deleted == [model_a_1]
+    assert model_a_1.exists()
+    assert model_a_2.exists()
+
+
 def test_shutdown_model_success():
     """Test model shutdown success."""
     client = VecInfClient()
