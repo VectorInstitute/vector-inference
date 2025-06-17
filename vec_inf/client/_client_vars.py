@@ -10,12 +10,12 @@ MODEL_READY_SIGNATURE : str
     Signature string indicating successful model server startup
 SRC_DIR : str
     Absolute path to the package source directory
-REQUIRED_FIELDS : set
-    Set of required fields for model configuration
 KEY_METRICS : dict
     Mapping of vLLM metrics to their human-readable names
 SLURM_JOB_CONFIG_ARGS : dict
     Mapping of SLURM configuration arguments to their parameter names
+VLLM_SHORT_TO_LONG_MAP : dict
+    Mapping of vLLM short arguments to their long names
 """
 
 from pathlib import Path
@@ -32,15 +32,6 @@ from vec_inf.client.slurm_vars import (
 MODEL_READY_SIGNATURE = "INFO:     Application startup complete."
 SRC_DIR = str(Path(__file__).parent.parent)
 
-
-# Required fields for model configuration
-REQUIRED_FIELDS = {
-    "model_family",
-    "model_type",
-    "gpus_per_node",
-    "num_nodes",
-    "vocab_size",
-}
 
 # Key production metrics for inference servers
 KEY_METRICS = {
@@ -85,7 +76,6 @@ VLLM_SHORT_TO_LONG_MAP = {
     "-O": "--compilation-config",
     "-q": "--quantization",
 }
-
 
 # Slurm script templates
 class ShebangConfig(TypedDict):
