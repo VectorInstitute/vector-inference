@@ -39,21 +39,16 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 WORKDIR /vec-inf
 COPY . /vec-inf
 
-# Install PyTorch 2.6 for CUDA 12.4 first [2][6]
-RUN uv pip install --system torch==2.6.0 torchvision==0.17.0 torchaudio==2.6.0 \
-    --index-url https://download.pytorch.org/whl/cu124
-
-# Install project dependencies with updated torch version
-RUN uv pip install --system -e .[dev]
-
-# Install FlashAttention with compatible version
-RUN python3.10 -m pip install flash-attn==2.5.6 --no-build-isolation
-
-# Install FlashInfer for Torch 2.6/CUDA 12.4 [2][5][6]
-RUN python3.10 -m pip install flashinfer-python==0.2.5 -i https://flashinfer.ai/whl/cu124/torch2.6/
+# Install project dependencies with build requirements
+RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
+# Install FlashAttention
+RUN python3.10 -m pip install flash-attn --no-build-isolation
+# Install FlashInfer
+RUN python3.10 -m pip install flashinfer-python -i https://flashinfer.ai/whl/cu124/torch2.6/
 
 # Final configuration
 RUN mkdir -p /vec-inf/nccl && \
     mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
 
+# Set the default command to start an interactive shell
 CMD ["bash"]
