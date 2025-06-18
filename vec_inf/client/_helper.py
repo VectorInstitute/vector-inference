@@ -291,7 +291,7 @@ class BatchModelLauncher:
 
     A class that manages the launch process of multiple inference servers, including
     configuration validation, and SLURM job submission.
-    
+
     Parameters
     ----------
     model_names : list[str]
@@ -302,9 +302,7 @@ class BatchModelLauncher:
         self.model_names = model_names
 
     def launch(self) -> list[LaunchResponse]:
-        """Launch the models.
-        """
-    
+        """Launch the models."""
 
 
 class ModelStatusMonitor:
