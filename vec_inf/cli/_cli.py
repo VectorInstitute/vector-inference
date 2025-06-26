@@ -26,6 +26,7 @@ from rich.console import Console
 from rich.live import Live
 
 from vec_inf.cli._helper import (
+    BatchLaunchResponseFormatter,
     LaunchResponseFormatter,
     ListCmdDisplay,
     MetricsResponseFormatter,
@@ -78,7 +79,7 @@ def cli() -> None:
     help="Exclude certain nodes from the resources granted to the job",
 )
 @click.option(
-    "--node-list",
+    "--nodelist",
     type=str,
     help="Request a specific list of nodes for deployment",
 )
@@ -145,7 +146,7 @@ def launch(
             Quality of service tier
         - exclude : str, optional
             Exclude certain nodes from the resources granted to the job
-        - node_list : str, optional
+        - nodelist : str, optional
             Request a specific list of nodes for deployment
         - bind : str, optional
             Additional binds for the singularity container
@@ -179,10 +180,10 @@ def launch(
         launch_response = client.launch_model(model_name, launch_options)
 
         # Display launch information
-        launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
         if json_mode:
             click.echo(launch_response.config)
         else:
+            launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
             launch_info_table = launch_formatter.format_table_output()
             CONSOLE.print(launch_info_table)
 
@@ -191,6 +192,53 @@ def launch(
     except Exception as e:
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
+
+@cli.command("batch-launch")
+@click.argument("model-names", type=str, nargs=-1)
+@click.option(
+    "--batch-config",
+    type=str,
+    help="Model configuration for batch launch",
+)
+@click.option(
+    "--json-mode",
+    is_flag=True,
+    help="Output in JSON string",
+)
+def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = None, json_mode: Optional[bool] = False) -> None:
+    """Launch multiple models in a batch.    
+
+    Parameters
+    ----------
+    model_names : tuple[str, ...]
+        Names of the models to launch
+    batch_config : str
+        Model configuration for batch launch
+    json_mode : bool, default=False
+        Whether to output in JSON format    
+
+    Raises
+    ------
+    click.ClickException
+        If batch launch fails
+    """
+    try:
+        # Start the client and launch models in batch mode
+        client = VecInfClient()
+        batch_launch_response = client.batch_launch_models(list(model_names), batch_config)
+
+        # Display batch launch information
+        if json_mode:
+            click.echo(batch_launch_response.config)
+        else:
+            batch_launch_formatter = BatchLaunchResponseFormatter(batch_launch_response.config)
+            batch_launch_info_table = batch_launch_formatter.format_table_output()
+            CONSOLE.print(batch_launch_info_table)
+
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
 @cli.command("status")
 @click.argument("slurm_job_id", type=int, nargs=1)
