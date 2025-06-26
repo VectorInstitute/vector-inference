@@ -100,12 +100,12 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
     ],
-    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE}",
+    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
             "\n# Find available port",
-            "head_node_ip=${SLURMD_NODENAME}",
+            "head_node_ip=${{SLURMD_NODENAME}}",
         ],
         "multinode": [
             "\n# Get list of nodes",
@@ -119,7 +119,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'echo "Ray Head IP: $ray_head"',
             'echo "Starting HEAD at $head_node"',
             'srun --nodes=1 --ntasks=1 -w "$head_node" \\',
-            "    SINGULARITY_PLACEHOLDER \\",
+            "    SINGULARITY_PLACEHOLDER",
             '    ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \\',
             '    --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
             "sleep 10",
@@ -129,7 +129,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "    node_i=${nodes_array[$i]}",
             '    echo "Starting WORKER $i at $node_i"',
             '    srun --nodes=1 --ntasks=1 -w "$node_i" \\',
-            "        SINGULARITY_PLACEHOLDER \\",
+            "        SINGULARITY_PLACEHOLDER",
             '        ray start --address "$ray_head" \\',
             '        --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
             "    sleep 5",
@@ -138,7 +138,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "find_vllm_port": [
         "\nvllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
-        'server_address="http://${head_node_ip}:${vllm_port_number}/v1"',
+        'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"',
     ],
     "write_to_json": [
         '\njson_path="{log_dir}/{model_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
@@ -178,29 +178,26 @@ class BatchSlurmScriptTemplate(TypedDict):
 
     shebang: str
     hetjob: str
-    singularity_setup: list[str]
+    singularity_setup: str
     env_vars: list[str]
     permission_update: str
     launch_model_scripts: list[str]
 
 
 BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
-    "shebang": "#!/bin/bash\n{out_file}\n{err_file}",
-    "hetjob": "#SBATCH hetjob",
-    "singularity_setup": [
-        SINGULARITY_LOAD_CMD,
-        f"singularity exec {SINGULARITY_IMAGE} ray stop",
-    ],
+    "shebang": "#!/bin/bash\n#SBATCH --output={out_file}\n#SBATCH --error={err_file}\n",
+    "hetjob": "#SBATCH hetjob\n",
+    "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
     "env_vars": [
         f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
-        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
+        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}\n",
     ],
     "permission_update": "chmod +x {script_name}",
     "launch_model_scripts": [
-        "srun --het-group={het_group_id} \\",
+        "\nsrun --het-group={het_group_id} \\",
         "    --output={out_file} \\",
         "    --error={err_file} \\",
-        "    {script_name} &",
+        "    {script_name} &\n",
     ],
 }
 
@@ -222,19 +219,27 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 
     shebang: str
     server_address_setup: list[str]
+    write_to_json: list[str]
     launch_cmd: list[str]
     singularity_command: str
 
 
 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
-    "shebang": "#!/bin/bash",
+    "shebang": "#!/bin/bash\n",
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
-        "head_node_ip=${SLURMD_NODENAME}",
+        "head_node_ip=${{SLURMD_NODENAME}}",
         "vllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
-        'server_address="http://${head_node_ip}:${vllm_port_number}/v1"',
+        'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"\n',
     ],
-    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE}",
+    "write_to_json": [
+        'json_path="{log_dir}/{slurm_job_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
+        'jq --arg server_addr "$server_address" \\',
+        "    '. + {{\"server_address\": $server_addr}}' \\",
+        '    "$json_path" > temp.json \\',
+        '    && mv temp.json "$json_path"\n',
+    ],
+    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "launch_cmd": [
         "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
