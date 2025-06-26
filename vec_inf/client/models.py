@@ -97,6 +97,29 @@ class LaunchResponse:
     config: dict[str, Any]
     raw_output: str = field(repr=False)
 
+@dataclass
+class BatchLaunchResponse():
+    """Response from launching multiple models in batch mode.
+
+    Parameters
+    ----------
+    slurm_job_id : int
+        ID of the launched SLURM job
+    slurm_job_name : str
+        Name of the launched SLURM job
+    model_names : list[str]
+        Names of the launched models
+    config : dict[str, Any]
+        Configuration used for the launch
+    raw_output : str
+        Raw output from the launch command (hidden from repr)
+    """
+
+    slurm_job_id: int
+    slurm_job_name: str
+    model_names: list[str]
+    config: dict[str, Any]
+    raw_output: str = field(repr=False)
 
 @dataclass
 class StatusResponse:
@@ -198,7 +221,7 @@ class LaunchOptions:
     account: Optional[str] = None
     qos: Optional[str] = None
     exclude: Optional[str] = None
-    node_list: Optional[str] = None
+    nodelist: Optional[str] = None
     bind: Optional[str] = None
     time: Optional[str] = None
     vocab_size: Optional[int] = None
