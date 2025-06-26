@@ -168,7 +168,7 @@ class VecInfClient:
         """
         model_launcher = BatchModelLauncher(model_names, batch_config)
         return model_launcher.launch()
-    
+
     def get_status(
         self, slurm_job_id: int, log_dir: Optional[str] = None
     ) -> StatusResponse:
