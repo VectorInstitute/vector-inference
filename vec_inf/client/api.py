@@ -19,6 +19,7 @@ from vec_inf.client._exceptions import (
     SlurmJobError,
 )
 from vec_inf.client._helper import (
+    BatchModelLauncher,
     ModelLauncher,
     ModelRegistry,
     ModelStatusMonitor,
@@ -145,8 +146,8 @@ class VecInfClient:
         model_launcher = ModelLauncher(model_name, options_dict)
         return model_launcher.launch()
 
-    def launch_multiple_models(
-        self, model_names: list[str]
+    def batch_launch_models(
+        self, model_names: list[str], batch_config: Optional[str] = None
     ) -> list[LaunchResponse]:
         """Launch multiple models on the cluster.
 
@@ -165,7 +166,7 @@ class VecInfClient:
         ModelConfigurationError
             If the model configuration is invalid
         """
-        model_launcher = ModelLauncher(model_names)
+        model_launcher = BatchModelLauncher(model_names, batch_config)
         return model_launcher.launch()
     
     def get_status(
