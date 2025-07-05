@@ -8,6 +8,7 @@ import json
 import time
 import warnings
 from pathlib import Path
+from shutil import copy2
 from typing import Any, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
@@ -483,27 +484,34 @@ class BatchModelLauncher:
         self.params["slurm_job_id"] = self.slurm_job_id
 
         # Create log directory and job json file, move slurm script to job log directory
-        job_log_dir = Path(
-            self.params["log_dir"], f"{self.slurm_job_name}.{self.slurm_job_id}"
-        )
-        job_log_dir.mkdir(parents=True, exist_ok=True)
+        main_job_log_dir = None
 
         for model_name in self.model_names:
+            model_job_id = int(self.slurm_job_id) + int(self.params["models"][model_name]["het_group_id"])
+
+            job_log_dir = Path(
+                self.params["log_dir"], f"{self.slurm_job_name}.{model_job_id}"
+            )
+            job_log_dir.mkdir(parents=True, exist_ok=True)
+
+            if not main_job_log_dir:
+                main_job_log_dir = job_log_dir
+
             job_json = Path(
                 job_log_dir,
-                f"{model_name}.{self.slurm_job_id}.json",
+                f"{model_name}.{model_job_id}.json",
             )
             job_json.touch(exist_ok=True)
 
             with job_json.open("w") as file:
                 json.dump(self.params["models"][model_name], file, indent=4)
 
-        # Move the launch scripts to the job log directory
+        # Copy the launch scripts to the job log directory, the original scripts cannot be deleted otherwise slurm will not be able to find them
         script_path_mapper = {}
         for script_path in self.launch_script_paths:
             old_path = script_path.name
             file_name = old_path.split("/")[-1]
-            script_path.rename(job_log_dir / file_name)
+            copy2(script_path, main_job_log_dir / file_name)
             new_path = script_path.name
             script_path_mapper[old_path] = new_path
             
@@ -517,7 +525,7 @@ class BatchModelLauncher:
 
         # Move the batch script to the job log directory
         self.batch_script_path.rename(
-            job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.slurm"
+            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.slurm"
         )
 
         return BatchLaunchResponse(
@@ -537,13 +545,13 @@ class ModelStatusMonitor:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to monitor
     log_dir : str, optional
         Base directory containing log files
     """
 
-    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: str, log_dir: Optional[str] = None):
         self.slurm_job_id = slurm_job_id
         self.output = self._get_raw_status_output()
         self.log_dir = log_dir
@@ -564,6 +572,7 @@ class ModelStatusMonitor:
         """
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output, stderr = utils.run_bash_command(status_cmd)
+
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
         return output
@@ -577,8 +586,14 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            job_name = self.output.split(" ")[1].split("=")[1]
-            job_state = self.output.split(" ")[9].split("=")[1]
+            if "+" in self.slurm_job_id:
+                job_name_idx = 3
+                job_state_idx = 12
+            else:
+                job_name_idx = 1
+                job_state_idx = 9
+            job_name = self.output.split(" ")[job_name_idx].split("=")[1]
+            job_state = self.output.split(" ")[job_state_idx].split("=")[1]
         except IndexError:
             job_name = "UNAVAILABLE"
             job_state = ModelStatus.UNAVAILABLE
