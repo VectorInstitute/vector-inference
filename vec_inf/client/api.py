@@ -170,7 +170,7 @@ class VecInfClient:
         return model_launcher.launch()
 
     def get_status(
-        self, slurm_job_id: str, log_dir: Optional[str] = None
+        self, slurm_job_id: str
     ) -> StatusResponse:
         """Get the status of a running model.
 
@@ -178,8 +178,6 @@ class VecInfClient:
         ----------
         slurm_job_id : str
             The SLURM job ID to check
-        log_dir : str, optional
-            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
@@ -191,11 +189,11 @@ class VecInfClient:
             - Base URL (if ready)
             - Error information (if failed)
         """
-        model_status_monitor = ModelStatusMonitor(slurm_job_id, log_dir)
+        model_status_monitor = ModelStatusMonitor(slurm_job_id)
         return model_status_monitor.process_model_status()
 
     def get_metrics(
-        self, slurm_job_id: int, log_dir: Optional[str] = None
+        self, slurm_job_id: int
     ) -> MetricsResponse:
         """Get the performance metrics of a running model.
 
@@ -203,8 +201,6 @@ class VecInfClient:
         ----------
         slurm_job_id : int
             The SLURM job ID to get metrics for
-        log_dir : str, optional
-            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
@@ -215,7 +211,7 @@ class VecInfClient:
             - Timestamp of collection
         """
         performance_metrics_collector = PerformanceMetricsCollector(
-            slurm_job_id, log_dir
+            slurm_job_id
         )
 
         metrics: Union[dict[str, float], str]
@@ -259,7 +255,6 @@ class VecInfClient:
         slurm_job_id: int,
         timeout_seconds: int = 1800,
         poll_interval_seconds: int = 10,
-        log_dir: Optional[str] = None,
     ) -> StatusResponse:
         """Wait until a model is ready or fails.
 
@@ -271,8 +266,6 @@ class VecInfClient:
             Maximum time to wait in seconds, by default 1800 (30 mins)
         poll_interval_seconds : int, optional
             How often to check status in seconds, by default 10
-        log_dir : str, optional
-            Path to the SLURM log directory. If None, uses default location
 
         Returns
         -------
@@ -297,7 +290,7 @@ class VecInfClient:
         start_time = time.time()
 
         while True:
-            status_info = self.get_status(slurm_job_id, log_dir)
+            status_info = self.get_status(slurm_job_id)
 
             if status_info.server_status == ModelStatus.READY:
                 return status_info

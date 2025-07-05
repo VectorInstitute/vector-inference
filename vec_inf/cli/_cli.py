@@ -243,17 +243,12 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
 @cli.command("status")
 @click.argument("slurm_job_id", type=str, nargs=1)
 @click.option(
-    "--log-dir",
-    type=str,
-    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
-)
-@click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
 )
 def status(
-    slurm_job_id: str, log_dir: Optional[str] = None, json_mode: bool = False
+    slurm_job_id: str, json_mode: bool = False
 ) -> None:
     """Get the status of a running model on the cluster.
 
@@ -261,8 +256,6 @@ def status(
     ----------
     slurm_job_id : str
         ID of the SLURM job to check
-    log_dir : str, optional
-        Path to SLURM log directory
     json_mode : bool, default=False
         Whether to output in JSON format
 
@@ -274,7 +267,7 @@ def status(
     try:
         # Start the client and get model inference server status
         client = VecInfClient()
-        status_response = client.get_status(slurm_job_id, log_dir)
+        status_response = client.get_status(slurm_job_id)
         # Display status information
         status_formatter = StatusResponseFormatter(status_response)
         if json_mode:
@@ -351,19 +344,14 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 
 
 @cli.command("metrics")
-@click.argument("slurm_job_id", type=int, nargs=1)
-@click.option(
-    "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
-)
-def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
+@click.argument("slurm_job_id", type=str, nargs=1)
+def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to monitor
-    log_dir : str, optional
-        Path to SLURM log directory
 
     Raises
     ------
@@ -379,7 +367,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     try:
         # Start the client and get inference server metrics
         client = VecInfClient()
-        metrics_response = client.get_metrics(slurm_job_id, log_dir)
+        metrics_response = client.get_metrics(slurm_job_id)
         metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
         # Check if metrics response is ready
@@ -390,7 +378,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
         with Live(refresh_per_second=1, console=CONSOLE) as live:
             while True:
-                metrics_response = client.get_metrics(slurm_job_id, log_dir)
+                metrics_response = client.get_metrics(slurm_job_id)
                 metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
                 if isinstance(metrics_response.metrics, str):
