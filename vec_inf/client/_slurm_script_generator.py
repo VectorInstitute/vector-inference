@@ -229,6 +229,7 @@ class BatchSlurmScriptGenerator:
         )
         script_content.append(
             "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["write_to_json"]).format(
+                het_group_id=model_params["het_group_id"],
                 log_dir=self.params["log_dir"],
                 slurm_job_name=self.params["slurm_job_name"],
                 model_name=model_name,
