@@ -547,14 +547,17 @@ class ModelStatusMonitor:
     ----------
     slurm_job_id : str
         ID of the SLURM job to monitor
-    log_dir : str, optional
-        Base directory containing log files
     """
 
-    def __init__(self, slurm_job_id: str, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: str):
         self.slurm_job_id = slurm_job_id
         self.output = self._get_raw_status_output()
-        self.log_dir = log_dir
+        self.job_status = dict(
+            field.split("=", 1)
+            for field in self.output.split()
+            if "=" in field
+        )
+        self.log_dir = self._get_log_dir()
         self.status_info = self._get_base_status_data()
 
     def _get_raw_status_output(self) -> str:
@@ -577,6 +580,21 @@ class ModelStatusMonitor:
             raise SlurmJobError(f"Error: {stderr}")
         return output
 
+    def _get_log_dir(self) -> str:
+        """Get the log directory for the job.
+
+        Returns
+        -------
+        str
+            Log directory for the job
+        """
+        try:
+            outfile_path = self.job_status["StdOut"]
+            directory = Path(outfile_path).parent
+            return str(directory)
+        except KeyError:
+            raise FileNotFoundError(f"Output file not found for job {self.slurm_job_id}")
+
     def _get_base_status_data(self) -> StatusResponse:
         """Extract basic job status information from scontrol output.
 
@@ -586,20 +604,15 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            if "+" in self.slurm_job_id:
-                job_name_idx = 3
-                job_state_idx = 12
-            else:
-                job_name_idx = 1
-                job_state_idx = 9
-            job_name = self.output.split(" ")[job_name_idx].split("=")[1]
-            job_state = self.output.split(" ")[job_state_idx].split("=")[1]
-        except IndexError:
+            job_name = self.job_status["JobName"]
+            job_state = self.job_status["JobState"]
+        except KeyError:
             job_name = "UNAVAILABLE"
             job_state = ModelStatus.UNAVAILABLE
 
         return StatusResponse(
             model_name=job_name,
+            log_dir=self.log_dir,
             server_status=ModelStatus.UNAVAILABLE,
             job_state=job_state,
             raw_output=self.output,
@@ -679,10 +692,10 @@ class PerformanceMetricsCollector:
         Directory containing log files
     """
 
-    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: int):
         self.slurm_job_id = slurm_job_id
-        self.log_dir = log_dir
         self.status_info = self._get_status_info()
+        self.log_dir = self.status_info.log_dir
         self.metrics_url = self._build_metrics_url()
         self.enabled_prefix_caching = self._check_prefix_caching()
 
@@ -699,7 +712,7 @@ class PerformanceMetricsCollector:
         StatusResponse
             Current status information for the model
         """
-        status_helper = ModelStatusMonitor(self.slurm_job_id, self.log_dir)
+        status_helper = ModelStatusMonitor(self.slurm_job_id)
         return status_helper.process_model_status()
 
     def _build_metrics_url(self) -> str:
