@@ -41,7 +41,7 @@ def run_bash_command(command: str) -> tuple[str, str]:
 
 def read_slurm_log(
     slurm_job_name: str,
-    slurm_job_id: int,
+    slurm_job_id: str,
     slurm_log_type: str,
     log_dir: Optional[Union[str, Path]],
 ) -> Union[list[str], str, dict[str, str]]:
@@ -51,7 +51,7 @@ def read_slurm_log(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
     slurm_log_type : str
         Type of log file to read ('out', 'err', or 'json')
@@ -86,6 +86,9 @@ def read_slurm_log(
         return "LOG DIR NOT FOUND"
 
     try:
+        if "+" in slurm_job_id:
+            main_job_id, het_job_id = slurm_job_id.split("+")
+            slurm_job_id = str(int(main_job_id) + int(het_job_id))
         file_path = (
             log_dir
             / Path(f"{slurm_job_name}.{slurm_job_id}")
@@ -103,7 +106,7 @@ def read_slurm_log(
 
 
 def is_server_running(
-    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+    slurm_job_name: str, slurm_job_id: str, log_dir: Optional[str]
 ) -> Union[str, ModelStatus, tuple[ModelStatus, str]]:
     """Check if a model is ready to serve requests.
 
@@ -111,7 +114,7 @@ def is_server_running(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
     log_dir : Optional[str]
         Directory containing log files
@@ -138,14 +141,14 @@ def is_server_running(
     return status
 
 
-def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
+def get_base_url(slurm_job_name: str, slurm_job_id: str, log_dir: Optional[str]) -> str:
     """Get the base URL of a model.
 
     Parameters
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
     log_dir : Optional[str]
         Directory containing log files
@@ -164,7 +167,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 
 def model_health_check(
-    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+    slurm_job_name: str, slurm_job_id: str, log_dir: Optional[str]
 ) -> tuple[ModelStatus, Union[str, int]]:
     """Check the health of a running model on the cluster.
 
@@ -172,7 +175,7 @@ def model_health_check(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
     log_dir : Optional[str]
         Directory containing log files
