@@ -105,7 +105,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "server_setup": {
         "single_node": [
             "\n# Find available port",
-            "head_node_ip=${{SLURMD_NODENAME}}",
+            "head_node_ip=${SLURMD_NODENAME}",
         ],
         "multinode": [
             "\n# Get list of nodes",
@@ -138,7 +138,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "find_vllm_port": [
         "\nvllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
-        'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"',
+        'server_address="http://${head_node_ip}:${vllm_port_number}/v1"',
     ],
     "write_to_json": [
         '\njson_path="{log_dir}/{model_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
