@@ -241,7 +241,7 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
         raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
 @cli.command("status")
-@click.argument("slurm_job_id", type=int, nargs=1)
+@click.argument("slurm_job_id", type=str, nargs=1)
 @click.option(
     "--log-dir",
     type=str,
@@ -253,13 +253,13 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
     help="Output in JSON string",
 )
 def status(
-    slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
+    slurm_job_id: str, log_dir: Optional[str] = None, json_mode: bool = False
 ) -> None:
     """Get the status of a running model on the cluster.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to check
     log_dir : str, optional
         Path to SLURM log directory

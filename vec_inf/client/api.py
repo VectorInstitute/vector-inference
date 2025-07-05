@@ -170,13 +170,13 @@ class VecInfClient:
         return model_launcher.launch()
 
     def get_status(
-        self, slurm_job_id: int, log_dir: Optional[str] = None
+        self, slurm_job_id: str, log_dir: Optional[str] = None
     ) -> StatusResponse:
         """Get the status of a running model.
 
         Parameters
         ----------
-        slurm_job_id : int
+        slurm_job_id : str
             The SLURM job ID to check
         log_dir : str, optional
             Path to the SLURM log directory. If None, uses default location
