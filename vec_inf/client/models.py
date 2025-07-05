@@ -129,6 +129,8 @@ class StatusResponse:
     ----------
     model_name : str
         Name of the model
+    log_dir : str
+        Path to the SLURM log directory
     server_status : ModelStatus
         Current status of the server
     job_state : Union[str, ModelStatus]
@@ -144,6 +146,7 @@ class StatusResponse:
     """
 
     model_name: str
+    log_dir: str
     server_status: ModelStatus
     job_state: Union[str, ModelStatus]
     raw_output: str = field(repr=False)
