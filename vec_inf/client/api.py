@@ -174,9 +174,7 @@ class VecInfClient:
         model_launcher = BatchModelLauncher(model_names, batch_config)
         return model_launcher.launch()
 
-    def get_status(
-        self, slurm_job_id: str
-    ) -> StatusResponse:
+    def get_status(self, slurm_job_id: str) -> StatusResponse:
         """Get the status of a running model.
 
         Parameters
@@ -197,9 +195,7 @@ class VecInfClient:
         model_status_monitor = ModelStatusMonitor(slurm_job_id)
         return model_status_monitor.process_model_status()
 
-    def get_metrics(
-        self, slurm_job_id: int
-    ) -> MetricsResponse:
+    def get_metrics(self, slurm_job_id: int) -> MetricsResponse:
         """Get the performance metrics of a running model.
 
         Parameters
@@ -215,9 +211,7 @@ class VecInfClient:
             - Performance metrics or error message
             - Timestamp of collection
         """
-        performance_metrics_collector = PerformanceMetricsCollector(
-            slurm_job_id
-        )
+        performance_metrics_collector = PerformanceMetricsCollector(slurm_job_id)
 
         metrics: Union[dict[str, float], str]
         if not performance_metrics_collector.metrics_url.startswith("http"):

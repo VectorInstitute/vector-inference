@@ -233,7 +233,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"\n',
     ],
     "write_to_json": [
-        'het_job_id=$(($SLURM_JOB_ID+{het_group_id}))',
+        "het_job_id=$(($SLURM_JOB_ID+{het_group_id}))",
         'json_path="{log_dir}/{slurm_job_name}.$het_job_id/{model_name}.$het_job_id.json"',
         'jq --arg server_addr "$server_address" \\',
         "    '. + {{\"server_address\": $server_addr}}' \\",

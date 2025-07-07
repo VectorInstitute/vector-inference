@@ -189,7 +189,10 @@ class BatchSlurmScriptGenerator:
                     f" --bind {self.params['models'][model_name]['bind']}"
                 )
             self.params["models"][model_name]["model_weights_path"] = str(
-                Path(self.params["models"][model_name]["model_weights_parent_dir"], model_name)
+                Path(
+                    self.params["models"][model_name]["model_weights_parent_dir"],
+                    model_name,
+                )
             )
 
     def _write_to_log_dir(self, script_content: list[str], script_name: str) -> Path:
@@ -254,7 +257,9 @@ class BatchSlurmScriptGenerator:
             else:
                 script_content.append(f"    {arg} {value} \\")
         # Write the bash script to the log directory
-        launch_script_path = self._write_to_log_dir(script_content, f"launch_{model_name}.sh")
+        launch_script_path = self._write_to_log_dir(
+            script_content, f"launch_{model_name}.sh"
+        )
         self.script_paths.append(launch_script_path)
         return launch_script_path
 

@@ -184,7 +184,9 @@ def launch(
         if json_mode:
             click.echo(json.dumps(launch_response.config))
         else:
-            launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
+            launch_formatter = LaunchResponseFormatter(
+                model_name, launch_response.config
+            )
             launch_info_table = launch_formatter.format_table_output()
             CONSOLE.print(launch_info_table)
 
@@ -206,8 +208,12 @@ def launch(
     is_flag=True,
     help="Output in JSON string",
 )
-def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = None, json_mode: Optional[bool] = False) -> None:
-    """Launch multiple models in a batch.    
+def batch_launch(
+    model_names: tuple[str, ...],
+    batch_config: Optional[str] = None,
+    json_mode: Optional[bool] = False,
+) -> None:
+    """Launch multiple models in a batch.
 
     Parameters
     ----------
@@ -216,7 +222,7 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
     batch_config : str
         Model configuration for batch launch
     json_mode : bool, default=False
-        Whether to output in JSON format    
+        Whether to output in JSON format
 
     Raises
     ------
@@ -226,13 +232,17 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
     try:
         # Start the client and launch models in batch mode
         client = VecInfClient()
-        batch_launch_response = client.batch_launch_models(list(model_names), batch_config)
+        batch_launch_response = client.batch_launch_models(
+            list(model_names), batch_config
+        )
 
         # Display batch launch information
         if json_mode:
             click.echo(batch_launch_response.config)
         else:
-            batch_launch_formatter = BatchLaunchResponseFormatter(batch_launch_response.config)
+            batch_launch_formatter = BatchLaunchResponseFormatter(
+                batch_launch_response.config
+            )
             batch_launch_info_table = batch_launch_formatter.format_table_output()
             CONSOLE.print(batch_launch_info_table)
 
@@ -241,6 +251,7 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
     except Exception as e:
         raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
+
 @cli.command("status")
 @click.argument("slurm_job_id", type=str, nargs=1)
 @click.option(
@@ -248,9 +259,7 @@ def batch_launch(model_names: tuple[str, ...], batch_config: Optional[str] = Non
     is_flag=True,
     help="Output in JSON string",
 )
-def status(
-    slurm_job_id: str, json_mode: bool = False
-) -> None:
+def status(slurm_job_id: str, json_mode: bool = False) -> None:
     """Get the status of a running model on the cluster.
 
     Parameters

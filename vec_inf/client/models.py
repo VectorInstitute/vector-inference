@@ -97,8 +97,9 @@ class LaunchResponse:
     config: dict[str, Any]
     raw_output: str = field(repr=False)
 
+
 @dataclass
-class BatchLaunchResponse():
+class BatchLaunchResponse:
     """Response from launching multiple models in batch mode.
 
     Parameters
@@ -120,6 +121,7 @@ class BatchLaunchResponse():
     model_names: list[str]
     config: dict[str, Any]
     raw_output: str = field(repr=False)
+
 
 @dataclass
 class StatusResponse:

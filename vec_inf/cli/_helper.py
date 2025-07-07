@@ -116,14 +116,28 @@ class BatchLaunchResponseFormatter:
         for model_name in self.params["models"]:
             table.add_row("Model Name", model_name, style="magenta")
             # Add resource allocation details
-            table.add_row("Partition", f"  {self.params['models'][model_name]['partition']}")
+            table.add_row(
+                "Partition", f"  {self.params['models'][model_name]['partition']}"
+            )
             table.add_row("QoS", f"  {self.params['models'][model_name]['qos']}")
-            table.add_row("Time Limit", f"  {self.params['models'][model_name]['time']}")
-            table.add_row("Num Nodes", f"  {self.params['models'][model_name]['num_nodes']}")
-            table.add_row("GPUs/Node", f"  {self.params['models'][model_name]['gpus_per_node']}")
-            table.add_row("CPUs/Task", f"  {self.params['models'][model_name]['cpus_per_task']}")
-            table.add_row("Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}")
-            table.add_row("Log Directory", f"  {self.params['models'][model_name]['log_dir']}")
+            table.add_row(
+                "Time Limit", f"  {self.params['models'][model_name]['time']}"
+            )
+            table.add_row(
+                "Num Nodes", f"  {self.params['models'][model_name]['num_nodes']}"
+            )
+            table.add_row(
+                "GPUs/Node", f"  {self.params['models'][model_name]['gpus_per_node']}"
+            )
+            table.add_row(
+                "CPUs/Task", f"  {self.params['models'][model_name]['cpus_per_task']}"
+            )
+            table.add_row(
+                "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
+            )
+            table.add_row(
+                "Log Directory", f"  {self.params['models'][model_name]['log_dir']}"
+            )
 
         return table
 

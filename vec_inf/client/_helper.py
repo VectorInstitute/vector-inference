@@ -487,7 +487,9 @@ class BatchModelLauncher:
         main_job_log_dir = None
 
         for model_name in self.model_names:
-            model_job_id = int(self.slurm_job_id) + int(self.params["models"][model_name]["het_group_id"])
+            model_job_id = int(self.slurm_job_id) + int(
+                self.params["models"][model_name]["het_group_id"]
+            )
 
             job_log_dir = Path(
                 self.params["log_dir"], f"{self.slurm_job_name}.{model_job_id}"
@@ -514,7 +516,7 @@ class BatchModelLauncher:
             copy2(script_path, main_job_log_dir / file_name)
             new_path = script_path.name
             script_path_mapper[old_path] = new_path
-            
+
         # Replace old launch script paths with new paths in batch slurm script
         with self.batch_script_path.open("r") as f:
             script_content = f.read()
@@ -553,9 +555,7 @@ class ModelStatusMonitor:
         self.slurm_job_id = slurm_job_id
         self.output = self._get_raw_status_output()
         self.job_status = dict(
-            field.split("=", 1)
-            for field in self.output.split()
-            if "=" in field
+            field.split("=", 1) for field in self.output.split() if "=" in field
         )
         self.log_dir = self._get_log_dir()
         self.status_info = self._get_base_status_data()
@@ -593,7 +593,9 @@ class ModelStatusMonitor:
             directory = Path(outfile_path).parent
             return str(directory)
         except KeyError:
-            raise FileNotFoundError(f"Output file not found for job {self.slurm_job_id}")
+            raise FileNotFoundError(
+                f"Output file not found for job {self.slurm_job_id}"
+            )
 
     def _get_base_status_data(self) -> StatusResponse:
         """Extract basic job status information from scontrol output.
