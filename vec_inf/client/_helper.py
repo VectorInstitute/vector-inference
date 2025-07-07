@@ -283,7 +283,7 @@ class ModelLauncher:
             json.dump(self.params, file, indent=4)
 
         return LaunchResponse(
-            slurm_job_id=int(self.slurm_job_id),
+            slurm_job_id=self.slurm_job_id,
             model_name=self.model_name,
             config=self.params,
             raw_output=command_output,
@@ -532,7 +532,7 @@ class BatchModelLauncher:
         )
 
         return BatchLaunchResponse(
-            slurm_job_id=int(self.slurm_job_id),
+            slurm_job_id=self.slurm_job_id,
             slurm_job_name=self.slurm_job_name,
             model_names=self.model_names,
             config=self.params,

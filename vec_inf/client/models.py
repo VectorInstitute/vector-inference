@@ -82,7 +82,7 @@ class LaunchResponse:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the launched SLURM job
     model_name : str
         Name of the launched model
@@ -92,7 +92,7 @@ class LaunchResponse:
         Raw output from the launch command (hidden from repr)
     """
 
-    slurm_job_id: int
+    slurm_job_id: str
     model_name: str
     config: dict[str, Any]
     raw_output: str = field(repr=False)
@@ -104,7 +104,7 @@ class BatchLaunchResponse:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the launched SLURM job
     slurm_job_name : str
         Name of the launched SLURM job
@@ -116,7 +116,7 @@ class BatchLaunchResponse:
         Raw output from the launch command (hidden from repr)
     """
 
-    slurm_job_id: int
+    slurm_job_id: str
     slurm_job_name: str
     model_names: list[str]
     config: dict[str, Any]
