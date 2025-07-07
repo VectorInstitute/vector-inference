@@ -180,7 +180,7 @@ class BatchSlurmScriptGenerator:
 
     def __init__(self, params: dict[str, Any]):
         self.params = params
-        self.script_paths = []
+        self.script_paths: list[Path] = []
         self.use_singularity = self.params["venv"] == "singularity"
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = ""
@@ -208,7 +208,7 @@ class BatchSlurmScriptGenerator:
         script_path.write_text("\n".join(script_content))
         return script_path
 
-    def _generate_model_launch_script(self, model_name: str) -> str:
+    def _generate_model_launch_script(self, model_name: str) -> Path:
         """Generate the bash script for launching individual vLLM servers.
 
         Parameters
@@ -218,7 +218,7 @@ class BatchSlurmScriptGenerator:
 
         Returns
         -------
-        str
+        Path
             The bash script path for launching the vLLM server.
         """
         # Generate the bash script content
@@ -288,12 +288,12 @@ class BatchSlurmScriptGenerator:
         shebang.pop()
         return "\n".join(shebang)
 
-    def generate_batch_slurm_script(self) -> str:
+    def generate_batch_slurm_script(self) -> Path:
         """Generate the Slurm script for launching multiple vLLM servers in batch mode.
 
         Returns
         -------
-        str
+        Path
             The Slurm script for launching multiple vLLM servers in batch mode.
         """
         script_content = []
@@ -323,9 +323,5 @@ class BatchSlurmScriptGenerator:
         script_content.append("wait")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        script_path: Path = (
-            Path(self.params["log_dir"])
-            / f"{self.params['slurm_job_name']}_{timestamp}.slurm"
-        )
-        batch_script_path = self._write_to_log_dir(script_content, script_path)
-        return batch_script_path
+        script_name = f"{self.params['slurm_job_name']}_{timestamp}.slurm"
+        return self._write_to_log_dir(script_content, script_name)

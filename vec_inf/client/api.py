@@ -30,6 +30,7 @@ from vec_inf.client._helper import (
 from vec_inf.client._utils import find_matching_dirs, run_bash_command
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
+    BatchLaunchResponse,
     LaunchOptions,
     LaunchResponse,
     MetricsResponse,
@@ -153,7 +154,7 @@ class VecInfClient:
 
     def batch_launch_models(
         self, model_names: list[str], batch_config: Optional[str] = None
-    ) -> list[LaunchResponse]:
+    ) -> BatchLaunchResponse:
         """Launch multiple models on the cluster.
 
         Parameters
@@ -163,8 +164,8 @@ class VecInfClient:
 
         Returns
         -------
-        list[LaunchResponse]
-            List of LaunchResponse objects containing launch details for each model
+        BatchLaunchResponse
+            Response containing launch details for each model
 
         Raises
         ------
@@ -195,12 +196,12 @@ class VecInfClient:
         model_status_monitor = ModelStatusMonitor(slurm_job_id)
         return model_status_monitor.process_model_status()
 
-    def get_metrics(self, slurm_job_id: int) -> MetricsResponse:
+    def get_metrics(self, slurm_job_id: str) -> MetricsResponse:
         """Get the performance metrics of a running model.
 
         Parameters
         ----------
-        slurm_job_id : int
+        slurm_job_id : str
             The SLURM job ID to get metrics for
 
         Returns
@@ -251,7 +252,7 @@ class VecInfClient:
 
     def wait_until_ready(
         self,
-        slurm_job_id: int,
+        slurm_job_id: str,
         timeout_seconds: int = 1800,
         poll_interval_seconds: int = 10,
     ) -> StatusResponse:
@@ -259,7 +260,7 @@ class VecInfClient:
 
         Parameters
         ----------
-        slurm_job_id : int
+        slurm_job_id : str
             The SLURM job ID to wait for
         timeout_seconds : int, optional
             Maximum time to wait in seconds, by default 1800 (30 mins)

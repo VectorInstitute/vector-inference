@@ -200,21 +200,22 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     Configuration is loaded from:
     1. User path: specified by config_path
     2. Default path: package's config/models.yaml or CACHED_CONFIG if it exists
-    3. User path: specified by VEC_INF_CONFIG environment variable and merged with default config
+    3. Environment variable: specified by VEC_INF_CONFIG environment variable
+        and merged with default config
 
     If user configuration exists, it will be merged with default configuration,
     with user values taking precedence for overlapping fields.
     """
 
     def load_yaml_config(path: Path) -> dict[str, Any]:
-        """Helper to load YAML config with error handling."""
+        """Load YAML config with error handling."""
         try:
             with path.open() as f:
                 return yaml.safe_load(f) or {}
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Could not find config: {path}")
-        except yaml.YAMLError as e:
-            raise ValueError(f"Error parsing YAML config at {path}: {e}")
+        except FileNotFoundError as err:
+            raise FileNotFoundError(f"Could not find config: {path}") from err
+        except yaml.YAMLError as err:
+            raise ValueError(f"Error parsing YAML config at {path}: {err}") from err
 
     # 1. If config_path is given, use only that
     if config_path:

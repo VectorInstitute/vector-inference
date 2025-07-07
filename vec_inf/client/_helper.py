@@ -308,7 +308,7 @@ class BatchModelLauncher:
         self.slurm_job_id = ""
         self.slurm_job_name = self._get_slurm_job_name()
         self.batch_script_path = Path("")
-        self.launch_script_paths = []
+        self.launch_script_paths: list[Path] = []
         self.model_configs = self._get_model_configurations()
         self.params = self._get_launch_params()
 
@@ -381,7 +381,7 @@ class BatchModelLauncher:
             # Validate resource allocation and parallelization settings
             if (
                 int(config.gpus_per_node) > 1
-                and config.vllm_args.get("--tensor-parallel-size") is None
+                and (config.vllm_args or {}).get("--tensor-parallel-size") is None
             ):
                 raise MissingRequiredFieldsError(
                     f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
@@ -394,8 +394,8 @@ class BatchModelLauncher:
                 )
 
             total_parallel_sizes = int(
-                config.vllm_args.get("--tensor-parallel-size", "1")
-            ) * int(config.vllm_args.get("--pipeline-parallel-size", "1"))
+                (config.vllm_args or {}).get("--tensor-parallel-size", "1")
+            ) * int((config.vllm_args or {}).get("--pipeline-parallel-size", "1"))
             if total_gpus_requested != total_parallel_sizes:
                 raise ValueError(
                     f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
@@ -458,7 +458,7 @@ class BatchModelLauncher:
         batch_script_generator = BatchSlurmScriptGenerator(self.params)
         self.batch_script_path = batch_script_generator.generate_batch_slurm_script()
         self.launch_script_paths = batch_script_generator.script_paths
-        return f"sbatch {self.batch_script_path}"
+        return f"sbatch {str(self.batch_script_path)}"
 
     def launch(self) -> BatchLaunchResponse:
         """Launch models in batch mode.
@@ -484,7 +484,7 @@ class BatchModelLauncher:
         self.params["slurm_job_id"] = self.slurm_job_id
 
         # Create log directory and job json file, move slurm script to job log directory
-        main_job_log_dir = None
+        main_job_log_dir = Path("")
 
         for model_name in self.model_names:
             model_job_id = int(self.slurm_job_id) + int(
@@ -496,7 +496,7 @@ class BatchModelLauncher:
             )
             job_log_dir.mkdir(parents=True, exist_ok=True)
 
-            if not main_job_log_dir:
+            if main_job_log_dir == Path(""):
                 main_job_log_dir = job_log_dir
 
             job_json = Path(
@@ -508,7 +508,8 @@ class BatchModelLauncher:
             with job_json.open("w") as file:
                 json.dump(self.params["models"][model_name], file, indent=4)
 
-        # Copy the launch scripts to the job log directory, the original scripts cannot be deleted otherwise slurm will not be able to find them
+        # Copy the launch scripts to the job log directory, the original scripts
+        # cannot be deleted otherwise slurm will not be able to find them
         script_path_mapper = {}
         for script_path in self.launch_script_paths:
             old_path = script_path.name
@@ -592,10 +593,10 @@ class ModelStatusMonitor:
             outfile_path = self.job_status["StdOut"]
             directory = Path(outfile_path).parent
             return str(directory)
-        except KeyError:
+        except KeyError as err:
             raise FileNotFoundError(
                 f"Output file not found for job {self.slurm_job_id}"
-            )
+            ) from err
 
     def _get_base_status_data(self) -> StatusResponse:
         """Extract basic job status information from scontrol output.
@@ -659,9 +660,9 @@ class ModelStatusMonitor:
     def _process_pending_state(self) -> None:
         """Process PENDING job state and update status information."""
         try:
-            self.status_info.pending_reason = self.output.split(" ")[10].split("=")[1]
+            self.status_info.pending_reason = self.job_status["Reason"]
             self.status_info.server_status = ModelStatus.PENDING
-        except IndexError:
+        except KeyError:
             self.status_info.pending_reason = "Unknown pending reason"
 
     def process_model_status(self) -> StatusResponse:
@@ -688,13 +689,13 @@ class PerformanceMetricsCollector:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to collect metrics from
     log_dir : str, optional
         Directory containing log files
     """
 
-    def __init__(self, slurm_job_id: int):
+    def __init__(self, slurm_job_id: str):
         self.slurm_job_id = slurm_job_id
         self.status_info = self._get_status_info()
         self.log_dir = self.status_info.log_dir
