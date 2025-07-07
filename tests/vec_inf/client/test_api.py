@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from vec_inf.client import ModelStatus, ModelType, VecInfClient
+from vec_inf.client._exceptions import ServerError, SlurmJobError
 
 
 @pytest.fixture
@@ -128,3 +129,155 @@ def test_wait_until_ready():
             assert result.server_status == ModelStatus.READY
             assert result.base_url == "http://gpu123:8080/v1"
             assert mock_status.call_count == 2
+
+
+def test_cleanup_logs_no_match(tmp_path):
+    """Test when cleanup_logs returns empty list."""
+    fam_a = tmp_path / "fam_a"
+    model_a = fam_a / "model_a.999"
+    model_a.mkdir(parents=True)
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_b",
+        dry_run=False,
+    )
+
+    assert deleted == []
+    assert fam_a.exists()
+    assert model_a.exists()
+
+
+def test_cleanup_logs_deletes_matching_dirs(tmp_path):
+    """Test that cleanup_logs deletes model directories matching filters."""
+    fam_a = tmp_path / "fam_a"
+    fam_a.mkdir()
+
+    model_a_1 = fam_a / "model_a.10"
+    model_a_2 = fam_a / "model_a.20"
+    model_b = fam_a / "model_b.30"
+
+    model_a_1.mkdir()
+    model_a_2.mkdir()
+    model_b.mkdir()
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_a",
+        model_name="model_a",
+        before_job_id=15,
+        dry_run=False,
+    )
+
+    assert deleted == [model_a_1]
+    assert not model_a_1.exists()
+    assert model_a_2.exists()
+    assert model_b.exists()
+
+
+def test_cleanup_logs_matching_dirs_dry_run(tmp_path):
+    """Test that cleanup_logs find model directories matching filters."""
+    fam_a = tmp_path / "fam_a"
+    fam_a.mkdir()
+
+    model_a_1 = fam_a / "model_a.10"
+    model_a_2 = fam_a / "model_a.20"
+
+    model_a_1.mkdir()
+    model_a_2.mkdir()
+
+    client = VecInfClient()
+    deleted = client.cleanup_logs(
+        log_dir=tmp_path,
+        model_family="fam_a",
+        model_name="model_a",
+        before_job_id=15,
+        dry_run=True,
+    )
+
+    assert deleted == [model_a_1]
+    assert model_a_1.exists()
+    assert model_a_2.exists()
+
+
+def test_shutdown_model_success():
+    """Test model shutdown success."""
+    client = VecInfClient()
+    with patch("vec_inf.client.api.run_bash_command") as mock_command:
+        mock_command.return_value = ("", "")
+        result = client.shutdown_model(12345)
+
+        assert result is True
+        mock_command.assert_called_once_with("scancel 12345")
+
+
+def test_shutdown_model_failure():
+    """Test model shutdown failure."""
+    client = VecInfClient()
+    with patch("vec_inf.client.api.run_bash_command") as mock_command:
+        mock_command.return_value = ("", "Error: Job not found")
+        with pytest.raises(
+            SlurmJobError, match="Failed to shutdown model: Error: Job not found"
+        ):
+            client.shutdown_model(12345)
+
+
+def test_wait_until_ready_timeout():
+    """Test timeout in wait_until_ready."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.LAUNCHING
+        mock_status.return_value = mock_response
+
+        with (
+            patch("time.sleep"),
+            pytest.raises(ServerError, match="Timed out waiting for model"),
+        ):
+            client.wait_until_ready(12345, timeout_seconds=1, poll_interval_seconds=0.5)
+
+
+def test_wait_until_ready_failed_status():
+    """Test wait_until_ready when model fails."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.FAILED
+        mock_response.failed_reason = "Out of memory"
+        mock_status.return_value = mock_response
+
+        with pytest.raises(ServerError, match="Model failed to start: Out of memory"):
+            client.wait_until_ready(12345)
+
+
+def test_wait_until_ready_failed_no_reason():
+    """Test wait_until_ready when model fails without reason."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.FAILED
+        mock_response.failed_reason = None
+        mock_status.return_value = mock_response
+
+        with pytest.raises(ServerError, match="Model failed to start: Unknown error"):
+            client.wait_until_ready(12345)
+
+
+def test_wait_until_ready_shutdown():
+    """Test wait_until_ready when model is shutdown."""
+    client = VecInfClient()
+
+    with patch.object(client, "get_status") as mock_status:
+        mock_response = MagicMock()
+        mock_response.server_status = ModelStatus.SHUTDOWN
+        mock_status.return_value = mock_response
+
+        with pytest.raises(
+            ServerError, match="Model was shutdown before it became ready"
+        ):
+            client.wait_until_ready(12345)

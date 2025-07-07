@@ -10,8 +10,10 @@ vec_inf.client._helper : Helper classes for model inference server management
 vec_inf.client.models : Data models for API responses
 """
 
+import shutil
 import time
 import warnings
+from pathlib import Path
 from typing import Any, Optional, Union
 
 from vec_inf.client._exceptions import (
@@ -25,7 +27,7 @@ from vec_inf.client._helper import (
     ModelStatusMonitor,
     PerformanceMetricsCollector,
 )
-from vec_inf.client._utils import run_bash_command
+from vec_inf.client._utils import find_matching_dirs, run_bash_command
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     LaunchOptions,
@@ -60,6 +62,9 @@ class VecInfClient:
         Shutdown a running model
     wait_until_ready(slurm_job_id, timeout_seconds, poll_interval_seconds, log_dir)
         Wait for a model to become ready
+
+    cleanup_logs(log_dir, model_name, model_family, job_id, dry_run)
+        Remove logs from the log directory.
 
     Examples
     --------
@@ -317,3 +322,51 @@ class VecInfClient:
 
             # Wait before checking again
             time.sleep(poll_interval_seconds)
+
+    def cleanup_logs(
+        self,
+        log_dir: Optional[Union[str, Path]] = None,
+        model_family: Optional[str] = None,
+        model_name: Optional[str] = None,
+        job_id: Optional[int] = None,
+        before_job_id: Optional[int] = None,
+        dry_run: bool = False,
+    ) -> list[Path]:
+        """Remove logs from the log directory.
+
+        Parameters
+        ----------
+        log_dir : str or Path, optional
+            Root directory containing log files. Defaults to ~/.vec-inf-logs.
+        model_family : str, optional
+            Only delete logs for this model family.
+        model_name : str, optional
+            Only delete logs for this model name.
+        job_id : int, optional
+            If provided, only match directories with this exact SLURM job ID.
+        before_job_id : int, optional
+            If provided, only delete logs with job ID less than this value.
+        dry_run : bool
+            If True, return matching files without deleting them.
+
+        Returns
+        -------
+        list[Path]
+            List of deleted (or matched if dry_run) log file paths.
+        """
+        log_root = Path(log_dir) if log_dir else Path.home() / ".vec-inf-logs"
+        matched = find_matching_dirs(
+            log_dir=log_root,
+            model_family=model_family,
+            model_name=model_name,
+            job_id=job_id,
+            before_job_id=before_job_id,
+        )
+
+        if dry_run:
+            return matched
+
+        for path in matched:
+            shutil.rmtree(path)
+
+        return matched

@@ -10,4 +10,4 @@ If you are using the Vector cluster environment, and you don't need any customiz
 pip install vec-inf
 ```
 
-Otherwise, we recommend using the provided [`Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/Dockerfile) to set up your own environment with the package.
+Otherwise, we recommend using the provided [`Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.8.5.post1`.
