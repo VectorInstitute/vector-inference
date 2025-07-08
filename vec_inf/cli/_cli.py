@@ -293,13 +293,13 @@ def status(slurm_job_id: str, json_mode: bool = False) -> None:
 
 
 @cli.command("shutdown")
-@click.argument("slurm_job_id", type=int, nargs=1)
-def shutdown(slurm_job_id: int) -> None:
+@click.argument("slurm_job_id", type=str, nargs=1)
+def shutdown(slurm_job_id: str) -> None:
     """Shutdown a running model on the cluster.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to shut down
 
     Raises

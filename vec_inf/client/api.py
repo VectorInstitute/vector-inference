@@ -226,12 +226,12 @@ class VecInfClient:
             timestamp=time.time(),
         )
 
-    def shutdown_model(self, slurm_job_id: int) -> bool:
+    def shutdown_model(self, slurm_job_id: str) -> bool:
         """Shutdown a running model.
 
         Parameters
         ----------
-        slurm_job_id : int
+        slurm_job_id : str
             The SLURM job ID to shut down
 
         Returns
