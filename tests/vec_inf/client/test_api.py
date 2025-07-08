@@ -8,7 +8,7 @@ from vec_inf.client import ModelStatus, ModelType, VecInfClient
 from vec_inf.client._exceptions import (
     ModelConfigurationError,
     ServerError,
-    SlurmJobError
+    SlurmJobError,
 )
 
 
@@ -324,8 +324,7 @@ def test_batch_launch_models_with_config():
     client.batch_launch_models = lambda model_names, batch_config=None: mock_response
 
     result = client.batch_launch_models(
-        ["model1", "model2"],
-        batch_config="custom_config.yaml"
+        ["model1", "model2"], batch_config="custom_config.yaml"
     )
 
     assert result.slurm_job_id == "12345678"
@@ -420,11 +419,16 @@ def test_batch_launch_models_configuration_error():
 
     # Mock the batch launch method to raise a configuration error
     def mock_batch_launch(model_names, batch_config=None):
-        raise ModelConfigurationError("Model 'nonexistent-model' not found in configuration")
+        raise ModelConfigurationError(
+            "Model 'nonexistent-model' not found in configuration"
+        )
 
     client.batch_launch_models = mock_batch_launch
 
-    with pytest.raises(ModelConfigurationError, match="Model 'nonexistent-model' not found in configuration"):
+    with pytest.raises(
+        ModelConfigurationError,
+        match="Model 'nonexistent-model' not found in configuration",
+    ):
         client.batch_launch_models(["model1", "nonexistent-model"])
 
 
@@ -438,7 +442,9 @@ def test_batch_launch_models_slurm_error():
 
     client.batch_launch_models = mock_batch_launch
 
-    with pytest.raises(SlurmJobError, match="sbatch: error: Invalid partition specified"):
+    with pytest.raises(
+        SlurmJobError, match="sbatch: error: Invalid partition specified"
+    ):
         client.batch_launch_models(["model1", "model2"])
 
 
@@ -448,7 +454,10 @@ def test_batch_launch_models_integration():
 
     with (
         patch("vec_inf.client.api.BatchModelLauncher") as mock_launcher_class,
-        patch("vec_inf.client.api.run_bash_command", return_value=("Submitted batch job 12345678", ""))
+        patch(
+            "vec_inf.client.api.run_bash_command",
+            return_value=("Submitted batch job 12345678", ""),
+        ),
     ):
         # Mock the BatchModelLauncher instance
         mock_launcher = MagicMock()
@@ -456,7 +465,7 @@ def test_batch_launch_models_integration():
             slurm_job_id="12345678",
             slurm_job_name="BATCH-model1-model2",
             model_names=["model1", "model2"],
-            config={"slurm_job_id": "12345678"}
+            config={"slurm_job_id": "12345678"},
         )
         mock_launcher_class.return_value = mock_launcher
 
@@ -478,7 +487,10 @@ def test_batch_launch_models_with_custom_config_integration():
 
     with (
         patch("vec_inf.client.api.BatchModelLauncher") as mock_launcher_class,
-        patch("vec_inf.client.api.run_bash_command", return_value=("Submitted batch job 12345678", ""))
+        patch(
+            "vec_inf.client.api.run_bash_command",
+            return_value=("Submitted batch job 12345678", ""),
+        ),
     ):
         # Mock the BatchModelLauncher instance
         mock_launcher = MagicMock()
@@ -486,17 +498,18 @@ def test_batch_launch_models_with_custom_config_integration():
             slurm_job_id="12345678",
             slurm_job_name="BATCH-model1-model2",
             model_names=["model1", "model2"],
-            config={"slurm_job_id": "12345678"}
+            config={"slurm_job_id": "12345678"},
         )
         mock_launcher_class.return_value = mock_launcher
 
         result = client.batch_launch_models(
-            ["model1", "model2"],
-            batch_config="custom_config.yaml"
+            ["model1", "model2"], batch_config="custom_config.yaml"
         )
 
         # Verify BatchModelLauncher was called with custom config
-        mock_launcher_class.assert_called_once_with(["model1", "model2"], "custom_config.yaml")
+        mock_launcher_class.assert_called_once_with(
+            ["model1", "model2"], "custom_config.yaml"
+        )
         mock_launcher.launch.assert_called_once()
 
         # Verify the response

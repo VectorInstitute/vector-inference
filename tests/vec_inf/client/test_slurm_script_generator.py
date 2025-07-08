@@ -295,7 +295,9 @@ class TestBatchSlurmScriptGenerator:
         singularity_params["venv"] = "singularity"  # Set top-level venv to singularity
         for model_name in singularity_params["models"]:
             singularity_params["models"][model_name]["venv"] = "singularity"
-            singularity_params["models"][model_name]["bind"] = "/scratch:/scratch,/data:/data"
+            singularity_params["models"][model_name]["bind"] = (
+                "/scratch:/scratch,/data:/data"
+            )
         return singularity_params
 
     def test_init_basic(self, batch_params):
@@ -313,8 +315,14 @@ class TestBatchSlurmScriptGenerator:
         generator = BatchSlurmScriptGenerator(batch_singularity_params)
 
         assert generator.use_singularity
-        assert generator.params["models"]["model1"]["additional_binds"] == " --bind /scratch:/scratch,/data:/data"
-        assert generator.params["models"]["model2"]["additional_binds"] == " --bind /scratch:/scratch,/data:/data"
+        assert (
+            generator.params["models"]["model1"]["additional_binds"]
+            == " --bind /scratch:/scratch,/data:/data"
+        )
+        assert (
+            generator.params["models"]["model2"]["additional_binds"]
+            == " --bind /scratch:/scratch,/data:/data"
+        )
 
     def test_init_singularity_no_bind(self, batch_params):
         """Test Singularity initialization without additional binds."""
@@ -322,7 +330,7 @@ class TestBatchSlurmScriptGenerator:
         params["venv"] = "singularity"  # Set top-level venv to singularity
         for model_name in params["models"]:
             params["models"][model_name]["venv"] = "singularity"
-        
+
         generator = BatchSlurmScriptGenerator(params)
 
         assert generator.use_singularity
@@ -343,7 +351,9 @@ class TestBatchSlurmScriptGenerator:
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_generate_model_launch_script_basic(self, mock_write_text, mock_touch, batch_params):
+    def test_generate_model_launch_script_basic(
+        self, mock_write_text, mock_touch, batch_params
+    ):
         """Test generation of individual model launch scripts."""
         generator = BatchSlurmScriptGenerator(batch_params)
         script_path = generator._generate_model_launch_script("model1")
@@ -356,7 +366,9 @@ class TestBatchSlurmScriptGenerator:
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_generate_model_launch_script_singularity(self, mock_write_text, mock_touch, batch_singularity_params):
+    def test_generate_model_launch_script_singularity(
+        self, mock_write_text, mock_touch, batch_singularity_params
+    ):
         """Test generation of individual model launch scripts with Singularity."""
         generator = BatchSlurmScriptGenerator(batch_singularity_params)
         script_path = generator._generate_model_launch_script("model1")
@@ -369,7 +381,9 @@ class TestBatchSlurmScriptGenerator:
     @patch("vec_inf.client._slurm_script_generator.datetime")
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_generate_batch_slurm_script(self, mock_write_text, mock_touch, mock_datetime, batch_params, temp_log_dir):
+    def test_generate_batch_slurm_script(
+        self, mock_write_text, mock_touch, mock_datetime, batch_params, temp_log_dir
+    ):
         """Test complete batch SLURM script generation."""
         mock_datetime.now.return_value.strftime.return_value = "20240101_120000"
 
@@ -391,7 +405,14 @@ class TestBatchSlurmScriptGenerator:
     @patch("vec_inf.client._slurm_script_generator.datetime")
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_generate_batch_slurm_script_singularity(self, mock_write_text, mock_touch, mock_datetime, batch_singularity_params, temp_log_dir):
+    def test_generate_batch_slurm_script_singularity(
+        self,
+        mock_write_text,
+        mock_touch,
+        mock_datetime,
+        batch_singularity_params,
+        temp_log_dir,
+    ):
         """Test complete batch SLURM script generation with Singularity."""
         mock_datetime.now.return_value.strftime.return_value = "20240101_120000"
 
@@ -410,14 +431,18 @@ class TestBatchSlurmScriptGenerator:
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_write_to_log_dir(self, mock_write_text, mock_touch, batch_params, temp_log_dir):
+    def test_write_to_log_dir(
+        self, mock_write_text, mock_touch, batch_params, temp_log_dir
+    ):
         """Test writing script to log directory."""
         params = batch_params.copy()
         params["log_dir"] = str(temp_log_dir)
 
         generator = BatchSlurmScriptGenerator(params)
 
-        script_path = generator._write_to_log_dir(["#!/bin/bash", "echo 'test'"], "test_script.sh")
+        script_path = generator._write_to_log_dir(
+            ["#!/bin/bash", "echo 'test'"], "test_script.sh"
+        )
 
         expected_path = temp_log_dir / "test_script.sh"
         assert script_path == expected_path
@@ -428,12 +453,20 @@ class TestBatchSlurmScriptGenerator:
         """Test model weights path construction."""
         generator = BatchSlurmScriptGenerator(batch_params)
 
-        assert generator.params["models"]["model1"]["model_weights_path"] == "/path/to/model_weights/model1"
-        assert generator.params["models"]["model2"]["model_weights_path"] == "/path/to/model_weights/model2"
+        assert (
+            generator.params["models"]["model1"]["model_weights_path"]
+            == "/path/to/model_weights/model1"
+        )
+        assert (
+            generator.params["models"]["model2"]["model_weights_path"]
+            == "/path/to/model_weights/model2"
+        )
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_boolean_vllm_args_handling(self, mock_write_text, mock_touch, batch_params):
+    def test_boolean_vllm_args_handling(
+        self, mock_write_text, mock_touch, batch_params
+    ):
         """Test handling of boolean vLLM arguments."""
         generator = BatchSlurmScriptGenerator(batch_params)
         script_path = generator._generate_model_launch_script("model1")
@@ -446,7 +479,9 @@ class TestBatchSlurmScriptGenerator:
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
-    def test_multiple_models_script_generation(self, mock_write_text, mock_touch, batch_params):
+    def test_multiple_models_script_generation(
+        self, mock_write_text, mock_touch, batch_params
+    ):
         """Test generation of scripts for multiple models."""
         generator = BatchSlurmScriptGenerator(batch_params)
 

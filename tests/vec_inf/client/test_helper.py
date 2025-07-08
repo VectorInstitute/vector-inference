@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
+from vec_inf.client._client_vars import SRC_DIR
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
@@ -14,11 +15,11 @@ from vec_inf.client._exceptions import (
     SlurmJobError,
 )
 from vec_inf.client._helper import (
+    BatchModelLauncher,
     ModelLauncher,
     ModelRegistry,
     ModelStatusMonitor,
     PerformanceMetricsCollector,
-    BatchModelLauncher,
 )
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
@@ -26,7 +27,6 @@ from vec_inf.client.models import (
     ModelType,
     StatusResponse,
 )
-from vec_inf.client._client_vars import SRC_DIR
 
 
 class TestModelLauncher:
@@ -197,6 +197,7 @@ class TestModelLauncher:
         with pytest.raises(SlurmJobError):
             launcher.launch()
 
+
 class TestBatchModelLauncher:
     """Tests for the BatchModelLauncher class."""
 
@@ -252,7 +253,9 @@ class TestBatchModelLauncher:
         assert "family2-variant1" in launcher.model_configs
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_init_with_missing_model_config(self, mock_load_config, batch_model_configs):
+    def test_init_with_missing_model_config(
+        self, mock_load_config, batch_model_configs
+    ):
         """Test error is raised when one of the models is missing from config."""
         mock_load_config.return_value = batch_model_configs
 
@@ -266,9 +269,14 @@ class TestBatchModelLauncher:
     def test_get_slurm_job_name(self, mock_load_config, batch_model_configs):
         """Test SLURM job name is constructed correctly from model names."""
         mock_load_config.return_value = batch_model_configs
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1", "family1-variant2"])
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1", "family1-variant2"]
+        )
 
-        assert launcher.slurm_job_name == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        assert (
+            launcher.slurm_job_name
+            == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        )
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.mkdir")
@@ -278,14 +286,19 @@ class TestBatchModelLauncher:
         """Test launch parameters preparation creates log directories."""
         mock_load_config.return_value = batch_model_configs
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1", "family1-variant2"])
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1", "family1-variant2"]
+        )
         params = launcher.params
 
         assert "models" in params
         assert "family1-variant1" in params["models"]
         assert "family2-variant1" in params["models"]
         assert "family1-variant2" in params["models"]
-        assert params["slurm_job_name"] == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        assert (
+            params["slurm_job_name"]
+            == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        )
         assert params["src_dir"] == str(SRC_DIR)
 
         # Check that log directories are created
@@ -318,7 +331,7 @@ class TestBatchModelLauncher:
             batch_model_configs[0].model_copy(
                 update={
                     "gpus_per_node": 3,
-                    "vllm_args": {"--tensor-parallel-size": "3"}
+                    "vllm_args": {"--tensor-parallel-size": "3"},
                 }
             ),
             batch_model_configs[1],
@@ -345,7 +358,7 @@ class TestBatchModelLauncher:
                 update={
                     "gpus_per_node": 1,
                     "num_nodes": 2,  # This will cause the mismatch
-                    "vllm_args": {"--tensor-parallel-size": "1"}
+                    "vllm_args": {"--tensor-parallel-size": "1"},
                 }
             ),
         ]
@@ -450,13 +463,31 @@ class TestBatchModelLauncher:
         params = launcher.params
 
         # Check individual model log files
-        assert "family1-variant1.%j.out" in params["models"]["family1-variant1"]["out_file"]
-        assert "family1-variant1.%j.err" in params["models"]["family1-variant1"]["err_file"]
-        assert "family1-variant1.$SLURM_JOB_ID.json" in params["models"]["family1-variant1"]["json_file"]
+        assert (
+            "family1-variant1.%j.out"
+            in params["models"]["family1-variant1"]["out_file"]
+        )
+        assert (
+            "family1-variant1.%j.err"
+            in params["models"]["family1-variant1"]["err_file"]
+        )
+        assert (
+            "family1-variant1.$SLURM_JOB_ID.json"
+            in params["models"]["family1-variant1"]["json_file"]
+        )
 
-        assert "family2-variant1.%j.out" in params["models"]["family2-variant1"]["out_file"]
-        assert "family2-variant1.%j.err" in params["models"]["family2-variant1"]["err_file"]
-        assert "family2-variant1.$SLURM_JOB_ID.json" in params["models"]["family2-variant1"]["json_file"]
+        assert (
+            "family2-variant1.%j.out"
+            in params["models"]["family2-variant1"]["out_file"]
+        )
+        assert (
+            "family2-variant1.%j.err"
+            in params["models"]["family2-variant1"]["err_file"]
+        )
+        assert (
+            "family2-variant1.$SLURM_JOB_ID.json"
+            in params["models"]["family2-variant1"]["json_file"]
+        )
 
         # Check batch-level log files
         assert "BATCH-family1-variant1-family2-variant1.%j.out" in params["out_file"]
@@ -467,7 +498,9 @@ class TestBatchModelLauncher:
         """Test launcher initializes correctly with custom batch config."""
         mock_load_config.return_value = batch_model_configs
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], batch_config="custom_config.yaml")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"], batch_config="custom_config.yaml"
+        )
 
         assert launcher.batch_config == "custom_config.yaml"
         # Verify load_config was called with the custom config
