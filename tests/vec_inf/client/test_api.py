@@ -5,7 +5,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from vec_inf.client import ModelStatus, ModelType, VecInfClient
-from vec_inf.client._exceptions import ServerError, SlurmJobError
+from vec_inf.client._exceptions import (
+    ModelConfigurationError,
+    ServerError,
+    SlurmJobError
+)
 
 
 @pytest.fixture
@@ -281,3 +285,221 @@ def test_wait_until_ready_shutdown():
             ServerError, match="Model was shutdown before it became ready"
         ):
             client.wait_until_ready(12345)
+
+
+def test_batch_launch_models_success():
+    """Test successfully launching multiple models in batch mode."""
+    client = VecInfClient()
+
+    # Create a mock batch response
+    mock_response = MagicMock()
+    mock_response.slurm_job_id = "12345678"
+    mock_response.slurm_job_name = "BATCH-model1-model2"
+    mock_response.model_names = ["model1", "model2"]
+    mock_response.config = {"slurm_job_id": "12345678"}
+
+    # Mock the batch launch method
+    client.batch_launch_models = lambda model_names, batch_config=None: mock_response
+
+    result = client.batch_launch_models(["model1", "model2"])
+
+    assert result.slurm_job_id == "12345678"
+    assert result.slurm_job_name == "BATCH-model1-model2"
+    assert result.model_names == ["model1", "model2"]
+    assert result.config["slurm_job_id"] == "12345678"
+
+
+def test_batch_launch_models_with_config():
+    """Test launching multiple models with custom batch configuration."""
+    client = VecInfClient()
+
+    # Create a mock batch response
+    mock_response = MagicMock()
+    mock_response.slurm_job_id = "12345678"
+    mock_response.slurm_job_name = "BATCH-model1-model2"
+    mock_response.model_names = ["model1", "model2"]
+    mock_response.config = {"slurm_job_id": "12345678"}
+
+    # Mock the batch launch method
+    client.batch_launch_models = lambda model_names, batch_config=None: mock_response
+
+    result = client.batch_launch_models(
+        ["model1", "model2"],
+        batch_config="custom_config.yaml"
+    )
+
+    assert result.slurm_job_id == "12345678"
+    assert result.slurm_job_name == "BATCH-model1-model2"
+    assert result.model_names == ["model1", "model2"]
+
+
+def test_batch_launch_models_empty_list():
+    """Test that batch launch with empty model list raises an error."""
+    client = VecInfClient()
+
+    # Mock the batch launch method to raise an error for empty list
+    def mock_batch_launch(model_names, batch_config=None):
+        if not model_names:
+            raise ValueError("Model names list cannot be empty")
+        return MagicMock()
+
+    client.batch_launch_models = mock_batch_launch
+
+    with pytest.raises(ValueError, match="Model names list cannot be empty"):
+        client.batch_launch_models([])
+
+
+def test_batch_launch_models_single_model():
+    """Test launching a single model in batch mode."""
+    client = VecInfClient()
+
+    # Create a mock batch response for single model
+    mock_response = MagicMock()
+    mock_response.slurm_job_id = "12345678"
+    mock_response.slurm_job_name = "BATCH-model1"
+    mock_response.model_names = ["model1"]
+    mock_response.config = {"slurm_job_id": "12345678"}
+
+    # Mock the batch launch method
+    client.batch_launch_models = lambda model_names, batch_config=None: mock_response
+
+    result = client.batch_launch_models(["model1"])
+
+    assert result.slurm_job_id == "12345678"
+    assert result.slurm_job_name == "BATCH-model1"
+    assert result.model_names == ["model1"]
+    assert len(result.model_names) == 1
+
+
+def test_batch_launch_models_three_models():
+    """Test launching three models in batch mode."""
+    client = VecInfClient()
+
+    # Create a mock batch response for three models
+    mock_response = MagicMock()
+    mock_response.slurm_job_id = "12345678"
+    mock_response.slurm_job_name = "BATCH-model1-model2-model3"
+    mock_response.model_names = ["model1", "model2", "model3"]
+    mock_response.config = {"slurm_job_id": "12345678"}
+
+    # Mock the batch launch method
+    client.batch_launch_models = lambda model_names, batch_config=None: mock_response
+
+    result = client.batch_launch_models(["model1", "model2", "model3"])
+
+    assert result.slurm_job_id == "12345678"
+    assert result.slurm_job_name == "BATCH-model1-model2-model3"
+    assert result.model_names == ["model1", "model2", "model3"]
+    assert len(result.model_names) == 3
+
+
+def test_batch_launch_models_with_special_characters():
+    """Test launching models with special characters in names."""
+    client = VecInfClient()
+
+    # Create a mock batch response for models with special characters
+    mock_response = MagicMock()
+    mock_response.slurm_job_id = "12345678"
+    mock_response.slurm_job_name = "BATCH-model-1-model_2"
+    mock_response.model_names = ["model-1", "model_2"]
+    mock_response.config = {"slurm_job_id": "12345678"}
+
+    # Mock the batch launch method
+    client.batch_launch_models = lambda model_names, batch_config=None: mock_response
+
+    result = client.batch_launch_models(["model-1", "model_2"])
+
+    assert result.slurm_job_id == "12345678"
+    assert result.slurm_job_name == "BATCH-model-1-model_2"
+    assert result.model_names == ["model-1", "model_2"]
+
+
+def test_batch_launch_models_configuration_error():
+    """Test that batch launch raises configuration error when models are not found."""
+    client = VecInfClient()
+
+    # Mock the batch launch method to raise a configuration error
+    def mock_batch_launch(model_names, batch_config=None):
+        raise ModelConfigurationError("Model 'nonexistent-model' not found in configuration")
+
+    client.batch_launch_models = mock_batch_launch
+
+    with pytest.raises(ModelConfigurationError, match="Model 'nonexistent-model' not found in configuration"):
+        client.batch_launch_models(["model1", "nonexistent-model"])
+
+
+def test_batch_launch_models_slurm_error():
+    """Test that batch launch raises SLURM error when job submission fails."""
+    client = VecInfClient()
+
+    # Mock the batch launch method to raise a SLURM error
+    def mock_batch_launch(model_names, batch_config=None):
+        raise SlurmJobError("sbatch: error: Invalid partition specified")
+
+    client.batch_launch_models = mock_batch_launch
+
+    with pytest.raises(SlurmJobError, match="sbatch: error: Invalid partition specified"):
+        client.batch_launch_models(["model1", "model2"])
+
+
+def test_batch_launch_models_integration():
+    """Test integration of batch launch with actual BatchModelLauncher."""
+    client = VecInfClient()
+
+    with (
+        patch("vec_inf.client.api.BatchModelLauncher") as mock_launcher_class,
+        patch("vec_inf.client.api.run_bash_command", return_value=("Submitted batch job 12345678", ""))
+    ):
+        # Mock the BatchModelLauncher instance
+        mock_launcher = MagicMock()
+        mock_launcher.launch.return_value = MagicMock(
+            slurm_job_id="12345678",
+            slurm_job_name="BATCH-model1-model2",
+            model_names=["model1", "model2"],
+            config={"slurm_job_id": "12345678"}
+        )
+        mock_launcher_class.return_value = mock_launcher
+
+        result = client.batch_launch_models(["model1", "model2"])
+
+        # Verify BatchModelLauncher was called correctly
+        mock_launcher_class.assert_called_once_with(["model1", "model2"], None)
+        mock_launcher.launch.assert_called_once()
+
+        # Verify the response
+        assert result.slurm_job_id == "12345678"
+        assert result.slurm_job_name == "BATCH-model1-model2"
+        assert result.model_names == ["model1", "model2"]
+
+
+def test_batch_launch_models_with_custom_config_integration():
+    """Test integration of batch launch with custom configuration."""
+    client = VecInfClient()
+
+    with (
+        patch("vec_inf.client.api.BatchModelLauncher") as mock_launcher_class,
+        patch("vec_inf.client.api.run_bash_command", return_value=("Submitted batch job 12345678", ""))
+    ):
+        # Mock the BatchModelLauncher instance
+        mock_launcher = MagicMock()
+        mock_launcher.launch.return_value = MagicMock(
+            slurm_job_id="12345678",
+            slurm_job_name="BATCH-model1-model2",
+            model_names=["model1", "model2"],
+            config={"slurm_job_id": "12345678"}
+        )
+        mock_launcher_class.return_value = mock_launcher
+
+        result = client.batch_launch_models(
+            ["model1", "model2"],
+            batch_config="custom_config.yaml"
+        )
+
+        # Verify BatchModelLauncher was called with custom config
+        mock_launcher_class.assert_called_once_with(["model1", "model2"], "custom_config.yaml")
+        mock_launcher.launch.assert_called_once()
+
+        # Verify the response
+        assert result.slurm_job_id == "12345678"
+        assert result.slurm_job_name == "BATCH-model1-model2"
+        assert result.model_names == ["model1", "model2"]
