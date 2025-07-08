@@ -117,7 +117,7 @@ class TestModelLauncher:
     ):
         """Test _get_launch_params merges config and CLI vllm_args correctly."""
         mock_load_config.return_value = [model_config]
-        cli_kwargs = {"vllm_args": "--num-scheduler-steps=16", "num_nodes": 4}
+        cli_kwargs = {"vllm_args": "--num-scheduler-steps=16, -pp=4", "num_nodes": 4}
 
         launcher = ModelLauncher("test-model", cli_kwargs)
         params = launcher.params
@@ -173,7 +173,7 @@ class TestModelLauncher:
         launcher = ModelLauncher("test-model", {})
         response = launcher.launch()
 
-        assert response.slurm_job_id == 12345
+        assert response.slurm_job_id == "12345"
         assert response.model_name == "test-model"
         assert "slurm_job_id" in response.config
         assert response.config["slurm_job_id"] == "12345"
@@ -214,14 +214,15 @@ class TestModelStatusMonitor:
         """Test __init__ sets job ID, output, and initial status info."""
         mock_run_bash.return_value = (mock_scontrol_output, "")
 
-        monitor = ModelStatusMonitor(slurm_job_id=12345, log_dir="/path/to/logs")
+        monitor = ModelStatusMonitor(slurm_job_id="12345")
 
-        assert monitor.slurm_job_id == 12345
+        assert monitor.slurm_job_id == "12345"
         assert monitor.output == mock_scontrol_output
-        assert monitor.log_dir == "/path/to/logs"
-        assert isinstance(monitor.status_info.raw_output, str)
-        assert monitor.status_info.job_state == "RUNNING"
+        assert monitor.job_status["JobName"] == "test-model"
+        assert monitor.job_status["JobState"] == "RUNNING"
+        assert monitor.log_dir == "/path/to/log/test-family/test-model.12345"
         assert monitor.status_info.model_name == "test-model"
+        assert monitor.status_info.job_state == "RUNNING"
 
     @patch("vec_inf.client._helper.utils.run_bash_command")
     def test_init_with_slurm_error(self, mock_run_bash):
@@ -229,7 +230,7 @@ class TestModelStatusMonitor:
         mock_run_bash.return_value = ("", "scontrol: error: Invalid job id specified")
 
         with pytest.raises(SlurmJobError):
-            ModelStatusMonitor(99999)
+            ModelStatusMonitor("99999")
 
     @patch("vec_inf.client._helper.utils.run_bash_command")
     def test_process_pending_state(self, mock_run_bash, mock_pending_scontrol_output):
@@ -311,6 +312,7 @@ def mock_status_response():
     """Fixture returning a mock StatusResponse instance."""
     return StatusResponse(
         model_name="test-model",
+        log_dir="/tmp/test_logs",  # Add this line
         server_status=ModelStatus.UNAVAILABLE,
         job_state="RUNNING",
         raw_output="mock scontrol output",
@@ -345,9 +347,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
-        assert collector.slurm_job_id == 12345
+        assert collector.slurm_job_id == "12345"
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
@@ -364,9 +366,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         )
         mock_read_slurm_log.return_value = {"enable_prefix_caching": True}
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
-        assert collector.slurm_job_id == 12345
+        assert collector.slurm_job_id == "12345"
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
@@ -383,7 +385,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         assert collector.metrics_url == "Pending resources for server initialization"
 
@@ -398,7 +400,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         )
         mock_get_base_url.return_value = "http://gpu01:8000/v1"
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         assert collector.metrics_url == "http://gpu01:8000/metrics"
 
@@ -411,7 +413,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         parsed = collector._parse_metrics(mock_metrics_text)
 
@@ -442,7 +444,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         mock_response.text = mock_metrics_text
         mock_requests_get.return_value = mock_response
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
         collector.metrics_url = "http://gpu01:8000/metrics"
         collector.fetch_metrics()
 
@@ -487,7 +489,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         mock_status_monitor.return_value.process_model_status.return_value = mock_status
         mock_requests_get.side_effect = requests.RequestException("Connection refused")
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
         collector.metrics_url = "http://gpu01:8000/metrics"
 
         result = collector.fetch_metrics()

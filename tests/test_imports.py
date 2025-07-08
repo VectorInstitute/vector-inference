@@ -22,6 +22,7 @@ class TestVecInfImports(unittest.TestCase):
             import vec_inf.client._exceptions
             import vec_inf.client._helper
             import vec_inf.client._slurm_script_generator
+            import vec_inf.client._slurm_templates
             import vec_inf.client._utils
             import vec_inf.client.api
             import vec_inf.client.config
