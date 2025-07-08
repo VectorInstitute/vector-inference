@@ -61,9 +61,7 @@ def test_read_slurm_log_found(mock_log_dir):
 def test_read_slurm_log_not_found():
     """Test read_slurm_log, return an error message if the log file is not found."""
     result = read_slurm_log("missing_job", "456", "err", "/nonexistent")
-    assert (
-        result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456.err"
-    )
+    assert result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456.err"
 
 
 @pytest.mark.parametrize(
