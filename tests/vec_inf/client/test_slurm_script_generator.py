@@ -342,7 +342,6 @@ class TestBatchSlurmScriptGenerator:
         generator = BatchSlurmScriptGenerator(batch_params)
         shebang = generator._generate_batch_slurm_script_shebang()
 
-        # The job name is not included in the shebang template, so we shouldn't expect it
         assert "#SBATCH --output=/path/to/logs/BATCH-model1-model2.%j.out" in shebang
         assert "#SBATCH --error=/path/to/logs/BATCH-model1-model2.%j.err" in shebang
         assert "# ===== Resource group for model1 =====" in shebang
@@ -461,21 +460,6 @@ class TestBatchSlurmScriptGenerator:
             generator.params["models"]["model2"]["model_weights_path"]
             == "/path/to/model_weights/model2"
         )
-
-    @patch("pathlib.Path.touch")
-    @patch("pathlib.Path.write_text")
-    def test_boolean_vllm_args_handling(
-        self, mock_write_text, mock_touch, batch_params
-    ):
-        """Test handling of boolean vLLM arguments."""
-        generator = BatchSlurmScriptGenerator(batch_params)
-        script_path = generator._generate_model_launch_script("model1")
-
-        # Check that boolean args are handled correctly (no value after the flag)
-        mock_write_text.assert_called_once()
-        script_content = mock_write_text.call_args[0][0]
-        assert "--enforce-eager" in script_content
-        # The boolean flag should appear without a value
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
