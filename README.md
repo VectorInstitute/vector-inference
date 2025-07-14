@@ -103,7 +103,7 @@ export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 
 #### Other commands
 
-* `batch-launch`: Launch multiple model inference servers at once, currently ONLY single node models supported, 
+* `batch-launch`: Launch multiple model inference servers at once, currently ONLY single node models supported,
 * `status`: Check the model status by providing its Slurm job ID.
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.

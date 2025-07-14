@@ -102,7 +102,7 @@ export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 The `batch-launch` command allows users to launch multiple inference servers at once, here is an example of launching 2 models:
 
 ```bash
-vec-inf batch-launch DeepSeek-R1-Distill-Qwen-7B Qwen2.5-Math-PRM-7B 
+vec-inf batch-launch DeepSeek-R1-Distill-Qwen-7B Qwen2.5-Math-PRM-7B
 ```
 
 You should see an output like the following:
@@ -185,7 +185,7 @@ There are 5 possible states:
 * **FAILED**: Inference server in an unhealthy state. Job failed reason will be shown.
 * **SHUTDOWN**: Inference server is shutdown/cancelled.
 
-**Note** 
+**Note**
 * The base URL is only available when model is in `READY` state.
 * For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 17480109+0, 17480109+1).
 
