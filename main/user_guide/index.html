@@ -468,6 +468,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#batch-launch-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      batch-launch command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#status-command" class="md-nav__link">
     <span class="md-ellipsis">
       status command
@@ -666,6 +675,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#batch-launch-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      batch-launch command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#status-command" class="md-nav__link">
     <span class="md-ellipsis">
       status command
@@ -764,7 +782,7 @@
 <h1 id="user-guide">User Guide<a class="headerlink" href="#user-guide" title="Permanent link">&para;</a></h1>
 <h2 id="cli-usage">CLI Usage<a class="headerlink" href="#cli-usage" title="Permanent link">&para;</a></h2>
 <h3 id="launch-command"><code>launch</code> command<a class="headerlink" href="#launch-command" title="Permanent link">&para;</a></h3>
-<p>The <code>launch</code> command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.</p>
+<p>The <code>launch</code> command allows users to launch a OpenAI-compatible model inference server as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.</p>
 <p>We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:</p>
 <p><div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct
 </span></code></pre></div>
@@ -834,28 +852,66 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 * Check <a href="https://docs.vllm.ai/en/stable/serving/engine_args.html">vLLM Engine Arguments</a> for the full list of available vLLM engine arguments. The default parallel size for any parallelization defaults to 1, so none of the sizes were set specifically in this example.
 * For GPU partitions with non-Ampere architectures, e.g. <code>rtx6000</code>, <code>t4v2</code>, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. <code>--dtype: float16</code>.
 * Setting <code>--compilation-config</code> to <code>3</code> currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.</p>
+<h3 id="batch-launch-command"><code>batch-launch</code> command<a class="headerlink" href="#batch-launch-command" title="Permanent link">&para;</a></h3>
+<p>The <code>batch-launch</code> command allows users to launch multiple inference servers at once, here is an example of launching 2 models:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>vec-inf<span class="w"> </span>batch-launch<span class="w"> </span>DeepSeek-R1-Distill-Qwen-7B<span class="w"> </span>Qwen2.5-Math-PRM-7B
+</span></code></pre></div>
+<p>You should see an output like the following:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>┃ Job Config     ┃ Value                                                                   ┃
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>│ Slurm Job ID   │ 17480109                                                                │
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>│ Slurm Job Name │ BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5-Math-PRM-7B                   │
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>│ Model Name     │ DeepSeek-R1-Distill-Qwen-7B                                             │
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>│ Partition      │   a40                                                                   │
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>│ QoS            │   m2                                                                    │
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>│ Time Limit     │   08:00:00                                                              │
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>│ Num Nodes      │   1                                                                     │
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>│ GPUs/Node      │   1                                                                     │
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>│ CPUs/Task      │   16                                                                    │
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>│ Memory/Node    │   64G                                                                   │
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>│ Model Name     │ Qwen2.5-Math-PRM-7B                                                     │
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>│ Partition      │   a40                                                                   │
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>│ QoS            │   m2                                                                    │
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>│ Time Limit     │   08:00:00                                                              │
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>│ Num Nodes      │   1                                                                     │
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>│ GPUs/Node      │   1                                                                     │
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>│ CPUs/Task      │   16                                                                    │
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>│ Memory/Node    │   64G                                                                   │
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>└────────────────┴─────────────────────────────────────────────────────────────────────────┘
+</span></code></pre></div>
+<p>The inference servers will begin launching only after all requested resources have been allocated, preventing resource waste. Unlike the <code>launch</code> command, <code>batch-launch</code> does not accept additional launch parameters from the command line. Users must either:</p>
+<ul>
+<li>Specify a batch launch configuration file using the <code>--batch-config</code> option, or</li>
+<li>Ensure model launch configurations are available at the default location (cached config or user-defined <code>VEC_INF_CONFIG</code>)</li>
+</ul>
+<p>Since batch launches use heterogeneous jobs, users can request different partitions and resource amounts for each model. After launch, you can monitor individual servers using the standard commands (<code>status</code>, <code>metrics</code>, etc.) by providing the specific Slurm job ID for each server (e.g. 17480109+0, 17480109+1).</p>
+<p><strong>NOTE</strong>
+* Currently only models that can fit on a single node (regardless of the node type) is supported, multi-node launches will be available in a future update.</p>
 <h3 id="status-command"><code>status</code> command<a class="headerlink" href="#status-command" title="Permanent link">&para;</a></h3>
 <p>You can check the inference server status by providing the Slurm job ID to the <code>status</code> command:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>vec-inf<span class="w"> </span>status<span class="w"> </span><span class="m">15373800</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>vec-inf<span class="w"> </span>status<span class="w"> </span><span class="m">15373800</span>
 </span></code></pre></div>
 <p>If the server is pending for resources, you should see an output like this:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>┃ Job Status     ┃ Value                      ┃
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>│ Model Name     │ Meta-Llama-3.1-8B-Instruct │
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>│ Model Status   │ PENDING                    │
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>│ Pending Reason │ Resources                  │
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>│ Base URL       │ UNAVAILABLE                │
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>└────────────────┴────────────────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>┃ Job Status     ┃ Value                      ┃
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│ Model Name     │ Meta-Llama-3.1-8B-Instruct │
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│ Model Status   │ PENDING                    │
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│ Pending Reason │ Resources                  │
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│ Base URL       │ UNAVAILABLE                │
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>└────────────────┴────────────────────────────┘
 </span></code></pre></div>
 <p>When the server is ready, you should see an output like this:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>┃ Job Status   ┃ Value                      ┃
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>│ Model Name   │ Meta-Llama-3.1-8B-Instruct │
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>│ Model Status │ READY                      │
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>│ Base URL     │ http://gpu042:8080/v1      │
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>└──────────────┴────────────────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>┃ Job Status   ┃ Value                      ┃
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│ Model Name   │ Meta-Llama-3.1-8B-Instruct │
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│ Model Status │ READY                      │
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│ Base URL     │ http://gpu042:8080/v1      │
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>└──────────────┴────────────────────────────┘
 </span></code></pre></div>
 <p>There are 5 possible states:</p>
 <ul>
@@ -865,102 +921,104 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 <li><strong>FAILED</strong>: Inference server in an unhealthy state. Job failed reason will be shown.</li>
 <li><strong>SHUTDOWN</strong>: Inference server is shutdown/cancelled.</li>
 </ul>
-<p>Note that the base URL is only available when model is in <code>READY</code> state, and if you've changed the Slurm log directory path, you also need to specify it when using the <code>status</code> command.</p>
+<p><strong>Note</strong>
+* The base URL is only available when model is in <code>READY</code> state.
+* For servers launched with <code>batch-launch</code>, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 17480109+0, 17480109+1).</p>
 <h3 id="metrics-command"><code>metrics</code> command<a class="headerlink" href="#metrics-command" title="Permanent link">&para;</a></h3>
 <p>Once your server is ready, you can check performance metrics by providing the Slurm job ID to the <code>metrics</code> command:
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>vec-inf<span class="w"> </span>metrics<span class="w"> </span><span class="m">15373800</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>vec-inf<span class="w"> </span>metrics<span class="w"> </span><span class="m">15373800</span>
 </span></code></pre></div></p>
 <p>And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>┃ Metric                  ┃ Value           ┃
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│ Prompt Throughput       │ 10.9 tokens/s   │
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│ Generation Throughput   │ 34.2 tokens/s   │
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│ Requests Running        │ 1 reqs          │
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>│ Requests Waiting        │ 0 reqs          │
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│ Requests Swapped        │ 0 reqs          │
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>│ GPU Cache Usage         │ 0.1%            │
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>│ CPU Cache Usage         │ 0.0%            │
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>│ Avg Request Latency     │ 2.6 s           │
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>│ Total Prompt Tokens     │ 441 tokens      │
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>│ Total Generation Tokens │ 1748 tokens     │
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>│ Successful Requests     │ 14 reqs         │
-</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>└─────────────────────────┴─────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>┃ Metric                  ┃ Value           ┃
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>│ Prompt Throughput       │ 10.9 tokens/s   │
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>│ Generation Throughput   │ 34.2 tokens/s   │
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>│ Requests Running        │ 1 reqs          │
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>│ Requests Waiting        │ 0 reqs          │
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>│ Requests Swapped        │ 0 reqs          │
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>│ GPU Cache Usage         │ 0.1%            │
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>│ CPU Cache Usage         │ 0.0%            │
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>│ Avg Request Latency     │ 2.6 s           │
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>│ Total Prompt Tokens     │ 441 tokens      │
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>│ Total Generation Tokens │ 1748 tokens     │
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>│ Successful Requests     │ 14 reqs         │
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>└─────────────────────────┴─────────────────┘
 </span></code></pre></div>
 <h3 id="shutdown-command"><code>shutdown</code> command<a class="headerlink" href="#shutdown-command" title="Permanent link">&para;</a></h3>
 <p>Finally, when you're finished using a model, you can shut it down by providing the Slurm job ID:
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>vec-inf<span class="w"> </span>shutdown<span class="w"> </span><span class="m">15373800</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>&gt;<span class="w"> </span>Shutting<span class="w"> </span>down<span class="w"> </span>model<span class="w"> </span>with<span class="w"> </span>Slurm<span class="w"> </span>Job<span class="w"> </span>ID:<span class="w"> </span><span class="m">15373800</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>vec-inf<span class="w"> </span>shutdown<span class="w"> </span><span class="m">15373800</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>&gt;<span class="w"> </span>Shutting<span class="w"> </span>down<span class="w"> </span>model<span class="w"> </span>with<span class="w"> </span>Slurm<span class="w"> </span>Job<span class="w"> </span>ID:<span class="w"> </span><span class="m">15373800</span>
 </span></code></pre></div></p>
 <h3 id="list-command"><code>list</code> command<a class="headerlink" href="#list-command" title="Permanent link">&para;</a></h3>
 <p>You call view the full list of available models by running the <code>list</code> command:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>vec-inf<span class="w"> </span>list
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>vec-inf<span class="w"> </span>list
 </span></code></pre></div>
 <p><img width="940" alt="list_img" src="https://github.com/user-attachments/assets/8cf901c4-404c-4398-a52f-0486f00747a3"></p>
 <p>You can also view the default setup for a specific supported model by providing the model name, for example <code>Meta-Llama-3.1-70B-Instruct</code>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>vec-inf<span class="w"> </span>list<span class="w"> </span>Meta-Llama-3.1-70B-Instruct
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>vec-inf<span class="w"> </span>list<span class="w"> </span>Meta-Llama-3.1-70B-Instruct
 </span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>┃ Model Config             ┃ Value                      ┃
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>│ model_name               │ Meta-Llama-3.1-8B-Instruct │
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>│ model_family             │ Meta-Llama-3.1             │
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>│ model_variant            │ 8B-Instruct                │
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>│ model_type               │ LLM                        │
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>│ gpus_per_node            │ 1                          │
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>│ num_nodes                │ 1                          │
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>│ cpus_per_task            │ 16                         │
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>│ mem_per_node             │ 64G                        │
-</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>│ vocab_size               │ 128256                     │
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>│ qos                      │ m2                         │
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>│ time                     │ 08:00:00                   │
-</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>│ partition                │ a40                        │
-</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>│ model_weights_parent_dir │ /model-weights             │
-</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>│ vLLM Arguments:          │                            │
-</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>│   --max-model-len:       │ 131072                     │
-</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>│   --max-num-seqs:        │ 256                        │
-</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>└──────────────────────────┴────────────────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>┃ Model Config             ┃ Value                      ┃
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>│ model_name               │ Meta-Llama-3.1-8B-Instruct │
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>│ model_family             │ Meta-Llama-3.1             │
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>│ model_variant            │ 8B-Instruct                │
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>│ model_type               │ LLM                        │
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>│ gpus_per_node            │ 1                          │
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>│ num_nodes                │ 1                          │
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>│ cpus_per_task            │ 16                         │
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>│ mem_per_node             │ 64G                        │
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>│ vocab_size               │ 128256                     │
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>│ qos                      │ m2                         │
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>│ time                     │ 08:00:00                   │
+</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>│ partition                │ a40                        │
+</span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>│ model_weights_parent_dir │ /model-weights             │
+</span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>│ vLLM Arguments:          │                            │
+</span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>│   --max-model-len:       │ 131072                     │
+</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>│   --max-num-seqs:        │ 256                        │
+</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>└──────────────────────────┴────────────────────────────┘
 </span></code></pre></div>
 <p><code>launch</code>, <code>list</code>, and <code>status</code> command supports <code>--json-mode</code>, where the command output would be structured as a JSON string.</p>
 <h2 id="check-job-configuration">Check Job Configuration<a class="headerlink" href="#check-job-configuration" title="Permanent link">&para;</a></h2>
 <p>With every model launch, a Slurm script will be generated dynamically based on the job and model configuration. Once the Slurm job is queued, the generated Slurm script will be moved to the log directory for reproducibility, located at <code>$log_dir/$model_family/$model_name.$slurm_job_id/$model_name.$slurm_job_id.slurm</code>. In the same directory you can also find a JSON file with the same name that captures the launch configuration, and will have an entry of server URL once the server is ready.</p>
 <h2 id="send-inference-requests">Send inference requests<a class="headerlink" href="#send-inference-requests" title="Permanent link">&para;</a></h2>
 <p>Once the inference server is ready, you can start sending in inference requests. We provide example scripts for sending inference requests in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/examples"><code>examples</code></a> folder. Make sure to update the model server URL and the model weights location in the scripts. For example, you can run <code>python examples/inference/llm/chat_completions.py</code>, and you should expect to see an output like the following:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;chatcmpl-387c2579231948ffaf66cdda5439d3dc&quot;</span><span class="p">,</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">            </span><span class="nt">&quot;finish_reason&quot;</span><span class="p">:</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">            </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">            </span><span class="nt">&quot;logprobs&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">            </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">                </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="s2">&quot;Arrr, I be Captain Chatbeard, the scurviest chatbot on the seven seas! Ye be wantin&#39; to know me identity, eh? Well, matey, I be a swashbucklin&#39; AI, here to provide ye with answers and swappin&#39; tales, savvy?&quot;</span><span class="p">,</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">                </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">                </span><span class="nt">&quot;function_call&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">                </span><span class="nt">&quot;tool_calls&quot;</span><span class="p">:[],</span>
-</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">                </span><span class="nt">&quot;reasoning_content&quot;</span><span class="p">:</span><span class="kc">null</span>
-</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">            </span><span class="p">},</span>
-</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">            </span><span class="nt">&quot;stop_reason&quot;</span><span class="p">:</span><span class="kc">null</span>
-</span><span id="__span-15-16"><a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">    </span><span class="p">],</span>
-</span><span id="__span-15-18"><a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="mi">1742496683</span><span class="p">,</span>
-</span><span id="__span-15-19"><a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="s2">&quot;Meta-Llama-3.1-8B-Instruct&quot;</span><span class="p">,</span>
-</span><span id="__span-15-20"><a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="w">    </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="s2">&quot;chat.completion&quot;</span><span class="p">,</span>
-</span><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="w">    </span><span class="nt">&quot;system_fingerprint&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="w">    </span><span class="nt">&quot;usage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-15-23"><a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a><span class="w">        </span><span class="nt">&quot;completion_tokens&quot;</span><span class="p">:</span><span class="mi">66</span><span class="p">,</span>
-</span><span id="__span-15-24"><a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a><span class="w">        </span><span class="nt">&quot;prompt_tokens&quot;</span><span class="p">:</span><span class="mi">32</span><span class="p">,</span>
-</span><span id="__span-15-25"><a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a><span class="w">        </span><span class="nt">&quot;total_tokens&quot;</span><span class="p">:</span><span class="mi">98</span><span class="p">,</span>
-</span><span id="__span-15-26"><a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a><span class="w">        </span><span class="nt">&quot;prompt_tokens_details&quot;</span><span class="p">:</span><span class="kc">null</span>
-</span><span id="__span-15-27"><a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-15-28"><a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a><span class="w">    </span><span class="nt">&quot;prompt_logprobs&quot;</span><span class="p">:</span><span class="kc">null</span>
-</span><span id="__span-15-29"><a id="__codelineno-15-29" name="__codelineno-15-29" href="#__codelineno-15-29"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;chatcmpl-387c2579231948ffaf66cdda5439d3dc&quot;</span><span class="p">,</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">            </span><span class="nt">&quot;finish_reason&quot;</span><span class="p">:</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">            </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">            </span><span class="nt">&quot;logprobs&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">            </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">                </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="s2">&quot;Arrr, I be Captain Chatbeard, the scurviest chatbot on the seven seas! Ye be wantin&#39; to know me identity, eh? Well, matey, I be a swashbucklin&#39; AI, here to provide ye with answers and swappin&#39; tales, savvy?&quot;</span><span class="p">,</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">                </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">                </span><span class="nt">&quot;function_call&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">                </span><span class="nt">&quot;tool_calls&quot;</span><span class="p">:[],</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">                </span><span class="nt">&quot;reasoning_content&quot;</span><span class="p">:</span><span class="kc">null</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">            </span><span class="p">},</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">            </span><span class="nt">&quot;stop_reason&quot;</span><span class="p">:</span><span class="kc">null</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">    </span><span class="p">],</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="mi">1742496683</span><span class="p">,</span>
+</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="s2">&quot;Meta-Llama-3.1-8B-Instruct&quot;</span><span class="p">,</span>
+</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">    </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="s2">&quot;chat.completion&quot;</span><span class="p">,</span>
+</span><span id="__span-17-21"><a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">    </span><span class="nt">&quot;system_fingerprint&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">    </span><span class="nt">&quot;usage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">        </span><span class="nt">&quot;completion_tokens&quot;</span><span class="p">:</span><span class="mi">66</span><span class="p">,</span>
+</span><span id="__span-17-24"><a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">        </span><span class="nt">&quot;prompt_tokens&quot;</span><span class="p">:</span><span class="mi">32</span><span class="p">,</span>
+</span><span id="__span-17-25"><a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="w">        </span><span class="nt">&quot;total_tokens&quot;</span><span class="p">:</span><span class="mi">98</span><span class="p">,</span>
+</span><span id="__span-17-26"><a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="w">        </span><span class="nt">&quot;prompt_tokens_details&quot;</span><span class="p">:</span><span class="kc">null</span>
+</span><span id="__span-17-27"><a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-17-28"><a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="w">    </span><span class="nt">&quot;prompt_logprobs&quot;</span><span class="p">:</span><span class="kc">null</span>
+</span><span id="__span-17-29"><a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>NOTE</strong>: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via <code>--chat-template: TEMPLATE_PATH</code>.</p>
 <h2 id="ssh-tunnel-from-your-local-device">SSH tunnel from your local device<a class="headerlink" href="#ssh-tunnel-from-your-local-device" title="Permanent link">&para;</a></h2>
 <p>If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8081</span>:172.17.8.29:8081<span class="w"> </span>username@v.vectorinstitute.ai<span class="w"> </span>-N
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8081</span>:172.17.8.29:8081<span class="w"> </span>username@v.vectorinstitute.ai<span class="w"> </span>-N
 </span></code></pre></div>
 Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment</p>
 <h2 id="python-api-usage">Python API Usage<a class="headerlink" href="#python-api-usage" title="Permanent link">&para;</a></h2>
