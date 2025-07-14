@@ -22,7 +22,8 @@ def test_launch_command_success(runner):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        # Mock the launch response - ensure numeric values are strings for Rich table rendering
+        # Mock the launch response - ensure numeric values are strings
+        # for Rich table rendering
         mock_response = MagicMock()
         mock_response.config = {
             "slurm_job_id": "14933053",
