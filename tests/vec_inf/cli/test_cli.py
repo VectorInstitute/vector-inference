@@ -21,7 +21,7 @@ def test_launch_command_success(runner):
         # Mock the client instance
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         # Mock the launch response - ensure numeric values are strings for Rich table rendering
         mock_response = MagicMock()
         mock_response.config = {
@@ -38,7 +38,7 @@ def test_launch_command_success(runner):
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
             "vocab_size": "128000",  # Changed to string
-            "vllm_args": {"max_model_len": 8192}
+            "vllm_args": {"max_model_len": 8192},
         }
         mock_client.launch_model.return_value = mock_response
 
@@ -60,13 +60,13 @@ def test_launch_command_with_json_output(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_response = MagicMock()
         mock_response.config = {
             "slurm_job_id": "14933051",
             "model_name": "Meta-Llama-3.1-8B",
             "model_type": "LLM",
-            "log_dir": "/tmp/test_logs"
+            "log_dir": "/tmp/test_logs",
         }
         mock_client.launch_model.return_value = mock_response
 
@@ -83,7 +83,7 @@ def test_launch_command_model_not_found(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         # Mock the client to raise an exception
         mock_client.launch_model.side_effect = Exception(
             "'unknown-model' not found in configuration and model weights "
@@ -101,7 +101,7 @@ def test_list_all_models(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_model_info = MagicMock()
         mock_model_info.name = "Meta-Llama-3.1-8B"
         mock_model_info.family = "Meta-Llama-3.1"
@@ -120,14 +120,14 @@ def test_list_single_model(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_config = MagicMock()
         mock_config.model_dump.return_value = {
             "model_name": "Meta-Llama-3.1-8B",
             "model_family": "Meta-Llama-3.1",
             "model_type": "LLM",
             "model_weights_parent_dir": "/model-weights",
-            "vllm_args": {"max_model_len": 8192}
+            "vllm_args": {"max_model_len": 8192},
         }
         mock_client.get_model_config.return_value = mock_config
 
@@ -142,7 +142,7 @@ def test_status_command(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_status = MagicMock()
         mock_status.model_name = "Meta-Llama-3.1-8B"
         mock_status.server_status = "READY"
@@ -162,7 +162,7 @@ def test_shutdown_command(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         # Mock shutdown to not raise exception
         mock_client.shutdown_model.return_value = None
 
@@ -177,7 +177,7 @@ def test_metrics_command_pending_server(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_response = MagicMock()
         mock_response.metrics = "ERROR: Pending resources for server initialization"
         mock_client.get_metrics.return_value = mock_response
@@ -196,17 +196,17 @@ def test_metrics_command_server_ready(runner):
     ):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_response = MagicMock()
         mock_response.metrics = {
             "prompt_tokens_per_sec": 100.0,
             "generation_tokens_per_sec": 500.0,
-            "gpu_cache_usage": 0.5
+            "gpu_cache_usage": 0.5,
         }
         mock_client.get_metrics.return_value = mock_response
 
         # Use input simulation to trigger KeyboardInterrupt
-        result = runner.invoke(cli, ["metrics", "12345"], input='\x03')  # Ctrl+C
+        result = runner.invoke(cli, ["metrics", "12345"], input="\x03")  # Ctrl+C
 
         # The command should handle KeyboardInterrupt gracefully
         # In CLI context, this might exit with code 1 but that's expected behavior
@@ -303,7 +303,7 @@ def test_batch_launch_command_success(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_response = MagicMock()
         mock_response.config = {
             "slurm_job_id": "14933053",
@@ -319,7 +319,7 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",  # Changed to string
                     "cpus_per_task": "8",  # Changed to string
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs"
+                    "log_dir": "/tmp/test_logs",
                 },
                 "Meta-Llama-3.1-70B": {
                     "model_name": "Meta-Llama-3.1-70B",
@@ -330,13 +330,15 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",  # Changed to string
                     "cpus_per_task": "8",  # Changed to string
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs"
-                }
-            }
+                    "log_dir": "/tmp/test_logs",
+                },
+            },
         }
         mock_client.batch_launch_models.return_value = mock_response
 
-        result = runner.invoke(cli, ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"])
+        result = runner.invoke(
+            cli, ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"]
+        )
 
         assert result.exit_code == 0
         assert "14933053" in result.output
@@ -347,16 +349,19 @@ def test_batch_launch_command_with_json_output(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_response = MagicMock()
         mock_response.config = {
             "slurm_job_id": "14933051",
             "slurm_job_name": "BATCH-job",
-            "model_names": ["Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"]
+            "model_names": ["Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"],
         }
         mock_client.batch_launch_models.return_value = mock_response
 
-        result = runner.invoke(cli, ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B", "--json-mode"])
+        result = runner.invoke(
+            cli,
+            ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B", "--json-mode"],
+        )
 
         assert result.exit_code == 0
         assert "14933051" in result.output
@@ -367,12 +372,14 @@ def test_batch_launch_command_model_not_found(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_client.batch_launch_models.side_effect = Exception(
             "'unknown-model' not found in configuration"
         )
 
-        result = runner.invoke(cli, ["batch-launch", "Meta-Llama-3.1-8B", "unknown-model"])
+        result = runner.invoke(
+            cli, ["batch-launch", "Meta-Llama-3.1-8B", "unknown-model"]
+        )
 
         assert result.exit_code == 1
         assert "Batch launch failed:" in result.output
@@ -383,12 +390,14 @@ def test_batch_launch_command_slurm_error(runner):
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
-        
+
         mock_client.batch_launch_models.side_effect = Exception(
             "sbatch: error: Invalid partition specified"
         )
 
-        result = runner.invoke(cli, ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"])
+        result = runner.invoke(
+            cli, ["batch-launch", "Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"]
+        )
 
         assert result.exit_code == 1
         assert "Batch launch failed:" in result.output
