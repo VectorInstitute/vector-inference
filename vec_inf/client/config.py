@@ -112,7 +112,7 @@ class ModelConfig(BaseModel):
         default=None,
         description="Exclude certain nodes from the resources granted to the job",
     )
-    node_list: Optional[str] = Field(
+    nodelist: Optional[str] = Field(
         default=None, description="Request a specific list of nodes for deployment"
     )
     bind: Optional[str] = Field(

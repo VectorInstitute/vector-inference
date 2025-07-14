@@ -1291,3 +1291,17 @@ models:
       --max-model-len: 4096
       --max-num-seqs: 256
       --compilation-config: 3
+  Qwen3-14B:
+    model_family: Qwen3
+    model_variant: 14B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 151936
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    vllm_args:
+      --max-model-len: 40960
+      --max-num-seqs: 256
+      --compilation-config: 3

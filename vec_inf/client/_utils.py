@@ -41,9 +41,9 @@ def run_bash_command(command: str) -> tuple[str, str]:
 
 def read_slurm_log(
     slurm_job_name: str,
-    slurm_job_id: int,
+    slurm_job_id: str,
     slurm_log_type: str,
-    log_dir: Optional[Union[str, Path]],
+    log_dir: str,
 ) -> Union[list[str], str, dict[str, str]]:
     """Read the slurm log file.
 
@@ -51,12 +51,12 @@ def read_slurm_log(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
     slurm_log_type : str
         Type of log file to read ('out', 'err', or 'json')
-    log_dir : Optional[Union[str, Path]]
-        Directory containing log files, if None uses default location
+    log_dir : str
+        Directory containing log files
 
     Returns
     -------
@@ -66,31 +66,11 @@ def read_slurm_log(
         - dict[str, str] for 'json' logs
         - str for error messages if file not found
     """
-    if not log_dir:
-        # Default log directory
-        models_dir = Path.home() / ".vec-inf-logs"
-        # Iterate over all dirs in models_dir, sorted by dir name length in desc order
-        for directory in sorted(
-            [d for d in models_dir.iterdir() if d.is_dir()],
-            key=lambda d: len(d.name),
-            reverse=True,
-        ):
-            if directory.name in slurm_job_name:
-                log_dir = directory
-                break
-    else:
-        log_dir = Path(log_dir)
-
-    # If log_dir is still not set, then didn't find the log dir at default location
-    if not log_dir:
-        return "LOG DIR NOT FOUND"
-
     try:
-        file_path = (
-            log_dir
-            / Path(f"{slurm_job_name}.{slurm_job_id}")
-            / f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}"
-        )
+        if "+" in slurm_job_id:
+            main_job_id, het_job_id = slurm_job_id.split("+")
+            slurm_job_id = str(int(main_job_id) + int(het_job_id))
+        file_path = Path(log_dir, f"{slurm_job_name}.{slurm_job_id}.{slurm_log_type}")
         if slurm_log_type == "json":
             with file_path.open("r") as file:
                 json_content: dict[str, str] = json.load(file)
@@ -103,7 +83,7 @@ def read_slurm_log(
 
 
 def is_server_running(
-    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+    slurm_job_name: str, slurm_job_id: str, log_dir: str
 ) -> Union[str, ModelStatus, tuple[ModelStatus, str]]:
     """Check if a model is ready to serve requests.
 
@@ -111,9 +91,9 @@ def is_server_running(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
-    log_dir : Optional[str]
+    log_dir : str
         Directory containing log files
 
     Returns
@@ -138,16 +118,16 @@ def is_server_running(
     return status
 
 
-def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]) -> str:
+def get_base_url(slurm_job_name: str, slurm_job_id: str, log_dir: str) -> str:
     """Get the base URL of a model.
 
     Parameters
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
-    log_dir : Optional[str]
+    log_dir : str
         Directory containing log files
 
     Returns
@@ -164,7 +144,7 @@ def get_base_url(slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str])
 
 
 def model_health_check(
-    slurm_job_name: str, slurm_job_id: int, log_dir: Optional[str]
+    slurm_job_name: str, slurm_job_id: str, log_dir: str
 ) -> tuple[ModelStatus, Union[str, int]]:
     """Check the health of a running model on the cluster.
 
@@ -172,9 +152,9 @@ def model_health_check(
     ----------
     slurm_job_name : str
         Name of the SLURM job
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job
-    log_dir : Optional[str]
+    log_dir : str
         Directory containing log files
 
     Returns
@@ -199,11 +179,16 @@ def model_health_check(
         return (ModelStatus.FAILED, str(e))
 
 
-def load_config() -> list[ModelConfig]:
+def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     """Load the model configuration.
 
     Loads configuration from default and user-specified paths, merging them
     if both exist. User configuration takes precedence over default values.
+
+    Parameters
+    ----------
+    config_path : Optional[str]
+        Path to the configuration file
 
     Returns
     -------
@@ -213,33 +198,52 @@ def load_config() -> list[ModelConfig]:
     Notes
     -----
     Configuration is loaded from:
-    1. Default path: package's config/models.yaml
-    2. User path: specified by VEC_INF_CONFIG environment variable
+    1. User path: specified by config_path
+    2. Default path: package's config/models.yaml or CACHED_CONFIG if it exists
+    3. Environment variable: specified by VEC_INF_CONFIG environment variable
+        and merged with default config
 
     If user configuration exists, it will be merged with default configuration,
     with user values taking precedence for overlapping fields.
     """
+
+    def load_yaml_config(path: Path) -> dict[str, Any]:
+        """Load YAML config with error handling."""
+        try:
+            with path.open() as f:
+                return yaml.safe_load(f) or {}
+        except FileNotFoundError as err:
+            raise FileNotFoundError(f"Could not find config: {path}") from err
+        except yaml.YAMLError as err:
+            raise ValueError(f"Error parsing YAML config at {path}: {err}") from err
+
+    # 1. If config_path is given, use only that
+    if config_path:
+        config = load_yaml_config(Path(config_path))
+        return [
+            ModelConfig(model_name=name, **model_data)
+            for name, model_data in config.get("models", {}).items()
+        ]
+
+    # 2. Otherwise, load default config
     default_path = (
         CACHED_CONFIG
         if CACHED_CONFIG.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
+    config = load_yaml_config(default_path)
 
-    config: dict[str, Any] = {}
-    with open(default_path) as f:
-        config = yaml.safe_load(f) or {}
-
+    # 3. If user config exists, merge it
     user_path = os.getenv("VEC_INF_CONFIG")
     if user_path:
         user_path_obj = Path(user_path)
         if user_path_obj.exists():
-            with open(user_path_obj) as f:
-                user_config = yaml.safe_load(f) or {}
-                for name, data in user_config.get("models", {}).items():
-                    if name in config.get("models", {}):
-                        config["models"][name].update(data)
-                    else:
-                        config.setdefault("models", {})[name] = data
+            user_config = load_yaml_config(user_path_obj)
+            for name, data in user_config.get("models", {}).items():
+                if name in config.get("models", {}):
+                    config["models"][name].update(data)
+                else:
+                    config.setdefault("models", {})[name] = data
         else:
             warnings.warn(
                 f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}",
@@ -285,6 +289,17 @@ def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
             config_dict[key.lower().replace(" ", "_")] = value
 
     return slurm_job_id, config_dict
+
+
+def is_power_of_two(n: int) -> bool:
+    """Check if a number is a power of two.
+
+    Parameters
+    ----------
+    n : int
+        The number to check
+    """
+    return n > 0 and (n & (n - 1)) == 0
 
 
 def find_matching_dirs(
