@@ -103,10 +103,11 @@ export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 
 #### Other commands
 
-* `status`: Check the model status by providing its Slurm job ID, `--json-mode` supported.
+* `batch-launch`: Launch multiple model inference servers at once, currently ONLY single node models supported, 
+* `status`: Check the model status by providing its Slurm job ID.
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
-* `list`: List all available model names, or view the default/cached configuration of a specific model, `--json-mode` supported.
+* `list`: List all available model names, or view the default/cached configuration of a specific model.
 * `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, `--job-id`, and/or `--before-job-id`. Use `--dry-run` to preview what would be deleted.
 
 For more details on the usage of these commands, refer to the [User Guide](https://vectorinstitute.github.io/vector-inference/user_guide/)

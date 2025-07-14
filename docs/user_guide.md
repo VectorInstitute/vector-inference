@@ -4,7 +4,7 @@
 
 ### `launch` command
 
-The `launch` command allows users to deploy a model as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.
+The `launch` command allows users to launch a OpenAI-compatible model inference server as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.
 
 We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 
@@ -97,6 +97,53 @@ export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 * For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`.
 * Setting `--compilation-config` to `3` currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.
 
+### `batch-launch` command
+
+The `batch-launch` command allows users to launch multiple inference servers at once, here is an example of launching 2 models:
+
+```bash
+vec-inf batch-launch DeepSeek-R1-Distill-Qwen-7B Qwen2.5-Math-PRM-7B 
+```
+
+You should see an output like the following:
+
+```
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Config     ┃ Value                                                                   ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Slurm Job ID   │ 17480109                                                                │
+│ Slurm Job Name │ BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5-Math-PRM-7B                   │
+│ Model Name     │ DeepSeek-R1-Distill-Qwen-7B                                             │
+│ Partition      │   a40                                                                   │
+│ QoS            │   m2                                                                    │
+│ Time Limit     │   08:00:00                                                              │
+│ Num Nodes      │   1                                                                     │
+│ GPUs/Node      │   1                                                                     │
+│ CPUs/Task      │   16                                                                    │
+│ Memory/Node    │   64G                                                                   │
+│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
+│ Model Name     │ Qwen2.5-Math-PRM-7B                                                     │
+│ Partition      │   a40                                                                   │
+│ QoS            │   m2                                                                    │
+│ Time Limit     │   08:00:00                                                              │
+│ Num Nodes      │   1                                                                     │
+│ GPUs/Node      │   1                                                                     │
+│ CPUs/Task      │   16                                                                    │
+│ Memory/Node    │   64G                                                                   │
+│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
+└────────────────┴─────────────────────────────────────────────────────────────────────────┘
+```
+
+The inference servers will begin launching only after all requested resources have been allocated, preventing resource waste. Unlike the `launch` command, `batch-launch` does not accept additional launch parameters from the command line. Users must either:
+
+- Specify a batch launch configuration file using the `--batch-config` option, or
+- Ensure model launch configurations are available at the default location (cached config or user-defined `VEC_INF_CONFIG`)
+
+Since batch launches use heterogeneous jobs, users can request different partitions and resource amounts for each model. After launch, you can monitor individual servers using the standard commands (`status`, `metrics`, etc.) by providing the specific Slurm job ID for each server (e.g. 17480109+0, 17480109+1).
+
+**NOTE**
+* Currently only models that can fit on a single node (regardless of the node type) is supported, multi-node launches will be available in a future update.
+
 ### `status` command
 
 You can check the inference server status by providing the Slurm job ID to the `status` command:
@@ -138,7 +185,9 @@ There are 5 possible states:
 * **FAILED**: Inference server in an unhealthy state. Job failed reason will be shown.
 * **SHUTDOWN**: Inference server is shutdown/cancelled.
 
-Note that the base URL is only available when model is in `READY` state, and if you've changed the Slurm log directory path, you also need to specify it when using the `status` command.
+**Note** 
+* The base URL is only available when model is in `READY` state.
+* For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 17480109+0, 17480109+1).
 
 ### `metrics` command
 
