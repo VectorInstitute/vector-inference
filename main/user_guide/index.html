@@ -821,7 +821,8 @@ You should see an output like the following:</p>
 * Your model weights directory naming convention should follow <code>$MODEL_FAMILY-$MODEL_VARIANT</code> ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable <code>VEC_INF_CONFIG</code>. Check the <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml">default parameters</a> file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Creating a custom configuration file for your model and specify its path via setting the environment variable <code>VEC_INF_MODEL_CONFIG</code> (This one will supersede <code>VEC_INF_CONFIG_DIR</code> if that is also set). Check the <a href="vec_inf/config/models.yaml">default parameters</a> file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Add your model configuration to the cached <code>models.yaml</code> in your cluster environment (if you have write access to the cached configuration directory).
   * Using launch command options to specify your model setup.
 * For other model launch parameters you can reference the default values for similar models using the <a href="#list-command"><code>list</code> command </a>.</p>
 <p>Here is an example to deploy a custom <a href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M">Qwen2.5-7B-Instruct-1M</a> model which is not
@@ -844,8 +845,8 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 </span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">      </span><span class="nt">--max-model-len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1010000</span>
 </span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">      </span><span class="nt">--max-num-seqs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 </span></code></pre></div>
-<p>You would then set the <code>VEC_INF_CONFIG</code> path using:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VEC_INF_CONFIG</span><span class="o">=</span>/h/&lt;username&gt;/my-model-config.yaml
+<p>You would then set the <code>VEC_INF_MODEL_CONFIG</code> path using:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VEC_INF_MODEL_CONFIG</span><span class="o">=</span>/h/&lt;username&gt;/my-model-config.yaml
 </span></code></pre></div>
 <p><strong>NOTE</strong>
 * There are other parameters that can also be added to the config but not shown in this example, check the <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py"><code>ModelConfig</code></a> for details.

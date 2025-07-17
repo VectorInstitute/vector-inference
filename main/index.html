@@ -538,12 +538,16 @@
 
 
 <h1 id="vector-inference-easy-inference-on-slurm-clusters">Vector Inference: Easy inference on Slurm clusters<a class="headerlink" href="#vector-inference-easy-inference-on-slurm-clusters" title="Permanent link">&para;</a></h1>
-<p>This repository provides an easy-to-use solution to run inference servers on <a href="https://slurm.schedmd.com/overview.html">Slurm</a>-managed computing clusters using <a href="https://docs.vllm.ai/en/latest/">vLLM</a>. <strong>All scripts in this repository runs natively on the Vector Institute cluster environment</strong>. To adapt to other environments, update the environment variables in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/slurm_vars.py"><code>vec_inf/client/slurm_vars.py</code></a>, and the model config for cached model weights in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml"><code>vec_inf/config/models.yaml</code></a> accordingly.</p>
+<p>This repository provides an easy-to-use solution to run inference servers on <a href="https://slurm.schedmd.com/overview.html">Slurm</a>-managed computing clusters using <a href="https://docs.vllm.ai/en/latest/">vLLM</a>. <strong>All scripts in this repository runs natively on the Vector Institute cluster environment</strong>. To adapt to other environments, follow the instructions in <a href="#installation">Installation</a>.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>vec-inf
 </span></code></pre></div>
 <p>Otherwise, we recommend using the provided <a href="https://github.com/VectorInstitute/vector-inference/blob/main/Dockerfile"><code>Dockerfile</code></a> to set up your own environment with the package. The latest image has <code>vLLM</code> version <code>0.8.5.post1</code>.</p>
+<p>If you'd like to use <code>vec-inf</code> on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
+* Clone the repository and update the <code>environment.yaml</code> and the <code>models.yaml</code> file in <a href="vec_inf/config/"><code>vec_inf/config</code></a>, then install from source by running <code>pip install .</code>.
+* The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to <code>/model-weights/vec-inf-shared</code>, you would need to create an <code>environment.yaml</code> and a <code>models.yaml</code> following the format of these files in <a href="vec_inf/config/"><code>vec_inf/config</code></a>.
+* The package would also look for an enviroment variable <code>VEC_INF_CONFIG_DIR</code>. You can put your <code>environment.yaml</code> and <code>models.yaml</code> in a directory of your choice and set the enviroment variable <code>VEC_INF_CONFIG_DIR</code> to point to that location.</p>
 
 
 
