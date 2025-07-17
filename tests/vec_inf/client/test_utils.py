@@ -151,9 +151,11 @@ def test_load_config_default_only():
 
 def test_load_config_with_user_override(tmp_path, monkeypatch):
     """Test user config overriding default values."""
-    # Create user config with override and new model
-    user_config = tmp_path / "user_config.yaml"
-    user_config.write_text("""\
+    # Create user config directory and file
+    user_config_dir = tmp_path / "user_config_dir"
+    user_config_dir.mkdir()
+    user_config_file = user_config_dir / "models.yaml"
+    user_config_file.write_text("""\
 models:
   c4ai-command-r-plus-08-2024:
     gpus_per_node: 8
@@ -168,7 +170,7 @@ models:
 """)
 
     with monkeypatch.context() as m:
-        m.setenv("VEC_INF_CONFIG", str(user_config))
+        m.setenv("VEC_INF_CONFIG_DIR", str(user_config_dir))
         configs = load_config()
         config_map = {m.model_name: m for m in configs}
 
@@ -188,8 +190,11 @@ models:
 
 def test_load_config_invalid_user_model(tmp_path):
     """Test validation of user-provided model configurations."""
-    invalid_config = tmp_path / "bad_config.yaml"
-    invalid_config.write_text("""\
+    # Create user config directory and file
+    invalid_config_dir = tmp_path / "bad_config_dir"
+    invalid_config_dir.mkdir()
+    invalid_config_file = invalid_config_dir / "models.yaml"
+    invalid_config_file.write_text("""\
 models:
   invalid-model:
     model_family: ""
@@ -200,7 +205,7 @@ models:
 
     with (
         pytest.raises(ValueError) as excinfo,
-        patch.dict(os.environ, {"VEC_INF_CONFIG": str(invalid_config)}),
+        patch.dict(os.environ, {"VEC_INF_CONFIG_DIR": str(invalid_config_dir)}),
     ):
         load_config()
 
