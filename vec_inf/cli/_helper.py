@@ -82,6 +82,66 @@ class LaunchResponseFormatter:
         return table
 
 
+class BatchLaunchResponseFormatter:
+    """CLI Helper class for formatting BatchLaunchResponse.
+
+    A formatter class that handles the presentation of batch launch information
+    in both table and JSON formats.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Configuration for the batch launch
+    """
+
+    def __init__(self, params: dict[str, Any]):
+        self.params = params
+
+    def format_table_output(self) -> Table:
+        """Format output as rich Table.
+
+        Returns
+        -------
+        Table
+            Rich table containing formatted batch launch information including:
+            - Job configuration
+            - Model details
+            - Resource allocation
+            - vLLM configuration
+        """
+        table = create_table(key_title="Job Config", value_title="Value")
+        # Add key information with consistent styling
+        table.add_row("Slurm Job ID", self.params["slurm_job_id"], style="blue")
+        table.add_row("Slurm Job Name", self.params["slurm_job_name"], style="blue")
+        for model_name in self.params["models"]:
+            table.add_row("Model Name", model_name, style="magenta")
+            # Add resource allocation details
+            table.add_row(
+                "Partition", f"  {self.params['models'][model_name]['partition']}"
+            )
+            table.add_row("QoS", f"  {self.params['models'][model_name]['qos']}")
+            table.add_row(
+                "Time Limit", f"  {self.params['models'][model_name]['time']}"
+            )
+            table.add_row(
+                "Num Nodes", f"  {self.params['models'][model_name]['num_nodes']}"
+            )
+            table.add_row(
+                "GPUs/Node", f"  {self.params['models'][model_name]['gpus_per_node']}"
+            )
+            table.add_row(
+                "CPUs/Task", f"  {self.params['models'][model_name]['cpus_per_task']}"
+            )
+            table.add_row(
+                "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
+            )
+            table.add_row(
+                "Log Directory", f"  {self.params['models'][model_name]['log_dir']}"
+            )
+
+        return table
+
+
 class StatusResponseFormatter:
     """CLI Helper class for formatting StatusResponse.
 

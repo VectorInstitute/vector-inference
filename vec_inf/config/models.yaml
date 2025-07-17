@@ -1,19 +1,4 @@
 models:
-  c4ai-command-r-plus:
-    model_family: c4ai-command-r
-    model_variant: plus
-    model_type: LLM
-    gpus_per_node: 4
-    num_nodes: 2
-    vocab_size: 256000
-    qos: m2
-    time: 08:00:00
-    partition: a40
-    vllm_args:
-      --pipeline-parallel-size: 2
-      --tensor-parallel-size: 4
-      --max-model-len: 8192
-      --max-num-seqs: 256
   c4ai-command-r-plus-08-2024:
     model_family: c4ai-command-r
     model_variant: plus-08-2024
@@ -989,9 +974,9 @@ models:
       --max-model-len: 4096
       --max-num-seqs: 256
       --compilation-config: 3
-  QwQ-32B-Preview:
+  QwQ-32B:
     model_family: QwQ
-    model_variant: 32B-Preview
+    model_variant: 32B
     model_type: LLM
     gpus_per_node: 2
     num_nodes: 1
@@ -1289,5 +1274,19 @@ models:
     partition: a40
     vllm_args:
       --max-model-len: 4096
+      --max-num-seqs: 256
+      --compilation-config: 3
+  Qwen3-14B:
+    model_family: Qwen3
+    model_variant: 14B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 151936
+    qos: m2
+    time: 08:00:00
+    partition: a40
+    vllm_args:
+      --max-model-len: 40960
       --max-num-seqs: 256
       --compilation-config: 3

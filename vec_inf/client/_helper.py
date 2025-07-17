@@ -8,6 +8,7 @@ import json
 import time
 import warnings
 from pathlib import Path
+from shutil import copy2
 from typing import Any, Optional, Union, cast
 from urllib.parse import urlparse, urlunparse
 
@@ -15,8 +16,8 @@ import requests
 
 import vec_inf.client._utils as utils
 from vec_inf.client._client_vars import (
+    BATCH_MODE_REQUIRED_MATCHING_ARGS,
     KEY_METRICS,
-    REQUIRED_FIELDS,
     SRC_DIR,
     VLLM_SHORT_TO_LONG_MAP,
 )
@@ -26,9 +27,13 @@ from vec_inf.client._exceptions import (
     ModelNotFoundError,
     SlurmJobError,
 )
-from vec_inf.client._slurm_script_generator import SlurmScriptGenerator
+from vec_inf.client._slurm_script_generator import (
+    BatchSlurmScriptGenerator,
+    SlurmScriptGenerator,
+)
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
+    BatchLaunchResponse,
     LaunchResponse,
     ModelInfo,
     ModelStatus,
@@ -45,22 +50,13 @@ class ModelLauncher:
 
     Parameters
     ----------
-    model_name : str
+    model_name: str
         Name of the model to launch
-    kwargs : dict[str, Any], optional
+    kwargs: Optional[dict[str, Any]]
         Optional launch keyword arguments to override default configuration
     """
 
     def __init__(self, model_name: str, kwargs: Optional[dict[str, Any]]):
-        """Initialize the model launcher.
-
-        Parameters
-        ----------
-        model_name: str
-            Name of the model to launch
-        kwargs: Optional[dict[str, Any]]
-            Optional launch keyword arguments to override default configuration
-        """
         self.model_name = model_name
         self.kwargs = kwargs or {}
         self.slurm_job_id = ""
@@ -188,17 +184,25 @@ class ModelLauncher:
         for key, value in self.kwargs.items():
             params[key] = value
 
-        # Validate required fields and vllm args
-        if not REQUIRED_FIELDS.issubset(set(params.keys())):
-            raise MissingRequiredFieldsError(
-                f"Missing required fields: {REQUIRED_FIELDS - set(params.keys())}"
-            )
+        # Validate resource allocation and parallelization settings
         if (
             int(params["gpus_per_node"]) > 1
             and params["vllm_args"].get("--tensor-parallel-size") is None
         ):
             raise MissingRequiredFieldsError(
                 "--tensor-parallel-size is required when gpus_per_node > 1"
+            )
+
+        total_gpus_requested = int(params["gpus_per_node"]) * int(params["num_nodes"])
+        if not utils.is_power_of_two(total_gpus_requested):
+            raise ValueError("Total number of GPUs requested must be a power of two")
+
+        total_parallel_sizes = int(
+            params["vllm_args"].get("--tensor-parallel-size", "1")
+        ) * int(params["vllm_args"].get("--pipeline-parallel-size", "1"))
+        if total_gpus_requested != total_parallel_sizes:
+            raise ValueError(
+                "Mismatch between total number of GPUs requested and parallelization settings"
             )
 
         # Create log directory
@@ -279,8 +283,258 @@ class ModelLauncher:
             json.dump(self.params, file, indent=4)
 
         return LaunchResponse(
-            slurm_job_id=int(self.slurm_job_id),
+            slurm_job_id=self.slurm_job_id,
             model_name=self.model_name,
+            config=self.params,
+            raw_output=command_output,
+        )
+
+
+class BatchModelLauncher:
+    """Helper class for handling batch inference server launch.
+
+    A class that manages the launch process of multiple inference servers, including
+    configuration validation, and SLURM job submission.
+
+    Parameters
+    ----------
+    model_names : list[str]
+        List of model names to launch
+    """
+
+    def __init__(self, model_names: list[str], batch_config: Optional[str] = None):
+        self.model_names = model_names
+        self.batch_config = batch_config
+        self.slurm_job_id = ""
+        self.slurm_job_name = self._get_slurm_job_name()
+        self.batch_script_path = Path("")
+        self.launch_script_paths: list[Path] = []
+        self.model_configs = self._get_model_configurations()
+        self.params = self._get_launch_params()
+
+    def _get_slurm_job_name(self) -> str:
+        """Get the SLURM job name from the model names.
+
+        Returns
+        -------
+        str
+            SLURM job name
+        """
+        return "BATCH-" + "-".join(self.model_names)
+
+    def _get_model_configurations(self) -> dict[str, ModelConfig]:
+        """Load and validate model configurations.
+
+        Returns
+        -------
+        dict[str, ModelConfig]
+            Dictionary of validated model configurations
+
+        Raises
+        ------
+        ModelNotFoundError
+            If model weights parent directory cannot be determined
+        ModelConfigurationError
+            If model configuration is not found and weights don't exist
+        """
+        model_configs = utils.load_config(self.batch_config)
+
+        model_configs_dict = {}
+        for model_name in self.model_names:
+            config = next(
+                (m for m in model_configs if m.model_name == model_name), None
+            )
+
+            if config:
+                model_configs_dict[model_name] = config
+            else:
+                raise ModelConfigurationError(
+                    f"'{model_name}' not found in configuration, batch launch requires all models to be present in the configuration file"
+                )
+
+        return model_configs_dict
+
+    def _get_launch_params(self) -> dict[str, Any]:
+        """Prepare launch parameters, set log dir, and validate required fields.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of prepared launch parameters
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If required fields are missing or tensor parallel size is not specified
+            when using multiple GPUs
+        """
+        params: dict[str, Any] = {
+            "models": {},
+            "slurm_job_name": self.slurm_job_name,
+            "src_dir": str(SRC_DIR),
+        }
+
+        for i, (model_name, config) in enumerate(self.model_configs.items()):
+            params["models"][model_name] = config.model_dump(exclude_none=True)
+            params["models"][model_name]["het_group_id"] = i
+
+            # Validate resource allocation and parallelization settings
+            if (
+                int(config.gpus_per_node) > 1
+                and (config.vllm_args or {}).get("--tensor-parallel-size") is None
+            ):
+                raise MissingRequiredFieldsError(
+                    f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
+                )
+
+            total_gpus_requested = int(config.gpus_per_node) * int(config.num_nodes)
+            if not utils.is_power_of_two(total_gpus_requested):
+                raise ValueError(
+                    f"Total number of GPUs requested must be a power of two, check your configuration for {model_name}"
+                )
+
+            total_parallel_sizes = int(
+                (config.vllm_args or {}).get("--tensor-parallel-size", "1")
+            ) * int((config.vllm_args or {}).get("--pipeline-parallel-size", "1"))
+            if total_gpus_requested != total_parallel_sizes:
+                raise ValueError(
+                    f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
+                )
+
+            # Create log directory
+            log_dir = Path(
+                params["models"][model_name]["log_dir"], self.slurm_job_name
+            ).expanduser()
+            log_dir.mkdir(parents=True, exist_ok=True)
+            params["models"][model_name]["log_dir"] = str(log_dir)
+
+            # Convert model_weights_parent_dir to string for JSON serialization
+            params["models"][model_name]["model_weights_parent_dir"] = str(
+                params["models"][model_name]["model_weights_parent_dir"]
+            )
+
+            # Construct slurm log file paths
+            params["models"][model_name]["out_file"] = (
+                f"{params['models'][model_name]['log_dir']}/{self.slurm_job_name}.%j/{model_name}.%j.out"
+            )
+            params["models"][model_name]["err_file"] = (
+                f"{params['models'][model_name]['log_dir']}/{self.slurm_job_name}.%j/{model_name}.%j.err"
+            )
+            params["models"][model_name]["json_file"] = (
+                f"{params['models'][model_name]['log_dir']}/{self.slurm_job_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"
+            )
+
+            # Create top level log files using the first model's log directory
+            if not params.get("out_file"):
+                params["out_file"] = (
+                    f"{params['models'][model_name]['log_dir']}/{self.slurm_job_name}.%j/{self.slurm_job_name}.%j.out"
+                )
+            if not params.get("err_file"):
+                params["err_file"] = (
+                    f"{params['models'][model_name]['log_dir']}/{self.slurm_job_name}.%j/{self.slurm_job_name}.%j.err"
+                )
+
+            # Check if required matching arguments are matched
+            for arg in BATCH_MODE_REQUIRED_MATCHING_ARGS:
+                if not params.get(arg):
+                    params[arg] = params["models"][model_name][arg]
+                elif params[arg] != params["models"][model_name][arg]:
+                    # Remove the created directory since we found a mismatch
+                    log_dir.rmdir()
+                    raise ValueError(
+                        f"Mismatch found for {arg}: {params[arg]} != {params['models'][model_name][arg]}, check your configuration"
+                    )
+
+        return params
+
+    def _build_launch_command(self) -> str:
+        """Generate the slurm script and construct the launch command.
+
+        Returns
+        -------
+        str
+            Complete SLURM launch command
+        """
+        batch_script_generator = BatchSlurmScriptGenerator(self.params)
+        self.batch_script_path = batch_script_generator.generate_batch_slurm_script()
+        self.launch_script_paths = batch_script_generator.script_paths
+        return f"sbatch {str(self.batch_script_path)}"
+
+    def launch(self) -> BatchLaunchResponse:
+        """Launch models in batch mode.
+
+        Returns
+        -------
+        BatchLaunchResponse
+            Response object containing launch details and status
+
+        Raises
+        ------
+        SlurmJobError
+            If SLURM job submission fails
+        """
+        # Build and execute the launch command
+        command_output, stderr = utils.run_bash_command(self._build_launch_command())
+
+        if stderr:
+            raise SlurmJobError(f"Error: {stderr}")
+
+        # Extract slurm job id from command output
+        self.slurm_job_id = command_output.split(" ")[-1].strip().strip("\n")
+        self.params["slurm_job_id"] = self.slurm_job_id
+
+        # Create log directory and job json file, move slurm script to job log directory
+        main_job_log_dir = Path("")
+
+        for model_name in self.model_names:
+            model_job_id = int(self.slurm_job_id) + int(
+                self.params["models"][model_name]["het_group_id"]
+            )
+
+            job_log_dir = Path(
+                self.params["log_dir"], f"{self.slurm_job_name}.{model_job_id}"
+            )
+            job_log_dir.mkdir(parents=True, exist_ok=True)
+
+            if main_job_log_dir == Path(""):
+                main_job_log_dir = job_log_dir
+
+            job_json = Path(
+                job_log_dir,
+                f"{model_name}.{model_job_id}.json",
+            )
+            job_json.touch(exist_ok=True)
+
+            with job_json.open("w") as file:
+                json.dump(self.params["models"][model_name], file, indent=4)
+
+        # Copy the launch scripts to the job log directory, the original scripts
+        # cannot be deleted otherwise slurm will not be able to find them
+        script_path_mapper = {}
+        for script_path in self.launch_script_paths:
+            old_path = script_path.name
+            file_name = old_path.split("/")[-1]
+            copy2(script_path, main_job_log_dir / file_name)
+            new_path = script_path.name
+            script_path_mapper[old_path] = new_path
+
+        # Replace old launch script paths with new paths in batch slurm script
+        with self.batch_script_path.open("r") as f:
+            script_content = f.read()
+        for old_path, new_path in script_path_mapper.items():
+            script_content = script_content.replace(old_path, new_path)
+        with self.batch_script_path.open("w") as f:
+            f.write(script_content)
+
+        # Move the batch script to the job log directory
+        self.batch_script_path.rename(
+            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.slurm"
+        )
+
+        return BatchLaunchResponse(
+            slurm_job_id=self.slurm_job_id,
+            slurm_job_name=self.slurm_job_name,
+            model_names=self.model_names,
             config=self.params,
             raw_output=command_output,
         )
@@ -294,16 +548,17 @@ class ModelStatusMonitor:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to monitor
-    log_dir : str, optional
-        Base directory containing log files
     """
 
-    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: str):
         self.slurm_job_id = slurm_job_id
         self.output = self._get_raw_status_output()
-        self.log_dir = log_dir
+        self.job_status = dict(
+            field.split("=", 1) for field in self.output.split() if "=" in field
+        )
+        self.log_dir = self._get_log_dir()
         self.status_info = self._get_base_status_data()
 
     def _get_raw_status_output(self) -> str:
@@ -321,9 +576,27 @@ class ModelStatusMonitor:
         """
         status_cmd = f"scontrol show job {self.slurm_job_id} --oneliner"
         output, stderr = utils.run_bash_command(status_cmd)
+
         if stderr:
             raise SlurmJobError(f"Error: {stderr}")
         return output
+
+    def _get_log_dir(self) -> str:
+        """Get the log directory for the job.
+
+        Returns
+        -------
+        str
+            Log directory for the job
+        """
+        try:
+            outfile_path = self.job_status["StdOut"]
+            directory = Path(outfile_path).parent
+            return str(directory)
+        except KeyError as err:
+            raise FileNotFoundError(
+                f"Output file not found for job {self.slurm_job_id}"
+            ) from err
 
     def _get_base_status_data(self) -> StatusResponse:
         """Extract basic job status information from scontrol output.
@@ -334,14 +607,15 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            job_name = self.output.split(" ")[1].split("=")[1]
-            job_state = self.output.split(" ")[9].split("=")[1]
-        except IndexError:
+            job_name = self.job_status["JobName"]
+            job_state = self.job_status["JobState"]
+        except KeyError:
             job_name = "UNAVAILABLE"
             job_state = ModelStatus.UNAVAILABLE
 
         return StatusResponse(
             model_name=job_name,
+            log_dir=self.log_dir,
             server_status=ModelStatus.UNAVAILABLE,
             job_state=job_state,
             raw_output=self.output,
@@ -386,9 +660,9 @@ class ModelStatusMonitor:
     def _process_pending_state(self) -> None:
         """Process PENDING job state and update status information."""
         try:
-            self.status_info.pending_reason = self.output.split(" ")[10].split("=")[1]
+            self.status_info.pending_reason = self.job_status["Reason"]
             self.status_info.server_status = ModelStatus.PENDING
-        except IndexError:
+        except KeyError:
             self.status_info.pending_reason = "Unknown pending reason"
 
     def process_model_status(self) -> StatusResponse:
@@ -415,16 +689,16 @@ class PerformanceMetricsCollector:
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to collect metrics from
     log_dir : str, optional
         Directory containing log files
     """
 
-    def __init__(self, slurm_job_id: int, log_dir: Optional[str] = None):
+    def __init__(self, slurm_job_id: str):
         self.slurm_job_id = slurm_job_id
-        self.log_dir = log_dir
         self.status_info = self._get_status_info()
+        self.log_dir = self.status_info.log_dir
         self.metrics_url = self._build_metrics_url()
         self.enabled_prefix_caching = self._check_prefix_caching()
 
@@ -441,7 +715,7 @@ class PerformanceMetricsCollector:
         StatusResponse
             Current status information for the model
         """
-        status_helper = ModelStatusMonitor(self.slurm_job_id, self.log_dir)
+        status_helper = ModelStatusMonitor(self.slurm_job_id)
         return status_helper.process_model_status()
 
     def _build_metrics_url(self) -> str:
