@@ -10,6 +10,15 @@ This section documents the Python API for vector-inference.
       show_root_full_path: true
       members: true
 
+## Model Config
+
+::: vec_inf.client.config.ModelConfig
+    options:
+      show_root_heading: true
+      show_root_full_path: true
+      members: true
+
+
 ## Data Models
 
 ::: vec_inf.client.models
