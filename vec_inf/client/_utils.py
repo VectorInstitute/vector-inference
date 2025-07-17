@@ -224,6 +224,16 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
             for name, model_data in config.get("models", {}).items()
         ]
 
+    def resolve_config_path_from_env_var() -> Path | None:
+        """Resolve the config path from the environment variable."""
+        config_dir = os.getenv("VEC_INF_CONFIG_DIR")
+        config_path = os.getenv("VEC_INF_MODEL_CONFIG")
+        if config_path:
+            return Path(config_path)
+        if config_dir:
+            return Path(config_dir, "models.yaml")
+        return None
+
     def update_config(
         config: dict[str, Any], user_config: dict[str, Any]
     ) -> dict[str, Any]:
@@ -250,18 +260,16 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     config = load_yaml_config(default_path)
 
     # 3. If user config exists, merge it
-    user_path = os.getenv("VEC_INF_CONFIG_DIR")
-    if user_path:
-        user_path_obj = Path(user_path, "models.yaml")
-        if user_path_obj.exists():
-            user_config = load_yaml_config(user_path_obj)
-            config = update_config(config, user_config)
-        else:
-            warnings.warn(
-                f"WARNING: Could not find user config directory: {user_path}, revert to default config located at {default_path}",
-                UserWarning,
-                stacklevel=2,
-            )
+    user_path = resolve_config_path_from_env_var()
+    if user_path and user_path.exists():
+        user_config = load_yaml_config(user_path)
+        config = update_config(config, user_config)
+    elif user_path:
+        warnings.warn(
+            f"WARNING: Could not find user config: {str(user_path)}, revert to default config located at {default_path}",
+            UserWarning,
+            stacklevel=2,
+        )
 
     return process_config(config)
 
