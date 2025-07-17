@@ -6,10 +6,11 @@ single-node, multi-node, and batch mode templates.
 
 from typing import TypedDict
 
-from vec_inf.client.slurm_vars import (
+from vec_inf.client._slurm_vars import (
     LD_LIBRARY_PATH,
     SINGULARITY_IMAGE,
     SINGULARITY_LOAD_CMD,
+    SINGULARITY_MODULE_NAME,
     VLLM_NCCL_SO_PATH,
 )
 
@@ -93,14 +94,14 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
-        f"singularity exec {SINGULARITY_IMAGE} ray stop",
+        f"{SINGULARITY_MODULE_NAME} exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
         f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
     ],
-    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
+    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -240,7 +241,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         '    "$json_path" > temp_{model_name}.json \\',
         '    && mv temp_{model_name}.json "$json_path"\n',
     ],
-    "singularity_command": f"singularity exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
+    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "launch_cmd": [
         "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",

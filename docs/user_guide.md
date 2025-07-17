@@ -58,7 +58,8 @@ You can also launch your own custom model as long as the model architecture is [
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`. Check the [default parameters](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_MODEL_CONFIG` (This one will supersede `VEC_INF_CONFIG_DIR` if that is also set). Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Add your model configuration to the cached `models.yaml` in your cluster environment (if you have write access to the cached configuration directory).
   * Using launch command options to specify your model setup.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
@@ -85,10 +86,10 @@ models:
       --max-num-seqs: 256
 ```
 
-You would then set the `VEC_INF_CONFIG` path using:
+You would then set the `VEC_INF_MODEL_CONFIG` path using:
 
 ```bash
-export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
+export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
 **NOTE**
