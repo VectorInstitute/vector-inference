@@ -66,10 +66,8 @@ MAX_NUM_NODES = _config["limits"]["max_num_nodes"]
 MAX_CPUS_PER_TASK = _config["limits"]["max_cpus_per_task"]
 
 # Create dynamic Literal types
-QOS: TypeAlias = str  # Runtime validation will handle the actual values
-PARTITION: TypeAlias = str  # Runtime validation will handle the actual values
-QOS = Literal[tuple(_config["allowed_values"]["qos"])]
-PARTITION = Literal[tuple(_config["allowed_values"]["partition"])]
+QOS = Literal[tuple(_config["allowed_values"]["qos"])]  # type: ignore[valid-type]
+PARTITION = Literal[tuple(_config["allowed_values"]["partition"])]  # type: ignore[valid-type]
 
 # Extract default arguments
 DEFAULT_ARGS = _config["default_args"]

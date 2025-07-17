@@ -223,7 +223,6 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
             ModelConfig(model_name=name, **model_data)
             for name, model_data in config.get("models", {}).items()
         ]
-        
 
     def update_config(
         config: dict[str, Any], user_config: dict[str, Any]
