@@ -98,7 +98,7 @@ models:
 You would then set the `VEC_INF_MODEL_CONFIG` path using:
 
 ```bash
-export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
+export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
 **NOTE**
