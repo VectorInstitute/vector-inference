@@ -3,7 +3,7 @@
 import os
 import warnings
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any
 
 import yaml
 from typing_extensions import Literal
