@@ -16,4 +16,3 @@ If you'd like to use `vec-inf` on your own Slurm cluster, you would need to upda
 * Clone the repository and update the `environment.yaml` and the `models.yaml` file in [`vec_inf/config`](vec_inf/config/), then install from source by running `pip install .`.
 * The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to `/model-weights/vec-inf-shared`, you would need to create an `environment.yaml` and a `models.yaml` following the format of these files in [`vec_inf/config`](vec_inf/config/).
 * The package would also look for an enviroment variable `VEC_INF_CONFIG_DIR`. You can put your `environment.yaml` and `models.yaml` in a directory of your choice and set the enviroment variable `VEC_INF_CONFIG_DIR` to point to that location.
-
