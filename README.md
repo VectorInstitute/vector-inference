@@ -7,7 +7,7 @@
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
-[![vLLM](https://img.shields.io/badge/vllm-0.8.5.post1-blue)](https://docs.vllm.ai/en/v0.8.5.post1/index.html)
+[![vLLM](https://img.shields.io/badge/vllm-0.9.2)](https://docs.vllm.ai/en/v0.9.2/index.html)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
 This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
@@ -18,7 +18,7 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 pip install vec-inf
 ```
-Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.8.5.post1`.
+Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.9.2`.
 
 If you'd like to use `vec-inf` on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
 * Clone the repository and update the `environment.yaml` and the `models.yaml` file in [`vec_inf/config`](vec_inf/config/), then install from source by running `pip install .`.
