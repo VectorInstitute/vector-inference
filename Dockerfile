@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-devel-ubuntu20.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
 
 # Non-interactive apt-get commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -6,8 +6,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 # No GPUs visible during build
 ARG CUDA_VISIBLE_DEVICES=none
 
-# Specify CUDA architectures -> 7.5: RTX 6000 & T4, 8.0: A100, 8.6+PTX
-ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6+PTX"
+# Specify CUDA architectures -> 7.5: Quadro RTX 6000 & T4, 8.0: A100, 8.6: A40, 8.9: L40S, 9.0: H100
+ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9;9.0+PTX"
 
 # Set the Python version
 ARG PYTHON_VERSION=3.10.12
@@ -41,10 +41,6 @@ COPY . /vec-inf
 
 # Install project dependencies with build requirements
 RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
-# Install FlashAttention
-RUN python3.10 -m pip install flash-attn --no-build-isolation
-# Install FlashInfer
-RUN python3.10 -m pip install flashinfer-python -i https://flashinfer.ai/whl/cu124/torch2.6/
 
 # Final configuration
 RUN mkdir -p /vec-inf/nccl && \
