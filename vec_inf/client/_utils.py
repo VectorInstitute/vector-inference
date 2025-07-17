@@ -15,9 +15,9 @@ import requests
 import yaml
 
 from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
+from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
-from vec_inf.client.slurm_vars import CACHED_CONFIG
 
 
 def run_bash_command(command: str) -> tuple[str, str]:
@@ -217,44 +217,54 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
         except yaml.YAMLError as err:
             raise ValueError(f"Error parsing YAML config at {path}: {err}") from err
 
-    # 1. If config_path is given, use only that
-    if config_path:
-        config = load_yaml_config(Path(config_path))
+    def process_config(config: dict[str, Any]) -> list[ModelConfig]:
+        """Process the config based on the config type."""
         return [
             ModelConfig(model_name=name, **model_data)
             for name, model_data in config.get("models", {}).items()
         ]
+        
+
+    def update_config(
+        config: dict[str, Any], user_config: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Update the config with the user config."""
+        for name, data in user_config.get("models", {}).items():
+            if name in config.get("models", {}):
+                config["models"][name].update(data)
+            else:
+                config.setdefault("models", {})[name] = data
+
+        return config
+
+    # 1. If config_path is given, use only that
+    if config_path:
+        config = load_yaml_config(Path(config_path))
+        return process_config(config)
 
     # 2. Otherwise, load default config
     default_path = (
-        CACHED_CONFIG
-        if CACHED_CONFIG.exists()
+        CACHED_CONFIG_DIR / "models_latest.yaml"
+        if CACHED_CONFIG_DIR.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
     config = load_yaml_config(default_path)
 
     # 3. If user config exists, merge it
-    user_path = os.getenv("VEC_INF_CONFIG")
+    user_path = os.getenv("VEC_INF_CONFIG_DIR")
     if user_path:
-        user_path_obj = Path(user_path)
+        user_path_obj = Path(user_path, "models.yaml")
         if user_path_obj.exists():
             user_config = load_yaml_config(user_path_obj)
-            for name, data in user_config.get("models", {}).items():
-                if name in config.get("models", {}):
-                    config["models"][name].update(data)
-                else:
-                    config.setdefault("models", {})[name] = data
+            config = update_config(config, user_config)
         else:
             warnings.warn(
-                f"WARNING: Could not find user config: {user_path}, revert to default config located at {default_path}",
+                f"WARNING: Could not find user config directory: {user_path}, revert to default config located at {default_path}",
                 UserWarning,
                 stacklevel=2,
             )
 
-    return [
-        ModelConfig(model_name=name, **model_data)
-        for name, model_data in config.get("models", {}).items()
-    ]
+    return process_config(config)
 
 
 def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
