@@ -51,19 +51,17 @@ def test_run_bash_command_error():
 def test_read_slurm_log_found(mock_log_dir):
     """Test that read_slurm_log reads the content of a log file."""
     test_content = ["line1\n", "line2\n"]
-    log_file = mock_log_dir / "test_job.123" / "test_job.123.err"
+    log_file = mock_log_dir / "test_job.123.err"
     log_file.parent.mkdir(parents=True, exist_ok=True)
     log_file.write_text("".join(test_content))
-    result = read_slurm_log("test_job", 123, "err", mock_log_dir)
+    result = read_slurm_log("test_job", "123", "err", mock_log_dir)
     assert result == test_content
 
 
 def test_read_slurm_log_not_found():
     """Test read_slurm_log, return an error message if the log file is not found."""
-    result = read_slurm_log("missing_job", 456, "err", "/nonexistent")
-    assert (
-        result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456/missing_job.456.err"
-    )
+    result = read_slurm_log("missing_job", "456", "err", "/nonexistent")
+    assert result == "LOG FILE NOT FOUND: /nonexistent/missing_job.456.err"
 
 
 @pytest.mark.parametrize(
@@ -79,7 +77,7 @@ def test_is_server_running_statuses(log_content, expected):
     """Test that is_server_running returns the correct status."""
     with patch("vec_inf.client._utils.read_slurm_log") as mock_read:
         mock_read.return_value = log_content
-        result = is_server_running("test_job", 123, None)
+        result = is_server_running("test_job", "123", None)
         assert result == expected
 
 
@@ -88,7 +86,7 @@ def test_get_base_url_found():
     test_dict = {"server_address": "http://localhost:8000"}
     with patch("vec_inf.client._utils.read_slurm_log") as mock_read:
         mock_read.return_value = test_dict
-        result = get_base_url("test_job", 123, None)
+        result = get_base_url("test_job", "123", None)
         assert result == "http://localhost:8000"
 
 
@@ -96,7 +94,7 @@ def test_get_base_url_not_found():
     """Test get_base_url when URL is not found in logs."""
     with patch("vec_inf.client._utils.read_slurm_log") as mock_read:
         mock_read.return_value = {"random_key": "123"}
-        result = get_base_url("test_job", 123, None)
+        result = get_base_url("test_job", "123", None)
         assert result == "URL NOT FOUND"
 
 
@@ -115,10 +113,10 @@ def test_model_health_check(url, status_code, expected):
         if url.startswith("http"):
             with patch("requests.get") as mock_get:
                 mock_get.return_value.status_code = status_code
-                result = model_health_check("test_job", 123, None)
+                result = model_health_check("test_job", "123", None)
                 assert result == expected
         else:
-            result = model_health_check("test_job", 123, None)
+            result = model_health_check("test_job", "123", None)
             assert result == expected
 
 
@@ -130,7 +128,7 @@ def test_model_health_check_request_exception():
     ):
         mock_url.return_value = "http://localhost:8000"
         mock_get.side_effect = requests.exceptions.RequestException("Connection error")
-        result = model_health_check("test_job", 123, None)
+        result = model_health_check("test_job", "123", None)
         assert result == ("FAILED", "Connection error")
 
 
@@ -140,24 +138,26 @@ def test_load_config_default_only():
 
     # Verify at least one known model exists
     model_names = {m.model_name for m in configs}
-    assert "c4ai-command-r-plus" in model_names
+    assert "c4ai-command-r-plus-08-2024" in model_names
 
     # Verify full configuration of a sample model
-    model = next(m for m in configs if m.model_name == "c4ai-command-r-plus")
+    model = next(m for m in configs if m.model_name == "c4ai-command-r-plus-08-2024")
     assert model.model_family == "c4ai-command-r"
     assert model.model_type == "LLM"
     assert model.gpus_per_node == 4
     assert model.num_nodes == 2
-    assert model.vllm_args["--max-model-len"] == 8192
+    assert model.vllm_args["--max-model-len"] == 65536
 
 
 def test_load_config_with_user_override(tmp_path, monkeypatch):
     """Test user config overriding default values."""
-    # Create user config with override and new model
-    user_config = tmp_path / "user_config.yaml"
-    user_config.write_text("""\
+    # Create user config directory and file
+    user_config_dir = tmp_path / "user_config_dir"
+    user_config_dir.mkdir()
+    user_config_file = user_config_dir / "models.yaml"
+    user_config_file.write_text("""\
 models:
-  c4ai-command-r-plus:
+  c4ai-command-r-plus-08-2024:
     gpus_per_node: 8
   new-model:
     model_family: new-family
@@ -170,14 +170,14 @@ models:
 """)
 
     with monkeypatch.context() as m:
-        m.setenv("VEC_INF_CONFIG", str(user_config))
+        m.setenv("VEC_INF_CONFIG_DIR", str(user_config_dir))
         configs = load_config()
         config_map = {m.model_name: m for m in configs}
 
     # Verify override (merged with defaults)
-    assert config_map["c4ai-command-r-plus"].gpus_per_node == 8
-    assert config_map["c4ai-command-r-plus"].num_nodes == 2
-    assert config_map["c4ai-command-r-plus"].vocab_size == 256000
+    assert config_map["c4ai-command-r-plus-08-2024"].gpus_per_node == 8
+    assert config_map["c4ai-command-r-plus-08-2024"].num_nodes == 2
+    assert config_map["c4ai-command-r-plus-08-2024"].vocab_size == 256000
 
     # Verify new model
     new_model = config_map["new-model"]
@@ -190,8 +190,11 @@ models:
 
 def test_load_config_invalid_user_model(tmp_path):
     """Test validation of user-provided model configurations."""
-    invalid_config = tmp_path / "bad_config.yaml"
-    invalid_config.write_text("""\
+    # Create user config directory and file
+    invalid_config_dir = tmp_path / "bad_config_dir"
+    invalid_config_dir.mkdir()
+    invalid_config_file = invalid_config_dir / "models.yaml"
+    invalid_config_file.write_text("""\
 models:
   invalid-model:
     model_family: ""
@@ -202,7 +205,7 @@ models:
 
     with (
         pytest.raises(ValueError) as excinfo,
-        patch.dict(os.environ, {"VEC_INF_CONFIG": str(invalid_config)}),
+        patch.dict(os.environ, {"VEC_INF_CONFIG_DIR": str(invalid_config_dir)}),
     ):
         load_config()
 

@@ -10,7 +10,7 @@ from typing import Any, Optional, Union, cast
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
 
-from vec_inf.client.slurm_vars import (
+from vec_inf.client._slurm_vars import (
     DEFAULT_ARGS,
     MAX_CPUS_PER_TASK,
     MAX_GPUS_PER_NODE,
@@ -112,7 +112,7 @@ class ModelConfig(BaseModel):
         default=None,
         description="Exclude certain nodes from the resources granted to the job",
     )
-    node_list: Optional[str] = Field(
+    nodelist: Optional[str] = Field(
         default=None, description="Request a specific list of nodes for deployment"
     )
     bind: Optional[str] = Field(
@@ -132,7 +132,6 @@ class ModelConfig(BaseModel):
     vllm_args: Optional[dict[str, Any]] = Field(
         default={}, description="vLLM engine arguments"
     )
-
     model_config = ConfigDict(
         extra="forbid", str_strip_whitespace=True, validate_default=True, frozen=True
     )

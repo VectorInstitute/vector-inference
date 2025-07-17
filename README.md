@@ -10,7 +10,7 @@
 [![vLLM](https://img.shields.io/badge/vllm-0.8.5.post1-blue)](https://docs.vllm.ai/en/v0.8.5.post1/index.html)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, update the environment variables in [`vec_inf/client/slurm_vars.py`](vec_inf/client/slurm_vars.py), and the model config for cached model weights in [`vec_inf/config/models.yaml`](vec_inf/config/models.yaml) accordingly.
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
@@ -19,6 +19,11 @@ If you are using the Vector cluster environment, and you don't need any customiz
 pip install vec-inf
 ```
 Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.8.5.post1`.
+
+If you'd like to use `vec-inf` on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
+* Clone the repository and update the `environment.yaml` and the `models.yaml` file in [`vec_inf/config`](vec_inf/config/), then install from source by running `pip install .`.
+* The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to `/model-weights/vec-inf-shared`, you would need to create an `environment.yaml` and a `models.yaml` following the format of these files in [`vec_inf/config`](vec_inf/config/).
+* The package would also look for an enviroment variable `VEC_INF_CONFIG_DIR`. You can put your `environment.yaml` and `models.yaml` in a directory of your choice and set the enviroment variable `VEC_INF_CONFIG_DIR` to point to that location.
 
 ## Usage
 
@@ -61,7 +66,8 @@ You can also launch your own custom model as long as the model architecture is [
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_CONFIG`. Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_MODEL_CONFIG` (This one will supersede `VEC_INF_CONFIG_DIR` if that is also set). Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
+  * Add your model configuration to the cached `models.yaml` in your cluster environment (if you have write access to the cached configuration directory).
   * Using launch command options to specify your model setup.
 * For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
 
@@ -89,10 +95,10 @@ models:
       --compilation-config: 3
 ```
 
-You would then set the `VEC_INF_CONFIG` path using:
+You would then set the `VEC_INF_MODEL_CONFIG` path using:
 
 ```bash
-export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
+export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
 **NOTE**
@@ -103,10 +109,11 @@ export VEC_INF_CONFIG=/h/<username>/my-model-config.yaml
 
 #### Other commands
 
-* `status`: Check the model status by providing its Slurm job ID, `--json-mode` supported.
+* `batch-launch`: Launch multiple model inference servers at once, currently ONLY single node models supported,
+* `status`: Check the model status by providing its Slurm job ID.
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
-* `list`: List all available model names, or view the default/cached configuration of a specific model, `--json-mode` supported.
+* `list`: List all available model names, or view the default/cached configuration of a specific model.
 * `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, `--job-id`, and/or `--before-job-id`. Use `--dry-run` to preview what would be deleted.
 
 For more details on the usage of these commands, refer to the [User Guide](https://vectorinstitute.github.io/vector-inference/user_guide/)

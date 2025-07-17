@@ -27,6 +27,7 @@ from rich.console import Console
 from rich.live import Live
 
 from vec_inf.cli._helper import (
+    BatchLaunchResponseFormatter,
     LaunchResponseFormatter,
     ListCmdDisplay,
     MetricsResponseFormatter,
@@ -79,7 +80,7 @@ def cli() -> None:
     help="Exclude certain nodes from the resources granted to the job",
 )
 @click.option(
-    "--node-list",
+    "--nodelist",
     type=str,
     help="Request a specific list of nodes for deployment",
 )
@@ -146,7 +147,7 @@ def launch(
             Quality of service tier
         - exclude : str, optional
             Exclude certain nodes from the resources granted to the job
-        - node_list : str, optional
+        - nodelist : str, optional
             Request a specific list of nodes for deployment
         - bind : str, optional
             Additional binds for the singularity container
@@ -180,11 +181,12 @@ def launch(
         launch_response = client.launch_model(model_name, launch_options)
 
         # Display launch information
-        launch_formatter = LaunchResponseFormatter(model_name, launch_response.config)
-
         if json_mode:
             click.echo(json.dumps(launch_response.config))
         else:
+            launch_formatter = LaunchResponseFormatter(
+                model_name, launch_response.config
+            )
             launch_info_table = launch_formatter.format_table_output()
             CONSOLE.print(launch_info_table)
 
@@ -194,29 +196,76 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("status")
-@click.argument("slurm_job_id", type=int, nargs=1)
+@cli.command("batch-launch")
+@click.argument("model-names", type=str, nargs=-1)
 @click.option(
-    "--log-dir",
+    "--batch-config",
     type=str,
-    help="Path to slurm log directory. This is required if --log-dir was set in model launch",
+    help="Model configuration for batch launch",
 )
 @click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
 )
-def status(
-    slurm_job_id: int, log_dir: Optional[str] = None, json_mode: bool = False
+def batch_launch(
+    model_names: tuple[str, ...],
+    batch_config: Optional[str] = None,
+    json_mode: Optional[bool] = False,
 ) -> None:
+    """Launch multiple models in a batch.
+
+    Parameters
+    ----------
+    model_names : tuple[str, ...]
+        Names of the models to launch
+    batch_config : str
+        Model configuration for batch launch
+    json_mode : bool, default=False
+        Whether to output in JSON format
+
+    Raises
+    ------
+    click.ClickException
+        If batch launch fails
+    """
+    try:
+        # Start the client and launch models in batch mode
+        client = VecInfClient()
+        batch_launch_response = client.batch_launch_models(
+            list(model_names), batch_config
+        )
+
+        # Display batch launch information
+        if json_mode:
+            click.echo(batch_launch_response.config)
+        else:
+            batch_launch_formatter = BatchLaunchResponseFormatter(
+                batch_launch_response.config
+            )
+            batch_launch_info_table = batch_launch_formatter.format_table_output()
+            CONSOLE.print(batch_launch_info_table)
+
+    except click.ClickException as e:
+        raise e
+    except Exception as e:
+        raise click.ClickException(f"Batch launch failed: {str(e)}") from e
+
+
+@cli.command("status")
+@click.argument("slurm_job_id", type=str, nargs=1)
+@click.option(
+    "--json-mode",
+    is_flag=True,
+    help="Output in JSON string",
+)
+def status(slurm_job_id: str, json_mode: bool = False) -> None:
     """Get the status of a running model on the cluster.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to check
-    log_dir : str, optional
-        Path to SLURM log directory
     json_mode : bool, default=False
         Whether to output in JSON format
 
@@ -228,7 +277,7 @@ def status(
     try:
         # Start the client and get model inference server status
         client = VecInfClient()
-        status_response = client.get_status(slurm_job_id, log_dir)
+        status_response = client.get_status(slurm_job_id)
         # Display status information
         status_formatter = StatusResponseFormatter(status_response)
         if json_mode:
@@ -244,13 +293,13 @@ def status(
 
 
 @cli.command("shutdown")
-@click.argument("slurm_job_id", type=int, nargs=1)
-def shutdown(slurm_job_id: int) -> None:
+@click.argument("slurm_job_id", type=str, nargs=1)
+def shutdown(slurm_job_id: str) -> None:
     """Shutdown a running model on the cluster.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to shut down
 
     Raises
@@ -305,19 +354,14 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 
 
 @cli.command("metrics")
-@click.argument("slurm_job_id", type=int, nargs=1)
-@click.option(
-    "--log-dir", type=str, help="Path to slurm log directory (if used during launch)"
-)
-def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
+@click.argument("slurm_job_id", type=str, nargs=1)
+def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
 
     Parameters
     ----------
-    slurm_job_id : int
+    slurm_job_id : str
         ID of the SLURM job to monitor
-    log_dir : str, optional
-        Path to SLURM log directory
 
     Raises
     ------
@@ -333,7 +377,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
     try:
         # Start the client and get inference server metrics
         client = VecInfClient()
-        metrics_response = client.get_metrics(slurm_job_id, log_dir)
+        metrics_response = client.get_metrics(slurm_job_id)
         metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
         # Check if metrics response is ready
@@ -344,7 +388,7 @@ def metrics(slurm_job_id: int, log_dir: Optional[str] = None) -> None:
 
         with Live(refresh_per_second=1, console=CONSOLE) as live:
             while True:
-                metrics_response = client.get_metrics(slurm_job_id, log_dir)
+                metrics_response = client.get_metrics(slurm_job_id)
                 metrics_formatter = MetricsResponseFormatter(metrics_response.metrics)
 
                 if isinstance(metrics_response.metrics, str):

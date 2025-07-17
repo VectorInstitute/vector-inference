@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
+from vec_inf.client._client_vars import SRC_DIR
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
@@ -14,6 +15,7 @@ from vec_inf.client._exceptions import (
     SlurmJobError,
 )
 from vec_inf.client._helper import (
+    BatchModelLauncher,
     ModelLauncher,
     ModelRegistry,
     ModelStatusMonitor,
@@ -117,7 +119,7 @@ class TestModelLauncher:
     ):
         """Test _get_launch_params merges config and CLI vllm_args correctly."""
         mock_load_config.return_value = [model_config]
-        cli_kwargs = {"vllm_args": "--num-scheduler-steps=16", "num_nodes": 4}
+        cli_kwargs = {"vllm_args": "--num-scheduler-steps=16, -pp=4", "num_nodes": 4}
 
         launcher = ModelLauncher("test-model", cli_kwargs)
         params = launcher.params
@@ -173,7 +175,7 @@ class TestModelLauncher:
         launcher = ModelLauncher("test-model", {})
         response = launcher.launch()
 
-        assert response.slurm_job_id == 12345
+        assert response.slurm_job_id == "12345"
         assert response.model_name == "test-model"
         assert "slurm_job_id" in response.config
         assert response.config["slurm_job_id"] == "12345"
@@ -196,6 +198,315 @@ class TestModelLauncher:
             launcher.launch()
 
 
+class TestBatchModelLauncher:
+    """Tests for the BatchModelLauncher class."""
+
+    @pytest.fixture
+    def batch_model_configs(self) -> list[ModelConfig]:
+        """Fixture providing batch model configurations for tests."""
+        return [
+            ModelConfig(
+                model_name="family1-variant1",
+                model_family="family1",
+                model_variant="variant1",
+                model_type="LLM",
+                gpus_per_node=1,
+                num_nodes=1,
+                vocab_size=32000,
+                model_weights_parent_dir=Path("/path/to/models"),
+                vllm_args={},
+            ),
+            ModelConfig(
+                model_name="family2-variant1",
+                model_family="family2",
+                model_variant="variant1",
+                model_type="VLM",
+                gpus_per_node=1,
+                num_nodes=1,
+                vocab_size=65536,
+                model_weights_parent_dir=Path("/path/to/models"),
+                vllm_args={},
+            ),
+            ModelConfig(
+                model_name="family1-variant2",
+                model_family="family1",
+                model_variant="variant2",
+                model_type="LLM",
+                gpus_per_node=1,
+                num_nodes=1,
+                vocab_size=32000,
+                model_weights_parent_dir=Path("/path/to/models"),
+                vllm_args={},
+            ),
+        ]
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_init_with_valid_configs(self, mock_load_config, batch_model_configs):
+        """Test launcher initializes correctly with valid model configurations."""
+        mock_load_config.return_value = batch_model_configs
+        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"])
+
+        assert launcher.model_names == ["family1-variant1", "family2-variant1"]
+        assert launcher.slurm_job_name == "BATCH-family1-variant1-family2-variant1"
+        assert len(launcher.model_configs) == 2
+        assert "family1-variant1" in launcher.model_configs
+        assert "family2-variant1" in launcher.model_configs
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_init_with_missing_model_config(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test error is raised when one of the models is missing from config."""
+        mock_load_config.return_value = batch_model_configs
+
+        with pytest.raises(ModelConfigurationError) as excinfo:
+            BatchModelLauncher(["family1-variant1", "nonexistent-model"])
+
+        assert "nonexistent-model" in str(excinfo.value)
+        assert "not found in configuration" in str(excinfo.value)
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_get_slurm_job_name(self, mock_load_config, batch_model_configs):
+        """Test SLURM job name is constructed correctly from model names."""
+        mock_load_config.return_value = batch_model_configs
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1", "family1-variant2"]
+        )
+
+        assert (
+            launcher.slurm_job_name
+            == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        )
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.mkdir")
+    def test_get_launch_params_creates_log_dirs(
+        self, mock_mkdir, mock_load_config, batch_model_configs
+    ):
+        """Test launch parameters preparation creates log directories."""
+        mock_load_config.return_value = batch_model_configs
+
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1", "family1-variant2"]
+        )
+        params = launcher.params
+
+        assert "models" in params
+        assert "family1-variant1" in params["models"]
+        assert "family2-variant1" in params["models"]
+        assert "family1-variant2" in params["models"]
+        assert (
+            params["slurm_job_name"]
+            == "BATCH-family1-variant1-family2-variant1-family1-variant2"
+        )
+        assert params["src_dir"] == str(SRC_DIR)
+
+        # Check that log directories are created
+        mock_mkdir.assert_called()
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_get_launch_params_with_multi_gpu_no_tp(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test error when tensor parallelism is missing in multi-GPU setup."""
+        updated_configs = [
+            batch_model_configs[0].model_copy(update={"gpus_per_node": 2}),
+            batch_model_configs[1],
+        ]
+        mock_load_config.return_value = updated_configs
+
+        with pytest.raises(MissingRequiredFieldsError) as excinfo:
+            BatchModelLauncher(["family1-variant1", "family2-variant1"])
+
+        assert "--tensor-parallel-size" in str(excinfo.value)
+        assert "family1-variant1" in str(excinfo.value)
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_get_launch_params_with_non_power_of_two_gpus(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test error when total GPUs is not a power of two."""
+        # Need to add tensor parallelism to avoid the first validation error
+        updated_configs = [
+            batch_model_configs[0].model_copy(
+                update={
+                    "gpus_per_node": 3,
+                    "vllm_args": {"--tensor-parallel-size": "3"},
+                }
+            ),
+            batch_model_configs[1],
+        ]
+        mock_load_config.return_value = updated_configs
+
+        with pytest.raises(ValueError) as excinfo:
+            BatchModelLauncher(["family1-variant1", "family2-variant1"])
+
+        assert "power of two" in str(excinfo.value)
+        assert "family1-variant1" in str(excinfo.value)
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_get_launch_params_with_mismatched_batch_args(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test error when batch mode required arguments don't match."""
+        # Create a scenario where the batch argument validation actually fails
+        # Let's use different GPU configurations that will pass all other validations
+        # but fail on batch argument matching
+        updated_configs = [
+            batch_model_configs[0].model_copy(),
+            batch_model_configs[1].model_copy(
+                update={
+                    "gpus_per_node": 1,
+                    "num_nodes": 2,  # This will cause the mismatch
+                    "vllm_args": {"--tensor-parallel-size": "1"},
+                }
+            ),
+        ]
+        mock_load_config.return_value = updated_configs
+
+        with pytest.raises(ValueError) as excinfo:
+            BatchModelLauncher(["family1-variant1", "family2-variant1"])
+
+        assert "Mismatch between total number of GPUs requested" in str(excinfo.value)
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("vec_inf.client._helper.BatchSlurmScriptGenerator")
+    @patch("vec_inf.client._helper.utils.run_bash_command")
+    @patch("pathlib.Path.mkdir")
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.open")
+    @patch("pathlib.Path.rename")
+    @patch("vec_inf.client._helper.copy2")  # Mock the actual import in the module
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.read_text")
+    @patch("pathlib.Path.write_text")
+    def test_launch_success(
+        self,
+        mock_write_text,
+        mock_read_text,
+        mock_exists,
+        mock_copy2,
+        mock_rename,
+        mock_open,
+        mock_touch,
+        mock_mkdir,
+        mock_run_bash,
+        mock_script_gen,
+        mock_load_config,
+        batch_model_configs,
+    ):
+        """Test successful batch model launch returns expected response."""
+        mock_open.return_value = mock.mock_open().return_value
+        mock_load_config.return_value = batch_model_configs
+        mock_script_gen_instance = MagicMock()
+        mock_script_gen_instance.generate_batch_slurm_script.return_value = Path(
+            "/path/to/batch_slurm_script.sh"
+        )
+        mock_script_gen_instance.script_paths = [
+            Path("/path/to/script1.sh"),
+            Path("/path/to/script2.sh"),
+        ]
+        mock_script_gen.return_value = mock_script_gen_instance
+        mock_run_bash.return_value = ("Submitted batch job 12345", "")
+        # Mock that the script files exist and can be read/written
+        mock_exists.return_value = True
+        mock_read_text.return_value = "mock script content"
+        mock_write_text.return_value = None
+        # Mock copy2 to do nothing (avoid file operations)
+        mock_copy2.return_value = None
+
+        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"])
+        response = launcher.launch()
+
+        assert response.slurm_job_id == "12345"
+        assert response.slurm_job_name == "BATCH-family1-variant1-family2-variant1"
+        assert response.model_names == ["family1-variant1", "family2-variant1"]
+        assert "slurm_job_id" in response.config
+        assert response.config["slurm_job_id"] == "12345"
+
+        # Verify log directories and files are created
+        mock_mkdir.assert_called()
+        mock_touch.assert_called()
+        mock_copy2.assert_called()
+        mock_rename.assert_called()
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("vec_inf.client._helper.utils.run_bash_command")
+    def test_launch_with_slurm_error(
+        self, mock_run_bash, mock_load_config, batch_model_configs
+    ):
+        """Test launch raises error on SLURM submission failure."""
+        mock_load_config.return_value = batch_model_configs
+        mock_run_bash.return_value = ("", "sbatch: error: Invalid partition specified")
+
+        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"])
+        with pytest.raises(SlurmJobError):
+            launcher.launch()
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_launch_params_het_group_ids(self, mock_load_config, batch_model_configs):
+        """Test that heterogeneous group IDs are assigned correctly."""
+        mock_load_config.return_value = batch_model_configs
+
+        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"])
+        params = launcher.params
+
+        assert params["models"]["family1-variant1"]["het_group_id"] == 0
+        assert params["models"]["family2-variant1"]["het_group_id"] == 1
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_launch_params_log_file_paths(self, mock_load_config, batch_model_configs):
+        """Test that log file paths are constructed correctly."""
+        mock_load_config.return_value = batch_model_configs
+
+        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"])
+        params = launcher.params
+
+        # Check individual model log files
+        assert (
+            "family1-variant1.%j.out"
+            in params["models"]["family1-variant1"]["out_file"]
+        )
+        assert (
+            "family1-variant1.%j.err"
+            in params["models"]["family1-variant1"]["err_file"]
+        )
+        assert (
+            "family1-variant1.$SLURM_JOB_ID.json"
+            in params["models"]["family1-variant1"]["json_file"]
+        )
+
+        assert (
+            "family2-variant1.%j.out"
+            in params["models"]["family2-variant1"]["out_file"]
+        )
+        assert (
+            "family2-variant1.%j.err"
+            in params["models"]["family2-variant1"]["err_file"]
+        )
+        assert (
+            "family2-variant1.$SLURM_JOB_ID.json"
+            in params["models"]["family2-variant1"]["json_file"]
+        )
+
+        # Check batch-level log files
+        assert "BATCH-family1-variant1-family2-variant1.%j.out" in params["out_file"]
+        assert "BATCH-family1-variant1-family2-variant1.%j.err" in params["err_file"]
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_init_with_batch_config(self, mock_load_config, batch_model_configs):
+        """Test launcher initializes correctly with custom batch config."""
+        mock_load_config.return_value = batch_model_configs
+
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"], batch_config="custom_config.yaml"
+        )
+
+        assert launcher.batch_config == "custom_config.yaml"
+        # Verify load_config was called with the custom config
+        mock_load_config.assert_called_with("custom_config.yaml")
+
+
 class TestModelStatusMonitor:
     """Tests for the ModelStatusMonitor class."""
 
@@ -214,14 +525,15 @@ class TestModelStatusMonitor:
         """Test __init__ sets job ID, output, and initial status info."""
         mock_run_bash.return_value = (mock_scontrol_output, "")
 
-        monitor = ModelStatusMonitor(slurm_job_id=12345, log_dir="/path/to/logs")
+        monitor = ModelStatusMonitor(slurm_job_id="12345")
 
-        assert monitor.slurm_job_id == 12345
+        assert monitor.slurm_job_id == "12345"
         assert monitor.output == mock_scontrol_output
-        assert monitor.log_dir == "/path/to/logs"
-        assert isinstance(monitor.status_info.raw_output, str)
-        assert monitor.status_info.job_state == "RUNNING"
+        assert monitor.job_status["JobName"] == "test-model"
+        assert monitor.job_status["JobState"] == "RUNNING"
+        assert monitor.log_dir == "/path/to/log/test-family/test-model.12345"
         assert monitor.status_info.model_name == "test-model"
+        assert monitor.status_info.job_state == "RUNNING"
 
     @patch("vec_inf.client._helper.utils.run_bash_command")
     def test_init_with_slurm_error(self, mock_run_bash):
@@ -229,7 +541,7 @@ class TestModelStatusMonitor:
         mock_run_bash.return_value = ("", "scontrol: error: Invalid job id specified")
 
         with pytest.raises(SlurmJobError):
-            ModelStatusMonitor(99999)
+            ModelStatusMonitor("99999")
 
     @patch("vec_inf.client._helper.utils.run_bash_command")
     def test_process_pending_state(self, mock_run_bash, mock_pending_scontrol_output):
@@ -311,6 +623,7 @@ def mock_status_response():
     """Fixture returning a mock StatusResponse instance."""
     return StatusResponse(
         model_name="test-model",
+        log_dir="/tmp/test_logs",  # Add this line
         server_status=ModelStatus.UNAVAILABLE,
         job_state="RUNNING",
         raw_output="mock scontrol output",
@@ -345,9 +658,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
-        assert collector.slurm_job_id == 12345
+        assert collector.slurm_job_id == "12345"
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
@@ -364,9 +677,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         )
         mock_read_slurm_log.return_value = {"enable_prefix_caching": True}
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
-        assert collector.slurm_job_id == 12345
+        assert collector.slurm_job_id == "12345"
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
@@ -383,7 +696,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         assert collector.metrics_url == "Pending resources for server initialization"
 
@@ -398,7 +711,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         )
         mock_get_base_url.return_value = "http://gpu01:8000/v1"
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         assert collector.metrics_url == "http://gpu01:8000/metrics"
 
@@ -411,7 +724,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
             mock_status_response
         )
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
 
         parsed = collector._parse_metrics(mock_metrics_text)
 
@@ -442,7 +755,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         mock_response.text = mock_metrics_text
         mock_requests_get.return_value = mock_response
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
         collector.metrics_url = "http://gpu01:8000/metrics"
         collector.fetch_metrics()
 
@@ -487,7 +800,7 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         mock_status_monitor.return_value.process_model_status.return_value = mock_status
         mock_requests_get.side_effect = requests.RequestException("Connection refused")
 
-        collector = PerformanceMetricsCollector(12345)
+        collector = PerformanceMetricsCollector("12345")
         collector.metrics_url = "http://gpu01:8000/metrics"
 
         result = collector.fetch_metrics()

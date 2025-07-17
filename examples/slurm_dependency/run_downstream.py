@@ -9,7 +9,7 @@ from vec_inf.client import VecInfClient
 
 if len(sys.argv) < 2:
     raise ValueError("Expected server job ID as the first argument.")
-job_id = int(sys.argv[1])
+job_id = sys.argv[1]
 
 vi_client = VecInfClient()
 print(f"Waiting for SLURM job {job_id} to be ready...")
