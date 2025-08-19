@@ -276,6 +276,11 @@ class BatchSlurmScriptGenerator:
                 out_file=self.params["out_file"], err_file=self.params["err_file"]
             )
         ]
+
+        for arg, value in SLURM_JOB_CONFIG_ARGS.items():
+            if self.params.get(value):
+                shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+
         for model_name in self.params["models"]:
             shebang.append(f"# ===== Resource group for {model_name} =====")
             for arg, value in SLURM_JOB_CONFIG_ARGS.items():
