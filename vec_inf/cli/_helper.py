@@ -59,8 +59,16 @@ class LaunchResponseFormatter:
         table.add_row("Vocabulary Size", self.params["vocab_size"])
 
         # Add resource allocation details
-        table.add_row("Partition", self.params["partition"])
-        table.add_row("QoS", self.params["qos"])
+        if self.params.get("account"):
+            table.add_row("Account", self.params["account"])
+        if self.params.get("work_dir"):
+            table.add_row("Working Directory", self.params["work_dir"])
+        if self.params.get("resource_type"):
+            table.add_row("Resource Type", self.params["resource_type"])
+        if self.params.get("partition"):
+            table.add_row("Partition", self.params["partition"])
+        if self.params.get("qos"):
+            table.add_row("QoS", self.params["qos"])
         table.add_row("Time Limit", self.params["time"])
         table.add_row("Num Nodes", self.params["num_nodes"])
         table.add_row("GPUs/Node", self.params["gpus_per_node"])
@@ -113,13 +121,25 @@ class BatchLaunchResponseFormatter:
         # Add key information with consistent styling
         table.add_row("Slurm Job ID", self.params["slurm_job_id"], style="blue")
         table.add_row("Slurm Job Name", self.params["slurm_job_name"], style="blue")
+        if self.params.get("account"):
+            table.add_row("Account", self.params["account"], style="blue")
+        if self.params.get("work_dir"):
+            table.add_row("Working Directory", self.params["work_dir"], style="blue")
+        table.add_row("Log Directory", self.params["log_dir"], style="blue")
         for model_name in self.params["models"]:
             table.add_row("Model Name", model_name, style="magenta")
             # Add resource allocation details
-            table.add_row(
-                "Partition", f"  {self.params['models'][model_name]['partition']}"
-            )
-            table.add_row("QoS", f"  {self.params['models'][model_name]['qos']}")
+            if self.params["models"][model_name].get("resource_type"):
+                table.add_row(
+                    "Resource Type",
+                    f"  {self.params['models'][model_name]['resource_type']}",
+                )
+            if self.params["models"][model_name].get("partition"):
+                table.add_row(
+                    "Partition", f"  {self.params['models'][model_name]['partition']}"
+                )
+            if self.params["models"][model_name].get("qos"):
+                table.add_row("QoS", f"  {self.params['models'][model_name]['qos']}")
             table.add_row(
                 "Time Limit", f"  {self.params['models'][model_name]['time']}"
             )
@@ -134,9 +154,6 @@ class BatchLaunchResponseFormatter:
             )
             table.add_row(
                 "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
-            )
-            table.add_row(
-                "Log Directory", f"  {self.params['models'][model_name]['log_dir']}"
             )
 
         return table
@@ -379,7 +396,7 @@ class ListCmdDisplay:
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir", "vllm_args"}:
+            if field not in {"venv", "log_dir", "vllm_args"} and value:
                 table.add_row(field, str(value))
             if field == "vllm_args":
                 table.add_row("vLLM Arguments:", style="magenta")

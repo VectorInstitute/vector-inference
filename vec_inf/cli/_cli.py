@@ -52,7 +52,12 @@ def cli() -> None:
 @click.option(
     "--partition",
     type=str,
-    help="Type of compute partition",
+    help="Type of Slurm partition",
+)
+@click.option(
+    "--resource-type",
+    type=str,
+    help="Type of resource to request for the job",
 )
 @click.option(
     "--num-nodes",
@@ -66,8 +71,15 @@ def cli() -> None:
 )
 @click.option(
     "--account",
+    "-A",
     type=str,
     help="Charge resources used by this job to specified account.",
+)
+@click.option(
+    "--work-dir",
+    "-D",
+    type=str,
+    help="Set working directory for the batch job",
 )
 @click.option(
     "--qos",
@@ -136,13 +148,17 @@ def launch(
         - model_variant : str, optional
             Specific variant of the model
         - partition : str, optional
-            Type of compute partition
+            Type of Slurm partition
+        - resource_type : str, optional
+            Type of resource to request for the job
         - num_nodes : int, optional
             Number of nodes to use
         - gpus_per_node : int, optional
             Number of GPUs per node
         - account : str, optional
             Charge resources used by this job to specified account
+        - work_dir : str, optional
+            Set working directory for the batch job
         - qos : str, optional
             Quality of service tier
         - exclude : str, optional
@@ -204,6 +220,18 @@ def launch(
     help="Model configuration for batch launch",
 )
 @click.option(
+    "--account",
+    "-A",
+    type=str,
+    help="Charge resources used by this job to specified account.",
+)
+@click.option(
+    "--work-dir",
+    "-D",
+    type=str,
+    help="Set working directory for the batch job",
+)
+@click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
@@ -211,6 +239,8 @@ def launch(
 def batch_launch(
     model_names: tuple[str, ...],
     batch_config: Optional[str] = None,
+    account: Optional[str] = None,
+    work_dir: Optional[str] = None,
     json_mode: Optional[bool] = False,
 ) -> None:
     """Launch multiple models in a batch.
@@ -233,7 +263,7 @@ def batch_launch(
         # Start the client and launch models in batch mode
         client = VecInfClient()
         batch_launch_response = client.batch_launch_models(
-            list(model_names), batch_config
+            list(model_names), batch_config, account, work_dir
         )
 
         # Display batch launch information
