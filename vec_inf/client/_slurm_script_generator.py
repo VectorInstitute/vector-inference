@@ -91,7 +91,7 @@ class SlurmScriptGenerator:
         if self.is_multinode:
             server_setup_str = "\n".join(
                 SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
-            )
+            ).format(gpus_per_node=self.params["gpus_per_node"])
             if self.use_singularity:
                 server_setup_str = server_setup_str.replace(
                     "SINGULARITY_PLACEHOLDER",
@@ -272,14 +272,13 @@ class BatchSlurmScriptGenerator:
             The shebang for batch mode Slurm script.
         """
         shebang = [
-            BATCH_SLURM_SCRIPT_TEMPLATE["shebang"].format(
-                out_file=self.params["out_file"], err_file=self.params["err_file"]
-            )
+            BATCH_SLURM_SCRIPT_TEMPLATE["shebang"]
         ]
 
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             if self.params.get(value):
                 shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+        shebang.append("\n")
 
         for model_name in self.params["models"]:
             shebang.append(f"# ===== Resource group for {model_name} =====")

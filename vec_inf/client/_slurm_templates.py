@@ -110,7 +110,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "\n# Get list of nodes",
             'nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")',
             "nodes_array=($nodes)",
-            "head_node=${nodes_array[0]}",
+            "head_node=${{nodes_array[0]}}",
             'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
             "\n# Start Ray head node",
             "head_node_port=$(find_available_port $head_node_ip 8080 65535)",
@@ -120,17 +120,17 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'srun --nodes=1 --ntasks=1 -w "$head_node" \\',
             "    SINGULARITY_PLACEHOLDER",
             '    ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \\',
-            '    --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
+            '    --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus {gpus_per_node} --block &',
             "sleep 10",
             "\n# Start Ray worker nodes",
             "worker_num=$((SLURM_JOB_NUM_NODES - 1))",
             "for ((i = 1; i <= worker_num; i++)); do",
-            "    node_i=${nodes_array[$i]}",
+            "    node_i=${{nodes_array[$i]}}",
             '    echo "Starting WORKER $i at $node_i"',
             '    srun --nodes=1 --ntasks=1 -w "$node_i" \\',
             "        SINGULARITY_PLACEHOLDER",
             '        ray start --address "$ray_head" \\',
-            '        --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
+            '        --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus {gpus_per_node} --block &',
             "    sleep 5",
             "done",
         ],
@@ -184,7 +184,7 @@ class BatchSlurmScriptTemplate(TypedDict):
 
 
 BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
-    "shebang": "#!/bin/bash\n#SBATCH --output={out_file}\n#SBATCH --error={err_file}\n",
+    "shebang": "#!/bin/bash",
     "hetjob": "#SBATCH hetjob\n",
     "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
     "env_vars": [
@@ -229,6 +229,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         "head_node_ip=${{SLURMD_NODENAME}}",
         "vllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
         'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"\n',
+        "echo $server_address\n",
     ],
     "write_to_json": [
         "het_job_id=$(($SLURM_JOB_ID+{het_group_id}))",
