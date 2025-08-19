@@ -66,7 +66,7 @@ MAX_CPUS_PER_TASK = _config["limits"]["max_cpus_per_task"]
 
 
 # Create dynamic Literal types
-def create_literal_type(values: list, fallback: str = "") -> TypeAlias:
+def create_literal_type(values: list[str], fallback: str = "") -> TypeAlias:
     """Create a Literal type from a list, with configurable fallback."""
     if not values:
         return Literal[fallback]
