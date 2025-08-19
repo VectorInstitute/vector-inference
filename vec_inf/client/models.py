@@ -188,12 +188,16 @@ class LaunchOptions:
         Specific variant/version of the model
     partition : str, optional
         SLURM partition to use
+    resource_type : str, optional
+        Type of resource to request for the job
     num_nodes : int, optional
         Number of nodes to allocate
     gpus_per_node : int, optional
         Number of GPUs per node
     account : str, optional
         Account name for job scheduling
+    work_dir : str, optional
+        Set working directory for the batch job
     qos : str, optional
         Quality of Service level
     time : str, optional
@@ -221,9 +225,11 @@ class LaunchOptions:
     model_family: Optional[str] = None
     model_variant: Optional[str] = None
     partition: Optional[str] = None
+    resource_type: Optional[str] = None
     num_nodes: Optional[int] = None
     gpus_per_node: Optional[int] = None
     account: Optional[str] = None
+    work_dir: Optional[str] = None
     qos: Optional[str] = None
     exclude: Optional[str] = None
     nodelist: Optional[str] = None

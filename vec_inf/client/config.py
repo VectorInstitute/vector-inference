@@ -17,6 +17,7 @@ from vec_inf.client._slurm_vars import (
     MAX_NUM_NODES,
     PARTITION,
     QOS,
+    RESOURCE_TYPE,
 )
 
 
@@ -47,14 +48,18 @@ class ModelConfig(BaseModel):
         Memory allocation per node in GB format (e.g., '32G')
     vocab_size : int
         Size of the model's vocabulary (1-1,000,000)
-    account : Optional[str], optional
+    account : str, optional
         Charge resources used by this job to specified account.
+    work_dir : str, optional
+        Set working directory for the batch job
     qos : Union[QOS, str], optional
         Quality of Service tier for job scheduling
     time : str, optional
         Time limit for the job in HH:MM:SS format
     partition : Union[PARTITION, str], optional
-        GPU partition type for job scheduling
+        Slurm partition for job scheduling
+    resource_type : Union[RESOURCE_TYPE, str], optional
+        Type of resource to request for the job
     venv : str, optional
         Virtual environment or container system to use
     log_dir : Path, optional
@@ -83,7 +88,7 @@ class ModelConfig(BaseModel):
     )
     num_nodes: int = Field(..., gt=0, le=MAX_NUM_NODES, description="Number of nodes")
     cpus_per_task: int = Field(
-        default=cast(int, DEFAULT_ARGS["cpus_per_task"]),
+        default=int(DEFAULT_ARGS["cpus_per_task"]),
         gt=0,
         le=MAX_CPUS_PER_TASK,
         description="CPUs per task",
@@ -97,16 +102,27 @@ class ModelConfig(BaseModel):
     account: Optional[str] = Field(
         default=None, description="Account name for job scheduling"
     )
-    qos: Union[QOS, str] = Field(
-        default=cast(str, DEFAULT_ARGS["qos"]), description="Quality of Service tier"
+    work_dir: Optional[str] = Field(
+        default=None, description="Working directory for the job"
+    )
+    qos: Optional[Union[QOS, str]] = Field(
+        default=DEFAULT_ARGS["qos"] if DEFAULT_ARGS["qos"] != "" else None,
+        description="Quality of Service tier",
     )
     time: str = Field(
         default=cast(str, DEFAULT_ARGS["time"]),
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
-    partition: Union[PARTITION, str] = Field(
-        default=cast(str, DEFAULT_ARGS["partition"]), description="GPU partition type"
+    partition: Optional[Union[PARTITION, str]] = Field(
+        default=DEFAULT_ARGS["partition"] if DEFAULT_ARGS["partition"] != "" else None,
+        description="GPU partition type",
+    )
+    resource_type: Optional[Union[RESOURCE_TYPE, str]] = Field(
+        default=DEFAULT_ARGS["resource_type"]
+        if DEFAULT_ARGS["resource_type"] != ""
+        else None,
+        description="Resource type",
     )
     exclude: Optional[str] = Field(
         default=None,
