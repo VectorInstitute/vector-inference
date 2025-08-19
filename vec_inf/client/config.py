@@ -94,7 +94,7 @@ class ModelConfig(BaseModel):
         description="CPUs per task",
     )
     mem_per_node: str = Field(
-        default=cast(str, DEFAULT_ARGS["mem_per_node"]),
+        default=DEFAULT_ARGS["mem_per_node"],
         pattern=r"^\d{1,4}G$",
         description="Memory per node",
     )
@@ -110,7 +110,7 @@ class ModelConfig(BaseModel):
         description="Quality of Service tier",
     )
     time: str = Field(
-        default=cast(str, DEFAULT_ARGS["time"]),
+        default=DEFAULT_ARGS["time"],
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
@@ -138,11 +138,11 @@ class ModelConfig(BaseModel):
         default="singularity", description="Virtual environment/container system"
     )
     log_dir: Path = Field(
-        default=Path(cast(str, DEFAULT_ARGS["log_dir"])),
+        default=Path(DEFAULT_ARGS["log_dir"]),
         description="Log directory path",
     )
     model_weights_parent_dir: Path = Field(
-        default=Path(cast(str, DEFAULT_ARGS["model_weights_parent_dir"])),
+        default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
     )
     vllm_args: Optional[dict[str, Any]] = Field(
