@@ -35,8 +35,12 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py && \
     python3.10 -m pip install --upgrade pip setuptools wheel uv
 
-# Infiniband/RDMA support
-RUN apt-get install -y \
+# Install Infiniband/RDMA support
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    add-apt-repository multiverse && \
+    apt-get update && \
+    apt-get install -y \
     libibverbs1 \
     libibverbs-dev \
     ibverbs-providers \
