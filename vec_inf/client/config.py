@@ -5,7 +5,7 @@ configurations, including hardware requirements and model specifications.
 """
 
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal

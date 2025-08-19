@@ -14,7 +14,7 @@ limits:
 allowed_values:
   qos: []
   partition: []
-  resource_type: ["l40s", "h100"] 
+  resource_type: ["l40s", "h100"]
 
 default_args:
   cpus_per_task: "16"

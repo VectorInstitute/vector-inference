@@ -271,9 +271,7 @@ class BatchSlurmScriptGenerator:
         str
             The shebang for batch mode Slurm script.
         """
-        shebang = [
-            BATCH_SLURM_SCRIPT_TEMPLATE["shebang"]
-        ]
+        shebang = [BATCH_SLURM_SCRIPT_TEMPLATE["shebang"]]
 
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             if self.params.get(value):
