@@ -7,7 +7,6 @@ single-node, multi-node, and batch mode templates.
 from typing import TypedDict
 
 from vec_inf.client._slurm_vars import (
-    LD_LIBRARY_PATH,
     SINGULARITY_IMAGE,
     SINGULARITY_LOAD_CMD,
     SINGULARITY_MODULE_NAME,
@@ -98,7 +97,6 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
-        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
     ],
     "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
@@ -190,7 +188,6 @@ BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
     "hetjob": "#SBATCH hetjob\n",
     "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
     "env_vars": [
-        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}\n",
     ],
     "permission_update": "chmod +x {script_name}",
