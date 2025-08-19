@@ -44,12 +44,13 @@ SLURM_JOB_CONFIG_ARGS = {
     "job-name": "model_name",
     "partition": "partition",
     "account": "account",
+    "chdir": "work_dir",
     "qos": "qos",
     "time": "time",
     "nodes": "num_nodes",
     "exclude": "exclude",
     "nodelist": "node_list",
-    "gpus-per-node": "gpus_per_node",
+    "gres": "gres",
     "cpus-per-task": "cpus_per_task",
     "mem": "mem_per_node",
     "output": "out_file",
@@ -70,3 +71,10 @@ VLLM_SHORT_TO_LONG_MAP = {
 
 # Required matching arguments for batch mode
 BATCH_MODE_REQUIRED_MATCHING_ARGS = ["venv", "log_dir"]
+
+# Required arguments for launching jobs that don't have a default value and their
+# corresponding environment variables
+REQUIRED_ARGS = {
+    "account": "VEC_INF_ACCOUNT",
+    "work_dir": "VEC_INF_WORK_DIR",
+}
