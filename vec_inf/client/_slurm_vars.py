@@ -52,7 +52,6 @@ def load_env_config() -> dict[str, Any]:
 _config = load_env_config()
 
 # Extract path values
-LD_LIBRARY_PATH = _config["paths"]["ld_library_path"]
 SINGULARITY_IMAGE = _config["paths"]["image_path"]
 VLLM_NCCL_SO_PATH = _config["paths"]["vllm_nccl_so_path"]
 
@@ -65,9 +64,20 @@ MAX_GPUS_PER_NODE = _config["limits"]["max_gpus_per_node"]
 MAX_NUM_NODES = _config["limits"]["max_num_nodes"]
 MAX_CPUS_PER_TASK = _config["limits"]["max_cpus_per_task"]
 
+
 # Create dynamic Literal types
-QOS: TypeAlias = Literal[tuple(_config["allowed_values"]["qos"])]  # type: ignore[valid-type]
-PARTITION: TypeAlias = Literal[tuple(_config["allowed_values"]["partition"])]  # type: ignore[valid-type]
+def create_literal_type(values: list, fallback: str = "") -> TypeAlias:
+    """Create a Literal type from a list, with configurable fallback."""
+    if not values:
+        return Literal[fallback]
+    return Literal[tuple(values)]  # type: ignore[valid-type]
+
+
+QOS: TypeAlias = create_literal_type(_config["allowed_values"]["qos"])
+PARTITION: TypeAlias = create_literal_type(_config["allowed_values"]["partition"])
+RESOURCE_TYPE: TypeAlias = create_literal_type(
+    _config["allowed_values"]["resource_type"]
+)
 
 # Extract default arguments
-DEFAULT_ARGS = _config["default_args"]
+DEFAULT_ARGS: dict[str, str] = _config["default_args"]
