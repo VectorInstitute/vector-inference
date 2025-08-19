@@ -6,9 +6,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
@@ -21,9 +20,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
@@ -36,9 +34,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 16384
       --max-num-seqs: 256
@@ -50,9 +47,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 16384
       --max-num-seqs: 256
@@ -64,9 +60,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 16384
       --max-num-seqs: 256
@@ -78,9 +73,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 16384
       --max-num-seqs: 256
@@ -92,9 +86,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 16384
@@ -107,9 +100,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 16384
@@ -122,9 +114,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32016
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -137,9 +128,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32016
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -152,9 +142,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -166,9 +155,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -180,9 +168,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -195,9 +182,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -210,9 +196,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -224,9 +209,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -238,9 +222,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -252,9 +235,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -266,9 +248,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -281,9 +262,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -296,9 +276,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -310,9 +289,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -324,9 +302,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -338,9 +315,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 64064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -353,9 +329,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 8192
       --max-num-seqs: 256
@@ -367,9 +342,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 8192
       --max-num-seqs: 256
@@ -381,9 +355,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 8192
@@ -396,9 +369,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 8192
@@ -411,9 +383,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -425,9 +396,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -439,9 +409,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
@@ -454,9 +423,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
@@ -471,7 +439,7 @@ models:
     vocab_size: 128256
     qos: m4
     time: 02:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 8
       --tensor-parallel-size: 4
@@ -484,9 +452,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -498,9 +465,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -512,9 +478,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -526,9 +491,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -540,9 +504,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
@@ -555,9 +518,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
@@ -570,9 +532,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 32768
@@ -585,9 +546,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
@@ -600,9 +560,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
@@ -615,9 +574,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 131072
@@ -630,9 +588,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 65536
@@ -645,9 +602,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 8192
@@ -660,9 +616,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
@@ -675,9 +630,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -689,9 +643,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -703,9 +656,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -717,9 +669,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -731,9 +682,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -747,9 +697,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -763,9 +712,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 8
       --max-model-len: 4096
@@ -779,9 +727,8 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 8
       --max-model-len: 4096
@@ -795,9 +742,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -809,9 +755,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -823,9 +768,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -837,9 +781,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -851,9 +794,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -865,9 +807,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
@@ -880,9 +821,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 16384
@@ -895,9 +835,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -909,9 +848,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -923,9 +861,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -938,9 +875,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -952,9 +888,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 4096
@@ -967,9 +902,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -981,9 +915,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
@@ -996,9 +929,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 131072
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 8192
       --max-num-seqs: 256
@@ -1010,9 +942,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -1024,9 +955,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 512
       --max-num-seqs: 256
@@ -1038,9 +968,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 512
       --max-num-seqs: 256
@@ -1052,9 +981,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
@@ -1067,9 +995,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 92553
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
@@ -1082,9 +1009,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 92553
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 32768
@@ -1097,9 +1023,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 8192
@@ -1112,9 +1037,8 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
@@ -1127,9 +1051,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -1141,9 +1064,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 65536
@@ -1156,9 +1078,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 65536
       --max-num-seqs: 256
@@ -1170,9 +1091,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -1184,9 +1104,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 131072
       --max-num-seqs: 256
@@ -1198,9 +1117,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 65536
@@ -1213,9 +1131,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 92553
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 32768
       --max-num-seqs: 256
@@ -1227,9 +1144,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 151552
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 8192
       --max-num-seqs: 256
@@ -1241,9 +1157,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -1254,9 +1169,8 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 129280
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 4096
@@ -1269,9 +1183,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 129280
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
@@ -1283,9 +1196,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 151936
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s
     vllm_args:
       --max-model-len: 40960
       --max-num-seqs: 256
