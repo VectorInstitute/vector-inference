@@ -952,11 +952,7 @@ class ModelRegistry:
             If the specified model is not found in configuration
         """
         config = next(
-            (
-                c
-                for c in self.model_configs
-                if c.model_name == model_name 
-            ),
+            (c for c in self.model_configs if c.model_name == model_name),
             None,
         )
         if not config:
