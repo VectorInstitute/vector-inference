@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
     perftest \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Mellanox OFED 
+# Install Mellanox OFED
 RUN wget https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.9-0.5.6.0/MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
     tar -xzf MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
     cd MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64 && \
