@@ -97,14 +97,8 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{SINGULARITY_MODULE_NAME} exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "env_vars": [
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=/etc/libibverbs.d,/usr/include/infiniband,/usr/include/rdma",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/bin/ib*_* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/lib/x86_64-linux-gnu/libibverbs* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/lib/x86_64-linux-gnu/libnl* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}ENV_LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:\\$LD_LIBRARY_PATH\n",
-    ],
-    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --env VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH},NCCL_DEBUG=INFO,NCCL_IB_DISABLE=0,NCCL_IB_HCA=mlx5 --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
+    "env_vars": [],
+    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -192,13 +186,7 @@ BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
     "shebang": "#!/bin/bash",
     "hetjob": "#SBATCH hetjob\n",
     "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
-    "env_vars": [
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=/etc/libibverbs.d,/usr/include/infiniband,/usr/include/rdma",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/bin/ib*_* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/lib/x86_64-linux-gnu/libibverbs* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}_BINDPATH=${SINGULARITY_MODULE_NAME_UPPER}_BINDPATH,$(echo /usr/lib/x86_64-linux-gnu/libnl* | sed -e 's/ /,/g')",
-        f"export {SINGULARITY_MODULE_NAME_UPPER}ENV_LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:\\$LD_LIBRARY_PATH\n",
-    ],
+    "env_vars": [],
     "permission_update": "chmod +x {script_name}",
     "launch_model_scripts": [
         "\nsrun --het-group={het_group_id} \\",
@@ -248,7 +236,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         '    "$json_path" > temp_{model_name}.json \\',
         '    && mv temp_{model_name}.json "$json_path"\n',
     ],
-    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --env VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH},NCCL_DEBUG=INFO --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
+    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "launch_cmd": [
         "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
