@@ -36,29 +36,14 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     python3.10 -m pip install --upgrade pip setuptools wheel uv
 
 # Install Infiniband/RDMA support
-RUN apt-get update && apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    add-apt-repository multiverse && \
-    apt-get update && \
-    apt-get install -y \
-    libibverbs1 \
-    libibverbs-dev \
-    ibverbs-providers \
-    ibverbs-utils \
-    infiniband-diags \
-    libmlx5-1 \
-    rdma-core \
-    librdmacm1 \
-    librdmacm-dev \
-    libucx0 \
-    libucx-dev \
-    libopenmpi-dev \
-    openmpi-bin \
-    openmpi-common \
-    libopenmpi3
+RUN apt-get update && apt-get install -y \
+    libibverbs1 libibverbs-dev ibverbs-utils \
+    librdmacm1 librdmacm-dev rdmacm-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" && \
-    export UCX_NET_DEVICES=all
+# Set up RDMA environment (these will persist in the final container)
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+ENV UCX_NET_DEVICES=all
 
 # Set up project
 WORKDIR /vec-inf
