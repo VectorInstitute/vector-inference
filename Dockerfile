@@ -40,8 +40,6 @@ RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
     libnccl-net1 libnccl-profiler1 \
-    linux-modules-extra-$(uname -r) \
-    linux-tools-$(uname -r) \
     infiniband-diags \
     perftest \
     && rm -rf /var/lib/apt/lists/*
