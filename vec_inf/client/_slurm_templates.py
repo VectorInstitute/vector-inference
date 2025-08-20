@@ -10,7 +10,6 @@ from vec_inf.client._slurm_vars import (
     SINGULARITY_IMAGE,
     SINGULARITY_LOAD_CMD,
     SINGULARITY_MODULE_NAME,
-    VLLM_NCCL_SO_PATH,
 )
 
 
