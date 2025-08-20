@@ -39,11 +39,28 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
+    libnccl-net1 libnccl-profiler1 \
+    linux-modules-extra-$(uname -r) \
+    linux-tools-$(uname -r) \
+    infiniband-diags \
+    perftest \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Mellanox OFED 
+RUN wget https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.9-0.5.6.0/MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
+    tar -xzf MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
+    cd MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64 && \
+    ./mlnxofedinstall --user-space-only --without-fw-update --add-kernel-support && \
+    cd .. && \
+    rm -rf MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64*
 
 # Set up RDMA environment (these will persist in the final container)
 ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 ENV UCX_NET_DEVICES=all
+ENV NCCL_IB_DISABLE=0
+ENV NCCL_IB_HCA=mlx5_0
+ENV NCCL_IB_GID_INDEX=3
+ENV NCCL_IB_SL=0
 
 # Set up project
 WORKDIR /vec-inf
