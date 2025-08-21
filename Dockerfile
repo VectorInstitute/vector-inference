@@ -39,13 +39,14 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
+    apt-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Mellanox OFED
 RUN wget https://www.mellanox.com/downloads/ofed/MLNX_OFED-5.9-0.5.6.0/MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
     tar -xzf MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64.tgz && \
     cd MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64 && \
-    ./mlnxofedinstall --user-space-only --without-fw-update --add-kernel-support && \
+    ./mlnxofedinstall --user-space-only --without-fw-update --add-kernel-support --skip-repo && \
     cd .. && \
     rm -rf MLNX_OFED_LINUX-5.9-0.5.6.0-ubuntu22.04-x86_64*
 
