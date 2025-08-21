@@ -28,7 +28,8 @@ class LaunchResponseFormatter:
     Parameters
     ----------
     model_name : str
-        Name of the launched model    params : dict[str, Any] Launch parameters and configuration
+        Name of the launched model    params : dict[str, Any] Launch parameters and
+            configuration
     """
 
     def __init__(self, model_name: str, params: dict[str, Any]):
@@ -115,14 +116,28 @@ class BatchLaunchResponseFormatter:
         for model_name in self.params["models"]:
             table.add_row("Model Name", model_name, style="magenta")
             # Add resource allocation details
-            table.add_row("Partition", f"  {self.params['models'][model_name]['partition']}")
+            table.add_row(
+                "Partition", f"  {self.params['models'][model_name]['partition']}"
+            )
             table.add_row("QoS", f"  {self.params['models'][model_name]['qos']}")
-            table.add_row("Time Limit", f"  {self.params['models'][model_name]['time']}")
-            table.add_row("Num Nodes", f"  {self.params['models'][model_name]['num_nodes']}")
-            table.add_row("GPUs/Node", f"  {self.params['models'][model_name]['gpus_per_node']}")
-            table.add_row("CPUs/Task", f"  {self.params['models'][model_name]['cpus_per_task']}")
-            table.add_row("Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}")
-            table.add_row("Log Directory", f"  {self.params['models'][model_name]['log_dir']}")
+            table.add_row(
+                "Time Limit", f"  {self.params['models'][model_name]['time']}"
+            )
+            table.add_row(
+                "Num Nodes", f"  {self.params['models'][model_name]['num_nodes']}"
+            )
+            table.add_row(
+                "GPUs/Node", f"  {self.params['models'][model_name]['gpus_per_node']}"
+            )
+            table.add_row(
+                "CPUs/Task", f"  {self.params['models'][model_name]['cpus_per_task']}"
+            )
+            table.add_row(
+                "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
+            )
+            table.add_row(
+                "Log Directory", f"  {self.params['models'][model_name]['log_dir']}"
+            )
 
         return table
 
@@ -342,7 +357,9 @@ class ListCmdDisplay:
         self.model_config = None
         self.model_names: list[str] = []
 
-    def _format_single_model_output(self, config: ModelConfig) -> Union[dict[str, Any], Table]:
+    def _format_single_model_output(
+        self, config: ModelConfig
+    ) -> Union[dict[str, Any], Table]:
         """Format output table for a single model.
 
         Parameters
@@ -360,7 +377,9 @@ class ListCmdDisplay:
             excluded = {"venv", "log_dir"}
             config_dict = config.model_dump(exclude=excluded)
             # Convert Path objects to strings
-            config_dict["model_weights_parent_dir"] = str(config_dict["model_weights_parent_dir"])
+            config_dict["model_weights_parent_dir"] = str(
+                config_dict["model_weights_parent_dir"]
+            )
             return config_dict
 
         table = create_table(key_title="Model Config", value_title="Value")
@@ -373,7 +392,9 @@ class ListCmdDisplay:
                     table.add_row(f"  {vllm_arg}:", str(vllm_value))
         return table
 
-    def _format_all_models_output(self, model_infos: list[ModelInfo]) -> Union[list[str], list[Panel]]:
+    def _format_all_models_output(
+        self, model_infos: list[ModelInfo]
+    ) -> Union[list[str], list[Panel]]:
         """Format output table for all models.
 
         Parameters
