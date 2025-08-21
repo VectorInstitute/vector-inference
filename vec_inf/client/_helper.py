@@ -931,7 +931,7 @@ class ModelRegistry:
                 config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
             )
             available_models.append(info)
-        return available_models
+        return sorted(available_models, key=lambda x: x.name)
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
         """Get configuration for a specific model.
