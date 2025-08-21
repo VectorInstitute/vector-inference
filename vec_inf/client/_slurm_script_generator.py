@@ -91,7 +91,7 @@ class SlurmScriptGenerator:
         if self.is_multinode:
             server_setup_str = "\n".join(
                 SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
-            )
+            ).format(gpus_per_node=self.params["gpus_per_node"])
             if self.use_singularity:
                 server_setup_str = server_setup_str.replace(
                     "SINGULARITY_PLACEHOLDER",
@@ -256,6 +256,7 @@ class BatchSlurmScriptGenerator:
                 script_content.append(f"    {arg} \\")
             else:
                 script_content.append(f"    {arg} {value} \\")
+        script_content[-1] = script_content[-1].replace("\\", "")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(
             script_content, f"launch_{model_name}.sh"
@@ -271,16 +272,18 @@ class BatchSlurmScriptGenerator:
         str
             The shebang for batch mode Slurm script.
         """
-        shebang = [
-            BATCH_SLURM_SCRIPT_TEMPLATE["shebang"].format(
-                out_file=self.params["out_file"], err_file=self.params["err_file"]
-            )
-        ]
+        shebang = [BATCH_SLURM_SCRIPT_TEMPLATE["shebang"]]
+
+        for arg, value in SLURM_JOB_CONFIG_ARGS.items():
+            if self.params.get(value):
+                shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+        shebang.append("\n")
+
         for model_name in self.params["models"]:
             shebang.append(f"# ===== Resource group for {model_name} =====")
             for arg, value in SLURM_JOB_CONFIG_ARGS.items():
                 model_params = self.params["models"][model_name]
-                if model_params.get(value):
+                if model_params.get(value) and value not in ["out_file", "err_file"]:
                     shebang.append(f"#SBATCH --{arg}={model_params[value]}")
             shebang[-1] += "\n"
             shebang.append(BATCH_SLURM_SCRIPT_TEMPLATE["hetjob"])

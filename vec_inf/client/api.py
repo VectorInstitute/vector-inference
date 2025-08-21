@@ -153,7 +153,11 @@ class VecInfClient:
         return model_launcher.launch()
 
     def batch_launch_models(
-        self, model_names: list[str], batch_config: Optional[str] = None
+        self,
+        model_names: list[str],
+        batch_config: Optional[str] = None,
+        account: Optional[str] = None,
+        work_dir: Optional[str] = None,
     ) -> BatchLaunchResponse:
         """Launch multiple models on the cluster.
 
@@ -172,7 +176,9 @@ class VecInfClient:
         ModelConfigurationError
             If the model configuration is invalid
         """
-        model_launcher = BatchModelLauncher(model_names, batch_config)
+        model_launcher = BatchModelLauncher(
+            model_names, batch_config, account, work_dir
+        )
         return model_launcher.launch()
 
     def get_status(self, slurm_job_id: str) -> StatusResponse:

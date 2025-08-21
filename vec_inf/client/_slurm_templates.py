@@ -7,12 +7,13 @@ single-node, multi-node, and batch mode templates.
 from typing import TypedDict
 
 from vec_inf.client._slurm_vars import (
-    LD_LIBRARY_PATH,
     SINGULARITY_IMAGE,
     SINGULARITY_LOAD_CMD,
     SINGULARITY_MODULE_NAME,
-    VLLM_NCCL_SO_PATH,
 )
+
+
+SINGULARITY_MODULE_NAME_UPPER = SINGULARITY_MODULE_NAME.upper()
 
 
 class ShebangConfig(TypedDict):
@@ -56,8 +57,6 @@ class SlurmScriptTemplate(TypedDict):
         Commands for Singularity container setup
     imports : str
         Import statements and source commands
-    env_vars : list[str]
-        Environment variables to set
     singularity_command : str
         Template for Singularity execution command
     activate_venv : str
@@ -98,8 +97,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
-        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
-        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
+        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
     "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
@@ -112,7 +110,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "\n# Get list of nodes",
             'nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")',
             "nodes_array=($nodes)",
-            "head_node=${nodes_array[0]}",
+            "head_node=${{nodes_array[0]}}",
             'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
             "\n# Start Ray head node",
             "head_node_port=$(find_available_port $head_node_ip 8080 65535)",
@@ -122,17 +120,17 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'srun --nodes=1 --ntasks=1 -w "$head_node" \\',
             "    SINGULARITY_PLACEHOLDER",
             '    ray start --head --node-ip-address="$head_node_ip" --port=$head_node_port \\',
-            '    --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
+            '    --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus {gpus_per_node} --block &',
             "sleep 10",
             "\n# Start Ray worker nodes",
             "worker_num=$((SLURM_JOB_NUM_NODES - 1))",
             "for ((i = 1; i <= worker_num; i++)); do",
-            "    node_i=${nodes_array[$i]}",
+            "    node_i=${{nodes_array[$i]}}",
             '    echo "Starting WORKER $i at $node_i"',
             '    srun --nodes=1 --ntasks=1 -w "$node_i" \\',
             "        SINGULARITY_PLACEHOLDER",
             '        ray start --address "$ray_head" \\',
-            '        --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus "$SLURM_GPUS_PER_NODE" --block &',
+            '        --num-cpus "$SLURM_CPUS_PER_TASK" --num-gpus {gpus_per_node} --block &',
             "    sleep 5",
             "done",
         ],
@@ -186,12 +184,11 @@ class BatchSlurmScriptTemplate(TypedDict):
 
 
 BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
-    "shebang": "#!/bin/bash\n#SBATCH --output={out_file}\n#SBATCH --error={err_file}\n",
+    "shebang": "#!/bin/bash",
     "hetjob": "#SBATCH hetjob\n",
     "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
     "env_vars": [
-        f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
-        f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}\n",
+        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
     "permission_update": "chmod +x {script_name}",
     "launch_model_scripts": [
@@ -232,6 +229,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         "head_node_ip=${{SLURMD_NODENAME}}",
         "vllm_port_number=$(find_available_port $head_node_ip 8080 65535)",
         'server_address="http://${{head_node_ip}}:${{vllm_port_number}}/v1"\n',
+        "echo $server_address\n",
     ],
     "write_to_json": [
         "het_job_id=$(($SLURM_JOB_ID+{het_group_id}))",
