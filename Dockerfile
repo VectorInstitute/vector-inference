@@ -39,7 +39,6 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
-    libnccl-net1 libnccl-profiler1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Mellanox OFED
