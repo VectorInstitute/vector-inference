@@ -1,5 +1,6 @@
 """Tests for the CLI helper classes."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 from rich.console import Console
@@ -218,10 +219,11 @@ class TestStatusResponseFormatter:
         formatter.output_json()
 
         mock_echo.assert_called_once()
-        # Just check that it was called with a dict
+        # Just check that it was called with a json compatible string
         output = mock_echo.call_args[0][0]
-        assert isinstance(output, dict)
-        assert "model_name" in output
+        json_dict = json.loads(output)
+        assert isinstance(json_dict, dict)
+        assert "model_name" in json_dict
 
     @patch("click.echo")
     def test_output_json_with_error_reasons(self, mock_echo):
@@ -242,9 +244,10 @@ class TestStatusResponseFormatter:
 
         mock_echo.assert_called_once()
         output = mock_echo.call_args[0][0]
-        assert isinstance(output, dict)
-        assert "pending_reason" in output
-        assert "failed_reason" in output
+        json_dict = json.loads(output)
+        assert isinstance(json_dict, dict)
+        assert "pending_reason" in json_dict
+        assert "failed_reason" in json_dict
 
 
 class TestMetricsResponseFormatter:

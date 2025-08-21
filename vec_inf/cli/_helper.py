@@ -4,6 +4,7 @@ This module provides formatting and display classes for the command-line interfa
 handling the presentation of model information, status updates, and metrics.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Union
 
@@ -27,9 +28,8 @@ class LaunchResponseFormatter:
     Parameters
     ----------
     model_name : str
-        Name of the launched model
-    params : dict[str, Any]
-        Launch parameters and configuration
+        Name of the launched model    params : dict[str, Any] Launch parameters and
+            configuration
     """
 
     def __init__(self, model_name: str, params: dict[str, Any]):
@@ -176,7 +176,12 @@ class StatusResponseFormatter:
             json_data["pending_reason"] = self.status_info.pending_reason
         if self.status_info.failed_reason:
             json_data["failed_reason"] = self.status_info.failed_reason
-        click.echo(json_data)
+
+        # Convert dict to json compliant string with double quotes
+        json_string = json.dumps(json_data)
+
+        # Output json to console
+        click.echo(json_string)
 
     def output_table(self) -> Table:
         """Create and display rich table.
