@@ -268,7 +268,7 @@ def batch_launch(
 
         # Display batch launch information
         if json_mode:
-            click.echo(batch_launch_response.config)
+            click.echo(json.dumps(batch_launch_response.config, indent=4))
         else:
             batch_launch_formatter = BatchLaunchResponseFormatter(
                 batch_launch_response.config

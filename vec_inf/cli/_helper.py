@@ -194,11 +194,7 @@ class StatusResponseFormatter:
         if self.status_info.failed_reason:
             json_data["failed_reason"] = self.status_info.failed_reason
 
-        # Convert dict to json compliant string with double quotes
-        json_string = json.dumps(json_data)
-
-        # Output json to console
-        click.echo(json_string)
+        click.echo(json.dumps(json_data, indent=4))
 
     def output_table(self) -> Table:
         """Create and display rich table.
@@ -397,7 +393,7 @@ class ListCmdDisplay:
             config_dict["model_weights_parent_dir"] = str(
                 config_dict["model_weights_parent_dir"]
             )
-            return config_dict
+            return json.dumps(config_dict, indent=4)
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
@@ -476,7 +472,7 @@ class ListCmdDisplay:
         """
         if self.json_mode:
             model_names = [info.name for info in model_infos]
-            click.echo(model_names)
+            click.echo(json.dumps(model_names, indent=4))
         else:
             panels = self._format_all_models_output(model_infos)
             self.console.print(Columns(panels, equal=True))
