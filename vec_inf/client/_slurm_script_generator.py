@@ -256,6 +256,7 @@ class BatchSlurmScriptGenerator:
                 script_content.append(f"    {arg} \\")
             else:
                 script_content.append(f"    {arg} {value} \\")
+        script_content[-1] = script_content[-1].replace("\\", "")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(
             script_content, f"launch_{model_name}.sh"
@@ -282,7 +283,7 @@ class BatchSlurmScriptGenerator:
             shebang.append(f"# ===== Resource group for {model_name} =====")
             for arg, value in SLURM_JOB_CONFIG_ARGS.items():
                 model_params = self.params["models"][model_name]
-                if model_params.get(value):
+                if model_params.get(value) and value not in ["out_file", "err_file"]:
                     shebang.append(f"#SBATCH --{arg}={model_params[value]}")
             shebang[-1] += "\n"
             shebang.append(BATCH_SLURM_SCRIPT_TEMPLATE["hetjob"])

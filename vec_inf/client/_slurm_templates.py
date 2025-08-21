@@ -96,7 +96,9 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{SINGULARITY_MODULE_NAME} exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "env_vars": [],
+    "env_vars": [
+        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+    ],
     "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
@@ -185,7 +187,9 @@ BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
     "shebang": "#!/bin/bash",
     "hetjob": "#SBATCH hetjob\n",
     "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
-    "env_vars": [],
+    "env_vars": [
+        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+    ],
     "permission_update": "chmod +x {script_name}",
     "launch_model_scripts": [
         "\nsrun --het-group={het_group_id} \\",
