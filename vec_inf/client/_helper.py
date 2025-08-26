@@ -209,7 +209,11 @@ class ModelLauncher:
             )
 
         # Convert gpus_per_node and resource_type to gres
-        params["gres"] = f"gpu:{params['resource_type']}:{params['gpus_per_node']}"
+        resource_type = params.get("resource_type")
+        if resource_type:
+            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
+        else:
+            params["gres"] = f"gpu:{params['gpus_per_node']}"
 
         # Create log directory
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
