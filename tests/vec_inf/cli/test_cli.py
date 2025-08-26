@@ -40,6 +40,7 @@ def test_launch_command_success(runner):
             "model_weights_parent_dir": "/model-weights",
             "vocab_size": "128000",  # Changed to string
             "vllm_args": {"max_model_len": 8192},
+            "env": {"CACHE": "/cache"},
         }
         mock_client.launch_model.return_value = mock_response
 
