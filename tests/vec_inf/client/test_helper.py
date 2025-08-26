@@ -43,6 +43,12 @@ class TestModelLauncher:
             num_nodes=1,
             vocab_size=32000,
             model_weights_parent_dir=Path("/path/to/models"),
+            resource_type="l40s",
+            partition="gpu",
+            qos="normal",
+            time="01:00:00",
+            cpus_per_task=8,
+            mem_per_node="32G",
             vllm_args={},
         )
 
@@ -214,6 +220,12 @@ class TestBatchModelLauncher:
                 num_nodes=1,
                 vocab_size=32000,
                 model_weights_parent_dir=Path("/path/to/models"),
+                resource_type="l40s",
+                partition="gpu",
+                qos="normal",
+                time="01:00:00",
+                cpus_per_task=8,
+                mem_per_node="32G",
                 vllm_args={},
             ),
             ModelConfig(
@@ -225,6 +237,12 @@ class TestBatchModelLauncher:
                 num_nodes=1,
                 vocab_size=65536,
                 model_weights_parent_dir=Path("/path/to/models"),
+                resource_type="l40s",
+                partition="gpu",
+                qos="normal",
+                time="01:00:00",
+                cpus_per_task=8,
+                mem_per_node="32G",
                 vllm_args={},
             ),
             ModelConfig(
@@ -236,6 +254,12 @@ class TestBatchModelLauncher:
                 num_nodes=1,
                 vocab_size=32000,
                 model_weights_parent_dir=Path("/path/to/models"),
+                resource_type="l40s",
+                partition="gpu",
+                qos="normal",
+                time="01:00:00",
+                cpus_per_task=8,
+                mem_per_node="32G",
                 vllm_args={},
             ),
         ]
@@ -376,7 +400,7 @@ class TestBatchModelLauncher:
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.open")
     @patch("pathlib.Path.rename")
-    @patch("vec_inf.client._helper.copy2")  # Mock the actual import in the module
+    @patch("vec_inf.client._helper.copy2")
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.read_text")
     @patch("pathlib.Path.write_text")
@@ -826,6 +850,12 @@ class TestModelRegistry:
                 num_nodes=1,
                 vocab_size=32000,
                 model_weights_parent_dir=Path("/path/to/models"),
+                resource_type="l40s",
+                partition="gpu",
+                qos="normal",
+                time="01:00:00",
+                cpus_per_task=8,
+                mem_per_node="32G",
             ),
             ModelConfig(
                 model_name="model2",
@@ -836,6 +866,12 @@ class TestModelRegistry:
                 num_nodes=1,
                 vocab_size=32000,
                 model_weights_parent_dir=Path("/path/to/models"),
+                resource_type="l40s",
+                partition="gpu",
+                qos="normal",
+                time="01:00:00",
+                cpus_per_task=8,
+                mem_per_node="32G",
             ),
         ]
 
