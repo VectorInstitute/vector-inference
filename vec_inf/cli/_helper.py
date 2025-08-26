@@ -372,7 +372,7 @@ class ListCmdDisplay:
 
     def _format_single_model_output(
         self, config: ModelConfig
-    ) -> Union[dict[str, Any], Table]:
+    ) -> Union[str, Table]:
         """Format output table for a single model.
 
         Parameters
@@ -382,8 +382,8 @@ class ListCmdDisplay:
 
         Returns
         -------
-        Union[dict[str, Any], Table]
-            Either a dictionary for JSON output or a Rich table
+        Union[str, Table]
+            Either a JSON string for JSON output or a Rich table
         """
         if self.json_mode:
             # Exclude non-essential fields from JSON output
