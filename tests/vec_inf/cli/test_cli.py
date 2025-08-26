@@ -45,12 +45,6 @@ def test_launch_command_success(runner):
 
         result = runner.invoke(cli, ["launch", "Meta-Llama-3.1-8B"])
 
-        # Print debug info if test fails
-        if result.exit_code != 0:
-            print(f"Exit code: {result.exit_code}")
-            print(f"Output: {result.output}")
-            print(f"Exception: {result.exception}")
-
         assert result.exit_code == 0
         assert "14933053" in result.output
         mock_client.launch_model.assert_called_once()
@@ -310,6 +304,7 @@ def test_batch_launch_command_success(runner):
             "slurm_job_id": "14933053",
             "slurm_job_name": "BATCH-job",
             "model_names": ["Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"],
+            "log_dir": "/tmp/test_logs",  # Moved to top level
             "models": {
                 "Meta-Llama-3.1-8B": {
                     "model_name": "Meta-Llama-3.1-8B",
@@ -320,7 +315,6 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",  # Changed to string
                     "cpus_per_task": "8",  # Changed to string
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs",
                 },
                 "Meta-Llama-3.1-70B": {
                     "model_name": "Meta-Llama-3.1-70B",
@@ -331,7 +325,6 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",  # Changed to string
                     "cpus_per_task": "8",  # Changed to string
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs",
                 },
             },
         }
