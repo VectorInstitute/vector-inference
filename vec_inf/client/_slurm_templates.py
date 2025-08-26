@@ -172,8 +172,6 @@ class BatchSlurmScriptTemplate(TypedDict):
 
     shebang: str
     hetjob: str
-    singularity_setup: str
-    env_vars: list[str]
     permission_update: str
     launch_model_scripts: list[str]
 
