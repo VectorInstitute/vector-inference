@@ -158,7 +158,7 @@ class ModelLauncher:
                 vllm_args[arg.strip()] = True
         return vllm_args
 
-    def _process_env_args(self, arg_string: str) -> dict[str, str]:
+    def _process_env_vars(self, arg_string: str) -> dict[str, str]:
         """Process the env string into a dictionary of environment variables.
 
         Parameters
@@ -213,7 +213,7 @@ class ModelLauncher:
             del self.kwargs["vllm_args"]
 
         if self.kwargs.get("env"):
-            env_vars = self._process_env_args(self.kwargs["env"])
+            env_vars = self._process_env_vars(self.kwargs["env"])
             for key, value in env_vars.items():
                 params["env"][key] = str(value)
             del self.kwargs["env"]

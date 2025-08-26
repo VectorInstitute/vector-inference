@@ -114,6 +114,24 @@ class TestModelLauncher:
         assert vllm_args["--compilation-config"] == "3"
 
     @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_env_vars(self, mock_path_exists, mock_load_config, mock_configs):
+        """Test that vars from `--env` flag are parsed correctly."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        # Get filepath of dummy env file
+        file_path = Path(__file__).parent / "test_vars.env"
+
+        launcher = ModelLauncher("test-model", {})
+        env_vars = launcher._process_env_vars(
+            f"CACHE_DIR=/cache,{file_path}"
+        )
+        assert env_vars["CACHE_DIR"] == "/cache"
+        assert env_vars["MY_VAR"] == "5"
+        assert env_vars["VLLM_CACHE_ROOT"] == "/cache/vllm"
+
+    @patch("vec_inf.client._helper.utils.load_config")
     def test_get_launch_params_merges_config_and_cli_args(
         self, mock_load_config, model_config
     ):

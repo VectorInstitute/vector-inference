@@ -55,6 +55,11 @@ class TestSlurmScriptGenerator:
             {
                 "venv": "singularity",
                 "bind": "/scratch:/scratch,/data:/data",
+                "env": {
+                    "CACHE_DIR": "/cache",
+                    "MY_VAR": "5",
+                    "VLLM_CACHE_ROOT": "/cache/vllm",
+                }
             }
         )
         return singularity
@@ -74,6 +79,7 @@ class TestSlurmScriptGenerator:
         assert not generator.use_singularity
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
+        assert generator.env_str == ""
 
     def test_init_multinode(self, multinode_params):
         """Test initialization with multi-node configuration."""
@@ -84,6 +90,7 @@ class TestSlurmScriptGenerator:
         assert not generator.use_singularity
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
+        assert generator.env_str == ""
 
     def test_init_singularity(self, singularity_params):
         """Test initialization with Singularity configuration."""
@@ -94,6 +101,7 @@ class TestSlurmScriptGenerator:
         assert not generator.is_multinode
         assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
+        assert generator.env_str == "--env CACHE_DIR=/cache,MY_VAR=5,VLLM_CACHE_ROOT=/cache/vllm"
 
     def test_init_singularity_no_bind(self, basic_params):
         """Test Singularity initialization without additional binds."""
@@ -106,6 +114,7 @@ class TestSlurmScriptGenerator:
         assert not generator.is_multinode
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
+        assert generator.env_str == ""
 
     def test_generate_shebang_single_node(self, basic_params):
         """Test shebang generation for single-node setup."""
