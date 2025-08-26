@@ -158,23 +158,24 @@ class ModelLauncher:
                 vllm_args[arg.strip()] = True
         return vllm_args
 
-    def _process_env_vars(self, arg_string: str) -> dict[str, str]:
+    def _process_env_vars(self, env_arg: str) -> dict[str, str]:
         """Process the env string into a dictionary of environment variables.
 
         Parameters
         ----------
-            arg_string : str
-                Comma separated list of environment variable definitions (eg. MY_VAR=1)
-                or file paths containing environment variable definitions (separated by
-                newlines)
+        env_arg : str
+            String containing comma separated list of environment variable definitions
+            (eg. MY_VAR=1), file paths containing environment variable definitions
+            (separated by newlines), or a combination of both
+            (eg. 'MY_VAR=5,my_env.env')
 
         Returns
         -------
-            dict[str, str]
-                Processed environment variables as key-value pairs.
+        dict[str, str]
+            Processed environment variables as key-value pairs.
         """
         env_vars: dict[str, str] = {}
-        for arg in arg_string.split(","):
+        for arg in env_arg.split(","):
             if "=" in arg:  # Arg is an env var definition
                 key, value = arg.split("=")
                 env_vars[key.strip()] = value.strip()
