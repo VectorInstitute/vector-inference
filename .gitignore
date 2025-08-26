@@ -152,3 +152,7 @@ collect_env.py
 
 # build files
 dist/
+
+# type stubs
+stubs/
+mypy.ini
