@@ -226,7 +226,9 @@ class BatchSlurmScriptGenerator:
         model_params = self.params["models"][model_name]
         script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["shebang"])
         if self.use_singularity:
-            script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["singularity_setup"])
+            script_content.append(
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["singularity_setup"]
+            )
         script_content.append("\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["env_vars"]))
         script_content.append(
             "\n".join(
@@ -306,7 +308,7 @@ class BatchSlurmScriptGenerator:
         script_content = []
 
         script_content.append(self._generate_batch_slurm_script_shebang())
-        
+
         for model_name in self.params["models"]:
             model_params = self.params["models"][model_name]
             script_content.append(f"# ===== Launching {model_name} =====")
