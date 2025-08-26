@@ -282,7 +282,7 @@ class ModelLauncher:
         job_json.touch(exist_ok=True)
 
         self.slurm_script_path.rename(
-            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
+            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.sbatch"
         )
 
         with job_json.open("w") as file:
@@ -552,7 +552,7 @@ class BatchModelLauncher:
 
         # Move the batch script to the job log directory
         self.batch_script_path.rename(
-            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.slurm"
+            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.sbatch"
         )
 
         return BatchLaunchResponse(
