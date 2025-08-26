@@ -59,7 +59,7 @@ class TestSlurmScriptGenerator:
                     "CACHE_DIR": "/cache",
                     "MY_VAR": "5",
                     "VLLM_CACHE_ROOT": "/cache/vllm",
-                }
+                },
             }
         )
         return singularity
@@ -101,7 +101,10 @@ class TestSlurmScriptGenerator:
         assert not generator.is_multinode
         assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
-        assert generator.env_str == "--env CACHE_DIR=/cache,MY_VAR=5,VLLM_CACHE_ROOT=/cache/vllm"
+        assert (
+            generator.env_str
+            == "--env CACHE_DIR=/cache,MY_VAR=5,VLLM_CACHE_ROOT=/cache/vllm"
+        )
 
     def test_init_singularity_no_bind(self, basic_params):
         """Test Singularity initialization without additional binds."""

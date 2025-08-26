@@ -124,9 +124,7 @@ class TestModelLauncher:
         file_path = Path(__file__).parent / "test_vars.env"
 
         launcher = ModelLauncher("test-model", {})
-        env_vars = launcher._process_env_vars(
-            f"CACHE_DIR=/cache,{file_path}"
-        )
+        env_vars = launcher._process_env_vars(f"CACHE_DIR=/cache,{file_path}")
         assert env_vars["CACHE_DIR"] == "/cache"
         assert env_vars["MY_VAR"] == "5"
         assert env_vars["VLLM_CACHE_ROOT"] == "/cache/vllm"
