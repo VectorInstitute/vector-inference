@@ -97,7 +97,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
-        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+        f"export {SINGULARITY_MODULE_NAME}_BINDPATH=${SINGULARITY_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
     "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
@@ -151,7 +151,6 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
-        "    --trust-remote-code \\",
     ],
 }
 
@@ -165,10 +164,6 @@ class BatchSlurmScriptTemplate(TypedDict):
         Shebang line for the script
     hetjob : str
         SLURM directive for hetjob
-    singularity_setup : list[str]
-        Commands for Singularity container setup
-    env_vars : list[str]
-        Environment variables to set
     permission_update : str
         Command to update permissions of the script
     launch_model_scripts : list[str]
@@ -186,10 +181,6 @@ class BatchSlurmScriptTemplate(TypedDict):
 BATCH_SLURM_SCRIPT_TEMPLATE: BatchSlurmScriptTemplate = {
     "shebang": "#!/bin/bash",
     "hetjob": "#SBATCH hetjob\n",
-    "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
-    "env_vars": [
-        "export SINGULARITY_BINDPATH=$SINGULARITY_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
-    ],
     "permission_update": "chmod +x {script_name}",
     "launch_model_scripts": [
         "\nsrun --het-group={het_group_id} \\",
@@ -207,6 +198,10 @@ class BatchModelLaunchScriptTemplate(TypedDict):
     ----------
     shebang : str
         Shebang line for the script
+    singularity_setup : list[str]
+        Commands for Singularity container setup
+    env_vars : list[str]
+        Environment variables to set
     server_address_setup : list[str]
         Commands to setup the server address
     launch_cmd : list[str]
@@ -216,6 +211,8 @@ class BatchModelLaunchScriptTemplate(TypedDict):
     """
 
     shebang: str
+    singularity_setup: str
+    env_vars: list[str]
     server_address_setup: list[str]
     write_to_json: list[str]
     launch_cmd: list[str]
@@ -224,6 +221,10 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 
 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "shebang": "#!/bin/bash\n",
+    "singularity_setup": f"{SINGULARITY_LOAD_CMD}\n",
+    "env_vars": [
+        f"export {SINGULARITY_MODULE_NAME}_BINDPATH=${SINGULARITY_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+    ],
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
@@ -245,6 +246,5 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
-        "    --trust-remote-code \\",
     ],
 }

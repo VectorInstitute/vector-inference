@@ -163,7 +163,7 @@ class SlurmScriptGenerator:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         script_path: Path = (
             Path(self.params["log_dir"])
-            / f"launch_{self.params['model_name']}_{timestamp}.slurm"
+            / f"launch_{self.params['model_name']}_{timestamp}.sbatch"
         )
 
         content = self._generate_script_content()
@@ -225,6 +225,9 @@ class BatchSlurmScriptGenerator:
         script_content = []
         model_params = self.params["models"][model_name]
         script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["shebang"])
+        if self.use_singularity:
+            script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["singularity_setup"])
+        script_content.append("\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["env_vars"]))
         script_content.append(
             "\n".join(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["server_address_setup"]
@@ -277,6 +280,7 @@ class BatchSlurmScriptGenerator:
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             if self.params.get(value):
                 shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+        shebang.append("#SBATCH --ntasks=1")
         shebang.append("\n")
 
         for model_name in self.params["models"]:
@@ -302,10 +306,7 @@ class BatchSlurmScriptGenerator:
         script_content = []
 
         script_content.append(self._generate_batch_slurm_script_shebang())
-        if self.use_singularity:
-            script_content.append(BATCH_SLURM_SCRIPT_TEMPLATE["singularity_setup"])
-        script_content.append("\n".join(BATCH_SLURM_SCRIPT_TEMPLATE["env_vars"]))
-
+        
         for model_name in self.params["models"]:
             model_params = self.params["models"][model_name]
             script_content.append(f"# ===== Launching {model_name} =====")
@@ -326,5 +327,5 @@ class BatchSlurmScriptGenerator:
         script_content.append("wait")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        script_name = f"{self.params['slurm_job_name']}_{timestamp}.slurm"
+        script_name = f"{self.params['slurm_job_name']}_{timestamp}.sbatch"
         return self._write_to_log_dir(script_content, script_name)
