@@ -39,7 +39,7 @@ class SlurmScriptGenerator:
         self.model_weights_path = str(
             Path(self.params["model_weights_parent_dir"], self.params["model_name"])
         )
-        env_dict: dict = self.params.get("env", {})
+        env_dict: dict[str, str] = self.params.get("env", {})
         # Create string of environment variables
         self.env_str = ""
         for key, val in env_dict.items():
