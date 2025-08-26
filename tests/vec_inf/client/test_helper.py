@@ -49,6 +49,8 @@ class TestModelLauncher:
             time="01:00:00",
             cpus_per_task=8,
             mem_per_node="32G",
+            account="test-account",
+            work_dir="/tmp/test-work",
             vllm_args={},
         )
 
@@ -226,6 +228,8 @@ class TestBatchModelLauncher:
                 time="01:00:00",
                 cpus_per_task=8,
                 mem_per_node="32G",
+                account="test-account",
+                work_dir="/tmp/test-work",
                 vllm_args={},
             ),
             ModelConfig(
@@ -243,6 +247,8 @@ class TestBatchModelLauncher:
                 time="01:00:00",
                 cpus_per_task=8,
                 mem_per_node="32G",
+                account="test-account",
+                work_dir="/tmp/test-work",
                 vllm_args={},
             ),
             ModelConfig(
@@ -260,6 +266,8 @@ class TestBatchModelLauncher:
                 time="01:00:00",
                 cpus_per_task=8,
                 mem_per_node="32G",
+                account="test-account",
+                work_dir="/tmp/test-work",
                 vllm_args={},
             ),
         ]
@@ -856,6 +864,8 @@ class TestModelRegistry:
                 time="01:00:00",
                 cpus_per_task=8,
                 mem_per_node="32G",
+                account="test-account",
+                work_dir="/tmp/test-work",
             ),
             ModelConfig(
                 model_name="model2",
@@ -872,6 +882,8 @@ class TestModelRegistry:
                 time="01:00:00",
                 cpus_per_task=8,
                 mem_per_node="32G",
+                account="test-account",
+                work_dir="/tmp/test-work",
             ),
         ]
 
