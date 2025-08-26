@@ -101,7 +101,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"export LD_LIBRARY_PATH={LD_LIBRARY_PATH}",
         f"export VLLM_NCCL_SO_PATH={VLLM_NCCL_SO_PATH}",
     ],
-    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
+    "singularity_command": f"{SINGULARITY_MODULE_NAME} exec --nv {{env_str}} --bind {{model_weights_path}}{{additional_binds}} --containall {SINGULARITY_IMAGE} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [

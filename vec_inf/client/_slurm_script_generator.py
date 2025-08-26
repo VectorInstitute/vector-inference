@@ -39,6 +39,15 @@ class SlurmScriptGenerator:
         self.model_weights_path = str(
             Path(self.params["model_weights_parent_dir"], self.params["model_name"])
         )
+        env_dict: dict = self.params.get("env", {})
+        # Create string of environment variables
+        self.env_str = ""
+        for key, val in env_dict.items():
+            if len(self.env_str) == 0:
+                self.env_str = "--env "
+            else:
+                self.env_str += ","
+            self.env_str += key + "=" + val
 
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
@@ -98,6 +107,7 @@ class SlurmScriptGenerator:
                     SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                         model_weights_path=self.model_weights_path,
                         additional_binds=self.additional_binds,
+                        env_str=self.env_str
                     ),
                 )
         else:
@@ -130,6 +140,7 @@ class SlurmScriptGenerator:
                 SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                     model_weights_path=self.model_weights_path,
                     additional_binds=self.additional_binds,
+                    env_str=self.env_str
                 )
             )
         else:

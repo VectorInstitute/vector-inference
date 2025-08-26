@@ -132,6 +132,9 @@ class ModelConfig(BaseModel):
     vllm_args: Optional[dict[str, Any]] = Field(
         default={}, description="vLLM engine arguments"
     )
+    env: Optional[dict[str, Any]] = Field(
+        default={}, description="Environment variables to be set"
+    )
     model_config = ConfigDict(
         extra="forbid", str_strip_whitespace=True, validate_default=True, frozen=True
     )

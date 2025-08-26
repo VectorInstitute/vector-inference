@@ -119,6 +119,11 @@ def cli() -> None:
     is_flag=True,
     help="Output in JSON string",
 )
+@click.option(
+    "--env",
+    type=str,
+    help="Environment variables to be set. Seperate variables with commas. Can also include path to a file containing environment variables seperated by newlines. e.g. --env 'TRITON_CACHE_DIR=/scratch/.cache/triton,my_custom_vars_file.env'"
+)
 def launch(
     model_name: str,
     **cli_kwargs: Optional[Union[str, int, float, bool]],
