@@ -79,7 +79,10 @@ class TestModelLauncher:
         mock_path_exists.return_value = True
 
         with pytest.warns(UserWarning):
-            launcher = ModelLauncher("unknown-model", {"account": "test-account", "work_dir": "/tmp/test-work"})
+            launcher = ModelLauncher(
+                "unknown-model",
+                {"account": "test-account", "work_dir": "/tmp/test-work"},
+            )
 
         assert launcher.model_name == "unknown-model"
         assert launcher.model_config.model_name == "unknown-model"
@@ -276,7 +279,11 @@ class TestBatchModelLauncher:
     def test_init_with_valid_configs(self, mock_load_config, batch_model_configs):
         """Test launcher initializes correctly with valid model configurations."""
         mock_load_config.return_value = batch_model_configs
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
 
         assert launcher.model_names == ["family1-variant1", "family2-variant1"]
         assert launcher.slurm_job_name == "BATCH-family1-variant1-family2-variant1"
@@ -302,9 +309,9 @@ class TestBatchModelLauncher:
         """Test SLURM job name is constructed correctly from model names."""
         mock_load_config.return_value = batch_model_configs
         launcher = BatchModelLauncher(
-            ["family1-variant1", "family2-variant1", "family1-variant2"], 
-            account="test-account", 
-            work_dir="/tmp/test-work"
+            ["family1-variant1", "family2-variant1", "family1-variant2"],
+            account="test-account",
+            work_dir="/tmp/test-work",
         )
 
         assert (
@@ -321,9 +328,9 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = batch_model_configs
 
         launcher = BatchModelLauncher(
-            ["family1-variant1", "family2-variant1", "family1-variant2"], 
-            account="test-account", 
-            work_dir="/tmp/test-work"
+            ["family1-variant1", "family2-variant1", "family1-variant2"],
+            account="test-account",
+            work_dir="/tmp/test-work",
         )
         params = launcher.params
 
@@ -352,7 +359,11 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = updated_configs
 
         with pytest.raises(MissingRequiredFieldsError) as excinfo:
-            BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+            BatchModelLauncher(
+                ["family1-variant1", "family2-variant1"],
+                account="test-account",
+                work_dir="/tmp/test-work",
+            )
 
         assert "--tensor-parallel-size" in str(excinfo.value)
         assert "family1-variant1" in str(excinfo.value)
@@ -375,7 +386,11 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = updated_configs
 
         with pytest.raises(ValueError) as excinfo:
-            BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+            BatchModelLauncher(
+                ["family1-variant1", "family2-variant1"],
+                account="test-account",
+                work_dir="/tmp/test-work",
+            )
 
         assert "power of two" in str(excinfo.value)
         assert "family1-variant1" in str(excinfo.value)
@@ -401,7 +416,11 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = updated_configs
 
         with pytest.raises(ValueError) as excinfo:
-            BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+            BatchModelLauncher(
+                ["family1-variant1", "family2-variant1"],
+                account="test-account",
+                work_dir="/tmp/test-work",
+            )
 
         assert "Mismatch between total number of GPUs requested" in str(excinfo.value)
 
@@ -451,7 +470,11 @@ class TestBatchModelLauncher:
         # Mock copy2 to do nothing (avoid file operations)
         mock_copy2.return_value = None
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
         response = launcher.launch()
 
         assert response.slurm_job_id == "12345"
@@ -475,7 +498,11 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = batch_model_configs
         mock_run_bash.return_value = ("", "sbatch: error: Invalid partition specified")
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
         with pytest.raises(SlurmJobError):
             launcher.launch()
 
@@ -484,7 +511,11 @@ class TestBatchModelLauncher:
         """Test that heterogeneous group IDs are assigned correctly."""
         mock_load_config.return_value = batch_model_configs
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
         params = launcher.params
 
         assert params["models"]["family1-variant1"]["het_group_id"] == 0
@@ -495,7 +526,11 @@ class TestBatchModelLauncher:
         """Test that log file paths are constructed correctly."""
         mock_load_config.return_value = batch_model_configs
 
-        launcher = BatchModelLauncher(["family1-variant1", "family2-variant1"], account="test-account", work_dir="/tmp/test-work")
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
         params = launcher.params
 
         # Check individual model log files
@@ -535,10 +570,10 @@ class TestBatchModelLauncher:
         mock_load_config.return_value = batch_model_configs
 
         launcher = BatchModelLauncher(
-            ["family1-variant1", "family2-variant1"], 
+            ["family1-variant1", "family2-variant1"],
             batch_config="custom_config.yaml",
-            account="test-account", 
-            work_dir="/tmp/test-work"
+            account="test-account",
+            work_dir="/tmp/test-work",
         )
 
         assert launcher.batch_config == "custom_config.yaml"
