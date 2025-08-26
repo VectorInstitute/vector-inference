@@ -107,7 +107,7 @@ class SlurmScriptGenerator:
                     SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                         model_weights_path=self.model_weights_path,
                         additional_binds=self.additional_binds,
-                        env_str=self.env_str
+                        env_str=self.env_str,
                     ),
                 )
         else:
@@ -140,7 +140,7 @@ class SlurmScriptGenerator:
                 SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
                     model_weights_path=self.model_weights_path,
                     additional_binds=self.additional_binds,
-                    env_str=self.env_str
+                    env_str=self.env_str,
                 )
             )
         else:
