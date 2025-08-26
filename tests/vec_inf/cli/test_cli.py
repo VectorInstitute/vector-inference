@@ -33,12 +33,12 @@ def test_launch_command_success(runner):
             "partition": "gpu",
             "qos": "normal",
             "time": "1:00:00",
-            "num_nodes": "1",  # Changed to string
-            "gpus_per_node": "1",  # Changed to string
-            "cpus_per_task": "8",  # Changed to string
+            "num_nodes": "1",
+            "gpus_per_node": "1",
+            "cpus_per_task": "8",
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
-            "vocab_size": "128000",  # Changed to string
+            "vocab_size": "128000",
             "vllm_args": {"max_model_len": 8192},
         }
         mock_client.launch_model.return_value = mock_response
@@ -311,9 +311,9 @@ def test_batch_launch_command_success(runner):
                     "partition": "gpu",
                     "qos": "normal",
                     "time": "1:00:00",
-                    "num_nodes": "1",  # Changed to string
-                    "gpus_per_node": "1",  # Changed to string
-                    "cpus_per_task": "8",  # Changed to string
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
                     "mem_per_node": "32G",
                 },
                 "Meta-Llama-3.1-70B": {
@@ -321,9 +321,9 @@ def test_batch_launch_command_success(runner):
                     "partition": "gpu",
                     "qos": "normal",
                     "time": "1:00:00",
-                    "num_nodes": "1",  # Changed to string
-                    "gpus_per_node": "1",  # Changed to string
-                    "cpus_per_task": "8",  # Changed to string
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
                     "mem_per_node": "32G",
                 },
             },
