@@ -370,9 +370,7 @@ class ListCmdDisplay:
         self.model_config = None
         self.model_names: list[str] = []
 
-    def _format_single_model_output(
-        self, config: ModelConfig
-    ) -> Union[str, Table]:
+    def _format_single_model_output(self, config: ModelConfig) -> Union[str, Table]:
         """Format output table for a single model.
 
         Parameters
