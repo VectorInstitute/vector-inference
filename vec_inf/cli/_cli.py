@@ -45,7 +45,7 @@ def cli() -> None:
     pass
 
 
-@cli.command("launch")
+@cli.command("launch", help="Launch a model on the cluster.")
 @click.argument("model-name", type=str, nargs=1)
 @click.option("--model-family", type=str, help="The model family")
 @click.option("--model-variant", type=str, help="The model variant")
@@ -212,7 +212,7 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("batch-launch")
+@cli.command("batch-launch", help="Launch multiple models in a batch.")
 @click.argument("model-names", type=str, nargs=-1)
 @click.option(
     "--batch-config",
@@ -282,7 +282,7 @@ def batch_launch(
         raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
 
-@cli.command("status")
+@cli.command("status", help="Check the status of a running model on the cluster.")
 @click.argument("slurm_job_id", type=str, nargs=1)
 @click.option(
     "--json-mode",
@@ -322,7 +322,7 @@ def status(slurm_job_id: str, json_mode: bool = False) -> None:
         raise click.ClickException(f"Status check failed: {str(e)}") from e
 
 
-@cli.command("shutdown")
+@cli.command("shutdown", help="Shutdown a running model on the cluster.")
 @click.argument("slurm_job_id", type=str, nargs=1)
 def shutdown(slurm_job_id: str) -> None:
     """Shutdown a running model on the cluster.
@@ -345,7 +345,7 @@ def shutdown(slurm_job_id: str) -> None:
         raise click.ClickException(f"Shutdown failed: {str(e)}") from e
 
 
-@cli.command("list")
+@cli.command("list", help="List available models or get specific model configuration.")
 @click.argument("model-name", required=False)
 @click.option(
     "--json-mode",
@@ -383,7 +383,7 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
         raise click.ClickException(f"List models failed: {str(e)}") from e
 
 
-@cli.command("metrics")
+@cli.command("metrics", help="Stream real-time performance metrics from the model endpoint.")
 @click.argument("slurm_job_id", type=str, nargs=1)
 def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
@@ -435,7 +435,7 @@ def metrics(slurm_job_id: str) -> None:
         raise click.ClickException(f"Metrics check failed: {str(e)}") from e
 
 
-@cli.command("cleanup")
+@cli.command("cleanup", help="Clean up log files based on optional filters.")
 @click.option("--log-dir", type=str, help="Path to SLURM log directory")
 @click.option("--model-family", type=str, help="Filter by model family")
 @click.option("--model-name", type=str, help="Filter by model name")
