@@ -61,7 +61,7 @@ class ModelLauncher:
         self.kwargs = kwargs or {}
         self.slurm_job_id = ""
         self.slurm_script_path = Path("")
-        self.model_config = self._get_model_configuration()
+        self.model_config = self._get_model_configuration(self.kwargs.get("config"))
         self.params = self._get_launch_params()
 
     def _warn(self, message: str) -> None:
@@ -74,8 +74,13 @@ class ModelLauncher:
         """
         warnings.warn(message, UserWarning, stacklevel=2)
 
-    def _get_model_configuration(self) -> ModelConfig:
+    def _get_model_configuration(self, config_path: str | None = None) -> ModelConfig:
         """Load and validate model configuration.
+
+        Parameters
+        ----------
+        config_path : str | None, optional
+            Path to a yaml file with custom model config to use in place of the default
 
         Returns
         -------
@@ -89,7 +94,7 @@ class ModelLauncher:
         ModelConfigurationError
             If model configuration is not found and weights don't exist
         """
-        model_configs = utils.load_config()
+        model_configs = utils.load_config(config_path=config_path)
         config = next(
             (m for m in model_configs if m.model_name == self.model_name), None
         )

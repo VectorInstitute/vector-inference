@@ -218,6 +218,8 @@ class LaunchOptions:
         Additional arguments for vLLM
     env : str, optional
         Environment variables to be set
+    config : str, optional
+        Path to custom model config yaml
     """
 
     model_family: Optional[str] = None
@@ -238,6 +240,7 @@ class LaunchOptions:
     model_weights_parent_dir: Optional[str] = None
     vllm_args: Optional[str] = None
     env: Optional[str] = None
+    config: Optional[str] = None
 
 
 @dataclass
