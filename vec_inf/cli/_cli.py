@@ -1,5 +1,3 @@
-# ruff: noqa: D301, D411
-# Using \f and \b for click --help formatting, which violates these rules.
 """Command line interface for Vector Inference.
 
 This module provides the command-line interface for interacting with Vector
