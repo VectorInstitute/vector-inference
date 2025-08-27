@@ -1,245 +1,351 @@
-# Available Models
-More profiling metrics coming soon!
+# Model Weights Tracking
 
-## Text Generation Models
+This document tracks all model weights available in the `/model-weights` directory on Killarney cluster and indicates which ones have existing configurations in `models.yaml`. To request new model weights to be downloaded or model configuration to be added, please open an issue.
 
-### [Cohere for AI: Command R](https://huggingface.co/collections/CohereForAI/c4ai-command-r-plus-660ec4c34f7a69c50ce7f7b9)
+## Legend
+- ✅ **Configured**: Model has a complete configuration in `models.yaml`
+- ❌ **Not Configured**: Model exists in `/model-weights` but lacks configuration
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`c4ai-command-r-plus`](https://huggingface.co/CohereForAI/c4ai-command-r-plus) | 8x a40 (2 nodes, 4 a40/node) | 412 tokens/s | 541 tokens/s |
-| [`c4ai-command-r-plus-08-2024`](https://huggingface.co/CohereForAI/c4ai-command-r-plus-08-2024) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s |
-| [`c4ai-command-r-08-2024`](https://huggingface.co/CohereForAI/c4ai-command-r-08-2024) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s |
+---
 
-### [Code Llama](https://huggingface.co/collections/meta-llama/code-llama-family-661da32d0a9d678b6f55b933)
+## Text Generation Models (LLM)
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`CodeLlama-7b-hf`](https://huggingface.co/meta-llama/CodeLlama-7b-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-7b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-7b-Instruct-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-13b-hf`](https://huggingface.co/meta-llama/CodeLlama-13b-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-13b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-13b-Instruct-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-34b-hf`](https://huggingface.co/meta-llama/CodeLlama-34b-hf) | 2x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-34b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-34b-Instruct-hf) | 2x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-70b-hf`](https://huggingface.co/meta-llama/CodeLlama-70b-hf) | 4x a40 | - tokens/s | - tokens/s |
-| [`CodeLlama-70b-Instruct-hf`](https://huggingface.co/meta-llama/CodeLlama-70b-Instruct-hf) | 4x a40 | - tokens/s | - tokens/s |
+### Cohere for AI: Command R
+| Model | Configuration |
+|:------|:-------------|
+| `c4ai-command-r-plus-08-2024` | ✅ |
+| `c4ai-command-r-08-2024` | ✅ |
 
-### [Google: Gemma 2](https://huggingface.co/collections/google/gemma-2-release-667d6600fd5220e7b967f315)
+### Code Llama
+| Model | Configuration |
+|:------|:-------------|
+| `CodeLlama-7b-hf` | ✅ |
+| `CodeLlama-7b-Instruct-hf` | ✅ |
+| `CodeLlama-13b-hf` | ✅ |
+| `CodeLlama-13b-Instruct-hf` | ✅ |
+| `CodeLlama-34b-hf` | ✅ |
+| `CodeLlama-34b-Instruct-hf` | ✅ |
+| `CodeLlama-70b-hf` | ✅ |
+| `CodeLlama-70b-Instruct-hf` | ✅ |
+| `CodeLlama-7b-Python-hf` | ❌ |
+| `CodeLlama-13b-Python-hf` | ❌ |
+| `CodeLlama-70b-Python-hf` | ❌ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`gemma-2-9b`](https://huggingface.co/google/gemma-2-9b) | 1x a40 | - tokens/s | - tokens/s |
-| [`gemma-2-9b-it`](https://huggingface.co/google/gemma-2-9b-it) | 1x a40 | - tokens/s | - tokens/s |
-| [`gemma-2-27b`](https://huggingface.co/google/gemma-2-27b) | 2x a40 | - tokens/s | - tokens/s |
-| [`gemma-2-27b-it`](https://huggingface.co/google/gemma-2-27b-it) | 2x a40 | - tokens/s | - tokens/s |
+### Google: Gemma
+| Model | Configuration |
+|:------|:-------------|
+| `gemma-2b` | ❌ |
+| `gemma-2b-it` | ❌ |
+| `gemma-7b` | ❌ |
+| `gemma-7b-it` | ❌ |
+| `gemma-2-9b` | ✅ |
+| `gemma-2-9b-it` | ✅ |
+| `gemma-2-27b` | ✅ |
+| `gemma-2-27b-it` | ✅ |
+| `gemma-3-1b-it` | ❌ |
+| `gemma-3-4b-it` | ❌ |
+| `gemma-3-12b-it` | ❌ |
+| `gemma-3-27b-it` | ❌ |
 
-### [Meta: Llama 2](https://huggingface.co/collections/meta-llama/llama-2-family-661da1f90a9d678b6f55773b)
+### Meta: Llama 2
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-2-7b-hf` | ✅ |
+| `Llama-2-7b-chat-hf` | ✅ |
+| `Llama-2-13b-hf` | ✅ |
+| `Llama-2-13b-chat-hf` | ✅ |
+| `Llama-2-70b-hf` | ✅ |
+| `Llama-2-70b-chat-hf` | ✅ |
 
-| Variant | Suggested resource allocation |
-|:----------:|:----------:|
-| [`Llama-2-7b-hf`](https://huggingface.co/meta-llama/Llama-2-7b-hf) | 1x a40 |
-| [`Llama-2-7b-chat-hf`](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) | 1x a40 |
-| [`Llama-2-13b-hf`](https://huggingface.co/meta-llama/Llama-2-13b-hf) | 1x a40 |
-| [`Llama-2-13b-chat-hf`](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) | 1x a40 |
-| [`Llama-2-70b-hf`](https://huggingface.co/meta-llama/Llama-2-70b-hf) | 4x a40 |
-| [`Llama-2-70b-chat-hf`](https://huggingface.co/meta-llama/Llama-2-70b-chat-hf) | 4x a40 |
+### Meta: Llama 3
+| Model | Configuration |
+|:------|:-------------|
+| `Meta-Llama-3-8B` | ✅ |
+| `Meta-Llama-3-8B-Instruct` | ✅ |
+| `Meta-Llama-3-70B` | ✅ |
+| `Meta-Llama-3-70B-Instruct` | ✅ |
 
-### [Meta: Llama 3](https://huggingface.co/collections/meta-llama/meta-llama-3-66214712577ca38149ebb2b6)
+### Meta: Llama 3.1
+| Model | Configuration |
+|:------|:-------------|
+| `Meta-Llama-3.1-8B` | ✅ |
+| `Meta-Llama-3.1-8B-Instruct` | ✅ |
+| `Meta-Llama-3.1-70B` | ✅ |
+| `Meta-Llama-3.1-70B-Instruct` | ✅ |
+| `Meta-Llama-3.1-405B-Instruct` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Meta-Llama-3-8B`](https://huggingface.co/meta-llama/Meta-Llama-3-8B) | 1x a40 | 222 tokens/s | 1811 tokens/s |
-| [`Meta-Llama-3-8B-Instruct`](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) | 1x a40 | 371 tokens/s | 1990 tokens/s |
-| [`Meta-Llama-3-70B`](https://huggingface.co/meta-llama/Meta-Llama-3-70B) | 4x a40 | 81 tokens/s | 618 tokens/s |
-| [`Meta-Llama-3-70B-Instruct`](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) | 4x a40 | 301 tokens/s | 660 tokens/s |
+### Meta: Llama 3.2
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-3.2-1B` | ✅ |
+| `Llama-3.2-1B-Instruct` | ✅ |
+| `Llama-3.2-3B` | ✅ |
+| `Llama-3.2-3B-Instruct` | ✅ |
 
-### [Meta: Llama 3.1](https://huggingface.co/collections/meta-llama/llama-31-669fc079a0c406a149a5738f)
+### Meta: Llama 3.3
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-3.3-70B-Instruct` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Meta-Llama-3.1-8B`](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B) | 1x a40 | - tokens/s | - tokens/s |
-| [`Meta-Llama-3.1-8B-Instruct`](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Meta-Llama-3.1-70B`](https://huggingface.co/meta-llama/Meta-Llama-3.1-70B) | 4x a40 | - tokens/s | - tokens/s |
-| [`Meta-Llama-3.1-70B-Instruct`](https://huggingface.co/meta-llama/Meta-Llama-3.1-70B-Instruct) | 4x a40 | - tokens/s | - tokens/s |
-| [`Meta-Llama-3.1-405B-Instruct`](https://huggingface.co/meta-llama/Meta-Llama-3.1-405B-Instruct) | 32x a40 (8 nodes, 4 a40/node) | - tokens/s | - tokens/s |
+### Meta: Llama 4
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-4-Scout-17B-16E-Instruct` | ❌ |
 
-### [Meta: Llama 3.2](https://huggingface.co/collections/meta-llama/llama-32-66f448ffc8c32f949b04c8cf)
+### Mistral AI: Mistral
+| Model | Configuration |
+|:------|:-------------|
+| `Mistral-7B-v0.3` | ✅ |
+| `Mistral-7B-Instruct-v0.1` | ✅ |
+| `Mistral-7B-Instruct-v0.2` | ✅ |
+| `Mistral-7B-Instruct-v0.3` | ✅ |
+| `Mistral-Large-Instruct-2407` | ✅ |
+| `Mistral-Large-Instruct-2411` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Llama-3.2-1B`](https://huggingface.co/meta-llama/Llama-3.2-1B) | 1x a40 | - tokens/s | - tokens/s |
-| [`Llama-3.2-1B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Llama-3.2-3B`](https://huggingface.co/meta-llama/Llama-3.2-3B) | 1x a40 | - tokens/s | - tokens/s |
-| [`Llama-3.2-3B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
+### Mistral AI: Mixtral
+| Model | Configuration |
+|:------|:-------------|
+| `Mixtral-8x7B-Instruct-v0.1` | ✅ |
+| `Mixtral-8x22B-v0.1` | ✅ |
+| `Mixtral-8x22B-Instruct-v0.1` | ✅ |
 
-### [Mistral AI: Mistral](https://huggingface.co/mistralai)
+### Microsoft: Phi
+| Model | Configuration |
+|:------|:-------------|
+| `Phi-3-medium-128k-instruct` | ✅ |
+| `phi-4` | ❌ |
 
-| Variant (Mistral) | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Mistral-7B-v0.1`](https://huggingface.co/mistralai/Mistral-7B-v0.1) | 1x a40 | - tokens/s | - tokens/s|
-| [`Mistral-7B-Instruct-v0.1`](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1) | 1x a40 | - tokens/s | - tokens/s|
-| [`Mistral-7B-Instruct-v0.2`](https://huggingface.co/mistralai/Mistral-7B-v0.2) | 1x a40 | - tokens/s | - tokens/s|
-| [`Mistral-7B-v0.3`](https://huggingface.co/mistralai/Mistral-7B-v0.3) | 1x a40 | - tokens/s | - tokens/s |
-| [`Mistral-7B-Instruct-v0.3`](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) | 1x a40 | - tokens/s | - tokens/s|
-| [`Mistral-Large-Instruct-2407`](https://huggingface.co/mistralai/Mistral-Large-Instruct-2407) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s|
-| [`Mistral-Large-Instruct-2411`](https://huggingface.co/mistralai/Mistral-Large-Instruct-2411) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s|
+### Nvidia: Llama-3.1-Nemotron
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-3.1-Nemotron-70B-Instruct-HF` | ✅ |
 
-### [Mistral AI: Mixtral](https://huggingface.co/mistralai)
+### Qwen: Qwen2.5
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2.5-0.5B-Instruct` | ✅ |
+| `Qwen2.5-1.5B-Instruct` | ✅ |
+| `Qwen2.5-3B-Instruct` | ✅ |
+| `Qwen2.5-7B-Instruct` | ✅ |
+| `Qwen2.5-14B-Instruct` | ✅ |
+| `Qwen2.5-32B-Instruct` | ✅ |
+| `Qwen2.5-72B-Instruct` | ✅ |
 
-| Variant (Mixtral) | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Mixtral-8x7B-Instruct-v0.1`](https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1) | 4x a40 | 222 tokens/s | 1543 tokens/s |
-| [`Mixtral-8x22B-v0.1`](https://huggingface.co/mistralai/Mixtral-8x22B-v0.1) | 8x a40 (2 nodes, 4 a40/node) | 145 tokens/s | 827 tokens/s|
-| [`Mixtral-8x22B-Instruct-v0.1`](https://huggingface.co/mistralai/Mixtral-8x22B-Instruct-v0.1) | 8x a40 (2 nodes, 4 a40/node) | 95 tokens/s | 803 tokens/s|
+### Qwen: Qwen2.5-Math
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2.5-Math-1.5B-Instruct` | ✅ |
+| `Qwen2.5-Math-7B-Instruct` | ✅ |
+| `Qwen2.5-Math-72B-Instruct` | ✅ |
 
-### [Microsoft: Phi 3](https://huggingface.co/collections/microsoft/phi-3-6626e15e9585a200d2d761e3)
+### Qwen: Qwen2.5-Coder
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2.5-Coder-7B-Instruct` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Phi-3-medium-128k-instruct`](https://huggingface.co/microsoft/Phi-3-medium-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |
+### Qwen: QwQ
+| Model | Configuration |
+|:------|:-------------|
+| `QwQ-32B` | ✅ |
 
-### [Nvidia: Llama-3.1-Nemotron](https://huggingface.co/collections/nvidia/llama-31-nemotron-70b-670e93cd366feea16abc13d8)
+### Qwen: Qwen2
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2-1.5B-Instruct` | ❌ |
+| `Qwen2-7B-Instruct` | ❌ |
+| `Qwen2-Math-1.5B-Instruct` | ❌ |
+| `Qwen2-Math-7B-Instruct` | ❌ |
+| `Qwen2-Math-72B` | ❌ |
+| `Qwen2-Math-72B-Instruct` | ❌ |
+| `Qwen2-VL-7B-Instruct` | ❌ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Llama-3.1-Nemotron-70B-Instruct-HF`](https://huggingface.co/nvidia/Llama-3.1-Nemotron-70B-Instruct-HF) | 4x a40 | - tokens/s | - tokens/s |
+### Qwen: Qwen3
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen3-14B` | ✅ |
+| `Qwen3-8B` | ❌ |
+| `Qwen3-32B` | ❌ |
+| `Qwen3-235B-A22B` | ❌ |
+| `Qwen3-Embedding-8B` | ❌ |
 
-### [Qwen: Qwen2.5](https://huggingface.co/collections/Qwen/qwen25-66e81a666513e518adb90d9e)
+### DeepSeek: DeepSeek-R1
+| Model | Configuration |
+|:------|:-------------|
+| `DeepSeek-R1-Distill-Llama-8B` | ✅ |
+| `DeepSeek-R1-Distill-Llama-70B` | ✅ |
+| `DeepSeek-R1-Distill-Qwen-1.5B` | ✅ |
+| `DeepSeek-R1-Distill-Qwen-7B` | ✅ |
+| `DeepSeek-R1-Distill-Qwen-14B` | ✅ |
+| `DeepSeek-R1-Distill-Qwen-32B` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Qwen2.5-0.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-3B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-7B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-14B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-14B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-32B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-32B-Instruct) | 2x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-72B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-72B-Instruct) | 4x a40 | - tokens/s | - tokens/s |
+### DeepSeek: Other Models
+| Model | Configuration |
+|:------|:-------------|
+| `DeepSeek-Coder-V2-Lite-Instruct` | ❌ |
+| `deepseek-math-7b-instruct` | ❌ |
 
-### [Qwen: Qwen2.5-Math](https://huggingface.co/collections/Qwen/qwen25-math-66eaa240a1b7d5ee65f1da3e)
+### Other LLM Models
+| Model | Configuration |
+|:------|:-------------|
+| `AI21-Jamba-1.5-Mini` | ❌ |
+| `aya-expanse-32b` | ✅ (as Aya-Expanse-32B) |
+| `gpt2-large` | ❌ |
+| `gpt2-xl` | ❌ |
+| `gpt-oss-120b` | ❌ |
+| `instructblip-vicuna-7b` | ❌ |
+| `internlm2-math-plus-7b` | ❌ |
+| `Janus-Pro-7B` | ❌ |
+| `Kimi-K2-Instruct` | ❌ |
+| `Ministral-8B-Instruct-2410` | ❌ |
+| `Molmo-7B-D-0924` | ✅ |
+| `OLMo-1B-hf` | ❌ |
+| `OLMo-7B-hf` | ❌ |
+| `OLMo-7B-SFT` | ❌ |
+| `pythia` | ❌ |
+| `Qwen1.5-72B-Chat` | ❌ |
+| `ReasonFlux-PRM-7B` | ❌ |
+| `t5-large-lm-adapt` | ❌ |
+| `t5-xl-lm-adapt` | ❌ |
+| `mt5-xl-lm-adapt` | ❌ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Math-1.5B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-7B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Math-7B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-72B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Math-72B-Instruct) | 4x a40 | - tokens/s | - tokens/s |
+---
 
-### [Qwen: Qwen2.5-Coder](https://huggingface.co/collections/Qwen/qwen25-coder-66eaa22e6f99801bf65b0c2f)
+## Vision Language Models (VLM)
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Qwen2.5-Coder-7B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct) | 1x a40 | - tokens/s | - tokens/s |
+### LLaVa
+| Model | Configuration |
+|:------|:-------------|
+| `llava-1.5-7b-hf` | ✅ |
+| `llava-1.5-13b-hf` | ✅ |
+| `llava-v1.6-mistral-7b-hf` | ✅ |
+| `llava-v1.6-34b-hf` | ✅ |
+| `llava-med-v1.5-mistral-7b` | ❌ |
 
-### [Qwen: QwQ](https://huggingface.co/collections/Qwen/qwq-674762b79b75eac01735070a)
+### Microsoft: Phi 3 Vision
+| Model | Configuration |
+|:------|:-------------|
+| `Phi-3-vision-128k-instruct` | ✅ |
+| `Phi-3.5-vision-instruct` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`QwQ-32B-Preview`](https://huggingface.co/Qwen/QwQ-32B-Preview) | 2x a40 | - tokens/s | - tokens/s |
+### Meta: Llama 3.2 Vision
+| Model | Configuration |
+|:------|:-------------|
+| `Llama-3.2-11B-Vision` | ✅ |
+| `Llama-3.2-11B-Vision-Instruct` | ✅ |
+| `Llama-3.2-90B-Vision` | ✅ |
+| `Llama-3.2-90B-Vision-Instruct` | ✅ |
 
-### [DeepSeek-R1: Distilled Models](https://huggingface.co/collections/deepseek-ai/deepseek-r1-678e1e131c0169c0bc89728d)
+### Mistral: Pixtral
+| Model | Configuration |
+|:------|:-------------|
+| `Pixtral-12B-2409` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`DeepSeek-R1-Distill-Llama-8B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) | 1x a40 | - tokens/s | - tokens/s |
-| [`DeepSeek-R1-Distill-Llama-70B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-70B) | 4x a40 | - tokens/s | - tokens/s |
-| [`DeepSeek-R1-Distill-Qwen-1.5B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B) | 1x a40 | - tokens/s | - tokens/s |
-| [`DeepSeek-R1-Distill-Qwen-7B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B) | 1x a40 | - tokens/s | - tokens/s |
-| [`DeepSeek-R1-Distill-Qwen-14B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-14B) | 2x a40 | - tokens/s | - tokens/s |
-| [`DeepSeek-R1-Distill-Qwen-32B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B) | 4x a40 | - tokens/s | - tokens/s |
+### OpenGVLab: InternVL2.5
+| Model | Configuration |
+|:------|:-------------|
+| `InternVL2_5-8B` | ✅ |
+| `InternVL2_5-26B` | ✅ |
+| `InternVL2_5-38B` | ✅ |
 
+### THUDM: GLM-4
+| Model | Configuration |
+|:------|:-------------|
+| `glm-4v-9b` | ✅ |
 
-## Vision Language Models
+### DeepSeek: DeepSeek-VL2
+| Model | Configuration |
+|:------|:-------------|
+| `deepseek-vl2` | ✅ |
+| `deepseek-vl2-small` | ✅ |
 
-### [allenai: Molmo](https://huggingface.co/collections/allenai/molmo-66f379e6fe3b8ef090a8ca19)
+### Other VLM Models
+| Model | Configuration |
+|:------|:-------------|
+| `MiniCPM-Llama3-V-2_5` | ❌ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Molmo-7B-D-0924`](https://huggingface.co/allenai/Molmo-7B-D-0924) | 1x a40 | - tokens/s | - tokens/s |
-
-
-### [LLaVa-1.5](https://huggingface.co/collections/llava-hf/llava-15-65f762d5b6941db5c2ba07e0)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`llava-1.5-7b-hf`](https://huggingface.co/llava-hf/llava-1.5-7b-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`llava-1.5-13b-hf`](https://huggingface.co/llava-hf/llava-1.5-13b-hf) | 1x a40 | - tokens/s | - tokens/s |
-
-### [LLaVa-NeXT](https://huggingface.co/collections/llava-hf/llava-next-65f75c4afac77fd37dbbe6cf)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`llava-v1.6-mistral-7b-hf`](https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf) | 1x a40 | - tokens/s | - tokens/s |
-| [`llava-v1.6-34b-hf`](https://huggingface.co/llava-hf/llava-v1.6-34b-hf) | 2x a40 | - tokens/s | - tokens/s |
-
-### [Microsoft: Phi 3](https://huggingface.co/collections/microsoft/phi-3-6626e15e9585a200d2d761e3)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Phi-3-vision-128k-instruct`](https://huggingface.co/microsoft/Phi-3-vision-128k-instruct) | 2x a40 | - tokens/s | - tokens/s |
-| [`Phi-3.5-vision-instruct`](https://huggingface.co/microsoft/Phi-3.5-vision-instruct) | 2x a40 | - tokens/s | - tokens/s |
-
-### [Meta: Llama 3.2](https://huggingface.co/collections/meta-llama/llama-32-66f448ffc8c32f949b04c8cf)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Llama-3.2-11B-Vision`](https://huggingface.co/meta-llama/Llama-3.2-1B) | 2x a40 | - tokens/s | - tokens/s |
-| [`Llama-3.2-11B-Vision-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) | 2x a40 | - tokens/s | - tokens/s |
-| [`Llama-3.2-90B-Vision`](https://huggingface.co/meta-llama/Llama-3.2-3B) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s |
-| [`Llama-3.2-90B-Vision-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) | 8x a40 (2 nodes, 4 a40/node) | - tokens/s | - tokens/s |
-
-**NOTE**: `MllamaForConditionalGeneration` currently doesn't support pipeline parallelsim, to save memory, maximum number of requests is reduced and enforce eager mode is on.
-
-### [Mistral: Pixtral](https://huggingface.co/mistralai)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Pixtral-12B-2409`](https://huggingface.co/mistralai/Pixtral-12B-2409) | 1x a40 | - tokens/s | - tokens/s |
-
-### [OpenGVLab: InternVL2.5](https://huggingface.co/collections/OpenGVLab/internvl25-673e1019b66e2218f68d7c1c)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`InternVL2_5-8B`](https://huggingface.co/OpenGVLab/InternVL2_5-8B) | 1x a40 | - tokens/s | - tokens/s |
-| [`InternVL2_5-26B`](https://huggingface.co/OpenGVLab/InternVL2_5-26B) | 2x a40 | - tokens/s | - tokens/s |
-| [`InternVL2_5-38B`](https://huggingface.co/OpenGVLab/InternVL2_5-38B) | 4x a40 | - tokens/s | - tokens/s |
-
-### [THUDM: GLM-4](https://huggingface.co/collections/THUDM/glm-4-665fcf188c414b03c2f7e3b7)
-
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`glm-4v-9b`](https://huggingface.co/THUDM/glm-4v-9b) | 1x a40 | - tokens/s | - tokens/s |
-
-### [DeepSeek: DeepSeek-VL2](https://huggingface.co/collections/deepseek-ai/deepseek-vl2-675c22accc456d3beb4613ab)
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`deepseek-vl2`](https://huggingface.co/deepseek-ai/deepseek-vl2) | 2x a40 | - tokens/s | - tokens/s |
-| [`deepseek-vl2-small`](https://huggingface.co/deepseek-ai/deepseek-vl2-small) | 1x a40 | - tokens/s | - tokens/s |
-
+---
 
 ## Text Embedding Models
 
-### [Liang Wang: e5](https://huggingface.co/intfloat)
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`e5-mistral-7b-instruct`](https://huggingface.co/intfloat/e5-mistral-7b-instruct) | 1x a40 | - tokens/s | - tokens/s |
+### Liang Wang: e5
+| Model | Configuration |
+|:------|:-------------|
+| `e5-mistral-7b-instruct` | ✅ |
 
-### [BAAI: bge](https://huggingface.co/BAAI)
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`bge-base-en-v1.5`](https://huggingface.co/BAAI/bge-base-en-v1.5) | 1x A40 | - tokens/s | - tokens/s |
+### BAAI: bge
+| Model | Configuration |
+|:------|:-------------|
+| `bge-base-en-v1.5` | ✅ |
+| `bge-m3` | ❌ |
+| `bge-multilingual-gemma2` | ❌ |
 
-### [Sentence Transformers: MiniLM](https://huggingface.co/sentence-transformers)
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`all-MiniLM-L6-v2`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | 1x A40 | - tokens/s | - tokens/s |
+### Sentence Transformers: MiniLM
+| Model | Configuration |
+|:------|:-------------|
+| `all-MiniLM-L6-v2` | ✅ |
 
+### Other Embedding Models
+| Model | Configuration |
+|:------|:-------------|
+| `data2vec` | ❌ |
+| `gte-modernbert-base` | ❌ |
+| `gte-Qwen2-7B-instruct` | ❌ |
+| `m2-bert-80M-32k-retrieval` | ❌ |
+| `m2-bert-80M-8k-retrieval` | ❌ |
 
+---
 
 ## Reward Modeling Models
 
-### [Qwen: Qwen2.5-Math](https://huggingface.co/collections/Qwen/qwen25-math-66eaa240a1b7d5ee65f1da3e)
+### Qwen: Qwen2.5-Math
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2.5-Math-RM-72B` | ✅ |
+| `Qwen2.5-Math-PRM-7B` | ✅ |
 
-| Variant | Suggested resource allocation | Avg prompt throughput | Avg generation throughput |
-|:----------:|:----------:|:----------:|:----------:|
-| [`Qwen2.5-Math-RM-72B`](https://huggingface.co/Qwen/Qwen2.5-Math-RM-72B) | 4x a40 | - tokens/s | - tokens/s |
-| [`Qwen2.5-Math-PRM-7B`](https://huggingface.co/Qwen/Qwen2.5-Math-PRM-7B) | 1x a40 | - tokens/s | - tokens/s |
+---
+
+## Multimodal Models
+
+### CLIP
+| Model | Configuration |
+|:------|:-------------|
+| `clip-vit-base-patch16` | ❌ |
+| `clip-vit-large-patch14-336` | ❌ |
+
+### Stable Diffusion
+| Model | Configuration |
+|:------|:-------------|
+| `sd-v1-4-full-ema` | ❌ |
+| `stable-diffusion-v1-4` | ❌ |
+
+---
+
+## Summary Statistics
+
+- **Total Models in `/model-weights`**: 108
+- **Configured in `models.yaml`**: 89
+- **Not Configured**: 19
+- **Configuration Coverage**: 82.4%
+
+### Models Requiring Configuration
+The following models exist in `/model-weights` but lack configurations in `models.yaml`:
+
+1. **CodeLlama Python variants** (3 models)
+2. **Gemma 2b, 7b, and Gemma 3 variants** (7 models)
+3. **Qwen2 and Qwen3 variants** (8 models)
+4. **CLIP and Stable Diffusion models** (4 models)
+5. **Various specialized models** (7 models)
+
+### Recommendations
+1. **High Priority**: Configure popular model families like Gemma 3, Qwen2/3 variants
+2. **Medium Priority**: Add configurations for specialized models like CLIP and Stable Diffusion
+3. **Low Priority**: Configure less common or experimental models
+
+---
+
+## Notes
+- Models are categorized by their primary function (LLM, VLM, Embedding, etc.)
+- Configuration status is based on exact name matching between `/model-weights` and `models.yaml`
+- Some models may have slight naming variations that could affect matching
+- This document should be updated whenever new models are added to `/model-weights` or configurations are updated in `models.yaml`
