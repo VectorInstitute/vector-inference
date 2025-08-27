@@ -17,12 +17,13 @@ You should see an output like the following:
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Job Config              ┃ Value                                     ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Slurm Job ID            │ 16060964                                  │
+│ Slurm Job ID            │ 598624                                    │
 │ Job Name                │ Meta-Llama-3.1-8B-Instruct                │
 │ Model Type              │ LLM                                       │
 │ Vocabulary Size         │ 128256                                    │
-│ Partition               │ a40                                       │
-│ QoS                     │ m2                                        │
+│ Account                 │ aip-your-account                          │
+│ Working Directory       │ /your/working/directory                   │
+│ Resource Type           │ l40s                                      │
 │ Time Limit              │ 08:00:00                                  │
 │ Num Nodes               │ 1                                         │
 │ GPUs/Node               │ 1                                         │
@@ -36,21 +37,25 @@ You should see an output like the following:
 └─────────────────────────┴───────────────────────────────────────────┘
 ```
 
+**NOTE**: On Vector Killarney Cluster environment, the following fields are required:
+  * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
+  * `--work-dir`, `-D`: A working directory other than your home directory, this argument can be set to default by seeting environment variable `VEC_INF_WORK_DIR`.
+
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `qos` is to be overriden:
+Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `resource-type` is to be overriden:
 
 ```bash
-vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
+vec-inf launch Meta-Llama-3.1-8B-Instruct --resource-type <new_resource_type>
 ```
 
-To overwrite default vLLM engine arguments, you can specify the engine arguments in a comma separated string:
+To overwrite default `vllm serve` arguments, you can specify the arguments in a comma separated string:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
 ```
 
-For the full list of vLLM engine arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
+For the full list of `vllm serve` arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
 
 #### Custom models
 
@@ -77,9 +82,8 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
+    resource_type: l40s # You can also leave this field empty if your environment has a default type of resource to use
     time: 08:00:00
-    partition: a40
     model_weights_parent_dir: /h/<username>/model-weights
     vllm_args:
       --max-model-len: 1010000
@@ -94,45 +98,43 @@ export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 
 **NOTE**
 * There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py) for details.
-* Check [vLLM Engine Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html) for the full list of available vLLM engine arguments. The default parallel size for any parallelization defaults to 1, so none of the sizes were set specifically in this example.
+* Check [`vllm serve`](https://docs.vllm.ai/en/stable/cli/serve.html) for the full list of available vLLM engine arguments. The default parallel size for any parallelization defaults to 1, so none of the sizes were set specifically in this example.
 * For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`.
-* Setting `--compilation-config` to `3` currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.
 
 ### `batch-launch` command
 
 The `batch-launch` command allows users to launch multiple inference servers at once, here is an example of launching 2 models:
 
 ```bash
-vec-inf batch-launch DeepSeek-R1-Distill-Qwen-7B Qwen2.5-Math-PRM-7B
+vec-inf batch-launch Qwen2.5-1.5B-Instruct Qwen2.5-Math-PRM-7B
 ```
 
 You should see an output like the following:
 
 ```
-┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Job Config     ┃ Value                                                                   ┃
-┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Slurm Job ID   │ 17480109                                                                │
-│ Slurm Job Name │ BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5-Math-PRM-7B                   │
-│ Model Name     │ DeepSeek-R1-Distill-Qwen-7B                                             │
-│ Partition      │   a40                                                                   │
-│ QoS            │   m2                                                                    │
-│ Time Limit     │   08:00:00                                                              │
-│ Num Nodes      │   1                                                                     │
-│ GPUs/Node      │   1                                                                     │
-│ CPUs/Task      │   16                                                                    │
-│ Memory/Node    │   64G                                                                   │
-│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
-│ Model Name     │ Qwen2.5-Math-PRM-7B                                                     │
-│ Partition      │   a40                                                                   │
-│ QoS            │   m2                                                                    │
-│ Time Limit     │   08:00:00                                                              │
-│ Num Nodes      │   1                                                                     │
-│ GPUs/Node      │   1                                                                     │
-│ CPUs/Task      │   16                                                                    │
-│ Memory/Node    │   64G                                                                   │
-│ Log Directory  │   /h/marshallw/.vec-inf-logs/BATCH-DeepSeek-R1-Distill-Qwen-7B-Qwen2.5… │
-└────────────────┴─────────────────────────────────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Config        ┃ Value                                                                ┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Slurm Job ID      │ 599425                                                               │
+│ Slurm Job Name    │ BATCH-Qwen2.5-1.5B-Instruct-Qwen2.5-Math-PRM-7B                      │
+│ Account           │ aip-your-account                                                     │
+│ Working Directory │ /your/working/directory                                              │
+│ Log Directory     │ /home/marshw/.vec-inf-logs/BATCH-Qwen2.5-1.5B-Instruct-Qwen2.5-Math… │
+│ Model Name        │ Qwen2.5-1.5B-Instruct                                                │
+│ Resource Type     │   l40s                                                               │
+│ Time Limit        │   08:00:00                                                           │
+│ Num Nodes         │   1                                                                  │
+│ GPUs/Node         │   1                                                                  │
+│ CPUs/Task         │   16                                                                 │
+│ Memory/Node       │   64G                                                                │
+│ Model Name        │ Qwen2.5-Math-PRM-7B                                                  │
+│ Resource Type     │   l40s                                                               │
+│ Time Limit        │   08:00:00                                                           │
+│ Num Nodes         │   1                                                                  │
+│ GPUs/Node         │   1                                                                  │
+│ CPUs/Task         │   16                                                                 │
+│ Memory/Node       │   64G                                                                │
+└───────────────────┴──────────────────────────────────────────────────────────────────────┘
 ```
 
 The inference servers will begin launching only after all requested resources have been allocated, preventing resource waste. Unlike the `launch` command, `batch-launch` does not accept additional launch parameters from the command line. Users must either:
@@ -244,29 +246,47 @@ vec-inf list Meta-Llama-3.1-70B-Instruct
 ```
 
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Model Config             ┃ Value                      ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ model_name               │ Meta-Llama-3.1-8B-Instruct │
-│ model_family             │ Meta-Llama-3.1             │
-│ model_variant            │ 8B-Instruct                │
-│ model_type               │ LLM                        │
-│ gpus_per_node            │ 1                          │
-│ num_nodes                │ 1                          │
-│ cpus_per_task            │ 16                         │
-│ mem_per_node             │ 64G                        │
-│ vocab_size               │ 128256                     │
-│ qos                      │ m2                         │
-│ time                     │ 08:00:00                   │
-│ partition                │ a40                        │
-│ model_weights_parent_dir │ /model-weights             │
-│ vLLM Arguments:          │                            │
-│   --max-model-len:       │ 131072                     │
-│   --max-num-seqs:        │ 256                        │
-└──────────────────────────┴────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Model Config              ┃ Value                       ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ model_name                │ Meta-Llama-3.1-70B-Instruct │
+│ model_family              │ Meta-Llama-3.1              │
+│ model_variant             │ 70B-Instruct                │
+│ model_type                │ LLM                         │
+│ gpus_per_node             │ 4                           │
+│ num_nodes                 │ 1                           │
+│ cpus_per_task             │ 16                          │
+│ mem_per_node              │ 64G                         │
+│ vocab_size                │ 128256                      │
+│ time                      │ 08:00:00                    │
+│ resource_type             │ l40s                        │
+│ model_weights_parent_dir  │ /model-weights              │
+│ vLLM Arguments:           │                             │
+│   --tensor-parallel-size: │ 4                           │
+│   --max-model-len:        │ 65536                       │
+│   --max-num-seqs:         │ 256                         │
+└───────────────────────────┴─────────────────────────────┘
 ```
 
 `launch`, `list`, and `status` command supports `--json-mode`, where the command output would be structured as a JSON string.
+
+### `cleanup` command
+
+To avoid log build up and maintaining a clean working environment, you can use the `cleanup` command to remove old logs:
+```bash
+vec-inf cleanup [OPTIONS]
+```
+
+You can use the following filters to select which logs you would like to remove:
+| Option | Short | Type | Description |
+|--------|-------|------|-------------|
+| `--log-dir` | - | string | Path to SLURM log directory (defaults to `~/.vec-inf-logs`) |
+| `--model-family` | - | string | Filter logs by model family (e.g., "llama", "gpt") |
+| `--model-name` | - | string | Filter logs by specific model name |
+| `--job-id` | - | integer | Only remove logs with this exact SLURM job ID |
+| `--before-job-id` | - | integer | Remove logs with job ID less than this value |
+| `--dry-run` | - | flag | List matching logs without deleting them |
+
 
 ## Check Job Configuration
 
