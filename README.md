@@ -42,7 +42,7 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_image" src="https://github.com/user-attachments/assets/a72a99fd-4bf2-408e-8850-359761d96c4f">
+<img width="720" alt="launch_image" src="https://github.com/user-attachments/assets/c1e0c60c-cf7a-49ed-a426-fdb38ebf88ee" />
 
 **NOTE**: On Vector Killarney Cluster environment, the following fields are required:
   * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
