@@ -71,8 +71,12 @@ jobs:
         run: |
           uv run pytest tests/test_imports.py
 
+      - name: Import Codecov GPG public key
+        run: |
+          gpg --keyserver keyserver.ubuntu.com --recv-keys 806BB28AED779869
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5.4.3
+        uses: codecov/codecov-action@v5.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml

@@ -7,10 +7,12 @@
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
-[![vLLM](https://img.shields.io/badge/vllm-0.9.2)](https://docs.vllm.ai/en/v0.9.2/index.html)
+[![vLLM](https://img.shields.io/badge/vLLM-0.10.1.1-blue)](https://docs.vllm.ai/en/v0.10.1.1/)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **This package runs natively on the Vector Institute cluster environments**. To adapt to other environments, follow the instructions in [Installation](#installation).
+
+**NOTE**: Supported models on Killarney are tracked [here](vec_inf/config/README.md)
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
@@ -18,7 +20,7 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 pip install vec-inf
 ```
-Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.9.2`.
+Otherwise, we recommend using the provided [`Dockerfile`](Dockerfile) to set up your own environment with the package. The latest image has `vLLM` version `0.10.1.1`.
 
 If you'd like to use `vec-inf` on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
 * Clone the repository and update the `environment.yaml` and the `models.yaml` file in [`vec_inf/config`](vec_inf/config/), then install from source by running `pip install .`.
@@ -42,23 +44,26 @@ You should see an output like the following:
 
 <img width="600" alt="launch_image" src="https://github.com/user-attachments/assets/a72a99fd-4bf2-408e-8850-359761d96c4f">
 
+**NOTE**: On Vector Killarney Cluster environment, the following fields are required:
+  * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
+  * `--work-dir`, `-D`: A working directory other than your home directory, this argument can be set to default by seeting environment variable `VEC_INF_WORK_DIR`.
 
 #### Overrides
 
 Models that are already supported by `vec-inf` would be launched using the cached configuration (set in [slurm_vars.py](vec_inf/client/slurm_vars.py)) or [default configuration](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
-overriden. For example, if `qos` is to be overriden:
+overriden. For example, if `resource-type` is to be overriden:
 
 ```bash
-vec-inf launch Meta-Llama-3.1-8B-Instruct --qos <new_qos>
+vec-inf launch Meta-Llama-3.1-8B-Instruct --resource-type <new_resource_type>
 ```
 
-To overwrite default vLLM engine arguments, you can specify the engine arguments in a comma separated string:
+To overwrite default `vllm serve` arguments, you can specify the arguments in a comma separated string:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
 ```
 
-For the full list of vLLM engine arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
+For the full list of `vllm serve` arguments, you can find them [here](https://docs.vllm.ai/en/stable/cli/serve.html), make sure you select the correct vLLM version.
 
 #### Custom models
 
@@ -85,14 +90,12 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    qos: m2
     time: 08:00:00
-    partition: a40
+    resource_type: l40s # You can also leave this field empty if your environment has a default type of resource to use
     model_weights_parent_dir: /h/<username>/model-weights
     vllm_args:
       --max-model-len: 1010000
       --max-num-seqs: 256
-      --compilation-config: 3
 ```
 
 You would then set the `VEC_INF_MODEL_CONFIG` path using:
@@ -103,9 +106,8 @@ export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 
 **NOTE**
 * There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
-* Check [vLLM Engine Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html) for the full list of available vLLM engine arguments, the default parallel size for any parallelization is default to 1, so none of the sizes were set specifically in this example
+* Check [`vllm serve`](https://docs.vllm.ai/en/stable/cli/serve.html) for the full list of available vLLM engine arguments, the default parallel size for any parallelization is default to 1, so none of the sizes were set specifically in this example
 * For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`
-* Setting `--compilation-config` to `3` currently breaks multi-node model launches, so we don't set them for models that require multiple nodes of GPUs.
 
 #### Other commands
 
@@ -114,7 +116,7 @@ export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
 * `list`: List all available model names, or view the default/cached configuration of a specific model.
-* `cleanup`: Remove old log directories. You can filter by `--model-family`, `--model-name`, `--job-id`, and/or `--before-job-id`. Use `--dry-run` to preview what would be deleted.
+* `cleanup`: Remove old log directories, use `--help` to see the supported filters. Use `--dry-run` to preview what would be deleted.
 
 For more details on the usage of these commands, refer to the [User Guide](https://vectorinstitute.github.io/vector-inference/user_guide/)
 
@@ -125,6 +127,7 @@ Example:
 ```python
 >>> from vec_inf.api import VecInfClient
 >>> client = VecInfClient()
+>>> # Assume VEC_INF_ACCOUNT and VEC_INF_WORK_DIR is set
 >>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
 >>> job_id = response.slurm_job_id
 >>> status = client.get_status(job_id)

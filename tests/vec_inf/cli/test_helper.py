@@ -83,6 +83,7 @@ class TestBatchLaunchResponseFormatter:
             "slurm_job_id": "14933053",
             "slurm_job_name": "BATCH-job",
             "model_names": ["model1", "model2"],
+            "log_dir": "/tmp/logs",  # Moved to top level
             "models": {
                 "model1": {
                     "model_name": "model1",
@@ -93,7 +94,6 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "1",
                     "cpus_per_task": "8",
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/logs",
                 },
                 "model2": {
                     "model_name": "model2",
@@ -104,7 +104,6 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "2",
                     "cpus_per_task": "16",
                     "mem_per_node": "64G",
-                    "log_dir": "/tmp/logs",
                 },
             },
         }
@@ -121,6 +120,7 @@ class TestBatchLaunchResponseFormatter:
             "slurm_job_id": "12345",
             "slurm_job_name": "SINGLE-job",
             "model_names": ["single-model"],
+            "log_dir": "/logs",  # Moved to top level
             "models": {
                 "single-model": {
                     "model_name": "single-model",
@@ -131,7 +131,6 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "0",
                     "cpus_per_task": "4",
                     "mem_per_node": "16G",
-                    "log_dir": "/logs",
                 }
             },
         }
@@ -417,9 +416,11 @@ class TestListCmdDisplay:
 
         result = display._format_single_model_output(mock_config)
 
-        assert isinstance(result, dict)
-        assert "model_name" in result
-        assert result["model_name"] == "Meta-Llama-3.1-8B"
+        assert isinstance(result, str)  # Changed from dict to str
+        # Parse the JSON string to check content
+        result_dict = json.loads(result)
+        assert "model_name" in result_dict
+        assert result_dict["model_name"] == "Meta-Llama-3.1-8B"
 
     def test_format_all_models_output(self):
         """Test formatting all models output."""

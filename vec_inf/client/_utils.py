@@ -14,7 +14,8 @@ from typing import Any, Optional, Union, cast
 import requests
 import yaml
 
-from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
+from vec_inf.client._client_vars import MODEL_READY_SIGNATURE, REQUIRED_ARGS
+from vec_inf.client._exceptions import MissingRequiredFieldsError
 from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
@@ -253,7 +254,7 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
 
     # 2. Otherwise, load default config
     default_path = (
-        CACHED_CONFIG_DIR / "models_latest.yaml"
+        CACHED_CONFIG_DIR / "models.yaml"
         if CACHED_CONFIG_DIR.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
@@ -384,3 +385,22 @@ def find_matching_dirs(
             matched.append(job_dir)
 
     return matched
+
+
+def check_required_fields(params: dict[str, Any]) -> None:
+    """Check for required fields without default vals and their corresponding env vars.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Dictionary of parameters to check.
+    """
+    for arg in REQUIRED_ARGS:
+        if not params.get(arg):
+            default_value = os.getenv(REQUIRED_ARGS[arg])
+            if default_value:
+                params[arg] = default_value
+            else:
+                raise MissingRequiredFieldsError(
+                    f"{arg} is required, please set it in the command arguments or environment variables"
+                )

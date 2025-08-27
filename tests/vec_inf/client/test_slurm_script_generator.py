@@ -76,7 +76,7 @@ class TestSlurmScriptGenerator:
 
         assert generator.params == basic_params
         assert not generator.is_multinode
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
         assert generator.env_str == ""
@@ -87,7 +87,7 @@ class TestSlurmScriptGenerator:
 
         assert generator.params == multinode_params
         assert generator.is_multinode
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
         assert generator.env_str == ""
@@ -97,7 +97,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(singularity_params)
 
         assert generator.params == singularity_params
-        assert generator.use_singularity
+        assert generator.use_container
         assert not generator.is_multinode
         assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
@@ -113,7 +113,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(params)
 
         assert generator.params == params
-        assert generator.use_singularity
+        assert generator.use_container
         assert not generator.is_multinode
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
@@ -146,7 +146,6 @@ class TestSlurmScriptGenerator:
 
         assert "head_node_ip=${SLURMD_NODENAME}" in setup
         assert "source /path/to/src/find_port.sh" in setup
-        assert "export LD_LIBRARY_PATH=" in setup
         assert "ray start --head" not in setup
 
     def test_generate_server_setup_multinode(self, multinode_params):
@@ -164,9 +163,10 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(singularity_params)
         setup = generator._generate_server_setup()
 
-        assert "singularity exec" in setup
         assert "ray stop" in setup
-        assert "module load singularity" in setup
+        assert (
+            "module load " in setup
+        )  # Remove module name since it's inconsistent between clusters
 
     def test_generate_launch_cmd_venv(self, basic_params):
         """Test launch command generation with virtual environment."""
@@ -185,7 +185,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(singularity_params)
         launch_cmd = generator._generate_launch_cmd()
 
-        assert "singularity exec --nv" in launch_cmd
+        assert "exec --nv" in launch_cmd
         assert "--bind /path/to/model_weights/test-model" in launch_cmd
         assert "--bind /scratch:/scratch,/data:/data" in launch_cmd
         assert "source" not in launch_cmd
@@ -222,7 +222,9 @@ class TestSlurmScriptGenerator:
         with patch.object(Path, "write_text") as mock_write:
             script_path = generator.write_to_log_dir()
 
-            expected_path = temp_log_dir / "launch_test-model_20240101_120000.slurm"
+            expected_path = (
+                temp_log_dir / "launch_test-model_20240101_120000.sbatch"
+            )  # Changed from .slurm to .sbatch
             assert script_path == expected_path
             mock_write.assert_called_once()
 
@@ -317,7 +319,7 @@ class TestBatchSlurmScriptGenerator:
         generator = BatchSlurmScriptGenerator(batch_params)
 
         assert generator.params == batch_params
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert len(generator.script_paths) == 0
         assert "model1" in generator.params["models"]
         assert "model2" in generator.params["models"]
@@ -326,7 +328,7 @@ class TestBatchSlurmScriptGenerator:
         """Test initialization with Singularity configuration."""
         generator = BatchSlurmScriptGenerator(batch_singularity_params)
 
-        assert generator.use_singularity
+        assert generator.use_container
         assert (
             generator.params["models"]["model1"]["additional_binds"]
             == " --bind /scratch:/scratch,/data:/data"
@@ -345,7 +347,7 @@ class TestBatchSlurmScriptGenerator:
 
         generator = BatchSlurmScriptGenerator(params)
 
-        assert generator.use_singularity
+        assert generator.use_container
         assert generator.params["models"]["model1"]["additional_binds"] == ""
         assert generator.params["models"]["model2"]["additional_binds"] == ""
 
@@ -405,7 +407,9 @@ class TestBatchSlurmScriptGenerator:
 
         script_path = generator.generate_batch_slurm_script()
 
-        expected_path = temp_log_dir / "BATCH-model1-model2_20240101_120000.slurm"
+        expected_path = (
+            temp_log_dir / "BATCH-model1-model2_20240101_120000.sbatch"
+        )  # Changed from .slurm to .sbatch
         assert script_path == expected_path
         assert len(generator.script_paths) == 2
         assert any("launch_model1.sh" in str(p) for p in generator.script_paths)
@@ -434,7 +438,9 @@ class TestBatchSlurmScriptGenerator:
 
         script_path = generator.generate_batch_slurm_script()
 
-        expected_path = temp_log_dir / "BATCH-model1-model2_20240101_120000.slurm"
+        expected_path = (
+            temp_log_dir / "BATCH-model1-model2_20240101_120000.sbatch"
+        )  # Changed from .slurm to .sbatch
         assert script_path == expected_path
         assert len(generator.script_paths) == 2
         mock_touch.assert_called()
