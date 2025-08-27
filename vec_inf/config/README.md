@@ -2,6 +2,8 @@
 
 This document tracks all model weights available in the `/model-weights` directory on Killarney cluster and indicates which ones have existing configurations in `models.yaml`. To request new model weights to be downloaded or model configuration to be added, please open an issue.
 
+**NOTE**: The `models.yaml` file here is not always up to date with the latest cached model config on Killarney cluster, new model config would be added to the cached model config. `models.yaml` would be updated to reflect the cached model config when a new version of the package is released.
+
 ## Legend
 - ✅ **Configured**: Model has a complete configuration in `models.yaml`
 - ❌ **Not Configured**: Model exists in `/model-weights` but lacks configuration

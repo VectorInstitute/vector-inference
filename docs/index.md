@@ -1,6 +1,8 @@
 # Vector Inference: Easy inference on Slurm clusters
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/stable/). **This package runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
+
+**NOTE**: Supported models on Killarney are tracked [here](vec_inf/config/README.md)
 
 ## Installation
 

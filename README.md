@@ -10,7 +10,9 @@
 [![vLLM](https://img.shields.io/badge/vLLM-0.10.1.1-blue)](https://docs.vllm.ai/en/v0.10.1.1/)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **All scripts in this repository runs natively on the Vector Institute cluster environment**. To adapt to other environments, follow the instructions in [Installation](#installation).
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **This package runs natively on the Vector Institute cluster environments**. To adapt to other environments, follow the instructions in [Installation](#installation).
+
+**NOTE**: Supported models on Killarney are tracked [here](vec_inf/config/README.md)
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
