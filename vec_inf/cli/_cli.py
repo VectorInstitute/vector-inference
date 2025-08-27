@@ -228,7 +228,10 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("batch-launch", help="Launch multiple models in a batch, separate model names with spaces.")
+@cli.command(
+    "batch-launch",
+    help="Launch multiple models in a batch, separate model names with spaces.",
+)
 @click.argument("model-names", type=str, nargs=-1)
 @click.option(
     "--batch-config",
@@ -476,7 +479,6 @@ def cleanup_logs_cli(
 ) -> None:
     """Clean up log files based on optional filters.
 
-
     Parameters
     ----------
     log_dir : str or Path, optional
@@ -491,7 +493,7 @@ def cleanup_logs_cli(
         If provided, only delete logs with job ID less than this value.
     dry_run : bool
         If True, return matching files without deleting them.
-    """  
+    """
     try:
         client = VecInfClient()
         matched = client.cleanup_logs(
