@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 # Non-interactive apt-get commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -35,16 +35,29 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py && \
     python3.10 -m pip install --upgrade pip setuptools wheel uv
 
+# Install Infiniband/RDMA support
+RUN apt-get update && apt-get install -y \
+    libibverbs1 libibverbs-dev ibverbs-utils \
+    librdmacm1 librdmacm-dev rdmacm-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up RDMA environment (these will persist in the final container)
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+ENV UCX_NET_DEVICES=all
+ENV NCCL_IB_DISABLE=0
+
 # Set up project
 WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu121" uv pip install --system -e .[dev]
+RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
 
 # Final configuration
 RUN mkdir -p /vec-inf/nccl && \
     mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
+ENV VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
+ENV NCCL_DEBUG=INFO
 
 # Set the default command to start an interactive shell
 CMD ["bash"]

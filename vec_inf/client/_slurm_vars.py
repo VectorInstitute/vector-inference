@@ -52,22 +52,31 @@ def load_env_config() -> dict[str, Any]:
 _config = load_env_config()
 
 # Extract path values
-LD_LIBRARY_PATH = _config["paths"]["ld_library_path"]
-SINGULARITY_IMAGE = _config["paths"]["image_path"]
-VLLM_NCCL_SO_PATH = _config["paths"]["vllm_nccl_so_path"]
+IMAGE_PATH = _config["paths"]["image_path"]
 
 # Extract containerization info
-SINGULARITY_LOAD_CMD = _config["containerization"]["module_load_cmd"]
-SINGULARITY_MODULE_NAME = _config["containerization"]["module_name"]
+CONTAINER_LOAD_CMD = _config["containerization"]["module_load_cmd"]
+CONTAINER_MODULE_NAME = _config["containerization"]["module_name"]
 
 # Extract limits
 MAX_GPUS_PER_NODE = _config["limits"]["max_gpus_per_node"]
 MAX_NUM_NODES = _config["limits"]["max_num_nodes"]
 MAX_CPUS_PER_TASK = _config["limits"]["max_cpus_per_task"]
 
+
 # Create dynamic Literal types
-QOS: TypeAlias = Literal[tuple(_config["allowed_values"]["qos"])]  # type: ignore[valid-type]
-PARTITION: TypeAlias = Literal[tuple(_config["allowed_values"]["partition"])]  # type: ignore[valid-type]
+def create_literal_type(values: list[str], fallback: str = "") -> Any:
+    """Create a Literal type from a list, with configurable fallback."""
+    if not values:
+        return Literal[fallback]
+    return Literal[tuple(values)]
+
+
+QOS: TypeAlias = create_literal_type(_config["allowed_values"]["qos"])  # type: ignore[valid-type]
+PARTITION: TypeAlias = create_literal_type(_config["allowed_values"]["partition"])  # type: ignore[valid-type]
+RESOURCE_TYPE: TypeAlias = create_literal_type(  # type: ignore[valid-type]
+    _config["allowed_values"]["resource_type"]
+)
 
 # Extract default arguments
-DEFAULT_ARGS = _config["default_args"]
+DEFAULT_ARGS: dict[str, str] = _config["default_args"]

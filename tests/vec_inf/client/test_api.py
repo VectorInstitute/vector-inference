@@ -472,7 +472,9 @@ def test_batch_launch_models_integration():
         result = client.batch_launch_models(["model1", "model2"])
 
         # Verify BatchModelLauncher was called correctly
-        mock_launcher_class.assert_called_once_with(["model1", "model2"], None)
+        mock_launcher_class.assert_called_once_with(
+            ["model1", "model2"], None, None, None
+        )
         mock_launcher.launch.assert_called_once()
 
         # Verify the response
@@ -508,7 +510,7 @@ def test_batch_launch_models_with_custom_config_integration():
 
         # Verify BatchModelLauncher was called with custom config
         mock_launcher_class.assert_called_once_with(
-            ["model1", "model2"], "custom_config.yaml"
+            ["model1", "model2"], "custom_config.yaml", None, None
         )
         mock_launcher.launch.assert_called_once()
 

@@ -33,23 +33,17 @@ def test_launch_command_success(runner):
             "partition": "gpu",
             "qos": "normal",
             "time": "1:00:00",
-            "num_nodes": "1",  # Changed to string
-            "gpus_per_node": "1",  # Changed to string
-            "cpus_per_task": "8",  # Changed to string
+            "num_nodes": "1",
+            "gpus_per_node": "1",
+            "cpus_per_task": "8",
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
-            "vocab_size": "128000",  # Changed to string
+            "vocab_size": "128000",
             "vllm_args": {"max_model_len": 8192},
         }
         mock_client.launch_model.return_value = mock_response
 
         result = runner.invoke(cli, ["launch", "Meta-Llama-3.1-8B"])
-
-        # Print debug info if test fails
-        if result.exit_code != 0:
-            print(f"Exit code: {result.exit_code}")
-            print(f"Output: {result.output}")
-            print(f"Exception: {result.exception}")
 
         assert result.exit_code == 0
         assert "14933053" in result.output
@@ -310,28 +304,27 @@ def test_batch_launch_command_success(runner):
             "slurm_job_id": "14933053",
             "slurm_job_name": "BATCH-job",
             "model_names": ["Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"],
+            "log_dir": "/tmp/test_logs",  # Moved to top level
             "models": {
                 "Meta-Llama-3.1-8B": {
                     "model_name": "Meta-Llama-3.1-8B",
                     "partition": "gpu",
                     "qos": "normal",
                     "time": "1:00:00",
-                    "num_nodes": "1",  # Changed to string
-                    "gpus_per_node": "1",  # Changed to string
-                    "cpus_per_task": "8",  # Changed to string
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs",
                 },
                 "Meta-Llama-3.1-70B": {
                     "model_name": "Meta-Llama-3.1-70B",
                     "partition": "gpu",
                     "qos": "normal",
                     "time": "1:00:00",
-                    "num_nodes": "1",  # Changed to string
-                    "gpus_per_node": "1",  # Changed to string
-                    "cpus_per_task": "8",  # Changed to string
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
                     "mem_per_node": "32G",
-                    "log_dir": "/tmp/test_logs",
                 },
             },
         }

@@ -184,6 +184,9 @@ class ModelLauncher:
         for key, value in self.kwargs.items():
             params[key] = value
 
+        # Check for required fields without default vals, will raise an error if missing
+        utils.check_required_fields(params)
+
         # Validate resource allocation and parallelization settings
         if (
             int(params["gpus_per_node"]) > 1
@@ -204,6 +207,13 @@ class ModelLauncher:
             raise ValueError(
                 "Mismatch between total number of GPUs requested and parallelization settings"
             )
+
+        # Convert gpus_per_node and resource_type to gres
+        resource_type = params.get("resource_type")
+        if resource_type:
+            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
+        else:
+            params["gres"] = f"gpu:{params['gpus_per_node']}"
 
         # Create log directory
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
@@ -276,7 +286,7 @@ class ModelLauncher:
         job_json.touch(exist_ok=True)
 
         self.slurm_script_path.rename(
-            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.slurm"
+            job_log_dir / f"{self.model_name}.{self.slurm_job_id}.sbatch"
         )
 
         with job_json.open("w") as file:
@@ -302,7 +312,13 @@ class BatchModelLauncher:
         List of model names to launch
     """
 
-    def __init__(self, model_names: list[str], batch_config: Optional[str] = None):
+    def __init__(
+        self,
+        model_names: list[str],
+        batch_config: Optional[str] = None,
+        account: Optional[str] = None,
+        work_dir: Optional[str] = None,
+    ):
         self.model_names = model_names
         self.batch_config = batch_config
         self.slurm_job_id = ""
@@ -310,7 +326,7 @@ class BatchModelLauncher:
         self.batch_script_path = Path("")
         self.launch_script_paths: list[Path] = []
         self.model_configs = self._get_model_configurations()
-        self.params = self._get_launch_params()
+        self.params = self._get_launch_params(account, work_dir)
 
     def _get_slurm_job_name(self) -> str:
         """Get the SLURM job name from the model names.
@@ -354,7 +370,9 @@ class BatchModelLauncher:
 
         return model_configs_dict
 
-    def _get_launch_params(self) -> dict[str, Any]:
+    def _get_launch_params(
+        self, account: Optional[str] = None, work_dir: Optional[str] = None
+    ) -> dict[str, Any]:
         """Prepare launch parameters, set log dir, and validate required fields.
 
         Returns
@@ -372,7 +390,12 @@ class BatchModelLauncher:
             "models": {},
             "slurm_job_name": self.slurm_job_name,
             "src_dir": str(SRC_DIR),
+            "account": account,
+            "work_dir": work_dir,
         }
+
+        # Check for required fields without default vals, will raise an error if missing
+        utils.check_required_fields(params)
 
         for i, (model_name, config) in enumerate(self.model_configs.items()):
             params["models"][model_name] = config.model_dump(exclude_none=True)
@@ -400,6 +423,11 @@ class BatchModelLauncher:
                 raise ValueError(
                     f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
                 )
+
+            # Convert gpus_per_node and resource_type to gres
+            params["models"][model_name]["gres"] = (
+                f"gpu:{config.resource_type}:{config.gpus_per_node}"
+            )
 
             # Create log directory
             log_dir = Path(
@@ -528,7 +556,7 @@ class BatchModelLauncher:
 
         # Move the batch script to the job log directory
         self.batch_script_path.rename(
-            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.slurm"
+            main_job_log_dir / f"{self.slurm_job_name}.{self.slurm_job_id}.sbatch"
         )
 
         return BatchLaunchResponse(
@@ -907,7 +935,7 @@ class ModelRegistry:
                 config=config.model_dump(exclude={"model_name", "venv", "log_dir"}),
             )
             available_models.append(info)
-        return available_models
+        return sorted(available_models, key=lambda x: x.name)
 
     def get_single_model_config(self, model_name: str) -> ModelConfig:
         """Get configuration for a specific model.
@@ -928,7 +956,8 @@ class ModelRegistry:
             If the specified model is not found in configuration
         """
         config = next(
-            (c for c in self.model_configs if c.model_name == model_name), None
+            (c for c in self.model_configs if c.model_name == model_name),
+            None,
         )
         if not config:
             raise ModelNotFoundError(f"Model '{model_name}' not found in configuration")

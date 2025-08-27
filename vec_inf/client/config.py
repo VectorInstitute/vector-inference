@@ -5,7 +5,7 @@ configurations, including hardware requirements and model specifications.
 """
 
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Literal
@@ -17,6 +17,7 @@ from vec_inf.client._slurm_vars import (
     MAX_NUM_NODES,
     PARTITION,
     QOS,
+    RESOURCE_TYPE,
 )
 
 
@@ -47,14 +48,18 @@ class ModelConfig(BaseModel):
         Memory allocation per node in GB format (e.g., '32G')
     vocab_size : int
         Size of the model's vocabulary (1-1,000,000)
-    account : Optional[str], optional
+    account : str, optional
         Charge resources used by this job to specified account.
+    work_dir : str, optional
+        Set working directory for the batch job
     qos : Union[QOS, str], optional
         Quality of Service tier for job scheduling
     time : str, optional
         Time limit for the job in HH:MM:SS format
     partition : Union[PARTITION, str], optional
-        GPU partition type for job scheduling
+        Slurm partition for job scheduling
+    resource_type : Union[RESOURCE_TYPE, str], optional
+        Type of resource to request for the job
     venv : str, optional
         Virtual environment or container system to use
     log_dir : Path, optional
@@ -83,13 +88,13 @@ class ModelConfig(BaseModel):
     )
     num_nodes: int = Field(..., gt=0, le=MAX_NUM_NODES, description="Number of nodes")
     cpus_per_task: int = Field(
-        default=cast(int, DEFAULT_ARGS["cpus_per_task"]),
+        default=int(DEFAULT_ARGS["cpus_per_task"]),
         gt=0,
         le=MAX_CPUS_PER_TASK,
         description="CPUs per task",
     )
     mem_per_node: str = Field(
-        default=cast(str, DEFAULT_ARGS["mem_per_node"]),
+        default=DEFAULT_ARGS["mem_per_node"],
         pattern=r"^\d{1,4}G$",
         description="Memory per node",
     )
@@ -97,36 +102,50 @@ class ModelConfig(BaseModel):
     account: Optional[str] = Field(
         default=None, description="Account name for job scheduling"
     )
-    qos: Union[QOS, str] = Field(
-        default=cast(str, DEFAULT_ARGS["qos"]), description="Quality of Service tier"
+    work_dir: Optional[str] = Field(
+        default=None, description="Working directory for the job"
+    )
+    qos: Optional[Union[QOS, str]] = Field(
+        default=DEFAULT_ARGS["qos"] if DEFAULT_ARGS["qos"] != "" else None,
+        description="Quality of Service tier",
     )
     time: str = Field(
-        default=cast(str, DEFAULT_ARGS["time"]),
+        default=DEFAULT_ARGS["time"],
         pattern=r"^\d{2}:\d{2}:\d{2}$",
         description="HH:MM:SS time limit",
     )
-    partition: Union[PARTITION, str] = Field(
-        default=cast(str, DEFAULT_ARGS["partition"]), description="GPU partition type"
+    partition: Optional[Union[PARTITION, str]] = Field(
+        default=DEFAULT_ARGS["partition"] if DEFAULT_ARGS["partition"] != "" else None,
+        description="GPU partition type",
+    )
+    resource_type: Optional[Union[RESOURCE_TYPE, str]] = Field(
+        default=DEFAULT_ARGS["resource_type"]
+        if DEFAULT_ARGS["resource_type"] != ""
+        else None,
+        description="Resource type",
     )
     exclude: Optional[str] = Field(
-        default=None,
+        default=DEFAULT_ARGS["exclude"],
         description="Exclude certain nodes from the resources granted to the job",
     )
     nodelist: Optional[str] = Field(
-        default=None, description="Request a specific list of nodes for deployment"
+        default=DEFAULT_ARGS["nodelist"],
+        description="Request a specific list of nodes for deployment",
     )
     bind: Optional[str] = Field(
-        default=None, description="Additional binds for the singularity container"
+        default=DEFAULT_ARGS["bind"],
+        description="Additional binds for the container",
     )
     venv: str = Field(
-        default="singularity", description="Virtual environment/container system"
+        default=DEFAULT_ARGS["venv"],
+        description="Virtual environment/container system",
     )
     log_dir: Path = Field(
-        default=Path(cast(str, DEFAULT_ARGS["log_dir"])),
+        default=Path(DEFAULT_ARGS["log_dir"]),
         description="Log directory path",
     )
     model_weights_parent_dir: Path = Field(
-        default=Path(cast(str, DEFAULT_ARGS["model_weights_parent_dir"])),
+        default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
     )
     vllm_args: Optional[dict[str, Any]] = Field(

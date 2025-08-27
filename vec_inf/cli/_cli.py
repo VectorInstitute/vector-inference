@@ -45,14 +45,19 @@ def cli() -> None:
     pass
 
 
-@cli.command("launch")
+@cli.command("launch", help="Launch a model on the cluster.")
 @click.argument("model-name", type=str, nargs=1)
 @click.option("--model-family", type=str, help="The model family")
 @click.option("--model-variant", type=str, help="The model variant")
 @click.option(
     "--partition",
     type=str,
-    help="Type of compute partition",
+    help="Type of Slurm partition",
+)
+@click.option(
+    "--resource-type",
+    type=str,
+    help="Type of resource to request for the job",
 )
 @click.option(
     "--num-nodes",
@@ -66,8 +71,15 @@ def cli() -> None:
 )
 @click.option(
     "--account",
+    "-A",
     type=str,
     help="Charge resources used by this job to specified account.",
+)
+@click.option(
+    "--work-dir",
+    "-D",
+    type=str,
+    help="Set working directory for the batch job",
 )
 @click.option(
     "--qos",
@@ -87,7 +99,7 @@ def cli() -> None:
 @click.option(
     "--bind",
     type=str,
-    help="Additional binds for the singularity container as a comma separated list of bind paths",
+    help="Additional binds for the container as a comma separated list of bind paths",
 )
 @click.option(
     "--time",
@@ -136,13 +148,17 @@ def launch(
         - model_variant : str, optional
             Specific variant of the model
         - partition : str, optional
-            Type of compute partition
+            Type of Slurm partition
+        - resource_type : str, optional
+            Type of resource to request for the job
         - num_nodes : int, optional
             Number of nodes to use
         - gpus_per_node : int, optional
             Number of GPUs per node
         - account : str, optional
             Charge resources used by this job to specified account
+        - work_dir : str, optional
+            Set working directory for the batch job
         - qos : str, optional
             Quality of service tier
         - exclude : str, optional
@@ -150,7 +166,7 @@ def launch(
         - nodelist : str, optional
             Request a specific list of nodes for deployment
         - bind : str, optional
-            Additional binds for the singularity container
+            Additional binds for the container as a comma separated list of bind paths
         - time : str, optional
             Time limit for job
         - venv : str, optional
@@ -196,12 +212,24 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("batch-launch")
+@cli.command("batch-launch", help="Launch multiple models in a batch.")
 @click.argument("model-names", type=str, nargs=-1)
 @click.option(
     "--batch-config",
     type=str,
     help="Model configuration for batch launch",
+)
+@click.option(
+    "--account",
+    "-A",
+    type=str,
+    help="Charge resources used by this job to specified account.",
+)
+@click.option(
+    "--work-dir",
+    "-D",
+    type=str,
+    help="Set working directory for the batch job",
 )
 @click.option(
     "--json-mode",
@@ -211,6 +239,8 @@ def launch(
 def batch_launch(
     model_names: tuple[str, ...],
     batch_config: Optional[str] = None,
+    account: Optional[str] = None,
+    work_dir: Optional[str] = None,
     json_mode: Optional[bool] = False,
 ) -> None:
     """Launch multiple models in a batch.
@@ -233,12 +263,12 @@ def batch_launch(
         # Start the client and launch models in batch mode
         client = VecInfClient()
         batch_launch_response = client.batch_launch_models(
-            list(model_names), batch_config
+            list(model_names), batch_config, account, work_dir
         )
 
         # Display batch launch information
         if json_mode:
-            click.echo(batch_launch_response.config)
+            click.echo(json.dumps(batch_launch_response.config, indent=4))
         else:
             batch_launch_formatter = BatchLaunchResponseFormatter(
                 batch_launch_response.config
@@ -252,7 +282,7 @@ def batch_launch(
         raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
 
-@cli.command("status")
+@cli.command("status", help="Check the status of a running model on the cluster.")
 @click.argument("slurm_job_id", type=str, nargs=1)
 @click.option(
     "--json-mode",
@@ -292,7 +322,7 @@ def status(slurm_job_id: str, json_mode: bool = False) -> None:
         raise click.ClickException(f"Status check failed: {str(e)}") from e
 
 
-@cli.command("shutdown")
+@cli.command("shutdown", help="Shutdown a running model on the cluster.")
 @click.argument("slurm_job_id", type=str, nargs=1)
 def shutdown(slurm_job_id: str) -> None:
     """Shutdown a running model on the cluster.
@@ -315,7 +345,7 @@ def shutdown(slurm_job_id: str) -> None:
         raise click.ClickException(f"Shutdown failed: {str(e)}") from e
 
 
-@cli.command("list")
+@cli.command("list", help="List available models or get specific model configuration.")
 @click.argument("model-name", required=False)
 @click.option(
     "--json-mode",
@@ -353,7 +383,9 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
         raise click.ClickException(f"List models failed: {str(e)}") from e
 
 
-@cli.command("metrics")
+@cli.command(
+    "metrics", help="Stream real-time performance metrics from the model endpoint."
+)
 @click.argument("slurm_job_id", type=str, nargs=1)
 def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
@@ -405,7 +437,7 @@ def metrics(slurm_job_id: str) -> None:
         raise click.ClickException(f"Metrics check failed: {str(e)}") from e
 
 
-@cli.command("cleanup")
+@cli.command("cleanup", help="Clean up log files based on optional filters.")
 @click.option("--log-dir", type=str, help="Path to SLURM log directory")
 @click.option("--model-family", type=str, help="Filter by model family")
 @click.option("--model-name", type=str, help="Filter by model name")
