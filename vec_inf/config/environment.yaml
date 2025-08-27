@@ -1,6 +1,5 @@
 paths:
   image_path: "/model-weights/vec-inf-shared/vector-inference_latest.sif"
-  vllm_nccl_so_path: "/vec-inf/nccl/libnccl.so.2.18.1"
 
 containerization:
   module_load_cmd: "module load apptainer"
@@ -23,6 +22,10 @@ default_args:
   qos: ""
   partition: ""
   resource_type: ""
+  exclude: ""
+  nodelist: ""
+  bind: ""
+  venv: "apptainer"
   data_type: "auto"
   log_dir: "~/.vec-inf-logs"
   model_weights_parent_dir: "/model-weights"

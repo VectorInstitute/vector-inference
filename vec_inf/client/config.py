@@ -125,17 +125,20 @@ class ModelConfig(BaseModel):
         description="Resource type",
     )
     exclude: Optional[str] = Field(
-        default=None,
+        default=DEFAULT_ARGS["exclude"],
         description="Exclude certain nodes from the resources granted to the job",
     )
     nodelist: Optional[str] = Field(
-        default=None, description="Request a specific list of nodes for deployment"
+        default=DEFAULT_ARGS["nodelist"],
+        description="Request a specific list of nodes for deployment",
     )
     bind: Optional[str] = Field(
-        default=None, description="Additional binds for the singularity container"
+        default=DEFAULT_ARGS["bind"],
+        description="Additional binds for the container",
     )
     venv: str = Field(
-        default="singularity", description="Virtual environment/container system"
+        default=DEFAULT_ARGS["venv"],
+        description="Virtual environment/container system",
     )
     log_dir: Path = Field(
         default=Path(DEFAULT_ARGS["log_dir"]),
