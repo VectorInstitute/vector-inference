@@ -99,7 +99,7 @@ def cli() -> None:
 @click.option(
     "--bind",
     type=str,
-    help="Additional binds for the singularity container as a comma separated list of bind paths",
+    help="Additional binds for the container as a comma separated list of bind paths",
 )
 @click.option(
     "--time",
@@ -166,7 +166,7 @@ def launch(
         - nodelist : str, optional
             Request a specific list of nodes for deployment
         - bind : str, optional
-            Additional binds for the singularity container
+            Additional binds for the container as a comma separated list of bind paths
         - time : str, optional
             Time limit for job
         - venv : str, optional

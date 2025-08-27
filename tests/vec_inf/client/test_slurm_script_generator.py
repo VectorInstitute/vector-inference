@@ -71,7 +71,7 @@ class TestSlurmScriptGenerator:
 
         assert generator.params == basic_params
         assert not generator.is_multinode
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
@@ -81,7 +81,7 @@ class TestSlurmScriptGenerator:
 
         assert generator.params == multinode_params
         assert generator.is_multinode
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
 
@@ -90,7 +90,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(singularity_params)
 
         assert generator.params == singularity_params
-        assert generator.use_singularity
+        assert generator.use_container
         assert not generator.is_multinode
         assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
@@ -102,7 +102,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(params)
 
         assert generator.params == params
-        assert generator.use_singularity
+        assert generator.use_container
         assert not generator.is_multinode
         assert generator.additional_binds == ""
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
@@ -307,7 +307,7 @@ class TestBatchSlurmScriptGenerator:
         generator = BatchSlurmScriptGenerator(batch_params)
 
         assert generator.params == batch_params
-        assert not generator.use_singularity
+        assert not generator.use_container
         assert len(generator.script_paths) == 0
         assert "model1" in generator.params["models"]
         assert "model2" in generator.params["models"]
@@ -316,7 +316,7 @@ class TestBatchSlurmScriptGenerator:
         """Test initialization with Singularity configuration."""
         generator = BatchSlurmScriptGenerator(batch_singularity_params)
 
-        assert generator.use_singularity
+        assert generator.use_container
         assert (
             generator.params["models"]["model1"]["additional_binds"]
             == " --bind /scratch:/scratch,/data:/data"
@@ -335,7 +335,7 @@ class TestBatchSlurmScriptGenerator:
 
         generator = BatchSlurmScriptGenerator(params)
 
-        assert generator.use_singularity
+        assert generator.use_container
         assert generator.params["models"]["model1"]["additional_binds"] == ""
         assert generator.params["models"]["model2"]["additional_binds"] == ""
 

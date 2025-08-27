@@ -207,7 +207,7 @@ class LaunchOptions:
     node_list : str, optional
         Request a specific list of nodes for deployment
     bind : str, optional
-        Additional binds for the singularity container
+        Additional binds for the container as a comma separated list of bind paths
     vocab_size : int, optional
         Size of model vocabulary
     data_type : str, optional

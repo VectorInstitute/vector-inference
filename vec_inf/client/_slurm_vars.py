@@ -52,12 +52,11 @@ def load_env_config() -> dict[str, Any]:
 _config = load_env_config()
 
 # Extract path values
-SINGULARITY_IMAGE = _config["paths"]["image_path"]
-VLLM_NCCL_SO_PATH = _config["paths"]["vllm_nccl_so_path"]
+IMAGE_PATH = _config["paths"]["image_path"]
 
 # Extract containerization info
-SINGULARITY_LOAD_CMD = _config["containerization"]["module_load_cmd"]
-SINGULARITY_MODULE_NAME = _config["containerization"]["module_name"]
+CONTAINER_LOAD_CMD = _config["containerization"]["module_load_cmd"]
+CONTAINER_MODULE_NAME = _config["containerization"]["module_name"]
 
 # Extract limits
 MAX_GPUS_PER_NODE = _config["limits"]["max_gpus_per_node"]

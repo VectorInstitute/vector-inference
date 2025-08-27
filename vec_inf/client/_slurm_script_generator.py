@@ -21,7 +21,7 @@ class SlurmScriptGenerator:
 
     This class handles the generation of Slurm scripts for both single-node and
     multi-node configurations, supporting different virtualization environments
-    (venv or singularity).
+    (venv or singularity/apptainer).
 
     Parameters
     ----------
@@ -32,7 +32,9 @@ class SlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
-        self.use_singularity = self.params["venv"] == "singularity"
+        self.use_container = (
+            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
+        )
         self.additional_binds = self.params.get("bind", "")
         if self.additional_binds:
             self.additional_binds = f" --bind {self.additional_binds}"
@@ -82,8 +84,8 @@ class SlurmScriptGenerator:
             Server initialization script content.
         """
         server_script = ["\n"]
-        if self.use_singularity:
-            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["singularity_setup"]))
+        if self.use_container:
+            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
         server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"]))
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
@@ -92,10 +94,10 @@ class SlurmScriptGenerator:
             server_setup_str = "\n".join(
                 SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
             ).format(gpus_per_node=self.params["gpus_per_node"])
-            if self.use_singularity:
+            if self.use_container:
                 server_setup_str = server_setup_str.replace(
-                    "SINGULARITY_PLACEHOLDER",
-                    SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
+                    "CONTAINER_PLACEHOLDER",
+                    SLURM_SCRIPT_TEMPLATE["container_command"].format(
                         model_weights_path=self.model_weights_path,
                         additional_binds=self.additional_binds,
                     ),
@@ -117,7 +119,7 @@ class SlurmScriptGenerator:
         """Generate the vLLM server launch command.
 
         Creates the command to launch the vLLM server, handling different virtualization
-        environments (venv or singularity).
+        environments (venv or singularity/apptainer).
 
         Returns
         -------
@@ -125,9 +127,9 @@ class SlurmScriptGenerator:
             Server launch command.
         """
         launcher_script = ["\n"]
-        if self.use_singularity:
+        if self.use_container:
             launcher_script.append(
-                SLURM_SCRIPT_TEMPLATE["singularity_command"].format(
+                SLURM_SCRIPT_TEMPLATE["container_command"].format(
                     model_weights_path=self.model_weights_path,
                     additional_binds=self.additional_binds,
                 )
@@ -181,7 +183,9 @@ class BatchSlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.script_paths: list[Path] = []
-        self.use_singularity = self.params["venv"] == "singularity"
+        self.use_container = (
+            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
+        )
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = ""
             if self.params["models"][model_name].get("bind"):
@@ -225,10 +229,8 @@ class BatchSlurmScriptGenerator:
         script_content = []
         model_params = self.params["models"][model_name]
         script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["shebang"])
-        if self.use_singularity:
-            script_content.append(
-                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["singularity_setup"]
-            )
+        if self.use_container:
+            script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_setup"])
         script_content.append("\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["env_vars"]))
         script_content.append(
             "\n".join(
@@ -243,9 +245,9 @@ class BatchSlurmScriptGenerator:
                 model_name=model_name,
             )
         )
-        if self.use_singularity:
+        if self.use_container:
             script_content.append(
-                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["singularity_command"].format(
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
                     model_weights_path=model_params["model_weights_path"],
                     additional_binds=model_params["additional_binds"],
                 )
