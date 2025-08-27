@@ -149,12 +149,10 @@ def launch(
 ) -> None:
     """Launch a model on the cluster.
 
-    \b
     Parameters
     ----------
     model_name : str
         Name of the model to launch
-    \f
     **cli_kwargs : dict
         Additional launch options including:
         - model_family : str, optional
@@ -230,7 +228,7 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("batch-launch", help="Launch multiple models in a batch.")
+@cli.command("batch-launch", help="Launch multiple models in a batch, separate model names with spaces.")
 @click.argument("model-names", type=str, nargs=-1)
 @click.option(
     "--batch-config",
@@ -263,12 +261,10 @@ def batch_launch(
 ) -> None:
     """Launch multiple models in a batch.
 
-    \b
     Parameters
     ----------
     model_names : tuple[str, ...]
         Names of the models to launch
-    \f
     batch_config : str
         Model configuration for batch launch
     json_mode : bool, default=False
@@ -312,12 +308,10 @@ def batch_launch(
 def status(slurm_job_id: str, json_mode: bool = False) -> None:
     """Get the status of a running model on the cluster.
 
-    \b
     Parameters
     ----------
     slurm_job_id : str
         ID of the SLURM job to check
-    \f
     json_mode : bool, default=False
         Whether to output in JSON format
 
@@ -349,12 +343,10 @@ def status(slurm_job_id: str, json_mode: bool = False) -> None:
 def shutdown(slurm_job_id: str) -> None:
     """Shutdown a running model on the cluster.
 
-    \b
     Parameters
     ----------
     slurm_job_id : str
         ID of the SLURM job to shut down
-    \f
 
     Raises
     ------
@@ -379,12 +371,10 @@ def shutdown(slurm_job_id: str) -> None:
 def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> None:
     """List all available models, or get default setup of a specific model.
 
-    \b
     Parameters
     ----------
     model_name : str, optional
         Name of specific model to get information for
-    \f
     json_mode : bool, default=False
         Whether to output in JSON format
 
@@ -416,12 +406,10 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
 def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
 
-    \b
     Parameters
     ----------
     slurm_job_id : str
         ID of the SLURM job to monitor
-    \f
 
     Raises
     ------
@@ -488,7 +476,6 @@ def cleanup_logs_cli(
 ) -> None:
     """Clean up log files based on optional filters.
 
-    \f
 
     Parameters
     ----------
@@ -504,7 +491,7 @@ def cleanup_logs_cli(
         If provided, only delete logs with job ID less than this value.
     dry_run : bool
         If True, return matching files without deleting them.
-    """  # NOQA: D301, the \f prevents click from printing options twice.
+    """  
     try:
         client = VecInfClient()
         matched = client.cleanup_logs(
