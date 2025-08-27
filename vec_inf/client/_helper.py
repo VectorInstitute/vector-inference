@@ -61,7 +61,7 @@ class ModelLauncher:
         self.kwargs = kwargs or {}
         self.slurm_job_id = ""
         self.slurm_script_path = Path("")
-        self.model_config = self._get_model_configuration()
+        self.model_config = self._get_model_configuration(self.kwargs.get("config"))
         self.params = self._get_launch_params()
 
     def _warn(self, message: str) -> None:
@@ -74,8 +74,13 @@ class ModelLauncher:
         """
         warnings.warn(message, UserWarning, stacklevel=2)
 
-    def _get_model_configuration(self) -> ModelConfig:
+    def _get_model_configuration(self, config_path: str | None = None) -> ModelConfig:
         """Load and validate model configuration.
+
+        Parameters
+        ----------
+        config_path : str | None, optional
+            Path to a yaml file with custom model config to use in place of the default
 
         Returns
         -------
@@ -89,7 +94,7 @@ class ModelLauncher:
         ModelConfigurationError
             If model configuration is not found and weights don't exist
         """
-        model_configs = utils.load_config()
+        model_configs = utils.load_config(config_path=config_path)
         config = next(
             (m for m in model_configs if m.model_name == self.model_name), None
         )
@@ -158,6 +163,38 @@ class ModelLauncher:
                 vllm_args[arg.strip()] = True
         return vllm_args
 
+    def _process_env_vars(self, env_arg: str) -> dict[str, str]:
+        """Process the env string into a dictionary of environment variables.
+
+        Parameters
+        ----------
+        env_arg : str
+            String containing comma separated list of environment variable definitions
+            (eg. MY_VAR=1), file paths containing environment variable definitions
+            (separated by newlines), or a combination of both
+            (eg. 'MY_VAR=5,my_env.env')
+
+        Returns
+        -------
+        dict[str, str]
+            Processed environment variables as key-value pairs.
+        """
+        env_vars: dict[str, str] = {}
+        for arg in env_arg.split(","):
+            if "=" in arg:  # Arg is an env var definition
+                key, value = arg.split("=")
+                env_vars[key.strip()] = value.strip()
+            else:  # Arg is a path to a file
+                with open(arg, "r") as file:
+                    lines = [line.rstrip() for line in file]
+                for line in lines:
+                    if "=" in line:
+                        key, value = line.split("=")
+                        env_vars[key.strip()] = value.strip()
+                    else:
+                        print(f"WARNING: Could not parse env var: {line}")
+        return env_vars
+
     def _get_launch_params(self) -> dict[str, Any]:
         """Prepare launch parameters, set log dir, and validate required fields.
 
@@ -180,6 +217,12 @@ class ModelLauncher:
             for key, value in vllm_args.items():
                 params["vllm_args"][key] = value
             del self.kwargs["vllm_args"]
+
+        if self.kwargs.get("env"):
+            env_vars = self._process_env_vars(self.kwargs["env"])
+            for key, value in env_vars.items():
+                params["env"][key] = str(value)
+            del self.kwargs["env"]
 
         for key, value in self.kwargs.items():
             params[key] = value
@@ -233,7 +276,7 @@ class ModelLauncher:
 
         # Convert path to string for JSON serialization
         for field in params:
-            if field == "vllm_args":
+            if field in ["vllm_args", "env"]:
                 continue
             params[field] = str(params[field])
 

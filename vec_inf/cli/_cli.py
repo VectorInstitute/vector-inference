@@ -131,6 +131,16 @@ def cli() -> None:
     is_flag=True,
     help="Output in JSON string",
 )
+@click.option(
+    "--env",
+    type=str,
+    help="Environment variables to be set. Seperate variables with commas. Can also include path to a file containing environment variables seperated by newlines. e.g. --env 'TRITON_CACHE_DIR=/scratch/.cache/triton,my_custom_vars_file.env'",
+)
+@click.option(
+    "--config",
+    type=str,
+    help="Path to a model config yaml file to use in place of the default",
+)
 def launch(
     model_name: str,
     **cli_kwargs: Optional[Union[str, int, float, bool]],
@@ -177,6 +187,10 @@ def launch(
             Path to model weights directory
         - vllm_args : str, optional
             vLLM engine arguments
+        - env : str, optional
+            Environment variables
+        - config : str, optional
+            Path to custom model config yaml file
         - json_mode : bool, optional
             Output in JSON format
 
@@ -212,7 +226,10 @@ def launch(
         raise click.ClickException(f"Launch failed: {str(e)}") from e
 
 
-@cli.command("batch-launch", help="Launch multiple models in a batch.")
+@cli.command(
+    "batch-launch",
+    help="Launch multiple models in a batch, separate model names with spaces.",
+)
 @click.argument("model-names", type=str, nargs=-1)
 @click.option(
     "--batch-config",

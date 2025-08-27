@@ -87,6 +87,11 @@ class LaunchResponseFormatter:
         for arg, value in self.params["vllm_args"].items():
             table.add_row(f"  {arg}:", str(value))
 
+        # Add Environment Variable Configuration Details
+        table.add_row("Environment Variables", style="magenta")
+        for arg, value in self.params["env"].items():
+            table.add_row(f"  {arg}:", str(value))
+
         return table
 
 

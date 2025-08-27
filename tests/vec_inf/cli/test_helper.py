@@ -36,6 +36,7 @@ class TestLaunchResponseFormatter:
             "model_weights_parent_dir": "/model-weights",
             "log_dir": "/tmp/logs",
             "vllm_args": {"max_model_len": 8192, "enable_prefix_caching": True},
+            "env": {"CACHE": "/cache"},
         }
 
         formatter = LaunchResponseFormatter(model_name, params)
@@ -63,6 +64,7 @@ class TestLaunchResponseFormatter:
             "model_weights_parent_dir": "/weights",
             "log_dir": "/logs",
             "vllm_args": {},
+            "env": {},
         }
 
         formatter = LaunchResponseFormatter(model_name, params)
