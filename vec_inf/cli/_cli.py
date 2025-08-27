@@ -383,7 +383,9 @@ def list_models(model_name: Optional[str] = None, json_mode: bool = False) -> No
         raise click.ClickException(f"List models failed: {str(e)}") from e
 
 
-@cli.command("metrics", help="Stream real-time performance metrics from the model endpoint.")
+@cli.command(
+    "metrics", help="Stream real-time performance metrics from the model endpoint."
+)
 @click.argument("slurm_job_id", type=str, nargs=1)
 def metrics(slurm_job_id: str) -> None:
     """Stream real-time performance metrics from the model endpoint.
