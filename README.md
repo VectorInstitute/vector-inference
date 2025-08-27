@@ -12,7 +12,7 @@
 
 This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using [vLLM](https://docs.vllm.ai/en/latest/). **This package runs natively on the Vector Institute cluster environments**. To adapt to other environments, follow the instructions in [Installation](#installation).
 
-**NOTE**: Supported models on Killarney are tracked [here](vec_inf/config/README.md)
+**NOTE**: Supported models on Killarney are tracked [here](./MODEL_TRACKING.md)
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
@@ -42,72 +42,13 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 ```
 You should see an output like the following:
 
-<img width="600" alt="launch_image" src="https://github.com/user-attachments/assets/a72a99fd-4bf2-408e-8850-359761d96c4f">
+<img width="720" alt="launch_image" src="https://github.com/user-attachments/assets/c1e0c60c-cf7a-49ed-a426-fdb38ebf88ee" />
 
 **NOTE**: On Vector Killarney Cluster environment, the following fields are required:
   * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
   * `--work-dir`, `-D`: A working directory other than your home directory, this argument can be set to default by seeting environment variable `VEC_INF_WORK_DIR`.
 
-#### Overrides
-
-Models that are already supported by `vec-inf` would be launched using the cached configuration (set in [slurm_vars.py](vec_inf/client/slurm_vars.py)) or [default configuration](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be
-overriden. For example, if `resource-type` is to be overriden:
-
-```bash
-vec-inf launch Meta-Llama-3.1-8B-Instruct --resource-type <new_resource_type>
-```
-
-To overwrite default `vllm serve` arguments, you can specify the arguments in a comma separated string:
-
-```bash
-vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
-```
-
-For the full list of `vllm serve` arguments, you can find them [here](https://docs.vllm.ai/en/stable/cli/serve.html), make sure you select the correct vLLM version.
-
-#### Custom models
-
-You can also launch your own custom model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
-* Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
-* Your model weights directory should contain HuggingFace format weights.
-* You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable `VEC_INF_MODEL_CONFIG` (This one will supersede `VEC_INF_CONFIG_DIR` if that is also set). Check the [default parameters](vec_inf/config/models.yaml) file for the format of the config file. All the parameters for the model should be specified in that config file.
-  * Add your model configuration to the cached `models.yaml` in your cluster environment (if you have write access to the cached configuration directory).
-  * Using launch command options to specify your model setup.
-* For other model launch parameters you can reference the default values for similar models using the [`list` command ](#list-command).
-
-Here is an example to deploy a custom [Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M) model which is not
-supported in the default list of models using a user custom config. In this case, the model weights are assumed to be downloaded to
-a `model-weights` directory inside the user's home directory. The weights directory of the model follows the naming convention so it
-would be named `Qwen2.5-7B-Instruct-1M`. The following yaml file would need to be created, lets say it is named `/h/<username>/my-model-config.yaml`.
-
-```yaml
-models:
-  Qwen2.5-7B-Instruct-1M:
-    model_family: Qwen2.5
-    model_variant: 7B-Instruct-1M
-    model_type: LLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s # You can also leave this field empty if your environment has a default type of resource to use
-    model_weights_parent_dir: /h/<username>/model-weights
-    vllm_args:
-      --max-model-len: 1010000
-      --max-num-seqs: 256
-```
-
-You would then set the `VEC_INF_MODEL_CONFIG` path using:
-
-```bash
-export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
-```
-
-**NOTE**
-* There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](vec_inf/client/config.py) for details.
-* Check [`vllm serve`](https://docs.vllm.ai/en/stable/cli/serve.html) for the full list of available vLLM engine arguments, the default parallel size for any parallelization is default to 1, so none of the sizes were set specifically in this example
-* For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`
+Models that are already supported by `vec-inf` would be launched using the cached configuration (set in [slurm_vars.py](vec_inf/client/slurm_vars.py)) or [default configuration](vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. You can also launch your own custom model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html). For detailed instructions on how to customize your model launch, check out the [`launch` command section in User Guide](https://vectorinstitute.github.io/vector-inference/latest/user_guide/#launch-command)
 
 #### Other commands
 
