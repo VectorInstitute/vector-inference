@@ -334,9 +334,9 @@ Once the inference server is ready, you can start sending in inference requests.
 
 If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
 ```bash
-ssh -L 8081:172.17.8.29:8081 username@v.vectorinstitute.ai -N
+ssh -L 8081:10.1.1.29:8081 username@v.vectorinstitute.ai -N
 ```
-Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment
+The example provided above is for the Vector Killarney cluster, change the variables accordingly for your environment. The IP address for the compute nodes on Killarney follow `10.1.1.XX` pattern, where `XX` is the GPU number (`kn029` -> `29` in this example). Similarly, for Bon Echo it's `172.17.8.XX`, where `XX` is from `gpuXX`.
 
 ## Python API Usage
 
