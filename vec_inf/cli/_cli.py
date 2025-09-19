@@ -18,6 +18,7 @@ metrics
     Stream real-time performance metrics
 """
 
+import asyncio
 import json
 import time
 from typing import Optional, Union
@@ -228,7 +229,7 @@ def status(
     try:
         # Start the client and get model inference server status
         client = VecInfClient()
-        status_response = client.get_status(slurm_job_id, log_dir)
+        status_response = asyncio.run(client.get_status(slurm_job_id, log_dir))
         # Display status information
         status_formatter = StatusResponseFormatter(status_response)
         if json_mode:

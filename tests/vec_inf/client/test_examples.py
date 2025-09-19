@@ -1,7 +1,7 @@
 """Tests to verify the API examples function properly."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -17,12 +17,12 @@ def mock_client():
     mock_model1 = MagicMock()
     mock_model1.name = "test-model"
     mock_model1.family = "test-family"
-    mock_model1.type = ModelType.LLM
+    mock_model1.model_type = ModelType.LLM
 
     mock_model2 = MagicMock()
     mock_model2.name = "test-model-2"
     mock_model2.family = "test-family-2"
-    mock_model2.type = ModelType.VLM
+    mock_model2.model_type = ModelType.VLM
 
     client.list_models.return_value = [mock_model1, mock_model2]
 
@@ -32,9 +32,9 @@ def mock_client():
     client.launch_model.return_value = launch_response
 
     status_response = MagicMock()
-    status_response.status = ModelStatus.READY
+    status_response.server_status = ModelStatus.READY
     status_response.base_url = "http://gpu123:8080/v1"
-    client.wait_until_ready.return_value = status_response
+    client.wait_until_ready = AsyncMock(return_value=status_response)
 
     metrics_response = MagicMock()
     metrics_response.metrics = {"throughput": "10.5"}
@@ -67,7 +67,7 @@ def test_api_usage_example():
     # Set up mock responses
     mock_model = MagicMock()
     mock_model.name = "Meta-Llama-3.1-8B-Instruct"
-    mock_model.type = ModelType.LLM
+    mock_model.model_type = ModelType.LLM
     mock_client.list_models.return_value = [mock_model]
 
     launch_response = MagicMock()
@@ -75,9 +75,9 @@ def test_api_usage_example():
     mock_client.launch_model.return_value = launch_response
 
     status_response = MagicMock()
-    status_response.status = ModelStatus.READY
+    status_response.server_status = ModelStatus.READY
     status_response.base_url = "http://gpu123:8080/v1"
-    mock_client.wait_until_ready.return_value = status_response
+    mock_client.wait_until_ready = AsyncMock(return_value=status_response)
 
     metrics_response = MagicMock()
     metrics_response.metrics = {"throughput": "10.5"}
@@ -89,11 +89,11 @@ def test_api_usage_example():
         patch("builtins.print"),
         example_path.open() as f,
     ):
-        exec(f.read())
+        exec(f.read(), {"__name__": "__main__", "__builtins__": __builtins__})
 
     # Verify the client methods were called
     mock_client.list_models.assert_called_once()
     mock_client.launch_model.assert_called_once()
-    mock_client.wait_until_ready.assert_called_once()
+    mock_client.wait_until_ready.assert_awaited_once()
     mock_client.get_metrics.assert_called_once()
     mock_client.shutdown_model.assert_called_once()

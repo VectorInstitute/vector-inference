@@ -139,15 +139,15 @@ def test_load_config_default_only():
 
     # Verify at least one known model exists
     model_names = {m.model_name for m in configs}
-    assert "c4ai-command-r-plus" in model_names
+    assert "Qwen3-14B" in model_names
 
     # Verify full configuration of a sample model
-    model = next(m for m in configs if m.model_name == "c4ai-command-r-plus")
-    assert model.model_family == "c4ai-command-r"
+    model = next(m for m in configs if m.model_name == "Qwen3-14B")
+    assert model.model_family == "Qwen3"
     assert model.model_type == "LLM"
-    assert model.gpus_per_node == 4
-    assert model.num_nodes == 2
-    assert model.vllm_args["--max-model-len"] == 8192
+    assert model.gpus_per_node == 1
+    assert model.num_nodes == 1
+    assert model.vllm_args["--max-model-len"] == 40960
 
 
 def test_load_config_with_user_override(tmp_path, monkeypatch):
@@ -156,7 +156,7 @@ def test_load_config_with_user_override(tmp_path, monkeypatch):
     user_config = tmp_path / "user_config.yaml"
     user_config.write_text("""\
 models:
-  c4ai-command-r-plus:
+  Qwen3-14B:
     gpus_per_node: 8
   new-model:
     model_family: new-family
@@ -174,9 +174,9 @@ models:
         config_map = {m.model_name: m for m in configs}
 
     # Verify override (merged with defaults)
-    assert config_map["c4ai-command-r-plus"].gpus_per_node == 8
-    assert config_map["c4ai-command-r-plus"].num_nodes == 2
-    assert config_map["c4ai-command-r-plus"].vocab_size == 256000
+    assert config_map["Qwen3-14B"].gpus_per_node == 8
+    assert config_map["Qwen3-14B"].num_nodes == 1
+    assert config_map["Qwen3-14B"].vocab_size == 151936
 
     # Verify new model
     new_model = config_map["new-model"]

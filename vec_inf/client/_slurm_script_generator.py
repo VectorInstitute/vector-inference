@@ -7,6 +7,7 @@ in both single-node and multi-node configurations.
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from vec_inf.client._client_vars import (
     SLURM_JOB_CONFIG_ARGS,
@@ -167,10 +168,11 @@ class SlurmScriptGenerator:
         Path
             Path to the generated SLURM script file.
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        unique_suffix = uuid4().hex[:8]
         script_path: Path = (
             Path(self.params["log_dir"])
-            / f"launch_{self.params['model_name']}_{timestamp}.slurm"
+            / f"launch_{self.params['model_name']}_{timestamp}_{unique_suffix}.slurm"
         )
 
         content = self._generate_script_content()

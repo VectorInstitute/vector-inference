@@ -115,14 +115,18 @@ For more details on the usage of these commands, refer to the [User Guide](https
 Example:
 
 ```python
+>>> import asyncio
 >>> from vec_inf.api import VecInfClient
->>> client = VecInfClient()
->>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
->>> job_id = response.slurm_job_id
->>> status = client.get_status(job_id)
->>> if status.status == ModelStatus.READY:
-...     print(f"Model is ready at {status.base_url}")
->>> client.shutdown_model(job_id)
+>>> async def main():
+...     client = VecInfClient()
+...     response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
+...     job_id = response.slurm_job_id
+...     status = await client.get_status(job_id)
+...     if status.server_status == ModelStatus.READY:
+...         print(f"Model is ready at {status.base_url}")
+...     await client.wait_until_ready(job_id)
+...     client.shutdown_model(job_id)
+>>> asyncio.run(main())
 ```
 
 For details on the usage of the API, refer to the [API Reference](https://vectorinstitute.github.io/vector-inference/api/)

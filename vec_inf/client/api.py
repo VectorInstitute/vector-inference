@@ -10,6 +10,7 @@ vec_inf.client._helper : Helper classes for model inference server management
 vec_inf.client.models : Data models for API responses
 """
 
+import asyncio
 import time
 import warnings
 from typing import Any, Optional, Union
@@ -62,14 +63,18 @@ class VecInfClient:
 
     Examples
     --------
+    >>> import asyncio
     >>> from vec_inf.api import VecInfClient
-    >>> client = VecInfClient()
-    >>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
-    >>> job_id = response.slurm_job_id
-    >>> status = client.get_status(job_id)
-    >>> if status.status == ModelStatus.READY:
-    ...     print(f"Model is ready at {status.base_url}")
-    >>> client.shutdown_model(job_id)
+    >>> async def main():
+    ...     client = VecInfClient()
+    ...     response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
+    ...     job_id = response.slurm_job_id
+    ...     status = await client.get_status(job_id)
+    ...     if status.server_status == ModelStatus.READY:
+    ...         print(f"Model is ready at {status.base_url}")
+    ...     await client.wait_until_ready(job_id)
+    ...     client.shutdown_model(job_id)
+    >>> asyncio.run(main())
     """
 
     def __init__(self) -> None:
@@ -145,7 +150,7 @@ class VecInfClient:
         model_launcher = ModelLauncher(model_name, options_dict)
         return model_launcher.launch()
 
-    def get_status(
+    async def get_status(
         self, slurm_job_id: int, log_dir: Optional[str] = None
     ) -> StatusResponse:
         """Get the status of a running model.
@@ -167,6 +172,14 @@ class VecInfClient:
             - Base URL (if ready)
             - Error information (if failed)
         """
+        return await asyncio.to_thread(
+            self._get_status_sync, slurm_job_id, log_dir
+        )
+
+    def _get_status_sync(
+        self, slurm_job_id: int, log_dir: Optional[str] = None
+    ) -> StatusResponse:
+        """Blocking helper that retrieves model status."""
         model_status_monitor = ModelStatusMonitor(slurm_job_id, log_dir)
         return model_status_monitor.process_model_status()
 
@@ -230,7 +243,7 @@ class VecInfClient:
             raise SlurmJobError(f"Failed to shutdown model: {stderr}")
         return True
 
-    def wait_until_ready(
+    async def wait_until_ready(
         self,
         slurm_job_id: int,
         timeout_seconds: int = 1800,
@@ -273,7 +286,7 @@ class VecInfClient:
         start_time = time.time()
 
         while True:
-            status_info = self.get_status(slurm_job_id, log_dir)
+            status_info = await self.get_status(slurm_job_id, log_dir)
 
             if status_info.server_status == ModelStatus.READY:
                 return status_info
@@ -299,4 +312,4 @@ class VecInfClient:
                 )
 
             # Wait before checking again
-            time.sleep(poll_interval_seconds)
+            await asyncio.sleep(poll_interval_seconds)

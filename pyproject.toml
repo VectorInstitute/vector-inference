@@ -12,10 +12,14 @@ dependencies = [
     "rich>=13.7.0",
     "pydantic>=2.10.6",
     "pyyaml>=6.0.2",
+    "pytest-asyncio>=0.26.0",
+    "backoff>=2.2.1",
+    "basedpyright>=1.31.4",
 ]
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.31.4",
     "codecov>=2.1.13",
     "mypy>=1.15.0",
     "nbqa>=1.9.1",

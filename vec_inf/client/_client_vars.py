@@ -167,7 +167,6 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     },
     "singularity_setup": [
         SINGULARITY_LOAD_CMD,
-        f"singularity exec {SINGULARITY_IMAGE} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
