@@ -1,6 +1,6 @@
 [project]
 name = "vec-inf"
-version = "0.7.0"
+version = "0.7.1"
 description = "Efficient LLM inference on Slurm clusters using vLLM."
 readme = "README.md"
 authors = [{name = "Marshall Wang", email = "marshall.wang@vectorinstitute.ai"}]
@@ -42,8 +42,7 @@ dev = [
     "xgrammar>=0.1.11",
     "torch>=2.7.0",
     "vllm>=0.10.0",
-    "vllm-nccl-cu12>=2.18,<2.19",
-    "ray>=2.40.0",
+    "ray==2.43.0",
     "cupy-cuda12x==12.1.0"
 ]
 
