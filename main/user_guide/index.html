@@ -1051,9 +1051,9 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 <p><strong>NOTE</strong>: Certain models don't adhere to OpenAI's chat template, e.g. Mistral family. For these models, you can either change your prompt to follow the model's default chat template or provide your own chat template via <code>--chat-template: TEMPLATE_PATH</code>.</p>
 <h2 id="ssh-tunnel-from-your-local-device">SSH tunnel from your local device<a class="headerlink" href="#ssh-tunnel-from-your-local-device" title="Permanent link">&para;</a></h2>
 <p>If you want to run inference from your local device, you can open a SSH tunnel to your cluster environment like the following:
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8081</span>:172.17.8.29:8081<span class="w"> </span>username@v.vectorinstitute.ai<span class="w"> </span>-N
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8081</span>:10.1.1.29:8081<span class="w"> </span>username@v.vectorinstitute.ai<span class="w"> </span>-N
 </span></code></pre></div>
-Where the last number in the URL is the GPU number (gpu029 in this case). The example provided above is for the vector cluster, change the variables accordingly for your environment</p>
+The example provided above is for the Vector Killarney cluster, change the variables accordingly for your environment. The IP address for the compute nodes on Killarney follow <code>10.1.1.XX</code> pattern, where <code>XX</code> is the GPU number (<code>kn029</code> -&gt; <code>29</code> in this example). Similarly, for Bon Echo it's <code>172.17.8.XX</code>, where <code>XX</code> is from <code>gpuXX</code>.</p>
 <h2 id="python-api-usage">Python API Usage<a class="headerlink" href="#python-api-usage" title="Permanent link">&para;</a></h2>
 <p>You can also use the <code>vec_inf</code> Python API to launch and manage inference servers.</p>
 <p>Check out the <a href="../api/">Python API documentation</a> for more details. There
