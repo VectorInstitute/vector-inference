@@ -54,9 +54,9 @@ COPY . /vec-inf
 RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
 
 # Final configuration
-# RUN mkdir -p /vec-inf/nccl && \
-#     mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
-# ENV VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
+RUN mkdir -p /vec-inf/nccl && \
+    mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
+ENV VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
 ENV NCCL_DEBUG=INFO
 
 # Set the default command to start an interactive shell

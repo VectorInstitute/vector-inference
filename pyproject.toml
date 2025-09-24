@@ -42,6 +42,7 @@ dev = [
     "xgrammar>=0.1.11",
     "torch>=2.7.0",
     "vllm>=0.10.0",
+    "vllm-nccl-cu12>=2.18,<2.19",
     "ray==2.43.0",
     "cupy-cuda12x==12.1.0"
 ]
