@@ -17,7 +17,7 @@ repos:
     - id: check-toml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.12.11'
+    rev: 'v0.13.2'
     hooks:
     - id: ruff
       args: [--fix, --exit-non-zero-on-fix]
@@ -26,7 +26,7 @@ repos:
       types_or: [python, jupyter]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1
+    rev: v1.18.2
     hooks:
     - id: mypy
       entry: python3 -m mypy --config-file pyproject.toml
