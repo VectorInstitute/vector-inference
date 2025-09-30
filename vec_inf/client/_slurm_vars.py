@@ -78,5 +78,9 @@ RESOURCE_TYPE: TypeAlias = create_literal_type(  # type: ignore[valid-type]
     _config["allowed_values"]["resource_type"]
 )
 
+# Extract required arguments, for launching jobs that don't have a default value and their
+# corresponding environment variables
+REQUIRED_ARGS: dict[str, str] = _config["required_args"]
+
 # Extract default arguments
 DEFAULT_ARGS: dict[str, str] = _config["default_args"]

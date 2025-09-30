@@ -71,10 +71,3 @@ VLLM_SHORT_TO_LONG_MAP = {
 
 # Required matching arguments for batch mode
 BATCH_MODE_REQUIRED_MATCHING_ARGS = ["venv", "log_dir"]
-
-# Required arguments for launching jobs that don't have a default value and their
-# corresponding environment variables
-REQUIRED_ARGS = {
-    "account": "VEC_INF_ACCOUNT",
-    "work_dir": "VEC_INF_WORK_DIR",
-}
