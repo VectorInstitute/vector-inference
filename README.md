@@ -44,7 +44,7 @@ You should see an output like the following:
 
 <img width="720" alt="launch_image" src="https://github.com/user-attachments/assets/c1e0c60c-cf7a-49ed-a426-fdb38ebf88ee" />
 
-**NOTE**: On Vector Killarney Cluster environment, the following fields are required:
+**NOTE**: You can set the required fields in the environment configuration (`environment.yaml`), it's a mapping between required arguments and their corresponding environment variables. On the Vector **Killarney** Cluster environment, the required fields are:
   * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
   * `--work-dir`, `-D`: A working directory other than your home directory, this argument can be set to default by seeting environment variable `VEC_INF_WORK_DIR`.
 
