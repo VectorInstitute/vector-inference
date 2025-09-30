@@ -827,7 +827,7 @@ You should see an output like the following:</p>
 </span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   --max-num-seqs:       │ 256                                       │
 </span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>└─────────────────────────┴───────────────────────────────────────────┘
 </span></code></pre></div>
-<p><strong>NOTE</strong>: On Vector Killarney Cluster environment, the following fields are required:
+<p><strong>NOTE</strong>: You can set the required fields in the environment configuration (<code>environment.yaml</code>), it's a mapping between required arguments and their corresponding environment variables. On the Vector <strong>Killarney</strong> Cluster environment, the required fields are:
   * <code>--account</code>, <code>-A</code>: The Slurm account, this argument can be set to default by setting environment variable <code>VEC_INF_ACCOUNT</code>.
   * <code>--work-dir</code>, <code>-D</code>: A working directory other than your home directory, this argument can be set to default by seeting environment variable <code>VEC_INF_WORK_DIR</code>.</p>
 <h4 id="overrides">Overrides<a class="headerlink" href="#overrides" title="Permanent link">&para;</a></h4>
