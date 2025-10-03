@@ -1,0 +1,5 @@
+{% if config.theme.logo %}
+<img src="{{ config.theme.logo | url }}" alt="logo">
+{% else %}
+<span class="md-header__title">{{ config.site_name }}</span>
+{% endif %}
