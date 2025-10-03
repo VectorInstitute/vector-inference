@@ -40,6 +40,7 @@ This document tracks all model weights available in the `/model-weights` directo
 | `gemma-2b-it` | ❌ |
 | `gemma-7b` | ❌ |
 | `gemma-7b-it` | ❌ |
+| `gemma-2-2b-it` | ✅ |
 | `gemma-2-9b` | ✅ |
 | `gemma-2-9b-it` | ✅ |
 | `gemma-2-27b` | ✅ |

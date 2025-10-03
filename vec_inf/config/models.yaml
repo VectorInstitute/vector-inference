@@ -126,6 +126,18 @@ models:
       --tensor-parallel-size: 4
       --max-model-len: 4096
       --max-num-seqs: 256
+  gemma-2-2b-it:
+    model_family: gemma-2
+    model_variant: 2b-it
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 256000
+    time: 08:00:00
+    resource_type: l40s
+    vllm_args:
+      --max-model-len: 4096
+      --max-num-seqs: 256
   gemma-2-9b:
     model_family: gemma-2
     model_variant: 9b
@@ -406,8 +418,7 @@ models:
     gpus_per_node: 4
     num_nodes: 8
     vocab_size: 128256
-    qos: m4
-    time: 02:00:00
+    time: 08:00:00
     resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 8
@@ -556,19 +567,6 @@ models:
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 65536
-      --max-num-seqs: 256
-  Llama3-OpenBioLLM-70B:
-    model_family: Llama3-OpenBioLLM
-    model_variant: 70B
-    model_type: LLM
-    gpus_per_node: 4
-    num_nodes: 1
-    vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 4
-      --max-model-len: 8192
       --max-num-seqs: 256
   Llama-3.1-Nemotron-70B-Instruct-HF:
     model_family: Llama-3.1-Nemotron
@@ -1107,6 +1105,18 @@ models:
     vllm_args:
       --max-model-len: 4096
       --max-num-seqs: 256
+  Qwen3-8B:
+    model_family: Qwen3
+    model_variant: 8B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 151936
+    time: 08:00:00
+    resource_type: l40s
+    vllm_args:
+      --max-model-len: 40960
+      --max-num-seqs: 256
   Qwen3-14B:
     model_family: Qwen3
     model_variant: 14B
@@ -1117,5 +1127,18 @@ models:
     time: 08:00:00
     resource_type: l40s
     vllm_args:
+      --max-model-len: 40960
+      --max-num-seqs: 256
+  Qwen3-32B:
+    model_family: Qwen3
+    model_variant: 32B
+    model_type: LLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 151936
+    time: 08:00:00
+    resource_type: l40s
+    vllm_args:
+      --tensor-parallel-size: 2
       --max-model-len: 40960
       --max-num-seqs: 256
