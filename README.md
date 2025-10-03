@@ -74,6 +74,11 @@ Example:
 >>> status = client.get_status(job_id)
 >>> if status.status == ModelStatus.READY:
 ...     print(f"Model is ready at {status.base_url}")
+>>> # Alternatively, use wait_until_ready which will either return a StatusResponse or throw a ServerError
+>>> try:
+>>>     status = wait_until_ready(job_id)
+>>> except ServerError as e:
+>>>     print(f"Model launch failed: {e}")
 >>> client.shutdown_model(job_id)
 ```
 
