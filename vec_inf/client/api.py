@@ -218,7 +218,7 @@ class VecInfClient:
             - Performance metrics or error message
             - Timestamp of collection
         """
-        # Use cached collector to preserve state between calls for throughput calculation
+        # Use cached collector to preserve state between calls to compute throughput
         if slurm_job_id not in self._metrics_collectors:
             self._metrics_collectors[slurm_job_id] = PerformanceMetricsCollector(
                 slurm_job_id
