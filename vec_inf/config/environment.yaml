@@ -15,6 +15,10 @@ allowed_values:
   partition: []
   resource_type: ["l40s", "h100"]
 
+required_args:
+  account: "VEC_INF_ACCOUNT"
+  work_dir: "VEC_INF_WORK_DIR"
+
 default_args:
   cpus_per_task: "16"
   mem_per_node: "64G"

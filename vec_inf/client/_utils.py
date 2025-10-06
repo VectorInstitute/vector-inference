@@ -14,9 +14,9 @@ from typing import Any, Optional, Union, cast
 import requests
 import yaml
 
-from vec_inf.client._client_vars import MODEL_READY_SIGNATURE, REQUIRED_ARGS
+from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
 from vec_inf.client._exceptions import MissingRequiredFieldsError
-from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR
+from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR, REQUIRED_ARGS
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
 

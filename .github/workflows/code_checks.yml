@@ -36,7 +36,7 @@ jobs:
           version: "0.5.21"
           enable-cache: true
       - name: "Set up Python"
-        uses: actions/setup-python@v5.5.0
+        uses: actions/setup-python@v6
         with:
           python-version-file: ".python-version"
       - name: Install the project
@@ -49,3 +49,5 @@ jobs:
         uses: pypa/gh-action-pip-audit@v1.1.0
         with:
           virtual-environment: .venv/
+          # Temporary: ignore pip advisory until fixed in pip>=25.3
+          ignore-vulns: GHSA-4xh5-x5gv-qwph

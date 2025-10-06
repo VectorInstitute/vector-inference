@@ -21,7 +21,7 @@ jobs:
           version: "0.6.6"
           enable-cache: true
 
-      - uses: actions/setup-python@v5.5.0
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
