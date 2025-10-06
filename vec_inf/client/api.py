@@ -220,8 +220,10 @@ class VecInfClient:
         """
         # Use cached collector to preserve state between calls for throughput calculation
         if slurm_job_id not in self._metrics_collectors:
-            self._metrics_collectors[slurm_job_id] = PerformanceMetricsCollector(slurm_job_id)
-        
+            self._metrics_collectors[slurm_job_id] = PerformanceMetricsCollector(
+                slurm_job_id
+            )
+
         performance_metrics_collector = self._metrics_collectors[slurm_job_id]
 
         metrics: Union[dict[str, float], str]
