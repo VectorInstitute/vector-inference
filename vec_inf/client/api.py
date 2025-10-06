@@ -81,7 +81,7 @@ class VecInfClient:
 
     def __init__(self) -> None:
         """Initialize the Vector Inference client."""
-        pass
+        self._metrics_collectors: dict[str, PerformanceMetricsCollector] = {}
 
     def list_models(self) -> list[ModelInfo]:
         """List all available models.
@@ -218,7 +218,13 @@ class VecInfClient:
             - Performance metrics or error message
             - Timestamp of collection
         """
-        performance_metrics_collector = PerformanceMetricsCollector(slurm_job_id)
+        # Use cached collector to preserve state between calls to compute throughput
+        if slurm_job_id not in self._metrics_collectors:
+            self._metrics_collectors[slurm_job_id] = PerformanceMetricsCollector(
+                slurm_job_id
+            )
+
+        performance_metrics_collector = self._metrics_collectors[slurm_job_id]
 
         metrics: Union[dict[str, float], str]
         if not performance_metrics_collector.metrics_url.startswith("http"):
