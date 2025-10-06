@@ -447,7 +447,7 @@ def metrics(slurm_job_id: str) -> None:
                     metrics_formatter.format_metrics()
 
                 live.update(metrics_formatter.table)
-                time.sleep(2)
+                time.sleep(1)
     except click.ClickException as e:
         raise e
     except Exception as e:
