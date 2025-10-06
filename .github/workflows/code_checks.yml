@@ -49,3 +49,5 @@ jobs:
         uses: pypa/gh-action-pip-audit@v1.1.0
         with:
           virtual-environment: .venv/
+          # Temporary: ignore pip advisory until fixed in pip>=25.3
+          ignore-vulns: GHSA-4xh5-x5gv-qwph
