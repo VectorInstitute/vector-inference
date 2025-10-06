@@ -74,6 +74,11 @@ Example:
 >>> status = client.get_status(job_id)
 >>> if status.status == ModelStatus.READY:
 ...     print(f"Model is ready at {status.base_url}")
+>>> # Alternatively, use wait_until_ready which will either return a StatusResponse or throw a ServerError
+>>> try:
+>>>     status = wait_until_ready(job_id)
+>>> except ServerError as e:
+>>>     print(f"Model launch failed: {e}")
 >>> client.shutdown_model(job_id)
 ```
 
@@ -127,3 +132,16 @@ If you want to run inference from your local device, you can open a SSH tunnel t
 ssh -L 8081:10.1.1.29:8081 username@v.vectorinstitute.ai -N
 ```
 The example provided above is for the Vector Killarney cluster, change the variables accordingly for your environment. The IP address for the compute nodes on Killarney follow `10.1.1.XX` pattern, where `XX` is the GPU number (`kn029` -> `29` in this example).
+
+## Reference
+If you found Vector Inference useful in your research or applications, please cite using the following BibTeX template:
+```
+@software{vector_inference,
+  title        = {Vector Inference: Efficient LLM inference on Slurm clusters using vLLM},
+  author       = {Wang, Marshall},
+  organization = {Vector Institute},
+  year         = {<YEAR_OF_RELEASE>},
+  version      = {<VERSION_TAG>},
+  url          = {https://github.com/VectorInstitute/vector-inference}
+}
+```
