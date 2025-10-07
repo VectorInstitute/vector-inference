@@ -14,6 +14,7 @@ from vec_inf.client._slurm_templates import (
     BATCH_SLURM_SCRIPT_TEMPLATE,
     SLURM_SCRIPT_TEMPLATE,
 )
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME
 
 
 class SlurmScriptGenerator:
@@ -32,9 +33,7 @@ class SlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
-        )
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         self.additional_binds = self.params.get("bind", "")
         if self.additional_binds:
             self.additional_binds = f" --bind {self.additional_binds}"
