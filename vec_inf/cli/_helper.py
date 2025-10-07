@@ -76,6 +76,7 @@ class LaunchResponseFormatter:
         table.add_row("Memory/Node", self.params["mem_per_node"])
 
         # Add job config details
+        table.add_row("Virtual Environment", self.params["venv"])
         table.add_row(
             "Model Weights Directory",
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
