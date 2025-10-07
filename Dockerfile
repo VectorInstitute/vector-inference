@@ -45,18 +45,23 @@ RUN apt-get update && apt-get install -y \
 ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 ENV UCX_NET_DEVICES=all
 ENV NCCL_IB_DISABLE=0
+ENV NCCL_SOCKET_IFNAME=ib0
 
 # Set up project
 WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
+# RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
+
+# # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
+# RUN apt-get update && apt-get install -y \
+#     libnccl2 libnccl-dev \
+#     && rm -rf /var/lib/apt/lists/*
+
+uv pip install vllm --torch-backend=auto
 
 # Final configuration
-RUN mkdir -p /vec-inf/nccl && \
-    mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
-ENV VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
 ENV NCCL_DEBUG=INFO
 
 # Set the default command to start an interactive shell
