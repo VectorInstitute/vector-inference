@@ -59,7 +59,7 @@ COPY . /vec-inf
 #     libnccl2 libnccl-dev \
 #     && rm -rf /var/lib/apt/lists/*
 
-uv pip install vllm --torch-backend=auto
+RUN uv pip install vllm --torch-backend=auto
 
 # Final configuration
 ENV NCCL_DEBUG=INFO
