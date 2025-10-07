@@ -55,11 +55,9 @@ COPY . /vec-inf
 RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --allow-change-held-packages\
     libnccl2 libnccl-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# RUN uv pip install --system vllm --torch-backend=auto
 
 # Final configuration
 ENV NCCL_DEBUG=INFO
