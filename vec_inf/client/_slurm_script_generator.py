@@ -193,9 +193,7 @@ class BatchSlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.script_paths: list[Path] = []
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
-        )
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = ""
             if self.params["models"][model_name].get("bind"):

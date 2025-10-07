@@ -26,22 +26,23 @@ def test_launch_command_success(runner):
         # for Rich table rendering
         mock_response = MagicMock()
         mock_response.config = {
-            "slurm_job_id": "14933053",
-            "model_name": "Meta-Llama-3.1-8B",
-            "model_type": "LLM",
-            "log_dir": "/tmp/test_logs",
-            "partition": "gpu",
-            "qos": "normal",
-            "time": "1:00:00",
-            "num_nodes": "1",
-            "gpus_per_node": "1",
-            "cpus_per_task": "8",
-            "mem_per_node": "32G",
-            "model_weights_parent_dir": "/model-weights",
-            "vocab_size": "128000",
-            "vllm_args": {"max_model_len": 8192},
-            "env": {"CACHE": "/cache"},
-        }
+                "slurm_job_id": "14933053",
+                "model_name": "Meta-Llama-3.1-8B",
+                "model_type": "LLM",
+                "log_dir": "/tmp/test_logs",
+                "partition": "gpu",
+                "qos": "normal",
+                "time": "1:00:00",
+                "num_nodes": "1",
+                "gpus_per_node": "1",
+                "cpus_per_task": "8",
+                "mem_per_node": "32G",
+                "model_weights_parent_dir": "/model-weights",
+                "vocab_size": "128000",
+                "venv": "/path/to/venv",
+                "vllm_args": {"max_model_len": 8192},
+                "env": {"CACHE": "/cache"},
+            }
         mock_client.launch_model.return_value = mock_response
 
         result = runner.invoke(cli, ["launch", "Meta-Llama-3.1-8B"])
