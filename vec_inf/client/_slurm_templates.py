@@ -97,7 +97,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     ],
     "imports": "source {src_dir}/find_port.sh",
     "env_vars": [
-        f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+        f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --bind {{model_weights_path}}{{additional_binds}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
@@ -221,7 +221,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "shebang": "#!/bin/bash\n",
     "container_setup": f"{CONTAINER_LOAD_CMD}\n",
     "env_vars": [
-        f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
+        f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
