@@ -35,17 +35,21 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py && \
     python3.10 -m pip install --upgrade pip setuptools wheel uv
 
-# Install Infiniband/RDMA support
+# Install RDMA support
 RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
+    rdma-core ibverbs-providers infiniband-diags perftest \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up RDMA environment (these will persist in the final container)
 ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
-ENV UCX_NET_DEVICES=all
 ENV NCCL_IB_DISABLE=0
-ENV NCCL_SOCKET_IFNAME=ib0
+ENV NCCL_SOCKET_IFNAME="^lo,docker0"
+ENV NCCL_NET_GDR_LEVEL=PHB
+ENV NCCL_IB_TIMEOUT=22
+ENV NCCL_IB_RETRY_CNT=7
+ENV NCCL_DEBUG=WARN
 
 # Set up project
 WORKDIR /vec-inf
@@ -58,9 +62,6 @@ RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --syst
 RUN apt-get update && apt-get install -y --allow-change-held-packages\
     libnccl2 libnccl-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Final configuration
-ENV NCCL_DEBUG=INFO
 
 # Set the default command to start an interactive shell
 CMD ["bash"]

@@ -8,7 +8,7 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31.0",
-    "click>=8.1.0,!=8.3.0",
+    "click>=8.1.0",
     "rich>=13.7.0",
     "pydantic>=2.10.6",
     "pyyaml>=6.0.2",
@@ -42,7 +42,7 @@ dev = [
     "xgrammar>=0.1.11",
     "torch>=2.7.0",
     "vllm>=0.10.0",
-    "ray>=2.40.0,<2.46.0",
+    "ray>=2.50.0",
     "cupy-cuda12x==12.1.0"
 ]
 
