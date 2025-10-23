@@ -67,7 +67,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --group docs
+        run: uv sync --all-extras --group docs --prerelease=allow
 
       - name: Build docs
         run: uv run mkdocs build
