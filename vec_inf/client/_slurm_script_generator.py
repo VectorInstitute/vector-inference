@@ -137,6 +137,13 @@ class SlurmScriptGenerator:
             Server launch command.
         """
         launcher_script = ["\n"]
+
+        # Check if --model is specified in vllm_args to use HuggingFace model name
+        model_path = self.model_weights_path
+        vllm_args_copy = self.params["vllm_args"].copy()
+        if "--model" in vllm_args_copy:
+            model_path = vllm_args_copy.pop("--model")
+
         if self.use_container:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["container_command"].format(
@@ -151,12 +158,12 @@ class SlurmScriptGenerator:
             )
         launcher_script.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
-                model_weights_path=self.model_weights_path,
+                model_weights_path=model_path,
                 model_name=self.params["model_name"],
             )
         )
 
-        for arg, value in self.params["vllm_args"].items():
+        for arg, value in vllm_args_copy.items():
             if isinstance(value, bool):
                 launcher_script.append(f"    {arg} \\")
             else:
@@ -256,6 +263,12 @@ class BatchSlurmScriptGenerator:
                 model_name=model_name,
             )
         )
+        # Check if --model is specified in vllm_args to use HuggingFace model name
+        model_path = model_params["model_weights_path"]
+        vllm_args_copy = model_params["vllm_args"].copy()
+        if "--model" in vllm_args_copy:
+            model_path = vllm_args_copy.pop("--model")
+
         if self.use_container:
             script_content.append(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
@@ -265,11 +278,12 @@ class BatchSlurmScriptGenerator:
             )
         script_content.append(
             "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"]).format(
-                model_weights_path=model_params["model_weights_path"],
+                model_weights_path=model_path,
                 model_name=model_name,
             )
         )
-        for arg, value in model_params["vllm_args"].items():
+        
+        for arg, value in vllm_args_copy.items():
             if isinstance(value, bool):
                 script_content.append(f"    {arg} \\")
             else:
