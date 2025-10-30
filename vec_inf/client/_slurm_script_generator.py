@@ -38,9 +38,11 @@ class SlurmScriptGenerator:
         self.additional_binds = self.params.get("bind", "")
         if self.additional_binds:
             self.additional_binds = f" --bind {self.additional_binds}"
-        self.model_weights_path = str(
-            Path(self.params["model_weights_parent_dir"], self.params["model_name"])
+        model_weights_path = Path(
+            self.params["model_weights_parent_dir"], self.params["model_name"]
         )
+        model_weights_path.mkdir(parents=True, exist_ok=True)
+        self.model_weights_path = str(model_weights_path)
         env_dict: dict[str, str] = self.params.get("env", {})
         # Create string of environment variables
         self.env_str = ""
@@ -210,11 +212,13 @@ class BatchSlurmScriptGenerator:
                 self.params["models"][model_name]["additional_binds"] = (
                     f" --bind {self.params['models'][model_name]['bind']}"
                 )
+            model_weights_path = Path(
+                self.params["models"][model_name]["model_weights_parent_dir"],
+                model_name,
+            )
+            model_weights_path.mkdir(parents=True, exist_ok=True)
             self.params["models"][model_name]["model_weights_path"] = str(
-                Path(
-                    self.params["models"][model_name]["model_weights_parent_dir"],
-                    model_name,
-                )
+                model_weights_path
             )
 
     def _write_to_log_dir(self, script_content: list[str], script_name: str) -> Path:
