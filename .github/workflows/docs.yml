@@ -70,7 +70,7 @@ jobs:
         run: uv sync --all-extras --group docs --prerelease=allow
 
       - name: Build docs
-        run: uv run mkdocs build
+        run: uv run mkdocs build --prerelease=allow
 
       - name: Create .nojekyll file
         run: touch site/.nojekyll

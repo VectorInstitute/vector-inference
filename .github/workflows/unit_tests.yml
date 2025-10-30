@@ -62,7 +62,7 @@ jobs:
 
       - name: Install dependencies and check code
         run: |
-          uv run pytest -m "not integration_test" --cov vec_inf --cov-report=xml tests
+          uv run pytest -m "not integration_test" --cov vec_inf --cov-report=xml tests --prerelease=allow
 
       - name: Install the core package only
         run: uv sync --no-dev
