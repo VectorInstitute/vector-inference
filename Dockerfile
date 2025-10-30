@@ -56,7 +56,7 @@ WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev] --prerelease=allow
+uv pip install --system -e .[dev] --prerelease=allow
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\
