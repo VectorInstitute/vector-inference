@@ -44,25 +44,24 @@ class SlurmScriptGenerator:
 
     def _generate_env_str(self) -> str:
         """Generate the environment variables string for the Slurm script.
-        
+
         Returns
         -------
         str
             Formatted environment variables string for container or shell export commands.
         """
         env_dict: dict[str, str] = self.params.get("env", {})
-        
+
         if not env_dict:
             return ""
-        
+
         if self.use_container:
             # Format for container: --env KEY1=VAL1,KEY2=VAL2
             env_pairs = [f"{key}={val}" for key, val in env_dict.items()]
             return f"--env {','.join(env_pairs)}"
-        else:
-            # Format for shell: export KEY1=VAL1\nexport KEY2=VAL2
-            export_lines = [f"export {key}={val}" for key, val in env_dict.items()]
-            return "\n".join(export_lines)
+        # Format for shell: export KEY1=VAL1\nexport KEY2=VAL2
+        export_lines = [f"export {key}={val}" for key, val in env_dict.items()]
+        return "\n".join(export_lines)
 
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
