@@ -35,29 +35,33 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     rm get-pip.py && \
     python3.10 -m pip install --upgrade pip setuptools wheel uv
 
-# Install Infiniband/RDMA support
+# Install RDMA support
 RUN apt-get update && apt-get install -y \
     libibverbs1 libibverbs-dev ibverbs-utils \
     librdmacm1 librdmacm-dev rdmacm-utils \
+    rdma-core ibverbs-providers infiniband-diags perftest \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up RDMA environment (these will persist in the final container)
 ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
-ENV UCX_NET_DEVICES=all
 ENV NCCL_IB_DISABLE=0
+ENV NCCL_SOCKET_IFNAME="^lo,docker0"
+ENV NCCL_NET_GDR_LEVEL=PHB
+ENV NCCL_IB_TIMEOUT=22
+ENV NCCL_IB_RETRY_CNT=7
+ENV NCCL_DEBUG=INFO
 
 # Set up project
 WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN PIP_INDEX_URL="https://download.pytorch.org/whl/cu128" uv pip install --system -e .[dev]
+RUN uv pip install --system -e .[dev] --prerelease=allow
 
-# Final configuration
-RUN mkdir -p /vec-inf/nccl && \
-    mv /root/.config/vllm/nccl/cu12/libnccl.so.2.18.1 /vec-inf/nccl/libnccl.so.2.18.1
-ENV VLLM_NCCL_SO_PATH=/vec-inf/nccl/libnccl.so.2.18.1
-ENV NCCL_DEBUG=INFO
+# Install a single, system NCCL (from NVIDIA CUDA repo in base image)
+RUN apt-get update && apt-get install -y --allow-change-held-packages\
+    libnccl2 libnccl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the default command to start an interactive shell
 CMD ["bash"]

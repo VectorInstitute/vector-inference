@@ -40,7 +40,7 @@ jobs:
         with:
           python-version-file: ".python-version"
       - name: Install the project
-        run: uv sync --dev
+        run: uv sync --dev --prerelease=allow
       - name: Install dependencies and check code
         run: |
           source .venv/bin/activate

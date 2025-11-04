@@ -53,7 +53,7 @@ class TestSlurmScriptGenerator:
         singularity = basic_params.copy()
         singularity.update(
             {
-                "venv": "singularity",
+                "venv": "apptainer",
                 "bind": "/scratch:/scratch,/data:/data",
                 "env": {
                     "CACHE_DIR": "/cache",
@@ -109,7 +109,7 @@ class TestSlurmScriptGenerator:
     def test_init_singularity_no_bind(self, basic_params):
         """Test Singularity initialization without additional binds."""
         params = basic_params.copy()
-        params["venv"] = "singularity"
+        params["venv"] = "apptainer"
         generator = SlurmScriptGenerator(params)
 
         assert generator.params == params
@@ -173,7 +173,6 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(basic_params)
         launch_cmd = generator._generate_launch_cmd()
 
-        assert "source /path/to/venv/bin/activate" in launch_cmd
         assert "vllm serve /path/to/model_weights/test-model" in launch_cmd
         assert "--served-model-name test-model" in launch_cmd
         assert "--tensor-parallel-size 4" in launch_cmd
@@ -185,7 +184,7 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(singularity_params)
         launch_cmd = generator._generate_launch_cmd()
 
-        assert "exec --nv" in launch_cmd
+        assert "apptainer exec --nv" in launch_cmd
         assert "--bind /path/to/model_weights/test-model" in launch_cmd
         assert "--bind /scratch:/scratch,/data:/data" in launch_cmd
         assert "source" not in launch_cmd
@@ -306,9 +305,9 @@ class TestBatchSlurmScriptGenerator:
     def batch_singularity_params(self, batch_params):
         """Generate batch SLURM configuration parameters with Singularity."""
         singularity_params = batch_params.copy()
-        singularity_params["venv"] = "singularity"  # Set top-level venv to singularity
+        singularity_params["venv"] = "apptainer"  # Set top-level venv to apptainer
         for model_name in singularity_params["models"]:
-            singularity_params["models"][model_name]["venv"] = "singularity"
+            singularity_params["models"][model_name]["venv"] = "apptainer"
             singularity_params["models"][model_name]["bind"] = (
                 "/scratch:/scratch,/data:/data"
             )
@@ -341,9 +340,9 @@ class TestBatchSlurmScriptGenerator:
     def test_init_singularity_no_bind(self, batch_params):
         """Test Singularity initialization without additional binds."""
         params = batch_params.copy()
-        params["venv"] = "singularity"  # Set top-level venv to singularity
+        params["venv"] = "apptainer"  # Set top-level venv to apptainer
         for model_name in params["models"]:
-            params["models"][model_name]["venv"] = "singularity"
+            params["models"][model_name]["venv"] = "apptainer"
 
         generator = BatchSlurmScriptGenerator(params)
 
