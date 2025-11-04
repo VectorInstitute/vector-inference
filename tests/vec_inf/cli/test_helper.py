@@ -35,6 +35,7 @@ class TestLaunchResponseFormatter:
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
             "log_dir": "/tmp/logs",
+            "venv": "/path/to/venv",
             "vllm_args": {"max_model_len": 8192, "enable_prefix_caching": True},
             "env": {"CACHE": "/cache"},
         }
@@ -63,6 +64,7 @@ class TestLaunchResponseFormatter:
             "mem_per_node": "16G",
             "model_weights_parent_dir": "/weights",
             "log_dir": "/logs",
+            "venv": "/path/to/venv",
             "vllm_args": {},
             "env": {},
         }

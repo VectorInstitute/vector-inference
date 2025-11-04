@@ -14,6 +14,7 @@ from vec_inf.client._slurm_templates import (
     BATCH_SLURM_SCRIPT_TEMPLATE,
     SLURM_SCRIPT_TEMPLATE,
 )
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME
 
 
 class SlurmScriptGenerator:
@@ -32,24 +33,35 @@ class SlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
-        )
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         self.additional_binds = self.params.get("bind", "")
         if self.additional_binds:
             self.additional_binds = f" --bind {self.additional_binds}"
         self.model_weights_path = str(
             Path(self.params["model_weights_parent_dir"], self.params["model_name"])
         )
+        self.env_str = self._generate_env_str()
+
+    def _generate_env_str(self) -> str:
+        """Generate the environment variables string for the Slurm script.
+
+        Returns
+        -------
+        str
+            Formatted env vars string for container or shell export commands.
+        """
         env_dict: dict[str, str] = self.params.get("env", {})
-        # Create string of environment variables
-        self.env_str = ""
-        for key, val in env_dict.items():
-            if len(self.env_str) == 0:
-                self.env_str = "--env "
-            else:
-                self.env_str += ","
-            self.env_str += key + "=" + val
+
+        if not env_dict:
+            return ""
+
+        if self.use_container:
+            # Format for container: --env KEY1=VAL1,KEY2=VAL2
+            env_pairs = [f"{key}={val}" for key, val in env_dict.items()]
+            return f"--env {','.join(env_pairs)}"
+        # Format for shell: export KEY1=VAL1\nexport KEY2=VAL2
+        export_lines = [f"export {key}={val}" for key, val in env_dict.items()]
+        return "\n".join(export_lines)
 
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
@@ -95,7 +107,12 @@ class SlurmScriptGenerator:
         server_script = ["\n"]
         if self.use_container:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
-        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"]))
+            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_env_vars"]))
+        else:
+            server_script.append(
+                SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
+            )
+            server_script.append(self.env_str)
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
@@ -111,6 +128,11 @@ class SlurmScriptGenerator:
                         additional_binds=self.additional_binds,
                         env_str=self.env_str,
                     ),
+                )
+            else:
+                server_setup_str = server_setup_str.replace(
+                    "CONTAINER_PLACEHOLDER",
+                    "\\",
                 )
         else:
             server_setup_str = "\n".join(
@@ -145,10 +167,7 @@ class SlurmScriptGenerator:
                     env_str=self.env_str,
                 )
             )
-        else:
-            launcher_script.append(
-                SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
-            )
+
         launcher_script.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
                 model_weights_path=self.model_weights_path,
@@ -194,9 +213,7 @@ class BatchSlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.script_paths: list[Path] = []
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
-        )
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = ""
             if self.params["models"][model_name].get("bind"):

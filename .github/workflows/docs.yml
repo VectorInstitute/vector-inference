@@ -56,7 +56,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.5.21"
           enable-cache: true
@@ -67,10 +67,10 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --group docs
+        run: uv sync --all-extras --group docs --prerelease=allow
 
       - name: Build docs
-        run: uv run mkdocs build
+        run: uv run --frozen mkdocs build
 
       - name: Create .nojekyll file
         run: touch site/.nojekyll
@@ -93,7 +93,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.5.21"
           enable-cache: true
@@ -104,7 +104,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --group docs
+        run: uv sync --all-extras --group docs --frozen
 
       - name: Configure Git Credentials
         run: |
