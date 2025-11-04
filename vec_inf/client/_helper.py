@@ -31,6 +31,7 @@ from vec_inf.client._slurm_script_generator import (
     BatchSlurmScriptGenerator,
     SlurmScriptGenerator,
 )
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     BatchLaunchResponse,
@@ -331,6 +332,10 @@ class ModelLauncher:
         self.slurm_script_path.rename(
             job_log_dir / f"{self.model_name}.{self.slurm_job_id}.sbatch"
         )
+
+        # Replace venv with image path if using container
+        if self.params["venv"] == CONTAINER_MODULE_NAME:
+            self.params["venv"] = IMAGE_PATH
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)

@@ -58,18 +58,18 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install the project
-        run: uv sync --dev
+        run: uv sync --dev --prerelease=allow
 
       - name: Install dependencies and check code
         run: |
-          uv run pytest -m "not integration_test" --cov vec_inf --cov-report=xml tests
+          uv run --frozen pytest -m "not integration_test" --cov vec_inf --cov-report=xml tests
 
       - name: Install the core package only
         run: uv sync --no-dev
 
       - name: Run package import tests
         run: |
-          uv run pytest tests/test_imports.py
+          uv run --frozen pytest tests/test_imports.py
 
       - name: Import Codecov GPG public key
         run: |
@@ -79,7 +79,7 @@ jobs:
         uses: codecov/codecov-action@v5.5.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          files: ./coverage.xml
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true

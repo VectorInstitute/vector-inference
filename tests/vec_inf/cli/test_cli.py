@@ -39,6 +39,7 @@ def test_launch_command_success(runner):
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
             "vocab_size": "128000",
+            "venv": "/path/to/venv",
             "vllm_args": {"max_model_len": 8192},
             "env": {"CACHE": "/cache"},
         }
