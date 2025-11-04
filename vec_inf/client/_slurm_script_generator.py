@@ -48,7 +48,7 @@ class SlurmScriptGenerator:
         Returns
         -------
         str
-            Formatted environment variables string for container or shell export commands.
+            Formatted env vars string for container or shell export commands.
         """
         env_dict: dict[str, str] = self.params.get("env", {})
 
