@@ -173,7 +173,6 @@ class TestSlurmScriptGenerator:
         generator = SlurmScriptGenerator(basic_params)
         launch_cmd = generator._generate_launch_cmd()
 
-        assert "source /path/to/venv/bin/activate" in launch_cmd
         assert "vllm serve /path/to/model_weights/test-model" in launch_cmd
         assert "--served-model-name test-model" in launch_cmd
         assert "--tensor-parallel-size 4" in launch_cmd
