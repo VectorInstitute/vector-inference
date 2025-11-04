@@ -56,7 +56,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.5.21"
           enable-cache: true
@@ -93,7 +93,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "0.5.21"
           enable-cache: true
