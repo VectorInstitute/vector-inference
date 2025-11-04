@@ -225,6 +225,10 @@ class ModelLauncher:
                 params["env"][key] = str(value)
             del self.kwargs["env"]
 
+        if self.kwargs.get("bind") and params.get("bind"):
+            params["bind"] = f"{params['bind']},{self.kwargs['bind']}"
+            del self.kwargs["bind"]
+
         for key, value in self.kwargs.items():
             params[key] = value
 

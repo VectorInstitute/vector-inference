@@ -85,22 +85,25 @@ class LaunchResponseFormatter:
         table.add_row("Log Directory", self.params["log_dir"])
 
         # Add vLLM configuration details
-        table.add_row("vLLM Arguments:", style="magenta")
-        for arg, value in self.params["vllm_args"].items():
-            table.add_row(f"  {arg}:", str(value))
+        if self.params.get("vllm_args"):
+            table.add_row("vLLM Arguments:", style="magenta")
+            for arg, value in self.params["vllm_args"].items():
+                table.add_row(f"  {arg}:", str(value))
 
         # Add environment variable configuration details
-        table.add_row("Environment Variables", style="magenta")
-        for arg, value in self.params["env"].items():
-            table.add_row(f"  {arg}:", str(value))
+        if self.params.get("env"):
+            table.add_row("Environment Variables", style="magenta")
+            for arg, value in self.params["env"].items():
+                table.add_row(f"  {arg}:", str(value))
 
         # Add bind path configuration details
-        table.add_row("Bind Paths", style="magenta")
-        for path in self.params["bind"].split(","):
-            host = target = path
-            if ":" in path:
-                host, target = path.split(":")
-            table.add_row(f"  {host}:", target)
+        if self.params.get("bind"):
+            table.add_row("Bind Paths", style="magenta")
+            for path in self.params["bind"].split(","):
+                host = target = path
+                if ":" in path:
+                    host, target = path.split(":")
+                table.add_row(f"  {host}:", target)
 
         return table
 
