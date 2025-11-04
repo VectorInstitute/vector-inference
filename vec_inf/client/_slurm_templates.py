@@ -74,7 +74,7 @@ class SlurmScriptTemplate(TypedDict):
     shebang: ShebangConfig
     container_setup: list[str]
     imports: str
-    env_vars: list[str]
+    container_env_vars: list[str]
     container_command: str
     activate_venv: str
     server_setup: ServerSetupConfig
