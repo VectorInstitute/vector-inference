@@ -196,23 +196,14 @@ class ModelLauncher:
                         print(f"WARNING: Could not parse env var: {line}")
         return env_vars
 
-    def _get_launch_params(self) -> dict[str, Any]:
-        """Prepare launch parameters, set log dir, and validate required fields.
+    def _apply_cli_overrides(self, params: dict[str, Any]) -> None:
+        """Apply CLI argument overrides to params.
 
-        Returns
-        -------
-        dict[str, Any]
-            Dictionary of prepared launch parameters
-
-        Raises
-        ------
-        MissingRequiredFieldsError
-            If required fields are missing or tensor parallel size is not specified
-            when using multiple GPUs
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to override
         """
-        params = self.model_config.model_dump(exclude_none=True)
-
-        # Override config defaults with CLI arguments
         if self.kwargs.get("vllm_args"):
             vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
             for key, value in vllm_args.items():
@@ -232,10 +223,22 @@ class ModelLauncher:
         for key, value in self.kwargs.items():
             params[key] = value
 
-        # Check for required fields without default vals, will raise an error if missing
-        utils.check_required_fields(params)
+    def _validate_resource_allocation(self, params: dict[str, Any]) -> None:
+        """Validate resource allocation and parallelization settings.
 
-        # Validate resource allocation and parallelization settings
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to validate
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If tensor parallel size is not specified when using multiple GPUs
+        ValueError
+            If total # of GPUs requested is not a power of two
+            If mismatch between total # of GPUs requested and parallelization settings
+        """
         if (
             int(params["gpus_per_node"]) > 1
             and params["vllm_args"].get("--tensor-parallel-size") is None
@@ -256,19 +259,18 @@ class ModelLauncher:
                 "Mismatch between total number of GPUs requested and parallelization settings"
             )
 
-        # Convert gpus_per_node and resource_type to gres
-        resource_type = params.get("resource_type")
-        if resource_type:
-            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
-        else:
-            params["gres"] = f"gpu:{params['gpus_per_node']}"
+    def _setup_log_files(self, params: dict[str, Any]) -> None:
+        """Set up log directory and file paths.
 
-        # Create log directory
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to set up log files
+        """
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
         params["log_dir"].mkdir(parents=True, exist_ok=True)
         params["src_dir"] = SRC_DIR
 
-        # Construct slurm log file paths
         params["out_file"] = (
             f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out"
         )
@@ -278,6 +280,35 @@ class ModelLauncher:
         params["json_file"] = (
             f"{params['log_dir']}/{self.model_name}.$SLURM_JOB_ID/{self.model_name}.$SLURM_JOB_ID.json"
         )
+
+    def _get_launch_params(self) -> dict[str, Any]:
+        """Prepare launch parameters, set log dir, and validate required fields.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of prepared launch parameters
+        """
+        params = self.model_config.model_dump(exclude_none=True)
+
+        # Override config defaults with CLI arguments
+        self._apply_cli_overrides(params)
+
+        # Check for required fields without default vals, will raise an error if missing
+        utils.check_required_fields(params)
+
+        # Validate resource allocation and parallelization settings
+        self._validate_resource_allocation(params)
+
+        # Convert gpus_per_node and resource_type to gres
+        resource_type = params.get("resource_type")
+        if resource_type:
+            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
+        else:
+            params["gres"] = f"gpu:{params['gpus_per_node']}"
+
+        # Setup log files
+        self._setup_log_files(params)
 
         # Convert path to string for JSON serialization
         for field in params:
