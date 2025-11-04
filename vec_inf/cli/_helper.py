@@ -89,10 +89,18 @@ class LaunchResponseFormatter:
         for arg, value in self.params["vllm_args"].items():
             table.add_row(f"  {arg}:", str(value))
 
-        # Add Environment Variable Configuration Details
+        # Add environment variable configuration details
         table.add_row("Environment Variables", style="magenta")
         for arg, value in self.params["env"].items():
             table.add_row(f"  {arg}:", str(value))
+
+        # Add bind path configuration details
+        table.add_row("Bind Paths", style="magenta")
+        for path in self.params["bind"].split(","):
+            host = target = path
+            if ":" in path:
+                host, target = path.split(":")
+            table.add_row(f"  {host}:", target)
 
         return table
 

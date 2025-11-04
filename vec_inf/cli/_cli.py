@@ -70,6 +70,16 @@ def cli() -> None:
     help="Number of GPUs/node to use, default to suggested resource allocation for model",
 )
 @click.option(
+    "--cpus-per-task",
+    type=int,
+    help="Number of CPU cores per task",
+)
+@click.option(
+    "--mem-per-node",
+    type=str,
+    help="Memory allocation per node in GB format (e.g., '32G')",
+)
+@click.option(
     "--account",
     "-A",
     type=str,
@@ -165,6 +175,10 @@ def launch(
             Number of nodes to use
         - gpus_per_node : int, optional
             Number of GPUs per node
+        - cpus_per_task : int, optional
+            Number of CPU cores per task
+        - mem_per_node : str, optional
+            Memory allocation per node in GB format (e.g., '32G')
         - account : str, optional
             Charge resources used by this job to specified account
         - work_dir : str, optional
