@@ -194,6 +194,10 @@ class LaunchOptions:
         Number of nodes to allocate
     gpus_per_node : int, optional
         Number of GPUs per node
+    cpus_per_task : int, optional
+        Number of CPUs per task
+    mem_per_node : str, optional
+        Memory per node
     account : str, optional
         Account name for job scheduling
     work_dir : str, optional
@@ -232,6 +236,8 @@ class LaunchOptions:
     resource_type: Optional[str] = None
     num_nodes: Optional[int] = None
     gpus_per_node: Optional[int] = None
+    cpus_per_task: Optional[int] = None
+    mem_per_node: Optional[str] = None
     account: Optional[str] = None
     work_dir: Optional[str] = None
     qos: Optional[str] = None
