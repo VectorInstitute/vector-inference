@@ -134,18 +134,18 @@ def is_server_running(
 
     for line in log_content:
         line_lower = line.lower()
-        
+
         # Check for ready signature first - if found, server is running
         if MODEL_READY_SIGNATURE in line:
             ready_signature_found = True
             # Continue checking to see if there are errors after startup
-        
+
         # Check for fatal errors (only if we haven't seen ready signature yet)
         if not ready_signature_found:
             # Skip lines that match ignore patterns
             if any(ignore_pattern in line_lower for ignore_pattern in ignore_patterns):
                 continue
-            
+
             # Check for fatal error patterns
             for pattern in fatal_error_patterns:
                 if pattern in line_lower:
@@ -163,7 +163,7 @@ def is_server_running(
     # If ready signature was found and no fatal errors, server is running
     if ready_signature_found:
         return "RUNNING"
-    
+
     # Otherwise, still launching
     return ModelStatus.LAUNCHING
 
