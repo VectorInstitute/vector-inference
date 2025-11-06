@@ -555,7 +555,9 @@ class BatchModelLauncher:
                         f"Mismatch found for {arg}: {params[arg]} != {params['models'][model_name][arg]}, check your configuration"
                     )
             # Check for required fields without default vals, will raise an error if missing
-            utils.check_required_fields({**params["models"][model_name], **common_params})
+            utils.check_required_fields(
+                {**params["models"][model_name], **common_params}
+            )
 
         return params
 
