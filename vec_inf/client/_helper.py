@@ -469,16 +469,15 @@ class BatchModelLauncher:
             If required fields are missing or tensor parallel size is not specified
             when using multiple GPUs
         """
-        params: dict[str, Any] = {
-            "models": {},
+        common_params: dict[str, Any] = {
             "slurm_job_name": self.slurm_job_name,
             "src_dir": str(SRC_DIR),
             "account": account,
             "work_dir": work_dir,
         }
 
-        # Check for required fields without default vals, will raise an error if missing
-        utils.check_required_fields(params)
+        params: dict[str, Any] = common_params.copy()
+        params["models"] = {}
 
         for i, (model_name, config) in enumerate(self.model_configs.items()):
             params["models"][model_name] = config.model_dump(exclude_none=True)
@@ -555,6 +554,10 @@ class BatchModelLauncher:
                     raise ValueError(
                         f"Mismatch found for {arg}: {params[arg]} != {params['models'][model_name][arg]}, check your configuration"
                     )
+            # Check for required fields, will raise an error if missing any
+            utils.check_required_fields(
+                {**params["models"][model_name], **common_params}
+            )
 
         return params
 
