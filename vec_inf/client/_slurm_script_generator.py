@@ -219,7 +219,9 @@ class BatchSlurmScriptGenerator:
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = (
-                f",{self.params['bind']}" if self.params.get("bind") else ""
+                f",{self.params['models'][model_name]['bind']}"
+                if self.params["models"][model_name].get("bind")
+                else ""
             )
             self.params["models"][model_name]["model_weights_path"] = str(
                 Path(

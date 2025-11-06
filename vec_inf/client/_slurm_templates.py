@@ -215,7 +215,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
         Shebang line for the script
     container_setup : list[str]
         Commands for container setup
-    bind_path : list[str]
+    bind_path : str
         Bind path environment variable for the container
     server_address_setup : list[str]
         Commands to setup the server address
@@ -227,7 +227,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 
     shebang: str
     container_setup: str
-    bind_path: list[str]
+    bind_path: str
     server_address_setup: list[str]
     write_to_json: list[str]
     launch_cmd: list[str]
