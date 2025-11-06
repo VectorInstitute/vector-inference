@@ -57,6 +57,8 @@ class SlurmScriptTemplate(TypedDict):
         Commands for container setup
     imports : str
         Import statements and source commands
+    bind_path : str
+        Bind path environment variable for the container
     container_command : str
         Template for container execution command
     activate_venv : str
@@ -74,7 +76,7 @@ class SlurmScriptTemplate(TypedDict):
     shebang: ShebangConfig
     container_setup: list[str]
     imports: str
-    container_env_vars: list[str]
+    bind_path: str
     container_command: str
     activate_venv: str
     server_setup: ServerSetupConfig
@@ -96,10 +98,8 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{CONTAINER_MODULE_NAME} exec {IMAGE_PATH} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "container_env_vars": [
-        f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp"
-    ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --bind {{model_weights_path}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -215,8 +215,8 @@ class BatchModelLaunchScriptTemplate(TypedDict):
         Shebang line for the script
     container_setup : list[str]
         Commands for container setup
-    env_vars : list[str]
-        Environment variables to set
+    bind_path : list[str]
+        Bind path environment variable for the container
     server_address_setup : list[str]
         Commands to setup the server address
     launch_cmd : list[str]
@@ -227,7 +227,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 
     shebang: str
     container_setup: str
-    env_vars: list[str]
+    bind_path: list[str]
     server_address_setup: list[str]
     write_to_json: list[str]
     launch_cmd: list[str]
@@ -237,9 +237,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "shebang": "#!/bin/bash\n",
     "container_setup": f"{CONTAINER_LOAD_CMD}\n",
-    "env_vars": [
-        f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
-    ],
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
@@ -255,7 +253,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         '    "$json_path" > temp_{model_name}.json \\',
         '    && mv temp_{model_name}.json "$json_path"\n',
     ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv --containall {IMAGE_PATH} \\",
     "launch_cmd": [
         "vllm serve {model_weights_path} \\",
         "    --served-model-name {model_name} \\",
