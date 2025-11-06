@@ -34,7 +34,9 @@ class SlurmScriptGenerator:
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
-        self.additional_binds = f",{self.params['bind']}" if self.params.get("bind") else ""
+        self.additional_binds = (
+            f",{self.params['bind']}" if self.params.get("bind") else ""
+        )
         self.model_weights_path = str(
             Path(self.params["model_weights_parent_dir"], self.params["model_name"])
         )
@@ -105,7 +107,12 @@ class SlurmScriptGenerator:
         server_script = ["\n"]
         if self.use_container:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
-            server_script.append(SLURM_SCRIPT_TEMPLATE["bind_path"].format(model_weights_path=self.model_weights_path, additional_binds=self.additional_binds))
+            server_script.append(
+                SLURM_SCRIPT_TEMPLATE["bind_path"].format(
+                    model_weights_path=self.model_weights_path,
+                    additional_binds=self.additional_binds,
+                )
+            )
         else:
             server_script.append(
                 SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
@@ -211,7 +218,9 @@ class BatchSlurmScriptGenerator:
         self.script_paths: list[Path] = []
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
-            self.params["models"][model_name]["additional_binds"] = f",{self.params['bind']}" if self.params.get("bind") else ""
+            self.params["models"][model_name]["additional_binds"] = (
+                f",{self.params['bind']}" if self.params.get("bind") else ""
+            )
             self.params["models"][model_name]["model_weights_path"] = str(
                 Path(
                     self.params["models"][model_name]["model_weights_parent_dir"],
@@ -251,10 +260,12 @@ class BatchSlurmScriptGenerator:
         script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["shebang"])
         if self.use_container:
             script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_setup"])
-        script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
-            model_weights_path=model_params["model_weights_path"],
-            additional_binds=model_params["additional_binds"],
-        ))
+        script_content.append(
+            BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
+                model_weights_path=model_params["model_weights_path"],
+                additional_binds=model_params["additional_binds"],
+            )
+        )
         script_content.append(
             "\n".join(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["server_address_setup"]
