@@ -444,6 +444,7 @@ def check_required_fields(params: dict[str, Any]) -> None:
     params : dict[str, Any]
         Dictionary of parameters to check.
     """
+
     for arg in REQUIRED_ARGS:
         if not params.get(arg):
             default_value = os.getenv(REQUIRED_ARGS[arg])
