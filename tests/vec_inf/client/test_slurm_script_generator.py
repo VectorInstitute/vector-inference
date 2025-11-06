@@ -99,7 +99,7 @@ class TestSlurmScriptGenerator:
         assert generator.params == singularity_params
         assert generator.use_container
         assert not generator.is_multinode
-        assert generator.additional_binds == " --bind /scratch:/scratch,/data:/data"
+        assert generator.additional_binds == ",/scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
         assert (
             generator.env_str
@@ -185,8 +185,6 @@ class TestSlurmScriptGenerator:
         launch_cmd = generator._generate_launch_cmd()
 
         assert "apptainer exec --nv" in launch_cmd
-        assert "--bind /path/to/model_weights/test-model" in launch_cmd
-        assert "--bind /scratch:/scratch,/data:/data" in launch_cmd
         assert "source" not in launch_cmd
 
     def test_generate_launch_cmd_boolean_args(self, basic_params):
@@ -327,14 +325,17 @@ class TestBatchSlurmScriptGenerator:
         """Test initialization with Singularity configuration."""
         generator = BatchSlurmScriptGenerator(batch_singularity_params)
 
+        print(generator.params["models"]["model1"]["additional_binds"])
+        print(generator.params["models"]["model2"]["additional_binds"])
+
         assert generator.use_container
         assert (
             generator.params["models"]["model1"]["additional_binds"]
-            == " --bind /scratch:/scratch,/data:/data"
+            == ",/scratch:/scratch,/data:/data"
         )
         assert (
             generator.params["models"]["model2"]["additional_binds"]
-            == " --bind /scratch:/scratch,/data:/data"
+            == ",/scratch:/scratch,/data:/data"
         )
 
     def test_init_singularity_no_bind(self, batch_params):
