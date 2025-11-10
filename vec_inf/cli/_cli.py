@@ -321,7 +321,7 @@ def batch_launch(
     is_flag=True,
     help="Output in JSON string",
 )
-def status(slurm_job_id: str = None, json_mode: bool = False) -> None:
+def status(slurm_job_id: Optional[str] = None, json_mode: bool = False) -> None:
     """Get the status of a running model on the cluster.
 
     Parameters

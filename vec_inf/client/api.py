@@ -193,7 +193,6 @@ class VecInfClient:
             List of matching job names; empty list if squeue unavailable.
         """
         try:
-            # Run squeue for current user
             res = subprocess.run(
                 ["squeue", "--me", "--noheader"],
                 capture_output=True,
@@ -217,7 +216,6 @@ class VecInfClient:
                         text=True,
                         check=True,
                     )
-                    # Example: "JobId=12345 JobName=my-long-job-name-vec-inf ..."
                     m = re.search(r"\bJobName=([^\s]+)", sctl.stdout)
                     if m and m.group(1).endswith("-vec-inf"):
                         matching_ids.append(jid)
