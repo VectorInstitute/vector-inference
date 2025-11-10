@@ -10,12 +10,12 @@ vec_inf.client._helper : Helper classes for model inference server management
 vec_inf.client.models : Data models for API responses
 """
 
+import re
 import shutil
+import subprocess
 import time
 import warnings
 from pathlib import Path
-import re
-import subprocess
 from typing import Any, Optional, Union
 
 from vec_inf.client._exceptions import (
@@ -192,14 +192,17 @@ class VecInfClient:
         list[str]
             List of matching job names; empty list if squeue unavailable.
         """
-
         try:
             # Run squeue for current user
             res = subprocess.run(
                 ["squeue", "--me", "--noheader"],
-                capture_output=True, text=True, check=True
+                capture_output=True,
+                text=True,
+                check=True,
             )
-            job_ids = [ln.strip().split()[0] for ln in res.stdout.splitlines() if ln.strip()]
+            job_ids = [
+                ln.strip().split()[0] for ln in res.stdout.splitlines() if ln.strip()
+            ]
 
             if not job_ids:
                 return []
@@ -210,7 +213,9 @@ class VecInfClient:
                 try:
                     sctl = subprocess.run(
                         ["scontrol", "show", "job", "-o", jid],
-                        capture_output=True, text=True, check=True
+                        capture_output=True,
+                        text=True,
+                        check=True,
                     )
                     # Example: "JobId=12345 JobName=my-long-job-name-vec-inf ..."
                     m = re.search(r"\bJobName=([^\s]+)", sctl.stdout)
@@ -224,7 +229,6 @@ class VecInfClient:
 
         except subprocess.CalledProcessError as e:
             raise SlurmJobError(f"Error running slurm command: {e}") from e
-
 
     def get_status(self, slurm_job_id: str) -> StatusResponse:
         """Get the status of a running model.

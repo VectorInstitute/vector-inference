@@ -263,12 +263,17 @@ class ListStatusDisplay:
         List of model status information
     """
 
-    def __init__(self, job_ids: list[str], statuses: list[StatusResponse], json_mode: bool = False):
+    def __init__(
+        self,
+        job_ids: list[str],
+        statuses: list[StatusResponse],
+        json_mode: bool = False,
+    ):
         self.job_ids = job_ids
         self.statuses = statuses
         self.json_mode = json_mode
-        
-        self.table = Table(show_header=True,header_style="bold magenta")
+
+        self.table = Table(show_header=True, header_style="bold magenta")
         self.table.add_column("Job ID")
         self.table.add_column("Model Name")
         self.table.add_column("Status", style="blue")
@@ -300,6 +305,7 @@ class ListStatusDisplay:
                 status.base_url,
             )
         console.print(self.table)
+
 
 class MetricsResponseFormatter:
     """CLI Helper class for formatting MetricsResponse.
