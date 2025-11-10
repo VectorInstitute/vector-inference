@@ -600,7 +600,7 @@ def test_fetch_running_jobs_empty_squeue():
 
 
 def test_fetch_running_jobs_mixed_jobs():
-    """Test fetch_running_jobs filters correctly with mixed matching/non-matching jobs."""
+    """Test fetch_running_jobs filters correctly with matching/non-matching jobs."""
     client = VecInfClient()
 
     # Mock squeue output with multiple jobs
