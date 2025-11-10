@@ -739,7 +739,9 @@ class TestListStatusDisplay:
             # Verify the row was added (None base_url should be handled gracefully)
             assert len(display.table.rows) == 1
             # Verify table has correct number of columns
-            assert len(display.table.columns) == 4  # Job ID, Model Name, Status, Base URL
+            assert (
+                len(display.table.columns) == 4
+            )  # Job ID, Model Name, Status, Base URL
 
     def test_display_multiple_status_output_json_with_none_values(self):
         """Test JSON output with None values."""
