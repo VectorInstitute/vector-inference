@@ -89,6 +89,8 @@ class SlurmScriptGenerator:
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             if self.params.get(value):
                 shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+            if value == "model_name":
+                shebang[-1] += "-vec-inf"
         if self.is_multinode:
             shebang += SLURM_SCRIPT_TEMPLATE["shebang"]["multinode"]
         return "\n".join(shebang)
@@ -328,6 +330,8 @@ class BatchSlurmScriptGenerator:
                 model_params = self.params["models"][model_name]
                 if model_params.get(value) and value not in ["out_file", "err_file"]:
                     shebang.append(f"#SBATCH --{arg}={model_params[value]}")
+                if value == "model_name":
+                    shebang[-1] += "-vec-inf"
             shebang[-1] += "\n"
             shebang.append(BATCH_SLURM_SCRIPT_TEMPLATE["hetjob"])
         # Remove the last hetjob line

@@ -14,6 +14,8 @@ import shutil
 import time
 import warnings
 from pathlib import Path
+import re
+import subprocess
 from typing import Any, Optional, Union
 
 from vec_inf.client._exceptions import (
@@ -180,6 +182,49 @@ class VecInfClient:
             model_names, batch_config, account, work_dir
         )
         return model_launcher.launch()
+
+    def fetch_running_jobs(self) -> list[str]:
+        """
+        Fetch the list of running vec-inf job IDs for the current user.
+
+        Returns
+        -------
+        list[str]
+            List of matching job names; empty list if squeue unavailable.
+        """
+
+        try:
+            # Run squeue for current user
+            res = subprocess.run(
+                ["squeue", "--me", "--noheader"],
+                capture_output=True, text=True, check=True
+            )
+            job_ids = [ln.strip().split()[0] for ln in res.stdout.splitlines() if ln.strip()]
+
+            if not job_ids:
+                return []
+
+            # For each job, fetch the full JobName and filter by suffix
+            matching_ids = []
+            for jid in job_ids:
+                try:
+                    sctl = subprocess.run(
+                        ["scontrol", "show", "job", "-o", jid],
+                        capture_output=True, text=True, check=True
+                    )
+                    # Example: "JobId=12345 JobName=my-long-job-name-vec-inf ..."
+                    m = re.search(r"\bJobName=([^\s]+)", sctl.stdout)
+                    if m and m.group(1).endswith("-vec-inf"):
+                        matching_ids.append(jid)
+                except subprocess.CalledProcessError:
+                    # Job might have finished between squeue and scontrol; skip
+                    continue
+
+            return matching_ids
+
+        except subprocess.CalledProcessError as e:
+            raise SlurmJobError(f"Error running slurm command: {e}") from e
+
 
     def get_status(self, slurm_job_id: str) -> StatusResponse:
         """Get the status of a running model.

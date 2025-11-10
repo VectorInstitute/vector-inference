@@ -721,7 +721,7 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            job_name = self.job_status["JobName"]
+            job_name = self.job_status["JobName"].removesuffix("-vec-inf")
             job_state = self.job_status["JobState"]
         except KeyError:
             job_name = "UNAVAILABLE"
