@@ -46,6 +46,8 @@ dev = [
     "cupy-cuda12x==12.1.0",
     "flashinfer-python>=0.4.0",
     "sglang>=0.5.0",
+    "orjson>=3.11.0",
+    "sgl_kernel"
 ]
 
 [project.scripts]

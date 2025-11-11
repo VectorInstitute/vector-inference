@@ -10,7 +10,7 @@ ARG CUDA_VISIBLE_DEVICES=none
 ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9;9.0+PTX"
 
 # Set the Python version
-ARG PYTHON_VERSION=3.10.12
+ARG PYTHON_VERSION=3.12.12
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -31,9 +31,9 @@ RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSIO
 
 # Install pip and core Python tools
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python3.10 get-pip.py && \
+    python3.12 get-pip.py && \
     rm get-pip.py && \
-    python3.10 -m pip install --upgrade pip setuptools wheel uv
+    python3.12 -m pip install --upgrade pip setuptools wheel uv
 
 # Install RDMA support
 RUN apt-get update && apt-get install -y \
