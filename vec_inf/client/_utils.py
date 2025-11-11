@@ -436,7 +436,7 @@ def find_matching_dirs(
     return matched
 
 
-def check_required_fields(params: dict[str, Any]) -> None:
+def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
     """Check for required fields without default vals and their corresponding env vars.
 
     Parameters
@@ -444,12 +444,15 @@ def check_required_fields(params: dict[str, Any]) -> None:
     params : dict[str, Any]
         Dictionary of parameters to check.
     """
+    env_overrides = {}
     for arg in REQUIRED_ARGS:
         if not params.get(arg):
             default_value = os.getenv(REQUIRED_ARGS[arg])
             if default_value:
                 params[arg] = default_value
+                env_overrides[arg] = default_value
             else:
                 raise MissingRequiredFieldsError(
                     f"{arg} is required, please set it in the command arguments or environment variables"
                 )
+    return env_overrides
