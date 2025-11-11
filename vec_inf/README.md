@@ -14,7 +14,7 @@ Use `--help` to see all available options
 
 * `launch_model`: Launch an OpenAI compatible inference server.
 * `batch_launch_models`: Launch multiple OpenAI compatible inference servers.
-* `fetch_running_jobs`: Get the running `vec-inf` job IDs. 
+* `fetch_running_jobs`: Get the running `vec-inf` job IDs.
 * `get_status`: Get the status of a running model.
 * `get_metrics`: Get the performance metrics of a running model.
 * `shutdown_model`: Shutdown a running model.
