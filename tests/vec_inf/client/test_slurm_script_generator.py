@@ -137,7 +137,7 @@ class TestSlurmScriptGenerator:
 
         assert "#SBATCH --nodes=2" in shebang
         assert "#SBATCH --exclusive" in shebang
-        assert "#SBATCH --tasks-per-node=1" in shebang
+        assert "#SBATCH --ntasks-per-node=1" in shebang
 
     def test_generate_server_setup_single_node(self, basic_params):
         """Test server setup generation for single-node."""
