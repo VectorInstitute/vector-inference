@@ -1,5 +1,6 @@
 """Tests for the Vector Inference API client."""
 
+import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -518,3 +519,188 @@ def test_batch_launch_models_with_custom_config_integration():
         assert result.slurm_job_id == "12345678"
         assert result.slurm_job_name == "BATCH-model1-model2"
         assert result.model_names == ["model1", "model2"]
+
+
+def test_fetch_running_jobs_success_with_matching_jobs():
+    """Test fetch_running_jobs returns matching job IDs."""
+    client = VecInfClient()
+
+    # Mock squeue output with multiple jobs
+    squeue_output = "12345  RUNNING  gpu\n67890  RUNNING  gpu\n"
+    # Mock scontrol outputs for each job
+    scontrol_outputs = {
+        "12345": "JobId=12345 JobName=test-model-vec-inf User=user",
+        "67890": "JobId=67890 JobName=other-model-vec-inf User=user",
+    }
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        elif cmd[0] == "scontrol":
+            job_id = cmd[-1]
+            mock_result.stdout = scontrol_outputs.get(job_id, "")
+            mock_result.returncode = 0
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    assert result == ["12345", "67890"]
+
+
+def test_fetch_running_jobs_no_matching_jobs():
+    """Test fetch_running_jobs returns empty list when no jobs match."""
+    client = VecInfClient()
+
+    # Mock squeue output with jobs that don't match
+    squeue_output = "12345  RUNNING  gpu\n67890  RUNNING  gpu\n"
+    # Mock scontrol outputs - jobs don't end with -vec-inf
+    scontrol_outputs = {
+        "12345": "JobId=12345 JobName=test-model User=user",
+        "67890": "JobId=67890 JobName=other-job User=user",
+    }
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        elif cmd[0] == "scontrol":
+            job_id = cmd[-1]
+            mock_result.stdout = scontrol_outputs.get(job_id, "")
+            mock_result.returncode = 0
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    assert result == []
+
+
+def test_fetch_running_jobs_empty_squeue():
+    """Test fetch_running_jobs returns empty list when squeue is empty."""
+    client = VecInfClient()
+
+    # Mock empty squeue output
+    squeue_output = ""
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    assert result == []
+
+
+def test_fetch_running_jobs_mixed_jobs():
+    """Test fetch_running_jobs filters correctly with matching/non-matching jobs."""
+    client = VecInfClient()
+
+    # Mock squeue output with multiple jobs
+    squeue_output = "12345  RUNNING  gpu\n67890  RUNNING  gpu\n11111  RUNNING  gpu\n"
+    # Mock scontrol outputs - only some match
+    scontrol_outputs = {
+        "12345": "JobId=12345 JobName=test-model-vec-inf User=user",
+        "67890": "JobId=67890 JobName=other-job User=user",  # Doesn't match
+        "11111": "JobId=11111 JobName=another-model-vec-inf User=user",
+    }
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        elif cmd[0] == "scontrol":
+            job_id = cmd[-1]
+            mock_result.stdout = scontrol_outputs.get(job_id, "")
+            mock_result.returncode = 0
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    assert result == ["12345", "11111"]
+
+
+def test_fetch_running_jobs_scontrol_failure():
+    """Test fetch_running_jobs skips jobs when scontrol fails."""
+    client = VecInfClient()
+
+    # Mock squeue output
+    squeue_output = "12345  RUNNING  gpu\n67890  RUNNING  gpu\n"
+    # Mock scontrol - one succeeds, one fails
+    scontrol_outputs = {
+        "12345": "JobId=12345 JobName=test-model-vec-inf User=user",
+    }
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        elif cmd[0] == "scontrol":
+            job_id = cmd[-1]
+            if job_id in scontrol_outputs:
+                mock_result.stdout = scontrol_outputs[job_id]
+                mock_result.returncode = 0
+            else:
+                # Simulate CalledProcessError for job 67890
+                raise subprocess.CalledProcessError(1, cmd)
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    # Should only return the job that succeeded
+    assert result == ["12345"]
+
+
+def test_fetch_running_jobs_squeue_failure():
+    """Test fetch_running_jobs raises SlurmJobError when squeue fails."""
+    client = VecInfClient()
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            # Simulate CalledProcessError
+            raise subprocess.CalledProcessError(1, cmd, stderr="squeue: error")
+        return mock_result
+
+    with (
+        patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run),
+        pytest.raises(SlurmJobError, match="Error running slurm command"),
+    ):
+        client.fetch_running_jobs()
+
+
+def test_fetch_running_jobs_job_name_not_found():
+    """Test fetch_running_jobs handles missing JobName in scontrol output."""
+    client = VecInfClient()
+
+    # Mock squeue output
+    squeue_output = "12345  RUNNING  gpu\n"
+    # Mock scontrol output without JobName
+    scontrol_output = "JobId=12345 User=user State=RUNNING"
+
+    def mock_subprocess_run(cmd, **kwargs):
+        mock_result = MagicMock()
+        if cmd[0] == "squeue":
+            mock_result.stdout = squeue_output
+            mock_result.returncode = 0
+        elif cmd[0] == "scontrol":
+            mock_result.stdout = scontrol_output
+            mock_result.returncode = 0
+        return mock_result
+
+    with patch("vec_inf.client.api.subprocess.run", side_effect=mock_subprocess_run):
+        result = client.fetch_running_jobs()
+
+    # Should return empty list since JobName doesn't match
+    assert result == []

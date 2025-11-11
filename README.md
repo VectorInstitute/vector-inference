@@ -53,7 +53,7 @@ Models that are already supported by `vec-inf` would be launched using the cache
 #### Other commands
 
 * `batch-launch`: Launch multiple model inference servers at once, currently ONLY single node models supported,
-* `status`: Check the model status by providing its Slurm job ID.
+* `status`: Check the status of all `vec-inf` jobs, or a specific job by providing its job ID.
 * `metrics`: Streams performance metrics to the console.
 * `shutdown`: Shutdown a model by providing its Slurm job ID.
 * `list`: List all available model names, or view the default/cached configuration of a specific model.

@@ -251,6 +251,62 @@ class StatusResponseFormatter:
         return table
 
 
+class ListStatusDisplay:
+    """CLI Helper class for formatting a list of StatusResponse.
+
+    A formatter class that handles the presentation of multiple job statuses
+    in a table format.
+
+    Parameters
+    ----------
+    statuses : list[StatusResponse]
+        List of model status information
+    """
+
+    def __init__(
+        self,
+        job_ids: list[str],
+        statuses: list[StatusResponse],
+        json_mode: bool = False,
+    ):
+        self.job_ids = job_ids
+        self.statuses = statuses
+        self.json_mode = json_mode
+
+        self.table = Table(show_header=True, header_style="bold magenta")
+        self.table.add_column("Job ID")
+        self.table.add_column("Model Name")
+        self.table.add_column("Status", style="blue")
+        self.table.add_column("Base URL")
+
+    def display_multiple_status_output(self, console: Console) -> None:
+        """Format and display all model statuses.
+
+        Formats each model's status and adds it to the table.
+        """
+        if self.json_mode:
+            json_data = [
+                {
+                    "job_id": status.model_name,
+                    "model_name": status.model_name,
+                    "model_status": status.server_status,
+                    "base_url": status.base_url,
+                }
+                for status in self.statuses
+            ]
+            click.echo(json.dumps(json_data, indent=4))
+            return
+
+        for i, status in enumerate(self.statuses):
+            self.table.add_row(
+                self.job_ids[i],
+                status.model_name,
+                status.server_status,
+                status.base_url,
+            )
+        console.print(self.table)
+
+
 class MetricsResponseFormatter:
     """CLI Helper class for formatting MetricsResponse.
 
