@@ -151,7 +151,7 @@ Since batch launches use heterogeneous jobs, users can request different partiti
 
 You can check the status of all inference servers launched through `vec-inf` by running the `status` command:
 ```bash
-vec-inf status`
+vec-inf status
 ```
 
 And you should see an output like this:
@@ -207,7 +207,7 @@ There are 5 possible states:
 
 **Note**
 * The base URL is only available when model is in `READY` state.
-* For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 17480109+0, 17480109+1).
+* For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 1435035+0, 1435035+1).
 
 ### `metrics` command
 
