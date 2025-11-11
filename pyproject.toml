@@ -43,11 +43,11 @@ dev = [
     "torch>=2.7.0",
     "vllm>=0.10.0",
     "ray[default]>=2.50.0",
-    "cupy-cuda12x==12.1.0",
+    "cupy-cuda12x>=12.3.0",
     "flashinfer-python>=0.4.0",
     "sglang>=0.5.0",
     "orjson>=3.11.0",
-    "sgl_kernel"
+    "sgl_kernel>=0.3.0"
 ]
 
 [project.scripts]
