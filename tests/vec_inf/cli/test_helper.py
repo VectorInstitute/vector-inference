@@ -10,6 +10,7 @@ from vec_inf.cli._helper import (
     BatchLaunchResponseFormatter,
     LaunchResponseFormatter,
     ListCmdDisplay,
+    ListStatusDisplay,
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
@@ -521,3 +522,251 @@ class TestListCmdDisplay:
         with patch.object(console, "print") as mock_print:
             display.display_all_models_output(model_infos)
             mock_print.assert_called_once()
+
+
+class TestListStatusDisplay:
+    """Test cases for ListStatusDisplay."""
+
+    def test_init(self):
+        """Test ListStatusDisplay initialization."""
+        job_ids = ["12345", "67890"]
+        statuses = [
+            StatusResponse(
+                model_name="test-model-1",
+                log_dir="/tmp/logs",
+                server_status="READY",
+                job_state="RUNNING",
+                raw_output="JobState=RUNNING",
+                base_url="http://localhost:8000",
+                pending_reason=None,
+                failed_reason=None,
+            ),
+            StatusResponse(
+                model_name="test-model-2",
+                log_dir="/tmp/logs",
+                server_status="PENDING",
+                job_state="PENDING",
+                raw_output="JobState=PENDING",
+                base_url=None,
+                pending_reason="Waiting for resources",
+                failed_reason=None,
+            ),
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=False)
+
+        assert display.job_ids == job_ids
+        assert display.statuses == statuses
+        assert display.json_mode is False
+        assert isinstance(display.table, Table)
+
+    def test_init_json_mode(self):
+        """Test ListStatusDisplay initialization with JSON mode."""
+        job_ids = ["12345"]
+        statuses = [
+            StatusResponse(
+                model_name="test-model",
+                log_dir="/tmp/logs",
+                server_status="READY",
+                job_state="RUNNING",
+                raw_output="JobState=RUNNING",
+                base_url="http://localhost:8000",
+                pending_reason=None,
+                failed_reason=None,
+            )
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=True)
+
+        assert display.json_mode is True
+
+    def test_display_multiple_status_output_table_mode(self):
+        """Test displaying multiple statuses in table mode."""
+        console = Console()
+        job_ids = ["12345", "67890"]
+        statuses = [
+            StatusResponse(
+                model_name="test-model-1",
+                log_dir="/tmp/logs",
+                server_status="READY",
+                job_state="RUNNING",
+                raw_output="JobState=RUNNING",
+                base_url="http://localhost:8000",
+                pending_reason=None,
+                failed_reason=None,
+            ),
+            StatusResponse(
+                model_name="test-model-2",
+                log_dir="/tmp/logs",
+                server_status="PENDING",
+                job_state="PENDING",
+                raw_output="JobState=PENDING",
+                base_url=None,
+                pending_reason="Waiting for resources",
+                failed_reason=None,
+            ),
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=False)
+
+        with patch.object(console, "print") as mock_print:
+            display.display_multiple_status_output(console)
+            mock_print.assert_called_once()
+            # Verify the table was printed
+            assert mock_print.call_args[0][0] == display.table
+
+    def test_display_multiple_status_output_json_mode(self):
+        """Test displaying multiple statuses in JSON mode."""
+        console = Console()
+        job_ids = ["12345", "67890"]
+        statuses = [
+            StatusResponse(
+                model_name="test-model-1",
+                log_dir="/tmp/logs",
+                server_status="READY",
+                job_state="RUNNING",
+                raw_output="JobState=RUNNING",
+                base_url="http://localhost:8000",
+                pending_reason=None,
+                failed_reason=None,
+            ),
+            StatusResponse(
+                model_name="test-model-2",
+                log_dir="/tmp/logs",
+                server_status="FAILED",
+                job_state="FAILED",
+                raw_output="JobState=FAILED",
+                base_url=None,
+                pending_reason=None,
+                failed_reason="Out of memory",
+            ),
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=True)
+
+        with patch("click.echo") as mock_echo:
+            display.display_multiple_status_output(console)
+            mock_echo.assert_called_once()
+
+            # Verify JSON output
+            output = mock_echo.call_args[0][0]
+            json_data = json.loads(output)
+            assert isinstance(json_data, list)
+            assert len(json_data) == 2
+            assert json_data[0]["model_name"] == "test-model-1"
+            assert json_data[0]["model_status"] == "READY"
+            assert json_data[0]["base_url"] == "http://localhost:8000"
+            assert json_data[1]["model_name"] == "test-model-2"
+            assert json_data[1]["model_status"] == "FAILED"
+            assert json_data[1]["base_url"] is None
+
+    def test_display_multiple_status_output_empty_list(self):
+        """Test displaying empty status list."""
+        console = Console()
+        job_ids = []
+        statuses = []
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=False)
+
+        with patch.object(console, "print") as mock_print:
+            display.display_multiple_status_output(console)
+            mock_print.assert_called_once()
+
+    def test_display_multiple_status_output_empty_list_json(self):
+        """Test displaying empty status list in JSON mode."""
+        console = Console()
+        job_ids = []
+        statuses = []
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=True)
+
+        with patch("click.echo") as mock_echo:
+            display.display_multiple_status_output(console)
+            mock_echo.assert_called_once()
+
+            output = mock_echo.call_args[0][0]
+            json_data = json.loads(output)
+            assert isinstance(json_data, list)
+            assert len(json_data) == 0
+
+    def test_display_multiple_status_output_single_status(self):
+        """Test displaying single status."""
+        console = Console()
+        job_ids = ["12345"]
+        statuses = [
+            StatusResponse(
+                model_name="single-model",
+                log_dir="/tmp/logs",
+                server_status="READY",
+                job_state="RUNNING",
+                raw_output="JobState=RUNNING",
+                base_url="http://localhost:8000",
+                pending_reason=None,
+                failed_reason=None,
+            )
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=False)
+
+        with patch.object(console, "print") as mock_print:
+            display.display_multiple_status_output(console)
+            mock_print.assert_called_once()
+            # Verify table has one row
+            assert len(display.table.rows) == 1
+
+    def test_display_multiple_status_output_with_none_base_url(self):
+        """Test displaying statuses with None base_url."""
+        console = Console()
+        job_ids = ["12345"]
+        statuses = [
+            StatusResponse(
+                model_name="pending-model",
+                log_dir="/tmp/logs",
+                server_status="PENDING",
+                job_state="PENDING",
+                raw_output="JobState=PENDING",
+                base_url=None,
+                pending_reason="Resource allocation",
+                failed_reason=None,
+            )
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=False)
+
+        with patch.object(console, "print") as mock_print:
+            display.display_multiple_status_output(console)
+            mock_print.assert_called_once()
+            # Verify the row was added (None base_url should be handled gracefully)
+            assert len(display.table.rows) == 1
+            # Verify table has correct number of columns
+            assert (
+                len(display.table.columns) == 4
+            )  # Job ID, Model Name, Status, Base URL
+
+    def test_display_multiple_status_output_json_with_none_values(self):
+        """Test JSON output with None values."""
+        console = Console()
+        job_ids = ["12345"]
+        statuses = [
+            StatusResponse(
+                model_name="pending-model",
+                log_dir="/tmp/logs",
+                server_status="PENDING",
+                job_state="PENDING",
+                raw_output="JobState=PENDING",
+                base_url=None,
+                pending_reason="Waiting",
+                failed_reason=None,
+            )
+        ]
+
+        display = ListStatusDisplay(job_ids, statuses, json_mode=True)
+
+        with patch("click.echo") as mock_echo:
+            display.display_multiple_status_output(console)
+            mock_echo.assert_called_once()
+
+            output = mock_echo.call_args[0][0]
+            json_data = json.loads(output)
+            assert json_data[0]["base_url"] is None
+            assert json_data[0]["model_status"] == "PENDING"

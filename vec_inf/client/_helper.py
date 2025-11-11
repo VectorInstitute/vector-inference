@@ -554,10 +554,16 @@ class BatchModelLauncher:
                     raise ValueError(
                         f"Mismatch found for {arg}: {params[arg]} != {params['models'][model_name][arg]}, check your configuration"
                     )
-            # Check for required fields, will raise an error if missing any
-            utils.check_required_fields(
+            # Check for required fields and return environment variable overrides
+            env_overrides = utils.check_required_fields(
                 {**params["models"][model_name], **common_params}
             )
+
+            for arg, value in env_overrides.items():
+                if arg in common_params:
+                    params[arg] = value
+                else:
+                    params["models"][model_name][arg] = value
 
         return params
 
@@ -721,7 +727,7 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            job_name = self.job_status["JobName"]
+            job_name = self.job_status["JobName"].removesuffix("-vec-inf")
             job_state = self.job_status["JobState"]
         except KeyError:
             job_name = "UNAVAILABLE"
