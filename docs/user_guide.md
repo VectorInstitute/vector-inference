@@ -149,35 +149,52 @@ Since batch launches use heterogeneous jobs, users can request different partiti
 
 ### `status` command
 
-You can check the inference server status by providing the Slurm job ID to the `status` command:
+You can check the status of all inference servers launched through `vec-inf` by running the `status` command:
+```bash
+vec-inf status
+```
+
+And you should see an output like this:
+```
+┏━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job ID    ┃ Model Name ┃ Status  ┃ Base URL              ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 1434429   │ Qwen3-8B   │ READY   │ http://gpu113:8080/v1 │
+│ 1434584   │ Qwen3-14B  │ READY   │ http://gpu053:8080/v1 │
+│ 1435035+0 │ Qwen3-32B  │ PENDING │ UNAVAILABLE           │
+│ 1435035+1 │ Qwen3-14B  │ PENDING │ UNAVAILABLE           │
+└───────────┴────────────┴─────────┴───────────────────────┘
+```
+
+If you want to check why a specific job is pending or failing, append the job ID to the status command:
 
 ```bash
-vec-inf status 15373800
+vec-inf status 1435035+1
 ```
 
 If the server is pending for resources, you should see an output like this:
 
 ```
-┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Job Status     ┃ Value                      ┃
-┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Model Name     │ Meta-Llama-3.1-8B-Instruct │
-│ Model Status   │ PENDING                    │
-│ Pending Reason │ Resources                  │
-│ Base URL       │ UNAVAILABLE                │
-└────────────────┴────────────────────────────┘
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Job Status     ┃ Value       ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ Model Name     │ Qwen3-14B   │
+│ Model Status   │ PENDING     │
+│ Pending Reason │ Resources   │
+│ Base URL       │ UNAVAILABLE │
+└────────────────┴─────────────┘
 ```
 
 When the server is ready, you should see an output like this:
 
 ```
-┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Job Status   ┃ Value                      ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Model Name   │ Meta-Llama-3.1-8B-Instruct │
-│ Model Status │ READY                      │
-│ Base URL     │ http://gpu042:8080/v1      │
-└──────────────┴────────────────────────────┘
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Status   ┃ Value                 ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Model Name   │ Qwen3-14B             │
+│ Model Status │ READY                 │
+│ Base URL     │ http://gpu105:8080/v1 │
+└──────────────┴───────────────────────┘
 ```
 
 There are 5 possible states:
@@ -190,7 +207,7 @@ There are 5 possible states:
 
 **Note**
 * The base URL is only available when model is in `READY` state.
-* For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 17480109+0, 17480109+1).
+* For servers launched with `batch-launch`, the job ID should follow the format of "MAIN_JOB_ID+OFFSET" (e.g. 1435035+0, 1435035+1).
 
 ### `metrics` command
 

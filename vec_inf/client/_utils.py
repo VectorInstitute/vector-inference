@@ -108,15 +108,64 @@ def is_server_running(
     if isinstance(log_content, str):
         return log_content
 
-    status: Union[str, tuple[ModelStatus, str]] = ModelStatus.LAUNCHING
+    # Patterns that indicate fatal errors (not just warnings)
+    fatal_error_patterns = [
+        "traceback",
+        "exception",
+        "fatal error",
+        "critical error",
+        "failed to",
+        "could not",
+        "unable to",
+        "error:",
+    ]
+
+    # Patterns to ignore (non-fatal warnings/info messages)
+    ignore_patterns = [
+        "deprecated",
+        "futurewarning",
+        "userwarning",
+        "deprecationwarning",
+        "slurmstepd: error:",  # SLURM cancellation messages (often after server started)
+    ]
+
+    ready_signature_found = False
+    fatal_error_line = None
 
     for line in log_content:
-        if "error" in line.lower():
-            status = (ModelStatus.FAILED, line.strip("\n"))
-        if MODEL_READY_SIGNATURE in line:
-            status = "RUNNING"
+        line_lower = line.lower()
 
-    return status
+        # Check for ready signature first - if found, server is running
+        if MODEL_READY_SIGNATURE in line:
+            ready_signature_found = True
+            # Continue checking to see if there are errors after startup
+
+        # Check for fatal errors (only if we haven't seen ready signature yet)
+        if not ready_signature_found:
+            # Skip lines that match ignore patterns
+            if any(ignore_pattern in line_lower for ignore_pattern in ignore_patterns):
+                continue
+
+            # Check for fatal error patterns
+            for pattern in fatal_error_patterns:
+                if pattern in line_lower:
+                    # Additional check: skip if it's part of a warning message
+                    # (warnings often contain "error:" but aren't fatal)
+                    if "warning" in line_lower and "error:" in line_lower:
+                        continue
+                    fatal_error_line = line.strip("\n")
+                    break
+
+    # If we found a fatal error, mark as failed
+    if fatal_error_line:
+        return (ModelStatus.FAILED, fatal_error_line)
+
+    # If ready signature was found and no fatal errors, server is running
+    if ready_signature_found:
+        return "RUNNING"
+
+    # Otherwise, still launching
+    return ModelStatus.LAUNCHING
 
 
 def get_base_url(slurm_job_name: str, slurm_job_id: str, log_dir: str) -> str:
@@ -387,7 +436,7 @@ def find_matching_dirs(
     return matched
 
 
-def check_required_fields(params: dict[str, Any]) -> None:
+def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
     """Check for required fields without default vals and their corresponding env vars.
 
     Parameters
@@ -395,12 +444,15 @@ def check_required_fields(params: dict[str, Any]) -> None:
     params : dict[str, Any]
         Dictionary of parameters to check.
     """
+    env_overrides = {}
     for arg in REQUIRED_ARGS:
         if not params.get(arg):
             default_value = os.getenv(REQUIRED_ARGS[arg])
             if default_value:
                 params[arg] = default_value
+                env_overrides[arg] = default_value
             else:
                 raise MissingRequiredFieldsError(
                     f"{arg} is required, please set it in the command arguments or environment variables"
                 )
+    return env_overrides

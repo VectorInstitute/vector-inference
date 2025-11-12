@@ -57,6 +57,8 @@ class SlurmScriptTemplate(TypedDict):
         Commands for container setup
     imports : str
         Import statements and source commands
+    bind_path : str
+        Bind path environment variable for the container
     container_command : str
         Template for container execution command
     activate_venv : str
@@ -74,7 +76,7 @@ class SlurmScriptTemplate(TypedDict):
     shebang: ShebangConfig
     container_setup: list[str]
     imports: str
-    env_vars: list[str]
+    bind_path: str
     container_command: str
     activate_venv: str
     server_setup: ServerSetupConfig
@@ -96,10 +98,8 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{CONTAINER_MODULE_NAME} exec {IMAGE_PATH} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "env_vars": [
-        f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
-    ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}}{{model_bind_option}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g'),/dev,/tmp{{model_weights_path}}{{additional_binds}}",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -112,6 +112,23 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "nodes_array=($nodes)",
             "head_node=${{nodes_array[0]}}",
             'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
+            "\n# Check for RDMA devices and set environment variable accordingly",
+            "if ! command -v ibv_devices >/dev/null 2>&1; then",
+            '   echo "ibv_devices not found; forcing TCP. (No RDMA userland on host?)"',
+            "   export NCCL_IB_DISABLE=1",
+            '   export NCCL_ENV_ARG="--env NCCL_IB_DISABLE=1"',
+            "else",
+            "   # Pick GID index based on link layer (IB vs RoCE)",
+            '   if ibv_devinfo 2>/dev/null | grep -q "link_layer:.*Ethernet"; then',
+            "       # RoCEv2 typically needs a nonzero GID index; 3 is common, try 2 if your fabric uses it",
+            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}"',
+            "   else",
+            "       # Native InfiniBand => GID 0",
+            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}"',
+            "   fi",
+            "fi",
             "\n# Start Ray head node",
             "head_node_port=$(find_available_port $head_node_ip 8080 65535)",
             "ray_head=$head_node_ip:$head_node_port",
@@ -198,8 +215,8 @@ class BatchModelLaunchScriptTemplate(TypedDict):
         Shebang line for the script
     container_setup : list[str]
         Commands for container setup
-    env_vars : list[str]
-        Environment variables to set
+    bind_path : str
+        Bind path environment variable for the container
     server_address_setup : list[str]
         Commands to setup the server address
     launch_cmd : list[str]
@@ -210,7 +227,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 
     shebang: str
     container_setup: str
-    env_vars: list[str]
+    bind_path: str
     server_address_setup: list[str]
     write_to_json: list[str]
     launch_cmd: list[str]
@@ -220,9 +237,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "shebang": "#!/bin/bash\n",
     "container_setup": f"{CONTAINER_LOAD_CMD}\n",
-    "env_vars": [
-        f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
-    ],
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
@@ -238,7 +253,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         '    "$json_path" > temp_{model_name}.json \\',
         '    && mv temp_{model_name}.json "$json_path"\n',
     ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv{{model_bind_option}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv --containall {IMAGE_PATH} \\",
     "launch_cmd": [
         "vllm serve {model_source} \\",
         "    --served-model-name {model_name} \\",

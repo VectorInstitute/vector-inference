@@ -39,6 +39,7 @@ def test_launch_command_success(runner):
             "mem_per_node": "32G",
             "model_weights_parent_dir": "/model-weights",
             "vocab_size": "128000",
+            "venv": "/path/to/venv",
             "vllm_args": {"max_model_len": 8192},
             "env": {"CACHE": "/cache"},
         }
@@ -134,7 +135,7 @@ def test_list_single_model(runner):
 
 
 def test_status_command(runner):
-    """Test status command."""
+    """Test status command with job ID argument."""
     with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
@@ -151,6 +152,111 @@ def test_status_command(runner):
 
         assert result.exit_code == 0
         assert "Meta-Llama-3.1-8B" in result.output
+
+
+def test_status_command_no_job_id_no_running_jobs(runner):
+    """Test status command with no argument when no jobs are running."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_client.fetch_running_jobs.return_value = []
+
+        result = runner.invoke(cli, ["status"])
+
+        assert result.exit_code == 0
+        assert "No running jobs found." in result.output
+
+
+def test_status_command_no_job_id_single_running_job(runner):
+    """Test status command with no argument when one job is running."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_client.fetch_running_jobs.return_value = ["12345"]
+
+        mock_status = MagicMock()
+        mock_status.model_name = "test-model-1"
+        mock_status.server_status = "READY"
+        mock_status.base_url = "http://localhost:8000"
+        mock_status.pending_reason = None
+        mock_status.failed_reason = None
+        mock_client.get_status.return_value = mock_status
+
+        result = runner.invoke(cli, ["status"])
+
+        assert result.exit_code == 0
+        assert "test-model-1" in result.output
+        mock_client.fetch_running_jobs.assert_called_once()
+        mock_client.get_status.assert_called_once_with("12345")
+
+
+def test_status_command_no_job_id_multiple_running_jobs(runner):
+    """Test status command with no argument when multiple jobs are running."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_client.fetch_running_jobs.return_value = ["12345", "67890"]
+
+        mock_status_1 = MagicMock()
+        mock_status_1.model_name = "test-model-1"
+        mock_status_1.server_status = "READY"
+        mock_status_1.base_url = "http://localhost:8000"
+        mock_status_1.pending_reason = None
+        mock_status_1.failed_reason = None
+
+        mock_status_2 = MagicMock()
+        mock_status_2.model_name = "test-model-2"
+        mock_status_2.server_status = "PENDING"
+        mock_status_2.base_url = None
+        mock_status_2.pending_reason = "Waiting for resources"
+        mock_status_2.failed_reason = None
+
+        mock_client.get_status.side_effect = [mock_status_1, mock_status_2]
+
+        result = runner.invoke(cli, ["status"])
+
+        assert result.exit_code == 0
+        assert "test-model-1" in result.output
+        assert "test-model-2" in result.output
+        assert "12345" in result.output
+        assert "67890" in result.output
+        mock_client.fetch_running_jobs.assert_called_once()
+        assert mock_client.get_status.call_count == 2
+
+
+def test_status_command_no_job_id_multiple_jobs_json_mode(runner):
+    """Test status command with no argument and JSON mode for multiple jobs."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_client.fetch_running_jobs.return_value = ["12345", "67890"]
+
+        mock_status_1 = MagicMock()
+        mock_status_1.model_name = "test-model-1"
+        mock_status_1.server_status = "READY"
+        mock_status_1.base_url = "http://localhost:8000"
+        mock_status_1.pending_reason = None
+        mock_status_1.failed_reason = None
+
+        mock_status_2 = MagicMock()
+        mock_status_2.model_name = "test-model-2"
+        mock_status_2.server_status = "FAILED"
+        mock_status_2.base_url = None
+        mock_status_2.pending_reason = None
+        mock_status_2.failed_reason = "Out of memory"
+
+        mock_client.get_status.side_effect = [mock_status_1, mock_status_2]
+
+        result = runner.invoke(cli, ["status", "--json-mode"])
+
+        assert result.exit_code == 0
+        output = json.loads(result.output)
+        assert isinstance(output, list)
+        assert len(output) == 2
+        assert output[0]["model_name"] == "test-model-1"
+        assert output[0]["model_status"] == "READY"
+        assert output[1]["model_name"] == "test-model-2"
+        assert output[1]["model_status"] == "FAILED"
 
 
 def test_shutdown_command(runner):

@@ -36,6 +36,43 @@ class LaunchResponseFormatter:
         self.model_name = model_name
         self.params = params
 
+    def _add_resource_allocation_details(self, table: Table) -> None:
+        """Add resource allocation details to the table."""
+        optional_fields = [
+            ("account", "Account"),
+            ("work_dir", "Working Directory"),
+            ("resource_type", "Resource Type"),
+            ("partition", "Partition"),
+            ("qos", "QoS"),
+        ]
+        for key, label in optional_fields:
+            if self.params.get(key):
+                table.add_row(label, self.params[key])
+
+    def _add_vllm_config(self, table: Table) -> None:
+        """Add vLLM configuration details to the table."""
+        if self.params.get("vllm_args"):
+            table.add_row("vLLM Arguments:", style="magenta")
+            for arg, value in self.params["vllm_args"].items():
+                table.add_row(f"  {arg}:", str(value))
+
+    def _add_env_vars(self, table: Table) -> None:
+        """Add environment variable configuration details to the table."""
+        if self.params.get("env"):
+            table.add_row("Environment Variables", style="magenta")
+            for arg, value in self.params["env"].items():
+                table.add_row(f"  {arg}:", str(value))
+
+    def _add_bind_paths(self, table: Table) -> None:
+        """Add bind path configuration details to the table."""
+        if self.params.get("bind"):
+            table.add_row("Bind Paths", style="magenta")
+            for path in self.params["bind"].split(","):
+                host = target = path
+                if ":" in path:
+                    host, target = path.split(":")
+                table.add_row(f"  {host}:", target)
+
     def format_table_output(self) -> Table:
         """Format output as rich Table.
 
@@ -59,16 +96,7 @@ class LaunchResponseFormatter:
         table.add_row("Vocabulary Size", self.params["vocab_size"])
 
         # Add resource allocation details
-        if self.params.get("account"):
-            table.add_row("Account", self.params["account"])
-        if self.params.get("work_dir"):
-            table.add_row("Working Directory", self.params["work_dir"])
-        if self.params.get("resource_type"):
-            table.add_row("Resource Type", self.params["resource_type"])
-        if self.params.get("partition"):
-            table.add_row("Partition", self.params["partition"])
-        if self.params.get("qos"):
-            table.add_row("QoS", self.params["qos"])
+        self._add_resource_allocation_details(table)
         table.add_row("Time Limit", self.params["time"])
         table.add_row("Num Nodes", self.params["num_nodes"])
         table.add_row("GPUs/Node", self.params["gpus_per_node"])
@@ -76,21 +104,18 @@ class LaunchResponseFormatter:
         table.add_row("Memory/Node", self.params["mem_per_node"])
 
         # Add job config details
+        if self.params.get("venv"):
+            table.add_row("Virtual Environment", self.params["venv"])
         table.add_row(
             "Model Weights Directory",
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
         )
         table.add_row("Log Directory", self.params["log_dir"])
 
-        # Add vLLM configuration details
-        table.add_row("vLLM Arguments:", style="magenta")
-        for arg, value in self.params["vllm_args"].items():
-            table.add_row(f"  {arg}:", str(value))
-
-        # Add Environment Variable Configuration Details
-        table.add_row("Environment Variables", style="magenta")
-        for arg, value in self.params["env"].items():
-            table.add_row(f"  {arg}:", str(value))
+        # Add configuration details
+        self._add_vllm_config(table)
+        self._add_env_vars(table)
+        self._add_bind_paths(table)
 
         return table
 
@@ -224,6 +249,62 @@ class StatusResponseFormatter:
 
         table.add_row("Base URL", self.status_info.base_url)
         return table
+
+
+class ListStatusDisplay:
+    """CLI Helper class for formatting a list of StatusResponse.
+
+    A formatter class that handles the presentation of multiple job statuses
+    in a table format.
+
+    Parameters
+    ----------
+    statuses : list[StatusResponse]
+        List of model status information
+    """
+
+    def __init__(
+        self,
+        job_ids: list[str],
+        statuses: list[StatusResponse],
+        json_mode: bool = False,
+    ):
+        self.job_ids = job_ids
+        self.statuses = statuses
+        self.json_mode = json_mode
+
+        self.table = Table(show_header=True, header_style="bold magenta")
+        self.table.add_column("Job ID")
+        self.table.add_column("Model Name")
+        self.table.add_column("Status", style="blue")
+        self.table.add_column("Base URL")
+
+    def display_multiple_status_output(self, console: Console) -> None:
+        """Format and display all model statuses.
+
+        Formats each model's status and adds it to the table.
+        """
+        if self.json_mode:
+            json_data = [
+                {
+                    "job_id": status.model_name,
+                    "model_name": status.model_name,
+                    "model_status": status.server_status,
+                    "base_url": status.base_url,
+                }
+                for status in self.statuses
+            ]
+            click.echo(json.dumps(json_data, indent=4))
+            return
+
+        for i, status in enumerate(self.statuses):
+            self.table.add_row(
+                self.job_ids[i],
+                status.model_name,
+                status.server_status,
+                status.base_url,
+            )
+        console.print(self.table)
 
 
 class MetricsResponseFormatter:

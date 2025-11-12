@@ -40,6 +40,7 @@ This document tracks all model weights available in the `/model-weights` directo
 | `gemma-2b-it` | ❌ |
 | `gemma-7b` | ❌ |
 | `gemma-7b-it` | ❌ |
+| `gemma-2-2b-it` | ✅ |
 | `gemma-2-9b` | ✅ |
 | `gemma-2-9b-it` | ✅ |
 | `gemma-2-27b` | ✅ |
@@ -165,8 +166,8 @@ This document tracks all model weights available in the `/model-weights` directo
 | Model | Configuration |
 |:------|:-------------|
 | `Qwen3-14B` | ✅ |
-| `Qwen3-8B` | ❌ |
-| `Qwen3-32B` | ❌ |
+| `Qwen3-8B` | ✅ |
+| `Qwen3-32B` | ✅ |
 | `Qwen3-235B-A22B` | ❌ |
 | `Qwen3-Embedding-8B` | ❌ |
 
@@ -185,6 +186,11 @@ This document tracks all model weights available in the `/model-weights` directo
 |:------|:-------------|
 | `DeepSeek-Coder-V2-Lite-Instruct` | ❌ |
 | `deepseek-math-7b-instruct` | ❌ |
+
+### OpenAI: GPT-OSS
+| Model | Configuration |
+|:------|:-------------|
+| `gpt-oss-120b` | ✅ |
 
 ### Other LLM Models
 | Model | Configuration |

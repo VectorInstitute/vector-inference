@@ -14,6 +14,7 @@ from vec_inf.client._slurm_templates import (
     BATCH_SLURM_SCRIPT_TEMPLATE,
     SLURM_SCRIPT_TEMPLATE,
 )
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME
 
 
 class SlurmScriptGenerator:
@@ -32,12 +33,10 @@ class SlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.is_multinode = int(self.params["num_nodes"]) > 1
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
+        self.additional_binds = (
+            f",{self.params['bind']}" if self.params.get("bind") else ""
         )
-        self.additional_binds = self.params.get("bind", "")
-        if self.additional_binds:
-            self.additional_binds = f" --bind {self.additional_binds}"
         model_weights_path = Path(
             self.params["model_weights_parent_dir"], self.params["model_name"]
         )
@@ -49,17 +48,30 @@ class SlurmScriptGenerator:
             else self.params["model_name"]
         )
         self.model_bind_option = (
-            f" --bind {self.model_weights_path}" if self.model_weights_exists else ""
+            f",{self.model_weights_path}" if self.model_weights_exists else ""
         )
+        self.env_str = self._generate_env_str()
+
+    def _generate_env_str(self) -> str:
+        """Generate the environment variables string for the Slurm script.
+
+        Returns
+        -------
+        str
+            Formatted env vars string for container or shell export commands.
+        """
         env_dict: dict[str, str] = self.params.get("env", {})
-        # Create string of environment variables
-        self.env_str = ""
-        for key, val in env_dict.items():
-            if len(self.env_str) == 0:
-                self.env_str = "--env "
-            else:
-                self.env_str += ","
-            self.env_str += key + "=" + val
+
+        if not env_dict:
+            return ""
+
+        if self.use_container:
+            # Format for container: --env KEY1=VAL1,KEY2=VAL2
+            env_pairs = [f"{key}={val}" for key, val in env_dict.items()]
+            return f"--env {','.join(env_pairs)}"
+        # Format for shell: export KEY1=VAL1\nexport KEY2=VAL2
+        export_lines = [f"export {key}={val}" for key, val in env_dict.items()]
+        return "\n".join(export_lines)
 
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
@@ -87,6 +99,8 @@ class SlurmScriptGenerator:
         for arg, value in SLURM_JOB_CONFIG_ARGS.items():
             if self.params.get(value):
                 shebang.append(f"#SBATCH --{arg}={self.params[value]}")
+            if value == "model_name":
+                shebang[-1] += "-vec-inf"
         if self.is_multinode:
             shebang += SLURM_SCRIPT_TEMPLATE["shebang"]["multinode"]
         return "\n".join(shebang)
@@ -105,7 +119,17 @@ class SlurmScriptGenerator:
         server_script = ["\n"]
         if self.use_container:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
-        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["env_vars"]))
+            server_script.append(
+                SLURM_SCRIPT_TEMPLATE["bind_path"].format(
+                    model_weights_path=self.model_weights_path if self.model_weights_exists else "",
+                    additional_binds=self.additional_binds,
+                )
+            )
+        else:
+            server_script.append(
+                SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
+            )
+            server_script.append(self.env_str)
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
@@ -117,10 +141,13 @@ class SlurmScriptGenerator:
                 server_setup_str = server_setup_str.replace(
                     "CONTAINER_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                        model_bind_option=self.model_bind_option,
-                        additional_binds=self.additional_binds,
                         env_str=self.env_str,
                     ),
+                )
+            else:
+                server_setup_str = server_setup_str.replace(
+                    "CONTAINER_PLACEHOLDER",
+                    "\\",
                 )
         else:
             server_setup_str = "\n".join(
@@ -156,15 +183,10 @@ class SlurmScriptGenerator:
         if self.use_container:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                    model_bind_option=self.model_bind_option,
-                    additional_binds=self.additional_binds,
                     env_str=self.env_str,
                 )
             )
-        else:
-            launcher_script.append(
-                SLURM_SCRIPT_TEMPLATE["activate_venv"].format(venv=self.params["venv"])
-            )
+
         launcher_script.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
                 model_source=model_source,
@@ -210,15 +232,13 @@ class BatchSlurmScriptGenerator:
     def __init__(self, params: dict[str, Any]):
         self.params = params
         self.script_paths: list[Path] = []
-        self.use_container = (
-            self.params["venv"] == "singularity" or self.params["venv"] == "apptainer"
-        )
+        self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
-            self.params["models"][model_name]["additional_binds"] = ""
-            if self.params["models"][model_name].get("bind"):
-                self.params["models"][model_name]["additional_binds"] = (
-                    f" --bind {self.params['models'][model_name]['bind']}"
-                )
+            self.params["models"][model_name]["additional_binds"] = (
+                f",{self.params['models'][model_name]['bind']}"
+                if self.params["models"][model_name].get("bind")
+                else ""
+            )
             model_weights_path = Path(
                 self.params["models"][model_name]["model_weights_parent_dir"],
                 model_name,
@@ -230,9 +250,6 @@ class BatchSlurmScriptGenerator:
             )
             self.params["models"][model_name]["model_weights_exists"] = (
                 model_weights_exists
-            )
-            self.params["models"][model_name]["model_bind_option"] = (
-                f" --bind {model_weights_path_str}" if model_weights_exists else ""
             )
             self.params["models"][model_name]["model_source"] = (
                 model_weights_path_str if model_weights_exists else model_name
@@ -270,7 +287,12 @@ class BatchSlurmScriptGenerator:
         script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["shebang"])
         if self.use_container:
             script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_setup"])
-        script_content.append("\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["env_vars"]))
+        script_content.append(
+            BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
+                model_weights_path=model_params["model_weights_path"] if model_params.get("model_weights_exists", True) else "",
+                additional_binds=model_params["additional_binds"],
+            )
+        )
         script_content.append(
             "\n".join(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["server_address_setup"]
@@ -293,10 +315,7 @@ class BatchSlurmScriptGenerator:
 
         if self.use_container:
             script_content.append(
-                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
-                    model_bind_option=model_params.get("model_bind_option", ""),
-                    additional_binds=model_params["additional_binds"],
-                )
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format()
             )
         script_content.append(
             "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"]).format(
@@ -340,6 +359,8 @@ class BatchSlurmScriptGenerator:
                 model_params = self.params["models"][model_name]
                 if model_params.get(value) and value not in ["out_file", "err_file"]:
                     shebang.append(f"#SBATCH --{arg}={model_params[value]}")
+                if value == "model_name":
+                    shebang[-1] += "-vec-inf"
             shebang[-1] += "\n"
             shebang.append(BATCH_SLURM_SCRIPT_TEMPLATE["hetjob"])
         # Remove the last hetjob line

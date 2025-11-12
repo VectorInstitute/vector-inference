@@ -31,6 +31,7 @@ from vec_inf.client._slurm_script_generator import (
     BatchSlurmScriptGenerator,
     SlurmScriptGenerator,
 )
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     BatchLaunchResponse,
@@ -195,23 +196,14 @@ class ModelLauncher:
                         print(f"WARNING: Could not parse env var: {line}")
         return env_vars
 
-    def _get_launch_params(self) -> dict[str, Any]:
-        """Prepare launch parameters, set log dir, and validate required fields.
+    def _apply_cli_overrides(self, params: dict[str, Any]) -> None:
+        """Apply CLI argument overrides to params.
 
-        Returns
-        -------
-        dict[str, Any]
-            Dictionary of prepared launch parameters
-
-        Raises
-        ------
-        MissingRequiredFieldsError
-            If required fields are missing or tensor parallel size is not specified
-            when using multiple GPUs
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to override
         """
-        params = self.model_config.model_dump(exclude_none=True)
-
-        # Override config defaults with CLI arguments
         if self.kwargs.get("vllm_args"):
             vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
             for key, value in vllm_args.items():
@@ -224,13 +216,29 @@ class ModelLauncher:
                 params["env"][key] = str(value)
             del self.kwargs["env"]
 
+        if self.kwargs.get("bind") and params.get("bind"):
+            params["bind"] = f"{params['bind']},{self.kwargs['bind']}"
+            del self.kwargs["bind"]
+
         for key, value in self.kwargs.items():
             params[key] = value
 
-        # Check for required fields without default vals, will raise an error if missing
-        utils.check_required_fields(params)
+    def _validate_resource_allocation(self, params: dict[str, Any]) -> None:
+        """Validate resource allocation and parallelization settings.
 
-        # Validate resource allocation and parallelization settings
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to validate
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If tensor parallel size is not specified when using multiple GPUs
+        ValueError
+            If total # of GPUs requested is not a power of two
+            If mismatch between total # of GPUs requested and parallelization settings
+        """
         if (
             int(params["gpus_per_node"]) > 1
             and params["vllm_args"].get("--tensor-parallel-size") is None
@@ -251,19 +259,18 @@ class ModelLauncher:
                 "Mismatch between total number of GPUs requested and parallelization settings"
             )
 
-        # Convert gpus_per_node and resource_type to gres
-        resource_type = params.get("resource_type")
-        if resource_type:
-            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
-        else:
-            params["gres"] = f"gpu:{params['gpus_per_node']}"
+    def _setup_log_files(self, params: dict[str, Any]) -> None:
+        """Set up log directory and file paths.
 
-        # Create log directory
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to set up log files
+        """
         params["log_dir"] = Path(params["log_dir"], params["model_family"]).expanduser()
         params["log_dir"].mkdir(parents=True, exist_ok=True)
         params["src_dir"] = SRC_DIR
 
-        # Construct slurm log file paths
         params["out_file"] = (
             f"{params['log_dir']}/{self.model_name}.%j/{self.model_name}.%j.out"
         )
@@ -273,6 +280,35 @@ class ModelLauncher:
         params["json_file"] = (
             f"{params['log_dir']}/{self.model_name}.$SLURM_JOB_ID/{self.model_name}.$SLURM_JOB_ID.json"
         )
+
+    def _get_launch_params(self) -> dict[str, Any]:
+        """Prepare launch parameters, set log dir, and validate required fields.
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary of prepared launch parameters
+        """
+        params = self.model_config.model_dump(exclude_none=True)
+
+        # Override config defaults with CLI arguments
+        self._apply_cli_overrides(params)
+
+        # Check for required fields without default vals, will raise an error if missing
+        utils.check_required_fields(params)
+
+        # Validate resource allocation and parallelization settings
+        self._validate_resource_allocation(params)
+
+        # Convert gpus_per_node and resource_type to gres
+        resource_type = params.get("resource_type")
+        if resource_type:
+            params["gres"] = f"gpu:{resource_type}:{params['gpus_per_node']}"
+        else:
+            params["gres"] = f"gpu:{params['gpus_per_node']}"
+
+        # Setup log files
+        self._setup_log_files(params)
 
         # Convert path to string for JSON serialization
         for field in params:
@@ -331,6 +367,10 @@ class ModelLauncher:
         self.slurm_script_path.rename(
             job_log_dir / f"{self.model_name}.{self.slurm_job_id}.sbatch"
         )
+
+        # Replace venv with image path if using container
+        if self.params["venv"] == CONTAINER_MODULE_NAME:
+            self.params["venv"] = IMAGE_PATH
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
@@ -429,16 +469,15 @@ class BatchModelLauncher:
             If required fields are missing or tensor parallel size is not specified
             when using multiple GPUs
         """
-        params: dict[str, Any] = {
-            "models": {},
+        common_params: dict[str, Any] = {
             "slurm_job_name": self.slurm_job_name,
             "src_dir": str(SRC_DIR),
             "account": account,
             "work_dir": work_dir,
         }
 
-        # Check for required fields without default vals, will raise an error if missing
-        utils.check_required_fields(params)
+        params: dict[str, Any] = common_params.copy()
+        params["models"] = {}
 
         for i, (model_name, config) in enumerate(self.model_configs.items()):
             params["models"][model_name] = config.model_dump(exclude_none=True)
@@ -515,6 +554,16 @@ class BatchModelLauncher:
                     raise ValueError(
                         f"Mismatch found for {arg}: {params[arg]} != {params['models'][model_name][arg]}, check your configuration"
                     )
+            # Check for required fields and return environment variable overrides
+            env_overrides = utils.check_required_fields(
+                {**params["models"][model_name], **common_params}
+            )
+
+            for arg, value in env_overrides.items():
+                if arg in common_params:
+                    params[arg] = value
+                else:
+                    params["models"][model_name][arg] = value
 
         return params
 
@@ -678,7 +727,7 @@ class ModelStatusMonitor:
             Basic status information for the job
         """
         try:
-            job_name = self.job_status["JobName"]
+            job_name = self.job_status["JobName"].removesuffix("-vec-inf")
             job_state = self.job_status["JobState"]
         except KeyError:
             job_name = "UNAVAILABLE"

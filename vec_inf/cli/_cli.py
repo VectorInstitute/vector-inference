@@ -30,6 +30,7 @@ from vec_inf.cli._helper import (
     BatchLaunchResponseFormatter,
     LaunchResponseFormatter,
     ListCmdDisplay,
+    ListStatusDisplay,
     MetricsResponseFormatter,
     StatusResponseFormatter,
 )
@@ -68,6 +69,16 @@ def cli() -> None:
     "--gpus-per-node",
     type=int,
     help="Number of GPUs/node to use, default to suggested resource allocation for model",
+)
+@click.option(
+    "--cpus-per-task",
+    type=int,
+    help="Number of CPU cores per task",
+)
+@click.option(
+    "--mem-per-node",
+    type=str,
+    help="Memory allocation per node in GB format (e.g., '32G')",
 )
 @click.option(
     "--account",
@@ -165,6 +176,10 @@ def launch(
             Number of nodes to use
         - gpus_per_node : int, optional
             Number of GPUs per node
+        - cpus_per_task : int, optional
+            Number of CPU cores per task
+        - mem_per_node : str, optional
+            Memory allocation per node in GB format (e.g., '32G')
         - account : str, optional
             Charge resources used by this job to specified account
         - work_dir : str, optional
@@ -299,14 +314,14 @@ def batch_launch(
         raise click.ClickException(f"Batch launch failed: {str(e)}") from e
 
 
-@cli.command("status", help="Check the status of a running model on the cluster.")
-@click.argument("slurm_job_id", type=str, nargs=1)
+@cli.command("status", help="Check the status of running vec-inf jobs on the cluster.")
+@click.argument("slurm_job_id", required=False)
 @click.option(
     "--json-mode",
     is_flag=True,
     help="Output in JSON string",
 )
-def status(slurm_job_id: str, json_mode: bool = False) -> None:
+def status(slurm_job_id: Optional[str] = None, json_mode: bool = False) -> None:
     """Get the status of a running model on the cluster.
 
     Parameters
@@ -324,14 +339,28 @@ def status(slurm_job_id: str, json_mode: bool = False) -> None:
     try:
         # Start the client and get model inference server status
         client = VecInfClient()
-        status_response = client.get_status(slurm_job_id)
-        # Display status information
-        status_formatter = StatusResponseFormatter(status_response)
-        if json_mode:
-            status_formatter.output_json()
+        if not slurm_job_id:
+            slurm_job_ids = client.fetch_running_jobs()
+            if not slurm_job_ids:
+                click.echo("No running jobs found.")
+                return
         else:
-            status_info_table = status_formatter.output_table()
-            CONSOLE.print(status_info_table)
+            slurm_job_ids = [slurm_job_id]
+        responses = []
+        for job_id in slurm_job_ids:
+            responses.append(client.get_status(job_id))
+
+        # Display status information
+        if slurm_job_id:
+            status_formatter = StatusResponseFormatter(responses[0])
+            if json_mode:
+                status_formatter.output_json()
+            else:
+                status_info_table = status_formatter.output_table()
+                CONSOLE.print(status_info_table)
+        else:
+            list_status_display = ListStatusDisplay(slurm_job_ids, responses, json_mode)
+            list_status_display.display_multiple_status_output(CONSOLE)
 
     except click.ClickException as e:
         raise e
