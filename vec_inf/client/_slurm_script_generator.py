@@ -121,7 +121,9 @@ class SlurmScriptGenerator:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
             server_script.append(
                 SLURM_SCRIPT_TEMPLATE["bind_path"].format(
-                    model_weights_path=self.model_weights_path if self.model_weights_exists else "",
+                    model_weights_path=self.model_weights_path
+                    if self.model_weights_exists
+                    else "",
                     additional_binds=self.additional_binds,
                 )
             )
@@ -289,7 +291,9 @@ class BatchSlurmScriptGenerator:
             script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_setup"])
         script_content.append(
             BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
-                model_weights_path=model_params["model_weights_path"] if model_params.get("model_weights_exists", True) else "",
+                model_weights_path=model_params["model_weights_path"]
+                if model_params.get("model_weights_exists", True)
+                else "",
                 additional_binds=model_params["additional_binds"],
             )
         )
