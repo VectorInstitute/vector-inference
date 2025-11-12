@@ -172,8 +172,9 @@ class TestSlurmScriptGenerator:
         setup = generator._generate_server_setup()
 
         assert "ray stop" in setup
-        # Note: module_load_cmd may be empty in some configs, so we don't assert it
-        # The container setup should still work without it
+        assert (
+            "module load " in setup
+        )  # Remove module name since it's inconsistent between clusters
 
     def test_generate_launch_cmd_venv(self, basic_params):
         """Test launch command generation with virtual environment."""
