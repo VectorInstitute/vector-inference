@@ -59,14 +59,6 @@ class SlurmScriptGenerator:
                 self.env_str += ","
             self.env_str += key + "=" + val
 
-        # # Ensure CUDA_VISIBLE_DEVICES is passed through to the container
-        # if self.use_container and "CUDA_VISIBLE_DEVICES" not in env_dict:
-        #     if len(self.env_str) == 0:
-        #         self.env_str = "--env "
-        #     else:
-        #         self.env_str += ","
-        #     self.env_str += "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
-
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
 
