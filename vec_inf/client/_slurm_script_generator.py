@@ -44,7 +44,9 @@ class SlurmScriptGenerator:
         self.model_weights_exists = model_weights_path.exists()
         self.model_weights_path = str(model_weights_path)
         self.model_source = (
-            self.model_weights_path if self.model_weights_exists else self.params["model_name"]
+            self.model_weights_path
+            if self.model_weights_exists
+            else self.params["model_name"]
         )
         self.model_bind_option = (
             f" --bind {self.model_weights_path}" if self.model_weights_exists else ""
@@ -283,7 +285,9 @@ class BatchSlurmScriptGenerator:
             )
         )
         vllm_args_copy = model_params["vllm_args"].copy()
-        model_source = model_params.get("model_source", model_params["model_weights_path"])
+        model_source = model_params.get(
+            "model_source", model_params["model_weights_path"]
+        )
         if "--model" in vllm_args_copy:
             model_source = vllm_args_copy.pop("--model")
 
@@ -300,7 +304,7 @@ class BatchSlurmScriptGenerator:
                 model_name=model_name,
             )
         )
-        
+
         for arg, value in vllm_args_copy.items():
             if isinstance(value, bool):
                 script_content.append(f"    {arg} \\")

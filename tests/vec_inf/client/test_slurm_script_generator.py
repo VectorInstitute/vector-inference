@@ -15,7 +15,6 @@ from vec_inf.client._slurm_script_generator import (
 @pytest.fixture(autouse=True)
 def patch_model_weights_exists(monkeypatch):
     """Ensure model weights directory existence checks default to True."""
-
     monkeypatch.setattr(
         "vec_inf.client._slurm_script_generator.Path.exists", lambda self: True
     )
@@ -202,7 +201,6 @@ class TestSlurmScriptGenerator:
         self, singularity_params, monkeypatch
     ):
         """Test container launch when model weights directory is missing."""
-
         monkeypatch.setattr(
             "vec_inf.client._slurm_script_generator.Path.exists",
             lambda self: False,
