@@ -41,8 +41,14 @@ class SlurmScriptGenerator:
         model_weights_path = Path(
             self.params["model_weights_parent_dir"], self.params["model_name"]
         )
-        model_weights_path.mkdir(parents=True, exist_ok=True)
+        self.model_weights_exists = model_weights_path.exists()
         self.model_weights_path = str(model_weights_path)
+        self.model_source = (
+            self.model_weights_path if self.model_weights_exists else self.params["model_name"]
+        )
+        self.model_bind_option = (
+            f" --bind {self.model_weights_path}" if self.model_weights_exists else ""
+        )
         env_dict: dict[str, str] = self.params.get("env", {})
         # Create string of environment variables
         self.env_str = ""
@@ -52,6 +58,14 @@ class SlurmScriptGenerator:
             else:
                 self.env_str += ","
             self.env_str += key + "=" + val
+
+        # # Ensure CUDA_VISIBLE_DEVICES is passed through to the container
+        # if self.use_container and "CUDA_VISIBLE_DEVICES" not in env_dict:
+        #     if len(self.env_str) == 0:
+        #         self.env_str = "--env "
+        #     else:
+        #         self.env_str += ","
+        #     self.env_str += "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 
     def _generate_script_content(self) -> str:
         """Generate the complete Slurm script content.
@@ -109,7 +123,7 @@ class SlurmScriptGenerator:
                 server_setup_str = server_setup_str.replace(
                     "CONTAINER_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                        model_weights_path=self.model_weights_path,
+                        model_bind_option=self.model_bind_option,
                         additional_binds=self.additional_binds,
                         env_str=self.env_str,
                     ),
@@ -140,16 +154,15 @@ class SlurmScriptGenerator:
         """
         launcher_script = ["\n"]
 
-        # Check if --model is specified in vllm_args to use HuggingFace model name
-        model_path = self.model_weights_path
         vllm_args_copy = self.params["vllm_args"].copy()
+        model_source = self.model_source
         if "--model" in vllm_args_copy:
-            model_path = vllm_args_copy.pop("--model")
+            model_source = vllm_args_copy.pop("--model")
 
         if self.use_container:
             launcher_script.append(
                 SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                    model_weights_path=self.model_weights_path,
+                    model_bind_option=self.model_bind_option,
                     additional_binds=self.additional_binds,
                     env_str=self.env_str,
                 )
@@ -160,7 +173,7 @@ class SlurmScriptGenerator:
             )
         launcher_script.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
-                model_weights_path=model_path,
+                model_source=model_source,
                 model_name=self.params["model_name"],
             )
         )
@@ -216,9 +229,19 @@ class BatchSlurmScriptGenerator:
                 self.params["models"][model_name]["model_weights_parent_dir"],
                 model_name,
             )
-            model_weights_path.mkdir(parents=True, exist_ok=True)
-            self.params["models"][model_name]["model_weights_path"] = str(
-                model_weights_path
+            model_weights_exists = model_weights_path.exists()
+            model_weights_path_str = str(model_weights_path)
+            self.params["models"][model_name]["model_weights_path"] = (
+                model_weights_path_str
+            )
+            self.params["models"][model_name]["model_weights_exists"] = (
+                model_weights_exists
+            )
+            self.params["models"][model_name]["model_bind_option"] = (
+                f" --bind {model_weights_path_str}" if model_weights_exists else ""
+            )
+            self.params["models"][model_name]["model_source"] = (
+                model_weights_path_str if model_weights_exists else model_name
             )
 
     def _write_to_log_dir(self, script_content: list[str], script_name: str) -> Path:
@@ -267,22 +290,21 @@ class BatchSlurmScriptGenerator:
                 model_name=model_name,
             )
         )
-        # Check if --model is specified in vllm_args to use HuggingFace model name
-        model_path = model_params["model_weights_path"]
         vllm_args_copy = model_params["vllm_args"].copy()
+        model_source = model_params.get("model_source", model_params["model_weights_path"])
         if "--model" in vllm_args_copy:
-            model_path = vllm_args_copy.pop("--model")
+            model_source = vllm_args_copy.pop("--model")
 
         if self.use_container:
             script_content.append(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
-                    model_weights_path=model_params["model_weights_path"],
+                    model_bind_option=model_params.get("model_bind_option", ""),
                     additional_binds=model_params["additional_binds"],
                 )
             )
         script_content.append(
             "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"]).format(
-                model_weights_path=model_path,
+                model_source=model_source,
                 model_name=model_name,
             )
         )

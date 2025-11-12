@@ -99,7 +99,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "env_vars": [
         f"export {CONTAINER_MODULE_NAME}_BINDPATH=${CONTAINER_MODULE_NAME}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g')"
     ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --bind {{model_weights_path}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}}{{model_bind_option}}{{additional_binds}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -147,7 +147,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
-        "vllm serve {model_weights_path} \\",
+        "vllm serve {model_source} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
@@ -238,9 +238,9 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
         '    "$json_path" > temp_{model_name}.json \\',
         '    && mv temp_{model_name}.json "$json_path"\n',
     ],
-    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv --bind {{model_weights_path}}{{additional_binds}} --containall {IMAGE_PATH} \\",
+    "container_command": f"{CONTAINER_MODULE_NAME} exec --nv{{model_bind_option}}{{additional_binds}} --containall {IMAGE_PATH} \\",
     "launch_cmd": [
-        "vllm serve {model_weights_path} \\",
+        "vllm serve {model_source} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
