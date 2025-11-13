@@ -13,6 +13,7 @@ on:
   pull_request:
     branches:
       - main
+      - f/sglang-support
     paths:
       - Dockerfile
       - .github/workflows/docker.yml
