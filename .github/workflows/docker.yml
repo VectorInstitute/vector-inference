@@ -34,6 +34,24 @@ jobs:
           VERSION=$(grep -A 1 'name = "vllm"' uv.lock | grep version | cut -d '"' -f 2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Maximize build space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          # Remove unnecessary pre-installed software
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          # Clean apt cache
+          sudo apt-get clean
+          # Remove docker images
+          docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
