@@ -34,17 +34,6 @@ jobs:
           VERSION=$(grep -A 1 'name = "vllm"' uv.lock | grep version | cut -d '"' -f 2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Free up disk space
-        run: |
-          echo "Disk space before cleanup:"
-          df -h
-          # Remove Docker cache and unused images
-          docker system prune -af --volumes || true
-          # Clean buildx cache
-          docker buildx prune -af || true
-          echo "Disk space after cleanup:"
-          df -h
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -70,14 +59,3 @@ jobs:
             ${{ steps.meta.outputs.tags }}
             vectorinstitute/vector-inference:${{ steps.vllm-version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=vectorinstitute/vector-inference:buildcache
-          cache-to: type=registry,ref=vectorinstitute/vector-inference:buildcache,mode=min
-
-      - name: Clean up after build
-        if: always()
-        run: |
-          echo "Cleaning up build artifacts..."
-          docker system prune -af || true
-          docker buildx prune -af || true
-          echo "Final disk space:"
-          df -h
