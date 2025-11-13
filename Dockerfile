@@ -57,7 +57,9 @@ WORKDIR /vec-inf
 COPY . /vec-inf
 
 # Install project dependencies with build requirements
-RUN uv pip install --system -e .[dev] --prerelease=allow
+# Use --no-cache to prevent uv from storing both downloaded and extracted packages
+RUN uv pip install --system -e .[dev] --prerelease=allow --no-cache && \
+    rm -rf /root/.cache/uv /tmp/*
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\
