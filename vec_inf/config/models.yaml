@@ -1059,12 +1059,11 @@ models:
     model_family: gpt-oss
     model_variant: 120b
     model_type: LLM
-    gpus_per_node: 4
-    num_nodes: 2
+    gpus_per_node: 2
+    num_nodes: 1
     vocab_size: 201088
     time: 08:00:00
     resource_type: l40s
     vllm_args:
-      --tensor-parallel-size: 4
-      --pipeline-parallel-size: 2
-      --max-model-len: 40960
+      --tensor-parallel-size: 2
+      --max-model-len: 32768
