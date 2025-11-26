@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from vec_inf.cli._utils import create_table
-from vec_inf.cli._vars import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
+from vec_inf.cli._vars import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY, ENGINE_NAME_MAP
 from vec_inf.client import ModelConfig, ModelInfo, StatusResponse
 
 
@@ -49,11 +49,12 @@ class LaunchResponseFormatter:
             if self.params.get(key):
                 table.add_row(label, self.params[key])
 
-    def _add_vllm_config(self, table: Table) -> None:
-        """Add vLLM configuration details to the table."""
-        if self.params.get("vllm_args"):
-            table.add_row("vLLM Arguments:", style="magenta")
-            for arg, value in self.params["vllm_args"].items():
+    def _add_engine_config(self, table: Table) -> None:
+        """Add inference engine configuration details to the table."""
+        if self.params.get("engine_args"):
+            engine_name = ENGINE_NAME_MAP[self.params.get("engine")]
+            table.add_row(f"{engine_name} Arguments:", style="magenta")
+            for arg, value in self.params["engine_args"].items():
                 table.add_row(f"  {arg}:", str(value))
 
     def _add_env_vars(self, table: Table) -> None:
@@ -111,9 +112,10 @@ class LaunchResponseFormatter:
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
         )
         table.add_row("Log Directory", self.params["log_dir"])
+        table.add_row("Inference Engine", ENGINE_NAME_MAP[self.params["engine"]])
 
         # Add configuration details
-        self._add_vllm_config(table)
+        self._add_engine_config(table)
         self._add_env_vars(table)
         self._add_bind_paths(table)
 
