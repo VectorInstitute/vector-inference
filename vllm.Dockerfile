@@ -56,9 +56,9 @@ ENV NCCL_DEBUG=INFO
 WORKDIR /vec-inf
 COPY . /vec-inf
 
-# Install project dependencies with build requirements
+# Install project dependencies with vllm backend and inference group
 # Use --no-cache to prevent uv from storing both downloaded and extracted packages
-RUN uv pip install --system -e .[dev] --prerelease=allow --no-cache && \
+RUN uv pip install --system -e .[vllm] --group inference --prerelease=allow --no-cache && \
     rm -rf /root/.cache/uv /tmp/*
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
