@@ -1068,3 +1068,16 @@ models:
       --tensor-parallel-size: 4
       --pipeline-parallel-size: 2
       --max-model-len: 40960
+  Llama-4-Maverick-17B-128E-Instruct:
+    model_family: Llama-4
+    model_variant: Maverick-17B-128E-Instruct
+    model_type: VLM
+    gpus_per_node: 4
+    num_nodes: 8
+    vocab_size: 202048
+    time: 03:00:00
+    resource_type: l40s
+    vllm_args:
+      --max-model-len: 16384
+      --tensor-parallel-size: 4
+      --pipeline-parallel-size: 8
