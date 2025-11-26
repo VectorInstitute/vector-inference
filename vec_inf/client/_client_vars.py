@@ -61,12 +61,36 @@ SLURM_JOB_CONFIG_ARGS = {
 VLLM_SHORT_TO_LONG_MAP = {
     "-tp": "--tensor-parallel-size",
     "-pp": "--pipeline-parallel-size",
+    "-n": "--nnodes",
+    "-r": "--node-rank",
+    "-dcp": "--decode-context-parallel-size",
+    "-pcp": "--prefill-context-parallel-size",
     "-dp": "--data-parallel-size",
+    "-dpn": "--data-parallel-rank",
+    "-dpr": "--data-parallel-start-rank",
     "-dpl": "--data-parallel-size-local",
     "-dpa": "--data-parallel-address",
     "-dpp": "--data-parallel-rpc-port",
+    "-dpb": "--data-parallel-backend",
+    "-dph": "--data-parallel-hybrid-lb",
+    "-dpe": "--data-parallel-external-lb",
     "-O": "--compilation-config",
     "-q": "--quantization",
+}
+
+# SGLang engine args mapping between short and long names
+SGLANG_SHORT_TO_LONG_MAP = {
+    "--tp": "--tensor-parallel-size",
+    "--pp": "--pipeline-parallel-size",
+    "--dp": "--data-parallel-size",
+    "--ep": "--expert-parallel-size",
+    "--ep-size": "--expert-parallel-expert-size",
+}
+
+# Mapping of engine short names to their argument mappings
+ENGINE_SHORT_TO_LONG_MAP = {
+    "vllm": VLLM_SHORT_TO_LONG_MAP,
+    "sglang": SGLANG_SHORT_TO_LONG_MAP,
 }
 
 # Required matching arguments for batch mode

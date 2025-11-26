@@ -148,8 +148,11 @@ class ModelConfig(BaseModel):
         default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
     )
-    vllm_args: Optional[dict[str, Any]] = Field(
-        default={}, description="vLLM engine arguments"
+    engine: Optional[str] = Field(
+        default="vllm", description="Inference engine to be used, supports 'vllm' and 'sglang'"
+    )
+    engine_args: Optional[dict[str, Any]] = Field(
+        default={}, description="Inference engine arguments"
     )
     env: Optional[dict[str, Any]] = Field(
         default={}, description="Environment variables to be set"
