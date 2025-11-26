@@ -47,7 +47,8 @@ dev = [
     "flashinfer-python>=0.4.0",
     "sglang>=0.5.0",
     "orjson>=3.11.0",
-    "sgl_kernel>=0.3.0"
+    "sgl_kernel>=0.3.0",
+    "torchao>=0.14.0"
 ]
 
 [project.scripts]
