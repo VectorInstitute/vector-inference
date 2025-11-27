@@ -52,7 +52,10 @@ def load_env_config() -> dict[str, Any]:
 _config = load_env_config()
 
 # Extract path values
-IMAGE_PATH = _config["paths"]["image_path"]
+IMAGE_PATH = {
+    "vllm": _config["paths"]["vllm_image_path"],
+    "sglang": _config["paths"]["sglang_image_path"]
+}
 
 # Extract containerization info
 CONTAINER_LOAD_CMD = _config["containerization"]["module_load_cmd"]
