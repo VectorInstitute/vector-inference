@@ -66,8 +66,10 @@ class ModelConfig(BaseModel):
         Directory path for storing logs
     model_weights_parent_dir : Path, optional
         Base directory containing model weights
-    vllm_args : dict[str, Any], optional
-        Additional arguments for vLLM engine configuration
+    engine: str, optional
+        Inference engine to be used, supports 'vllm' and 'sglang'
+    engine_args : dict[str, Any], optional
+        Additional arguments for inference engine configuration
 
     Notes
     -----
