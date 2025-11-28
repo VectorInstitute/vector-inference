@@ -90,7 +90,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         "base": "#!/bin/bash",
         "multinode": [
             "#SBATCH --exclusive",
-            "#SBATCH --tasks-per-node=1",
+            "#SBATCH --ntasks-per-node=1",
         ],
     },
     "container_setup": [

@@ -10,13 +10,14 @@ ARG CUDA_VISIBLE_DEVICES=none
 ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9;9.0+PTX"
 
 # Set the Python version
-ARG PYTHON_VERSION=3.10.12
+ARG PYTHON_VERSION=3.12.12
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     wget build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev libffi-dev libncursesw5-dev \
-    xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev git vim \
+    xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev libnuma1 \
+    git vim \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python
@@ -31,9 +32,9 @@ RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSIO
 
 # Install pip and core Python tools
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python3.10 get-pip.py && \
+    python3.12 get-pip.py && \
     rm get-pip.py && \
-    python3.10 -m pip install --upgrade pip setuptools wheel uv
+    python3.12 -m pip install --upgrade pip setuptools wheel uv
 
 # Install RDMA support
 RUN apt-get update && apt-get install -y \
@@ -55,8 +56,10 @@ ENV NCCL_DEBUG=INFO
 WORKDIR /vec-inf
 COPY . /vec-inf
 
-# Install project dependencies with build requirements
-RUN uv pip install --system -e .[dev] --prerelease=allow
+# Install project dependencies with vllm backend and inference group
+# Use --no-cache to prevent uv from storing both downloaded and extracted packages
+RUN uv pip install --system -e .[vllm] --group inference --prerelease=allow --no-cache && \
+    rm -rf /root/.cache/uv /tmp/*
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\

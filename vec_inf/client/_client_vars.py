@@ -49,7 +49,7 @@ SLURM_JOB_CONFIG_ARGS = {
     "time": "time",
     "nodes": "num_nodes",
     "exclude": "exclude",
-    "nodelist": "node_list",
+    "nodelist": "nodelist",
     "gres": "gres",
     "cpus-per-task": "cpus_per_task",
     "mem": "mem_per_node",
