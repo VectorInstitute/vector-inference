@@ -36,19 +36,38 @@ docs = [
     "pymdown-extensions>=10.7.1",
     "mike>=2.0.0",
 ]
-
-[project.optional-dependencies]
-dev = [
+# Common inference dependencies (shared by both backends)
+inference = [
     "xgrammar>=0.1.11",
     "torch>=2.7.0",
-    "vllm>=0.10.0",
-    "ray[default]>=2.50.0",
     "cupy-cuda12x>=12.3.0",
     "flashinfer-python>=0.4.0",
-    "sglang>=0.5.0",
-    "orjson>=3.11.0",
+]
+
+[project.optional-dependencies]
+# vLLM inference backend (conflicts with sglang due to dependency version conflicts)
+# Install with: uv sync --extra vllm --group inference
+vllm = [
+    "vllm>=0.11.2",
+    "ray[default]>=2.51.0",
+]
+# SGLang inference backend (conflicts with vllm due to dependency version conflicts)
+# Install with: uv sync --extra sglang --group inference
+sglang = [
+    "sglang>=0.5.5",
     "sgl_kernel>=0.3.0",
-    "torchao>=0.14.0"
+    "orjson>=3.11.0",
+    "torchao>=0.9.0",
+]
+
+[tool.uv]
+# Declare that vllm and sglang extras are mutually exclusive
+# This prevents uv from trying to resolve both together in the lock file
+conflicts = [
+    [
+        { extra = "vllm" },
+        { extra = "sglang" },
+    ],
 ]
 
 [project.scripts]
