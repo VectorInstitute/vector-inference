@@ -1,7 +1,7 @@
 """Class for generating Slurm scripts to run inference servers.
 
-This module provides functionality to generate Slurm scripts for running inference servers
-in both single-node and multi-node configurations.
+This module provides functionality to generate Slurm scripts for running inference
+servers in both single-node and multi-node configurations.
 """
 
 from datetime import datetime
@@ -109,9 +109,7 @@ class SlurmScriptGenerator:
         """
         server_script = ["\n"]
         if self.use_container:
-            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]).format(
-                image_path=IMAGE_PATH[self.engine],
-            ))
+            server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
             server_script.append(
                 SLURM_SCRIPT_TEMPLATE["bind_path"].format(
                     model_weights_path=self.model_weights_path,
@@ -126,9 +124,10 @@ class SlurmScriptGenerator:
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
+
         if self.is_multinode and self.engine == "vllm":
             server_setup_str = "\n".join(
-                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
+                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode_vllm"]
             ).format(gpus_per_node=self.params["gpus_per_node"])
             if self.use_container:
                 server_setup_str = server_setup_str.replace(
@@ -163,44 +162,75 @@ class SlurmScriptGenerator:
     def _generate_launch_cmd(self) -> str:
         """Generate the inference server launch command.
 
-        Creates the command to launch the inference server, handling different virtualization
-        environments (venv or singularity/apptainer).
+        Creates the command to launch the inference server, handling different
+        virtualization environments (venv or singularity/apptainer).
 
         Returns
         -------
         str
             Server launch command.
         """
-        launcher_script = ["\n"]
+        if self.is_multinode and self.engine == "sglang":
+            return self._generate_multinode_sglang_launch_cmd()
+
+        launch_cmd = ["\n"]
         if self.use_container:
-            launcher_script.append(
+            launch_cmd.append(
                 SLURM_SCRIPT_TEMPLATE["container_command"].format(
                     env_str=self.env_str,
                     image_path=IMAGE_PATH[self.engine],
                 )
             )
-        if self.is_multinode and self.engine == "sglang":
-            launcher_script.append(
-                SLURM_SCRIPT_TEMPLATE["launch_cmd"]["sglang_multinode"].format(
-                    num_nodes=self.params["num_nodes"],
-                    model_weights_path=self.model_weights_path,
-                    model_name=self.params["model_name"],
-                )
+
+        launch_cmd.append(
+            "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"][self.engine]).format(  # type: ignore[literal-required]
+                model_weights_path=self.model_weights_path,
+                model_name=self.params["model_name"],
             )
-        else:
-            launcher_script.append(
-                "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"][self.engine]).format(
-                    model_weights_path=self.model_weights_path,
-                    model_name=self.params["model_name"],
-                )
-            )
+        )
 
         for arg, value in self.params["engine_args"].items():
             if isinstance(value, bool):
-                launcher_script.append(f"    {arg} \\")
+                launch_cmd.append(f"    {arg} \\")
             else:
-                launcher_script.append(f"    {arg} {value} \\")
-        return "\n".join(launcher_script)
+                launch_cmd.append(f"    {arg} {value} \\")
+        return "\n".join(launch_cmd).rstrip(" \\n")
+
+    def _generate_multinode_sglang_launch_cmd(self) -> str:
+        """Generate the launch command for multi-node sglang setup.
+
+        Returns
+        -------
+        str
+            Multi-node sglang launch command.
+        """
+        launch_cmd = "\n" + "\n".join(
+            SLURM_SCRIPT_TEMPLATE["launch_cmd"]["sglang_multinode"]
+        ).format(
+            num_nodes=self.params["num_nodes"],
+            model_weights_path=self.model_weights_path,
+            model_name=self.params["model_name"],
+        )
+
+        container_placeholder = "\\"
+        if self.use_container:
+            container_placeholder = SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                env_str=self.env_str,
+                image_path=IMAGE_PATH[self.engine],
+            )
+        launch_cmd = launch_cmd.replace(
+            "CONTAINER_PLACEHOLDER",
+            container_placeholder,
+        )
+
+        engine_arg_str = ""
+        for arg, value in self.params["engine_args"].items():
+            if isinstance(value, bool):
+                engine_arg_str += f"            {arg} \\\n"
+            else:
+                engine_arg_str += f"            {arg} {value} \\\n"
+        launch_cmd = launch_cmd.replace("ENGINE_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n"))
+        return launch_cmd
 
     def write_to_log_dir(self) -> Path:
         """Write the generated Slurm script to the log directory.
@@ -306,7 +336,9 @@ class BatchSlurmScriptGenerator:
                 )
             )
         script_content.append(
-            "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][self.engine]).format(
+            "\n".join(
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][self.engine]
+            ).format(
                 model_weights_path=model_params["model_weights_path"],
                 model_name=model_name,
             )
@@ -355,12 +387,12 @@ class BatchSlurmScriptGenerator:
         return "\n".join(shebang)
 
     def generate_batch_slurm_script(self) -> Path:
-        """Generate the Slurm script for launching multiple inference servers in batch mode.
+        """Generate the Slurm script for launching multiple inference servers in batch.
 
         Returns
         -------
         Path
-            The Slurm script for launching multiple inference servers in batch mode.
+            The Slurm script for launching multiple inference servers in batch.
         """
         script_content = []
 

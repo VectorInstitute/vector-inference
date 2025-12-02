@@ -8,7 +8,8 @@ from typing import TypedDict
 
 from vec_inf.client._slurm_vars import (
     CONTAINER_LOAD_CMD,
-    CONTAINER_MODULE_NAME
+    CONTAINER_MODULE_NAME,
+    PYTHON_VERSION,
 )
 
 
@@ -109,13 +110,11 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "shebang": {
         "base": "#!/bin/bash",
         "multinode": [
-            "#SBATCH --exclusive",
             "#SBATCH --ntasks-per-node=1",
         ],
     },
     "container_setup": [
         CONTAINER_LOAD_CMD,
-        f"{CONTAINER_MODULE_NAME} exec {{image_path}} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
     "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
@@ -124,7 +123,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "server_setup": {
         "single_node": [
             "\n# Find available port",
-            "head_node_ip=${SLURMD_NODENAME}",
+            "head_node=${SLURMD_NODENAME}",
         ],
         "multinode_vllm": [
             "\n# Get list of nodes",
@@ -150,7 +149,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "   fi",
             "fi",
             "\n# Start Ray head node",
-            "head_node_port=$(find_available_port $head_node_ip 8080 65535)",
+            "head_node_port=$(find_available_port $head_node 8080 65535)",
             "ray_head=$head_node_ip:$head_node_port",
             'echo "Ray Head IP: $ray_head"',
             'echo "Starting HEAD at $head_node"',
@@ -173,15 +172,18 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         ],
         "multinode_sglang": [
             "\n# Set NCCL initialization address using the hostname of the head node",
-            'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
-            "NCCL_PORT=$(find_available_port $head_node_ip 8000 65535)",
-            'NCCL_INIT_ADDR="${{head_node_ip}}:${{NCCL_PORT}}"',
+            'nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")',
+            "nodes_array=($nodes)",
+            "head_node=${nodes_array[0]}",
+            # 'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
+            "NCCL_PORT=$(find_available_port $head_node 8000 65535)",
+            'NCCL_INIT_ADDR="${head_node}:${NCCL_PORT}"',
             'echo "[INFO] NCCL_INIT_ADDR: $NCCL_INIT_ADDR"',
-        ]
+        ],
     },
     "find_server_port": [
-        "\nserver_port_number=$(find_available_port $head_node_ip 8080 65535)",
-        'server_address="http://${head_node_ip}:${server_port_number}/v1"',
+        "\nserver_port_number=$(find_available_port $head_node 8080 65535)",
+        'server_address="http://${head_node}:${server_port_number}/v1"',
     ],
     "write_to_json": [
         '\njson_path="{log_dir}/{model_name}.$SLURM_JOB_ID/{model_name}.$SLURM_JOB_ID.json"',
@@ -198,24 +200,31 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "    --port $server_port_number \\",
         ],
         "sglang": [
-            "python3 -m sglang.launch_server \\",
+            f"{PYTHON_VERSION} -m sglang.launch_server \\",
             "    --model-path {model_weights_path} \\",
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
         ],
         "sglang_multinode": [
-            "srun --ntasks={num_nodes} --nodes={num_nodes} \\",
-            "python3 -m sglang.launch_server \\",
-            "    --model-path {model_weights_path} \\",
-            "    --served-model-name {model_name} \\",
-            '    --host "0.0.0.0" \\',
-            "    --port $server_port_number \\",
-            '    --nccl-init-addr "$NCCL_INIT_ADDR" \\',
-            "    --nnodes {num_nodes} \\",
-            '    --node-rank "$SLURM_NODEID" \\',
-        ]
-    }
+            "for ((i = 0; i < $SLURM_JOB_NUM_NODES; i++)); do",
+            "    node_i=${{nodes_array[$i]}}",
+            '    echo "Launching SGLang server on $node_i"',
+            '    srun --ntasks=1 --nodes=1 -w "$node_i" \\',
+            "    CONTAINER_PLACEHOLDER",
+            f"       {PYTHON_VERSION} -m sglang.launch_server \\",
+            "            --model-path {model_weights_path} \\",
+            "            --served-model-name {model_name} \\",
+            '            --host "0.0.0.0" \\',
+            "            --port $server_port_number \\",
+            '            --nccl-init-addr "$NCCL_INIT_ADDR" \\',
+            "            --nnodes {num_nodes} \\",
+            '            --node-rank "$i" \\',
+            "ENGINE_ARGS_PLACEHOLDER &",
+            "done",
+            "\nwait",
+        ],
+    },
 }
 
 
@@ -309,11 +318,11 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
             "    --port $server_port_number \\",
         ],
         "sglang": [
-            "python3 -m sglang.launch_server \\",
+            f"{PYTHON_VERSION} -m sglang.launch_server \\",
             "    --model-path {model_weights_path} \\",
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
-        ]
-    }
+        ],
+    },
 }
