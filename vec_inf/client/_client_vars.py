@@ -81,8 +81,11 @@ VLLM_SHORT_TO_LONG_MAP = {
 # SGLang engine args mapping between short and long names
 SGLANG_SHORT_TO_LONG_MAP = {
     "--tp": "--tensor-parallel-size",
+    "--tp-size": "--tensor-parallel-size",
     "--pp": "--pipeline-parallel-size",
+    "--pp-size": "--pipeline-parallel-size",
     "--dp": "--data-parallel-size",
+    "--dp-size": "--data-parallel-size",
     "--ep": "--expert-parallel-size",
     "--ep-size": "--expert-parallel-expert-size",
 }
