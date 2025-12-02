@@ -151,7 +151,8 @@ class ModelConfig(BaseModel):
         description="Base directory for model weights",
     )
     engine: Optional[str] = Field(
-        default="vllm", description="Inference engine to be used, supports 'vllm' and 'sglang'"
+        default="vllm",
+        description="Inference engine to be used, supports 'vllm' and 'sglang'",
     )
     engine_args: Optional[dict[str, Any]] = Field(
         default={}, description="Inference engine arguments"
