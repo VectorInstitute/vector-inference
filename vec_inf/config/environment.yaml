@@ -19,6 +19,8 @@ required_args:
   account: "VEC_INF_ACCOUNT"
   work_dir: "VEC_INF_WORK_DIR"
 
+python_version: "python3.12"
+
 default_args:
   cpus_per_task: "16"
   mem_per_node: "64G"

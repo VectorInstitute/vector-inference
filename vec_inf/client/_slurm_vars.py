@@ -54,7 +54,7 @@ _config = load_env_config()
 # Extract path values
 IMAGE_PATH = {
     "vllm": _config["paths"]["vllm_image_path"],
-    "sglang": _config["paths"]["sglang_image_path"]
+    "sglang": _config["paths"]["sglang_image_path"],
 }
 
 # Extract containerization info
@@ -83,7 +83,10 @@ RESOURCE_TYPE: TypeAlias = create_literal_type(  # type: ignore[valid-type]
 
 # Extract required arguments, for launching jobs that don't have a default value and
 # their corresponding environment variables
-REQUIRED_ARGS: dict[str, str] = _config["required_args"]
+REQUIRED_ARGS: dict[str, str | None] = _config["required_args"]
+
+# Extract python version, running sglang requires python version
+PYTHON_VERSION: str = _config["python_version"]
 
 # Extract default arguments
 DEFAULT_ARGS: dict[str, str] = _config["default_args"]
