@@ -137,7 +137,9 @@ class ModelLauncher:
             f"not found at expected path '{model_weights_path}'"
         )
 
-    def _process_engine_args(self, arg_string: str, engine_choice: str) -> dict[str, Any]:
+    def _process_engine_args(
+        self, arg_string: str, engine_choice: str
+    ) -> dict[str, Any]:
         """Process the engine_args string into a dictionary.
 
         Parameters
@@ -152,6 +154,7 @@ class ModelLauncher:
         """
         engine_args: dict[str, str | bool] = {}
         engine_arg_map = ENGINE_SHORT_TO_LONG_MAP[engine_choice]
+
         for arg in arg_string.split(","):
             if "=" in arg:
                 key, value = arg.split("=")
@@ -208,7 +211,12 @@ class ModelLauncher:
             Dictionary of launch parameters to override
         """
         if self.kwargs.get("engine_args"):
-            engine_args = self._process_engine_args(self.kwargs["engine_args"], params["engine"])
+            if self.kwargs.get("engine"):
+                params["engine"] = self.kwargs["engine"]
+                del self.kwargs["engine"]
+            engine_args = self._process_engine_args(
+                self.kwargs["engine_args"], params["engine"]
+            )
             for key, value in engine_args.items():
                 params["engine_args"][key] = value
             del self.kwargs["engine_args"]
@@ -373,7 +381,7 @@ class ModelLauncher:
 
         # Replace venv with image path if using container
         if self.params["venv"] == CONTAINER_MODULE_NAME:
-            self.params["venv"] = IMAGE_PATH
+            self.params["venv"] = IMAGE_PATH[self.params["engine"]]
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
