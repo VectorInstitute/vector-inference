@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from vec_inf.cli._utils import create_table
-from vec_inf.cli._vars import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY, ENGINE_NAME_MAP
+from vec_inf.cli._vars import ENGINE_NAME_MAP, MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
 from vec_inf.client import ModelConfig, ModelInfo, StatusResponse
 
 
@@ -52,7 +52,7 @@ class LaunchResponseFormatter:
     def _add_engine_config(self, table: Table) -> None:
         """Add inference engine configuration details to the table."""
         if self.params.get("engine_args"):
-            engine_name = ENGINE_NAME_MAP[self.params.get("engine")]
+            engine_name = ENGINE_NAME_MAP[self.params.get("engine", "vllm")]
             table.add_row(f"{engine_name} Arguments:", style="magenta")
             for arg, value in self.params["engine_args"].items():
                 table.add_row(f"  {arg}:", str(value))
@@ -483,12 +483,17 @@ class ListCmdDisplay:
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir", "vllm_args"} and value:
+            if field not in {"venv", "log_dir", "engine_args"} and value:
                 table.add_row(field, str(value))
-            if field == "vllm_args":
-                table.add_row("vLLM Arguments:", style="magenta")
-                for vllm_arg, vllm_value in value.items():
-                    table.add_row(f"  {vllm_arg}:", str(vllm_value))
+            if field == "engine_args":
+                table.add_row("Engine Arguments:", style="magenta")
+                for engine_arg, engine_value in value.items():
+                    if type(engine_value) is str:
+                        table.add_row(f"  {engine_arg}:", str(engine_value))
+                    else:
+                        table.add_row(f"  {engine_arg}:")
+                        for sub_arg, sub_value in engine_value.items():
+                            table.add_row(f"      {sub_arg}:", str(sub_value))
         return table
 
     def _format_all_models_output(
