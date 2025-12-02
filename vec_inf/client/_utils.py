@@ -444,10 +444,13 @@ def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
     params : dict[str, Any]
         Dictionary of parameters to check.
     """
-    env_overrides = {}
+    env_overrides: dict[str, str] = {}
+
+    if not REQUIRED_ARGS:
+        return env_overrides
     for arg in REQUIRED_ARGS:
         if not params.get(arg):
-            default_value = os.getenv(REQUIRED_ARGS[arg])
+            default_value = os.getenv(str(REQUIRED_ARGS[arg]))
             if default_value:
                 params[arg] = default_value
                 env_overrides[arg] = default_value
