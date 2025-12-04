@@ -2,7 +2,7 @@ paths:
   image_path: "/model-weights/vec-inf-shared/vector-inference_latest.sif" # Maintains backwards compatibility
   vllm_image_path: "/model-weights/vec-inf-shared/vector-inference-vllm_latest.sif"
   sglang_image_path: "/model-weights/vec-inf-shared/vector-inference-sglang_latest.sif"
-
+  cached_model_config_path: "/model-weights/vec-inf-shared/models.yaml"
 
 containerization:
   module_load_cmd: "module load apptainer"

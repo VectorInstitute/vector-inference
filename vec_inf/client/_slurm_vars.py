@@ -56,6 +56,7 @@ IMAGE_PATH = {
     "vllm": _config["paths"]["vllm_image_path"],
     "sglang": _config["paths"]["sglang_image_path"],
 }
+CACHED_MODEL_CONFIG_PATH = _config["paths"]["cached_model_config_path"]
 
 # Extract containerization info
 CONTAINER_LOAD_CMD = _config["containerization"]["module_load_cmd"]

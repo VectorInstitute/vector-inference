@@ -16,7 +16,7 @@ import yaml
 
 from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
 from vec_inf.client._exceptions import MissingRequiredFieldsError
-from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR, REQUIRED_ARGS
+from vec_inf.client._slurm_vars import CACHED_MODEL_CONFIG_PATH, REQUIRED_ARGS
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
 
@@ -249,7 +249,7 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     -----
     Configuration is loaded from:
     1. User path: specified by config_path
-    2. Default path: package's config/models.yaml or CACHED_CONFIG if it exists
+    2. Default path: package's config/models.yaml or CACHED_MODEL_CONFIG_PATH if it exists
     3. Environment variable: specified by VEC_INF_CONFIG environment variable
         and merged with default config
 
@@ -303,8 +303,8 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
 
     # 2. Otherwise, load default config
     default_path = (
-        CACHED_CONFIG_DIR / "models.yaml"
-        if CACHED_CONFIG_DIR.exists()
+        CACHED_MODEL_CONFIG_PATH
+        if CACHED_MODEL_CONFIG_PATH.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
     config = load_yaml_config(default_path)
