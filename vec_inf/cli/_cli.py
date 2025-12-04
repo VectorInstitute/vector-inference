@@ -133,9 +133,14 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
-    "--vllm-args",
+    "--engine",
     type=str,
-    help="vLLM engine arguments to be set, use the format as specified in vLLM documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
+    help="Inference engine to use, supports 'vllm' and 'sglang'",
+)
+@click.option(
+    "--engine-args",
+    type=str,
+    help="Inference engine arguments to be set, use the format as specified in inference engine documentation and separate arguments with commas, e.g. --engine-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
 )
 @click.option(
     "--json-mode",
@@ -200,8 +205,8 @@ def launch(
             Path to SLURM log directory
         - model_weights_parent_dir : str, optional
             Path to model weights directory
-        - vllm_args : str, optional
-            vLLM engine arguments
+        - engine_args : str, optional
+            inference engine arguments
         - env : str, optional
             Environment variables
         - config : str, optional

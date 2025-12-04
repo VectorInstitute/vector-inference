@@ -222,8 +222,10 @@ class LaunchOptions:
         Directory for logs
     model_weights_parent_dir : str, optional
         Parent directory containing model weights
-    vllm_args : str, optional
-        Additional arguments for vLLM
+    engine: str, optional
+        Inference engine to use
+    engine_args : str, optional
+        Inference engine arguments
     env : str, optional
         Environment variables to be set
     config : str, optional
@@ -250,7 +252,8 @@ class LaunchOptions:
     venv: Optional[str] = None
     log_dir: Optional[str] = None
     model_weights_parent_dir: Optional[str] = None
-    vllm_args: Optional[str] = None
+    engine: Optional[str] = None
+    engine_args: Optional[str] = None
     env: Optional[str] = None
     config: Optional[str] = None
 
