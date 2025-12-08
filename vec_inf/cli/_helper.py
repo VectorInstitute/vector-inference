@@ -51,10 +51,11 @@ class LaunchResponseFormatter:
 
     def _add_engine_config(self, table: Table) -> None:
         """Add inference engine configuration details to the table."""
-        if self.params.get("engine_args"):
-            engine_name = ENGINE_NAME_MAP[self.params.get("engine", "vllm")]
+        if self.params.get("engine"):
+            engine = self.params["engine"]
+            engine_name = ENGINE_NAME_MAP[self.params.get(engine)]
             table.add_row(f"{engine_name} Arguments:", style="magenta")
-            for arg, value in self.params["engine_args"].items():
+            for arg, value in self.params[f"{engine}_args"].items():
                 table.add_row(f"  {arg}:", str(value))
 
     def _add_env_vars(self, table: Table) -> None:
@@ -480,13 +481,16 @@ class ListCmdDisplay:
                 config_dict["model_weights_parent_dir"]
             )
             return json.dumps(config_dict, indent=4)
+        
+        excluded_list = ["venv", "log_dir", "vllm_args", "sglang_args"]
 
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir", "engine_args"} and value:
+            if field not in excluded_list and value:
                 table.add_row(field, str(value))
-            if field == "engine_args":
-                table.add_row("Engine Arguments:", style="magenta")
+            if "args" in field:
+                engine_name = field.split("_")[0]
+                table.add_row(f"{engine_name} Arguments:", style="magenta")
                 for engine_arg, engine_value in value.items():
                     if type(engine_value) is str:
                         table.add_row(f"  {engine_arg}:", str(engine_value))
