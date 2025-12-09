@@ -220,7 +220,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             '            --nccl-init-addr "$NCCL_INIT_ADDR" \\',
             "            --nnodes {num_nodes} \\",
             '            --node-rank "$i" \\',
-            "ENGINE_ARGS_PLACEHOLDER &",
+            "SGLANG_ARGS_PLACEHOLDER &",
             "done",
             "\nwait",
         ],

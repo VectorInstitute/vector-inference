@@ -230,7 +230,7 @@ class SlurmScriptGenerator:
             else:
                 engine_arg_str += f"            {arg} {value} \\\n"
         launch_cmd = launch_cmd.replace(
-            "ENGINE_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
+            "SGLANG_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
         )
         return launch_cmd
 
