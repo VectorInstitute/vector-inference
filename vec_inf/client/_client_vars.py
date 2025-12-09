@@ -98,3 +98,6 @@ ENGINE_SHORT_TO_LONG_MAP = {
 
 # Required matching arguments for batch mode
 BATCH_MODE_REQUIRED_MATCHING_ARGS = ["engine", "venv", "log_dir"]
+
+# Supported engines
+SUPPORTED_ENGINES = ["vllm", "sglang"]
