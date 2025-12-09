@@ -200,7 +200,7 @@ class SlurmScriptGenerator:
         if self.is_multinode:
             launch_cmd.append("    --distributed-executor-backend ray \\")
 
-        return "\n".join(launch_cmd).rstrip(" \\n")
+        return "\n".join(launch_cmd).rstrip(" \\")
 
     def _generate_multinode_sglang_launch_cmd(self) -> str:
         """Generate the launch command for multi-node sglang setup.
