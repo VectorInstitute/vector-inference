@@ -77,7 +77,7 @@ def read_slurm_log(
                 json_content: dict[str, str] = json.load(file)
                 return json_content
         else:
-            with file_path.open("r", errors='replace') as file:
+            with file_path.open("r", errors="replace") as file:
                 return file.readlines()
     except FileNotFoundError:
         return f"LOG FILE NOT FOUND: {file_path}"
@@ -249,7 +249,7 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     -----
     Configuration is loaded from:
     1. User path: specified by config_path
-    2. Default path: package's config/models.yaml or CACHED_MODEL_CONFIG_PATH if it exists
+    2. Default path: package's config/models.yaml or CACHED_MODEL_CONFIG_PATH if exists
     3. Environment variable: specified by VEC_INF_CONFIG environment variable
         and merged with default config
 

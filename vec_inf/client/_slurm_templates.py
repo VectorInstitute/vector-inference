@@ -175,7 +175,6 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")',
             "nodes_array=($nodes)",
             "head_node=${nodes_array[0]}",
-            # 'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
             "NCCL_PORT=$(find_available_port $head_node 8000 65535)",
             'NCCL_INIT_ADDR="${head_node}:${NCCL_PORT}"',
             'echo "[INFO] NCCL_INIT_ADDR: $NCCL_INIT_ADDR"',

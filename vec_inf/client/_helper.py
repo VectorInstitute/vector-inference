@@ -203,7 +203,7 @@ class ModelLauncher:
                     else:
                         print(f"WARNING: Could not parse env var: {line}")
         return env_vars
-    
+
     def _engine_check_override(self, params: dict[str, Any]) -> None:
         """Check for engine override in CLI args and warn user.
 
@@ -211,9 +211,12 @@ class ModelLauncher:
         ----------
         params : dict[str, Any]
             Dictionary of launch parameters to check
-        """ 
+        """
+
         def overwrite_engine_args(params: dict[str, Any]) -> None:
-            engine_args = self._process_engine_args(self.kwargs[f"{self.engine}_args"], self.engine)
+            engine_args = self._process_engine_args(
+                self.kwargs[f"{self.engine}_args"], self.engine
+            )
             for key, value in engine_args.items():
                 params["engine_args"][key] = value
             del self.kwargs[f"{self.engine}_args"]
@@ -236,10 +239,9 @@ class ModelLauncher:
                 raise ValueError(
                     f"Mismatch between provided engine '{input_engine}' and engine-specific args '{extracted_engine}'"
                 )
-            else:
-                self.engine = input_engine
-                params["engine_args"] = params[f"{self.engine}_args"]
-                overwrite_engine_args(params)
+            self.engine = input_engine
+            params["engine_args"] = params[f"{self.engine}_args"]
+            overwrite_engine_args(params)
         elif input_engine:
             # Only engine arg in CLI, use default engine args from config
             self.engine = input_engine
@@ -255,8 +257,7 @@ class ModelLauncher:
             self.engine = params.get("engine", "vllm")
             params["engine_args"] = params[f"{self.engine}_args"]
 
-        # Remove $ENGINE_NAME_args from params as we no longer need them, and they don't get 
-        # populated to the job json.
+        # Remove $ENGINE_NAME_args from params as they won't get populated to sjob json.
         for engine in SUPPORTED_ENGINES:
             del params[f"{engine}_args"]
 
@@ -267,9 +268,9 @@ class ModelLauncher:
         ----------
         params : dict[str, Any]
             Dictionary of launch parameters to override
-        """ 
+        """
         self._engine_check_override(params)
-        
+
         if self.kwargs.get("env"):
             env_vars = self._process_env_vars(self.kwargs["env"])
             for key, value in env_vars.items():
@@ -513,6 +514,53 @@ class BatchModelLauncher:
 
         return model_configs_dict
 
+    def _validate_resource_and_parallel_settings(
+        self,
+        config: ModelConfig,
+        model_engine_args: dict[str, Any] | None,
+        model_name: str,
+    ) -> None:
+        """Validate resource allocation and parallelization settings for each model.
+
+        Parameters
+        ----------
+        config : ModelConfig
+            Configuration of the model to validate
+        model_engine_args : dict[str, Any] | None
+            Inference engine arguments of the model to validate
+        model_name : str
+            Name of the model to validate
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If tensor parallel size is not specified when using multiple GPUs
+        ValueError
+            If total # of GPUs requested is not a power of two
+            If mismatch between total # of GPUs requested and parallelization settings
+        """
+        if (
+            int(config.gpus_per_node) > 1
+            and (model_engine_args or {}).get("--tensor-parallel-size") is None
+        ):
+            raise MissingRequiredFieldsError(
+                f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
+            )
+
+        total_gpus_requested = int(config.gpus_per_node) * int(config.num_nodes)
+        if not utils.is_power_of_two(total_gpus_requested):
+            raise ValueError(
+                f"Total number of GPUs requested must be a power of two, check your configuration for {model_name}"
+            )
+
+        total_parallel_sizes = int(
+            (model_engine_args or {}).get("--tensor-parallel-size", "1")
+        ) * int((model_engine_args or {}).get("--pipeline-parallel-size", "1"))
+        if total_gpus_requested != total_parallel_sizes:
+            raise ValueError(
+                f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
+            )
+
     def _get_launch_params(
         self, account: Optional[str] = None, work_dir: Optional[str] = None
     ) -> dict[str, Any]:
@@ -549,27 +597,9 @@ class BatchModelLauncher:
                 del params["models"][model_name][f"{engine}_args"]
 
             # Validate resource allocation and parallelization settings
-            if (
-                int(config.gpus_per_node) > 1
-                and (model_engine_args or {}).get("--tensor-parallel-size") is None
-            ):
-                raise MissingRequiredFieldsError(
-                    f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
-                )
-
-            total_gpus_requested = int(config.gpus_per_node) * int(config.num_nodes)
-            if not utils.is_power_of_two(total_gpus_requested):
-                raise ValueError(
-                    f"Total number of GPUs requested must be a power of two, check your configuration for {model_name}"
-                )
-
-            total_parallel_sizes = int(
-                (model_engine_args or {}).get("--tensor-parallel-size", "1")
-            ) * int((model_engine_args or {}).get("--pipeline-parallel-size", "1"))
-            if total_gpus_requested != total_parallel_sizes:
-                raise ValueError(
-                    f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
-                )
+            self._validate_resource_and_parallel_settings(
+                config, model_engine_args, model_name
+            )
 
             # Convert gpus_per_node and resource_type to gres
             params["models"][model_name]["gres"] = (

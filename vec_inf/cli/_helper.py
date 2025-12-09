@@ -188,7 +188,8 @@ class BatchLaunchResponseFormatter:
                 "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
             )
             table.add_row(
-                "Inference Engine", f"  {ENGINE_NAME_MAP[self.params['models'][model_name]['engine']]}"
+                "Inference Engine",
+                f"  {ENGINE_NAME_MAP[self.params['models'][model_name]['engine']]}",
             )
 
         return table
@@ -483,7 +484,7 @@ class ListCmdDisplay:
                 config_dict["model_weights_parent_dir"]
             )
             return json.dumps(config_dict, indent=4)
-        
+
         excluded_list = ["venv", "log_dir"]
 
         table = create_table(key_title="Model Config", value_title="Value")
