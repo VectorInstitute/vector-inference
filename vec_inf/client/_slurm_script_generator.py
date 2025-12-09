@@ -270,7 +270,6 @@ class BatchSlurmScriptGenerator:
 
     def __init__(self, params: dict[str, Any]):
         self.params = params
-        self.engine = params.get("engine", "vllm")
         self.script_paths: list[Path] = []
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
@@ -340,12 +339,12 @@ class BatchSlurmScriptGenerator:
         if self.use_container:
             script_content.append(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
-                    image_path=IMAGE_PATH[self.engine],
+                    image_path=IMAGE_PATH[model_params["engine"]],
                 )
             )
         script_content.append(
             "\n".join(
-                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][self.engine]
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][model_params["engine"]]
             ).format(
                 model_weights_path=model_params["model_weights_path"],
                 model_name=model_name,

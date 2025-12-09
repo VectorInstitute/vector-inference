@@ -187,6 +187,9 @@ class BatchLaunchResponseFormatter:
             table.add_row(
                 "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
             )
+            table.add_row(
+                "Inference Engine", f"  {ENGINE_NAME_MAP[self.params['models'][model_name]['engine']]}"
+            )
 
         return table
 
