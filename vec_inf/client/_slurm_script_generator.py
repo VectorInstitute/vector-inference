@@ -194,8 +194,8 @@ class SlurmScriptGenerator:
                 launch_cmd.append(f"    {arg} \\")
             else:
                 launch_cmd.append(f"    {arg} {value} \\")
-        
-        # A known bug in vLLM requires setting backend specifically to ray for multi-node
+
+        # A known bug in vLLM requires setting backend to ray for multi-node
         # Remove this when the bug is fixed
         if self.is_multinode:
             launch_cmd.append("    --distributed-executor-backend ray \\")
@@ -235,10 +235,10 @@ class SlurmScriptGenerator:
                 engine_arg_str += f"            {arg} \\\n"
             else:
                 engine_arg_str += f"            {arg} {value} \\\n"
-        launch_cmd = launch_cmd.replace(
+
+        return launch_cmd.replace(
             "SGLANG_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
         )
-        return launch_cmd
 
     def write_to_log_dir(self) -> Path:
         """Write the generated Slurm script to the log directory.
@@ -355,7 +355,7 @@ class BatchSlurmScriptGenerator:
                 script_content.append(f"    {arg} \\")
             else:
                 script_content.append(f"    {arg} {value} \\")
-        script_content[-1] = script_content[-1].replace("\\", "")
+        script_content[-1] = script_content[-1].rstrip(" \\")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(
             script_content, f"launch_{model_name}.sh"
