@@ -77,7 +77,7 @@ def read_slurm_log(
                 json_content: dict[str, str] = json.load(file)
                 return json_content
         else:
-            with file_path.open("r") as file:
+            with file_path.open("r", errors='replace') as file:
                 return file.readlines()
     except FileNotFoundError:
         return f"LOG FILE NOT FOUND: {file_path}"
