@@ -224,8 +224,10 @@ class LaunchOptions:
         Parent directory containing model weights
     engine: str, optional
         Inference engine to use
-    engine_args : str, optional
-        Inference engine arguments
+    vllm_args : str, optional
+        vLLM engine arguments
+    sglang_args : str, optional
+        SGLang engine arguments
     env : str, optional
         Environment variables to be set
     config : str, optional
@@ -253,7 +255,8 @@ class LaunchOptions:
     log_dir: Optional[str] = None
     model_weights_parent_dir: Optional[str] = None
     engine: Optional[str] = None
-    engine_args: Optional[str] = None
+    vllm_args: Optional[str] = None
+    sglang_args: Optional[str] = None
     env: Optional[str] = None
     config: Optional[str] = None
 

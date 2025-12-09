@@ -68,8 +68,10 @@ class ModelConfig(BaseModel):
         Base directory containing model weights
     engine: str, optional
         Inference engine to be used, supports 'vllm' and 'sglang'
-    engine_args : dict[str, Any], optional
-        Additional arguments for inference engine configuration
+    vllm_args : dict[str, Any], optional
+        Additional arguments for vLLM engine configuration
+    sglang_args : dict[str, Any], optional
+        Additional arguments for SGLang engine configuration
 
     Notes
     -----
@@ -154,8 +156,11 @@ class ModelConfig(BaseModel):
         default="vllm",
         description="Inference engine to be used, supports 'vllm' and 'sglang'",
     )
-    engine_args: Optional[dict[str, Any]] = Field(
-        default={}, description="Inference engine arguments"
+    vllm_args: Optional[dict[str, Any]] = Field(
+        default={}, description="vLLM engine arguments"
+    )
+    sglang_args: Optional[dict[str, Any]] = Field(
+        default={}, description="SGLang engine arguments"
     )
     env: Optional[dict[str, Any]] = Field(
         default={}, description="Environment variables to be set"
