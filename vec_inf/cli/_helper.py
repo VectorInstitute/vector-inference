@@ -486,15 +486,12 @@ class ListCmdDisplay:
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
             if "args" in field:
-                engine_name = field.split("_")[0]
+                if not value:
+                    continue
+                engine_name = ENGINE_NAME_MAP[field.split("_")[0]]
                 table.add_row(f"{engine_name} Arguments:", style="magenta")
                 for engine_arg, engine_value in value.items():
-                    if type(engine_value) is str:
-                        table.add_row(f"  {engine_arg}:", str(engine_value))
-                    else:
-                        table.add_row(f"  {engine_arg}:")
-                        for sub_arg, sub_value in engine_value.items():
-                            table.add_row(f"      {sub_arg}:", str(sub_value))
+                    table.add_row(f"  {engine_arg}:", str(engine_value))
             elif field not in excluded_list and value:
                 table.add_row(field, str(value))
         return table

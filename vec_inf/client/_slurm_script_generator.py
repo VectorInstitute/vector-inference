@@ -194,6 +194,12 @@ class SlurmScriptGenerator:
                 launch_cmd.append(f"    {arg} \\")
             else:
                 launch_cmd.append(f"    {arg} {value} \\")
+        
+        # A known bug in vLLM requires setting backend specifically to ray for multi-node
+        # Remove this when the bug is fixed
+        if self.is_multinode:
+            launch_cmd.append("    --distributed-executor-backend ray \\")
+
         return "\n".join(launch_cmd).rstrip(" \\n")
 
     def _generate_multinode_sglang_launch_cmd(self) -> str:
