@@ -226,7 +226,11 @@ models:
 
     # The error might be about validation or about missing required fields
     error_str = str(excinfo.value).lower()
-    assert "validation error" in error_str or "model_type" in error_str or "model_family" in error_str
+    assert (
+        "validation error" in error_str
+        or "model_type" in error_str
+        or "model_family" in error_str
+    )
 
 
 def test_find_matching_dirs_only_model_family(tmp_path):

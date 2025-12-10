@@ -112,7 +112,9 @@ class TestModelLauncher:
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
-    def test_process_engine_args_vllm(self, mock_path_exists, mock_load_config, mock_configs):
+    def test_process_engine_args_vllm(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
         """Test vLLM args are parsed correctly into key-value pairs."""
         mock_load_config.return_value = mock_configs
         mock_path_exists.return_value = True
@@ -128,14 +130,17 @@ class TestModelLauncher:
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
-    def test_process_engine_args_sglang(self, mock_path_exists, mock_load_config, mock_configs):
+    def test_process_engine_args_sglang(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
         """Test SGLang args are parsed correctly into key-value pairs."""
         mock_load_config.return_value = mock_configs
         mock_path_exists.return_value = True
 
         launcher = ModelLauncher("test-model", {})
         sglang_args = launcher._process_engine_args(
-            "--context-length=8192,--tensor-parallel-size=4,--mem-fraction-static=0.85", "sglang"
+            "--context-length=8192,--tensor-parallel-size=4,--mem-fraction-static=0.85",
+            "sglang",
         )
 
         assert sglang_args["--context-length"] == "8192"
@@ -235,9 +240,7 @@ class TestModelLauncher:
         assert launcher.engine == "sglang"
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_check_override_mismatch_error(
-        self, mock_load_config, model_config
-    ):
+    def test_engine_check_override_mismatch_error(self, mock_load_config, model_config):
         """Test error when engine and args mismatch."""
         mock_load_config.return_value = [model_config]
 

@@ -1,17 +1,16 @@
 """Unit tests for engine selection and validation logic."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from vec_inf.client._client_vars import (
     ENGINE_SHORT_TO_LONG_MAP,
-    SUPPORTED_ENGINES,
     SGLANG_SHORT_TO_LONG_MAP,
+    SUPPORTED_ENGINES,
     VLLM_SHORT_TO_LONG_MAP,
 )
-from vec_inf.client._exceptions import ModelConfigurationError
 from vec_inf.client._helper import ModelLauncher
 from vec_inf.client.config import ModelConfig
 
@@ -67,9 +66,7 @@ class TestEngineSelection:
         )
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_selection_default(
-        self, mock_load_config, model_config_default
-    ):
+    def test_engine_selection_default(self, mock_load_config, model_config_default):
         """Test default engine selection (vllm)."""
         mock_load_config.return_value = [model_config_default]
 
@@ -198,9 +195,7 @@ class TestEngineArgsProcessing:
         )
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_args_processing_vllm(
-        self, mock_load_config, model_config
-    ):
+    def test_engine_args_processing_vllm(self, mock_load_config, model_config):
         """Test vLLM args processing."""
         updated_config = model_config.model_copy(
             update={
@@ -227,15 +222,14 @@ class TestEngineArgsProcessing:
         assert processed_args["--enforce-eager"] is True
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_args_processing_sglang(
-        self, mock_load_config, model_config
-    ):
+    def test_engine_args_processing_sglang(self, mock_load_config, model_config):
         """Test SGLang args processing."""
         mock_load_config.return_value = [model_config]
 
         launcher = ModelLauncher("test-model", {})
         processed_args = launcher._process_engine_args(
-            "--context-length=8192,--tensor-parallel-size=4,--mem-fraction-static=0.85", "sglang"
+            "--context-length=8192,--tensor-parallel-size=4,--mem-fraction-static=0.85",
+            "sglang",
         )
 
         assert processed_args["--context-length"] == "8192"
@@ -250,9 +244,7 @@ class TestEngineArgsProcessing:
         mock_load_config.return_value = [model_config]
 
         launcher = ModelLauncher("test-model", {})
-        processed_args = launcher._process_engine_args(
-            "-tp=4,-pp=2,-q=awq", "vllm"
-        )
+        processed_args = launcher._process_engine_args("-tp=4,-pp=2,-q=awq", "vllm")
 
         assert processed_args["--tensor-parallel-size"] == "4"
         assert processed_args["--pipeline-parallel-size"] == "2"
@@ -266,9 +258,7 @@ class TestEngineArgsProcessing:
         mock_load_config.return_value = [model_config]
 
         launcher = ModelLauncher("test-model", {})
-        processed_args = launcher._process_engine_args(
-            "--tp=4,--pp=2,--dp=1", "sglang"
-        )
+        processed_args = launcher._process_engine_args("--tp=4,--pp=2,--dp=1", "sglang")
 
         assert processed_args["--tensor-parallel-size"] == "4"
         assert processed_args["--pipeline-parallel-size"] == "2"
@@ -292,9 +282,7 @@ class TestEngineArgsProcessing:
             launcher._process_engine_args("-O3", "sglang")
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_args_boolean_values(
-        self, mock_load_config, model_config
-    ):
+    def test_engine_args_boolean_values(self, mock_load_config, model_config):
         """Test boolean argument values."""
         mock_load_config.return_value = [model_config]
 
@@ -308,9 +296,7 @@ class TestEngineArgsProcessing:
         assert processed_args["--max-model-len"] == "8192"
 
     @patch("vec_inf.client._helper.utils.load_config")
-    def test_engine_args_with_spaces(
-        self, mock_load_config, model_config
-    ):
+    def test_engine_args_with_spaces(self, mock_load_config, model_config):
         """Test argument parsing with spaces."""
         mock_load_config.return_value = [model_config]
 
@@ -352,4 +338,3 @@ class TestEngineConstants:
         assert SGLANG_SHORT_TO_LONG_MAP["--tp"] == "--tensor-parallel-size"
         assert "--tp-size" in SGLANG_SHORT_TO_LONG_MAP
         assert SGLANG_SHORT_TO_LONG_MAP["--tp-size"] == "--tensor-parallel-size"
-

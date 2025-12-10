@@ -415,30 +415,30 @@ def test_batch_launch_command_success(runner):
             "slurm_job_name": "BATCH-job",
             "model_names": ["Meta-Llama-3.1-8B", "Meta-Llama-3.1-70B"],
             "log_dir": "/tmp/test_logs",  # Moved to top level
-                "models": {
-                    "Meta-Llama-3.1-8B": {
-                        "model_name": "Meta-Llama-3.1-8B",
-                        "partition": "gpu",
-                        "qos": "normal",
-                        "time": "1:00:00",
-                        "num_nodes": "1",
-                        "gpus_per_node": "1",
-                        "cpus_per_task": "8",
-                        "mem_per_node": "32G",
-                        "engine": "vllm",
-                    },
-                    "Meta-Llama-3.1-70B": {
-                        "model_name": "Meta-Llama-3.1-70B",
-                        "partition": "gpu",
-                        "qos": "normal",
-                        "time": "1:00:00",
-                        "num_nodes": "1",
-                        "gpus_per_node": "1",
-                        "cpus_per_task": "8",
-                        "mem_per_node": "32G",
-                        "engine": "vllm",
-                    },
+            "models": {
+                "Meta-Llama-3.1-8B": {
+                    "model_name": "Meta-Llama-3.1-8B",
+                    "partition": "gpu",
+                    "qos": "normal",
+                    "time": "1:00:00",
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
+                    "mem_per_node": "32G",
+                    "engine": "vllm",
                 },
+                "Meta-Llama-3.1-70B": {
+                    "model_name": "Meta-Llama-3.1-70B",
+                    "partition": "gpu",
+                    "qos": "normal",
+                    "time": "1:00:00",
+                    "num_nodes": "1",
+                    "gpus_per_node": "1",
+                    "cpus_per_task": "8",
+                    "mem_per_node": "32G",
+                    "engine": "vllm",
+                },
+            },
         }
         mock_client.batch_launch_models.return_value = mock_response
 
@@ -594,7 +594,9 @@ def test_launch_command_with_vllm_args(runner):
 
         assert result.exit_code == 0
         call_args = mock_client.launch_model.call_args
-        assert call_args[0][1].vllm_args == "--max-model-len=8192,--tensor-parallel-size=4"
+        assert (
+            call_args[0][1].vllm_args == "--max-model-len=8192,--tensor-parallel-size=4"
+        )
 
 
 def test_launch_command_with_sglang_args(runner):
@@ -635,7 +637,10 @@ def test_launch_command_with_sglang_args(runner):
 
         assert result.exit_code == 0
         call_args = mock_client.launch_model.call_args
-        assert call_args[0][1].sglang_args == "--context-length=8192,--tensor-parallel-size=4"
+        assert (
+            call_args[0][1].sglang_args
+            == "--context-length=8192,--tensor-parallel-size=4"
+        )
 
 
 def test_launch_command_engine_mismatch_error(runner):

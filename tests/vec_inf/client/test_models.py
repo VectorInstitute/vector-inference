@@ -75,7 +75,9 @@ def test_launch_options_with_vllm_args():
 
 def test_launch_options_with_sglang_args():
     """Test LaunchOptions with SGLang args."""
-    options = LaunchOptions(sglang_args="--context-length=8192,--tensor-parallel-size=4")
+    options = LaunchOptions(
+        sglang_args="--context-length=8192,--tensor-parallel-size=4"
+    )
 
     assert options.sglang_args == "--context-length=8192,--tensor-parallel-size=4"
 
