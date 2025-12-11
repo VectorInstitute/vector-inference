@@ -78,6 +78,9 @@ class ModelConfig(BaseModel):
     All fields are validated using Pydantic's validation system. The model is
     configured to be immutable (frozen) and forbids extra fields.
     """
+    model_config = ConfigDict(
+        extra="ignore", str_strip_whitespace=True, validate_default=True, frozen=True
+    )
 
     model_name: str = Field(..., min_length=3, pattern=r"^[a-zA-Z0-9\-_\.]+$")
     model_family: str = Field(..., min_length=2)
@@ -164,7 +167,4 @@ class ModelConfig(BaseModel):
     )
     env: Optional[dict[str, Any]] = Field(
         default={}, description="Environment variables to be set"
-    )
-    model_config = ConfigDict(
-        extra="forbid", str_strip_whitespace=True, validate_default=True, frozen=True
     )
