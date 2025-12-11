@@ -78,6 +78,7 @@ class ModelConfig(BaseModel):
     All fields are validated using Pydantic's validation system. The model is
     configured to be immutable (frozen) and forbids extra fields.
     """
+
     model_config = ConfigDict(
         extra="ignore", str_strip_whitespace=True, validate_default=True, frozen=True
     )
