@@ -551,7 +551,6 @@ def test_launch_command_with_engine_option(runner):
         assert "14933053" in result.output
         # Verify LaunchOptions was called with engine
         call_args = mock_client.launch_model.call_args
-        # launch_model(model_name, options=LaunchOptions(...))
         assert call_args[0][0] == "Meta-Llama-3.1-8B"
         assert call_args[0][1].engine == "sglang"
 

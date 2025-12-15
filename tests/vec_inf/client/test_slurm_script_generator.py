@@ -677,5 +677,5 @@ class TestBatchSlurmScriptGenerator:
         assert script_path.name.startswith("BATCH-model1-model2")
         # Verify individual launch scripts were generated for each model
         assert len(generator.script_paths) == 2
-        # Check that write_text was called multiple times (for each model script + batch script)
+        # Check that write_text was called multiple times
         assert mock_write_text.call_count >= 3  # 2 model scripts + 1 batch script
