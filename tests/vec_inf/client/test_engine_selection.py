@@ -18,6 +18,12 @@ from vec_inf.client.config import ModelConfig
 class TestEngineSelection:
     """Tests for engine selection logic."""
 
+    @pytest.fixture(autouse=True)
+    def _set_required_env_vars(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Provide dummy required Slurm env vars so tests don't depend on host env."""
+        monkeypatch.setenv("VEC_INF_ACCOUNT", "test-account")
+        monkeypatch.setenv("VEC_INF_WORK_DIR", "/tmp")
+
     @pytest.fixture
     def model_config_vllm(self) -> ModelConfig:
         """Fixture providing a vLLM model configuration."""
@@ -111,12 +117,10 @@ class TestEngineSelection:
         """Test engine inference from vLLM args."""
         mock_load_config.return_value = [model_config_default]
 
-        with pytest.warns(UserWarning, match="Inference engine inferred"):
-            launcher = ModelLauncher(
-                "test-model", {"vllm_args": "--max-model-len=8192"}
-            )
+        launcher = ModelLauncher("test-model", {"vllm_args": "--max-model-len=8192"})
 
         assert launcher.engine == "vllm"
+        assert launcher.params["engine_inferred"] is True
 
     @patch("vec_inf.client._helper.utils.load_config")
     def test_engine_selection_inferred_from_sglang_args(
@@ -125,12 +129,12 @@ class TestEngineSelection:
         """Test engine inference from SGLang args."""
         mock_load_config.return_value = [model_config_default]
 
-        with pytest.warns(UserWarning, match="Inference engine inferred"):
-            launcher = ModelLauncher(
-                "test-model", {"sglang_args": "--context-length=8192"}
-            )
+        launcher = ModelLauncher(
+            "test-model", {"sglang_args": "--context-length=8192"}
+        )
 
         assert launcher.engine == "sglang"
+        assert launcher.params["engine_inferred"] is True
 
     @patch("vec_inf.client._helper.utils.load_config")
     def test_engine_selection_mismatch_error(
@@ -178,6 +182,12 @@ class TestEngineSelection:
 
 class TestEngineArgsProcessing:
     """Tests for engine argument processing."""
+
+    @pytest.fixture(autouse=True)
+    def _set_required_env_vars(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Provide dummy required Slurm env vars so tests don't depend on host env."""
+        monkeypatch.setenv("VEC_INF_ACCOUNT", "test-account")
+        monkeypatch.setenv("VEC_INF_WORK_DIR", "/tmp")
 
     @pytest.fixture
     def model_config(self) -> ModelConfig:

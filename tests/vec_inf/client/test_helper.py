@@ -232,12 +232,10 @@ class TestModelLauncher:
         """Test engine inference from engine-specific args."""
         mock_load_config.return_value = [model_config]
 
-        with pytest.warns(UserWarning, match="Inference engine inferred"):
-            launcher = ModelLauncher(
-                "test-model", {"sglang_args": "--context-length=8192"}
-            )
+        launcher = ModelLauncher("test-model", {"sglang_args": "--context-length=8192"})
 
         assert launcher.engine == "sglang"
+        assert launcher.params["engine_inferred"] is True
 
     @patch("vec_inf.client._helper.utils.load_config")
     def test_engine_check_override_mismatch_error(self, mock_load_config, model_config):
