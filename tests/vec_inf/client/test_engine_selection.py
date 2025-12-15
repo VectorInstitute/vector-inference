@@ -129,9 +129,7 @@ class TestEngineSelection:
         """Test engine inference from SGLang args."""
         mock_load_config.return_value = [model_config_default]
 
-        launcher = ModelLauncher(
-            "test-model", {"sglang_args": "--context-length=8192"}
-        )
+        launcher = ModelLauncher("test-model", {"sglang_args": "--context-length=8192"})
 
         assert launcher.engine == "sglang"
         assert launcher.params["engine_inferred"] is True

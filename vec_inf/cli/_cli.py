@@ -242,7 +242,9 @@ def launch(
             click.echo(json.dumps(launch_response.config))
         else:
             if launch_response.config.get("engine_inferred"):
-                CONSOLE.print("Warning: Inference engine inferred from engine-specific args")
+                CONSOLE.print(
+                    "Warning: Inference engine inferred from engine-specific args"
+                )
             launch_formatter = LaunchResponseFormatter(
                 model_name, launch_response.config
             )
