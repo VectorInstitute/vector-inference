@@ -248,8 +248,8 @@ class ModelLauncher:
             params["engine_args"] = params[f"{self.engine}_args"]
         elif extracted_engine:
             # Only engine-specific args in CLI, infer engine and warn user
-            self._warn("Warning: Inference engine inferred from engine-specific args")
             self.engine = extracted_engine
+            params["engine_inferred"] = True
             params["engine_args"] = params[f"{self.engine}_args"]
             overwrite_engine_args(params)
         else:
@@ -373,7 +373,8 @@ class ModelLauncher:
 
         # Convert path to string for JSON serialization
         for field in params:
-            if field in ["engine_args", "env"]:
+            # Keep structured fields (dicts/bools) intact
+            if field in ["engine_args", "env", "engine_inferred"]:
                 continue
             params[field] = str(params[field])
 
