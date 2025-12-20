@@ -160,7 +160,7 @@ def cli() -> None:
 @click.option(
     "--config",
     type=str,
-    help="Path to a model config yaml file to use in place of the default",
+    help="Path to a model config yaml file to use in place of the default, you can also set VEC_INF_MODEL_CONFIG to the path to the model config file",
 )
 def launch(
     model_name: str,
