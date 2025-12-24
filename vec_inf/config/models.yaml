@@ -857,3 +857,17 @@ models:
     sglang_args:
       --tensor-parallel-size: 4
       --pipeline-parallel-size: 4
+  medgemma-4b-it:
+    model_family: medgemma
+    model_variant: 4b-it
+    model_type: VLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 262208
+  medgemma-27b-it:
+    model_family: medgemma
+    model_variant: 27b-it
+    model_type: VLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 262208
