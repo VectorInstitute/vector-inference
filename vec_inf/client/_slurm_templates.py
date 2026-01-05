@@ -98,7 +98,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{CONTAINER_MODULE_NAME} exec {IMAGE_PATH} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,$(echo /dev/infiniband* | sed -e 's/ /,/g'),/dev,/tmp{{model_weights_path}}{{additional_binds}}",
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp{{model_weights_path}}{{additional_binds}}",
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
