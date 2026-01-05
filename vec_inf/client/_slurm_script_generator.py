@@ -47,9 +47,6 @@ class SlurmScriptGenerator:
             if self.model_weights_exists
             else self.params["model_name"]
         )
-        self.model_bind_option = (
-            f",{self.model_weights_path}" if self.model_weights_exists else ""
-        )
         self.env_str = self._generate_env_str()
 
     def _generate_env_str(self) -> str:
