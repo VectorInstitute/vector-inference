@@ -15,6 +15,7 @@ from vec_inf.client._slurm_templates import (
     SLURM_SCRIPT_TEMPLATE,
 )
 from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME
+from vec_inf.client._utils import check_and_warn_hf_cache
 
 
 class SlurmScriptGenerator:
@@ -46,6 +47,11 @@ class SlurmScriptGenerator:
             self.model_weights_path
             if self.model_weights_exists
             else self.params["model_name"]
+        )
+        check_and_warn_hf_cache(
+            self.model_weights_exists,
+            self.model_weights_path,
+            self.params.get("env", {}),
         )
         self.env_str = self._generate_env_str()
 
@@ -253,6 +259,13 @@ class BatchSlurmScriptGenerator:
             self.params["models"][model_name]["model_source"] = (
                 model_weights_path_str if model_weights_exists else model_name
             )
+            check_and_warn_hf_cache(
+                model_weights_exists,
+                model_weights_path_str,
+                self.params["models"][model_name].get("env", {}),
+                model_name,
+            )
+
 
     def _write_to_log_dir(self, script_content: list[str], script_name: str) -> Path:
         """Write the generated Slurm script to the log directory.

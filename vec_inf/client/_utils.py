@@ -456,3 +456,43 @@ def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
                     f"{arg} is required, please set it in the command arguments or environment variables"
                 )
     return env_overrides
+
+
+def check_and_warn_hf_cache(
+    model_weights_exists: bool,
+    model_weights_path: str,
+    env_dict: dict[str, str],
+    model_name: str | None = None,
+) -> None:
+    """Warn if model weights don't exist and HuggingFace cache directory is not set.
+
+    Parameters
+    ----------
+    model_weights_exists : bool
+        Whether the model weights exist at the expected path.
+    model_weights_path : str
+        The expected path to the model weights.
+    env_dict : dict[str, str]
+        Dictionary of environment variables to check (from --env parameter).
+    model_name : str | None, optional
+        Optional model name to include in the warning message (for batch mode).
+    """
+    if model_weights_exists:
+        return
+
+    hf_cache_vars = ["HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"]
+    hf_cache_set = any(
+        os.environ.get(var) or env_dict.get(var) for var in hf_cache_vars
+    )
+
+    if not hf_cache_set:
+        model_prefix = f"Model weights for '{model_name}' " if model_name else "Model weights "
+        warnings.warn(
+            f"{model_prefix}not found at '{model_weights_path}' and no "
+            f"HuggingFace cache directory is set (HF_HOME, HF_HUB_CACHE, or "
+            f"HUGGINGFACE_HUB_CACHE). The model may be downloaded to your home "
+            f"directory, which could consume your storage quota. Consider setting "
+            f"one of these environment variables to a shared cache location.",
+            UserWarning,
+            stacklevel=4,
+        )
