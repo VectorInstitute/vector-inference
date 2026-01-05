@@ -98,7 +98,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         f"{CONTAINER_MODULE_NAME} exec {IMAGE_PATH} ray stop",
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
+    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp{{model_weights_path}}{{additional_binds}}",
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {IMAGE_PATH} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
@@ -164,7 +164,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         '    && mv temp.json "$json_path"',
     ],
     "launch_cmd": [
-        "vllm serve {model_weights_path} \\",
+        "vllm serve {model_source} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",
@@ -255,7 +255,7 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     ],
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv --containall {IMAGE_PATH} \\",
     "launch_cmd": [
-        "vllm serve {model_weights_path} \\",
+        "vllm serve {model_source} \\",
         "    --served-model-name {model_name} \\",
         '    --host "0.0.0.0" \\',
         "    --port $vllm_port_number \\",

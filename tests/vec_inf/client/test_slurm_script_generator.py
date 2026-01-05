@@ -12,6 +12,14 @@ from vec_inf.client._slurm_script_generator import (
 )
 
 
+@pytest.fixture(autouse=True)
+def patch_model_weights_exists(monkeypatch):
+    """Ensure model weights directory existence checks default to True."""
+    monkeypatch.setattr(
+        "vec_inf.client._slurm_script_generator.Path.exists", lambda self: True
+    )
+
+
 class TestSlurmScriptGenerator:
     """Tests for SlurmScriptGenerator class."""
 
@@ -168,6 +176,21 @@ class TestSlurmScriptGenerator:
             "module load " in setup
         )  # Remove module name since it's inconsistent between clusters
 
+    def test_generate_server_setup_singularity_no_weights(
+        self, singularity_params, monkeypatch
+    ):
+        """Test server setup when model weights don't exist."""
+        monkeypatch.setattr(
+            "vec_inf.client._slurm_script_generator.Path.exists",
+            lambda self: False,
+        )
+
+        generator = SlurmScriptGenerator(singularity_params)
+        setup = generator._generate_server_setup()
+
+        assert "ray stop" in setup
+        assert "/path/to/model_weights/test-model" not in setup
+
     def test_generate_launch_cmd_venv(self, basic_params):
         """Test launch command generation with virtual environment."""
         generator = SlurmScriptGenerator(basic_params)
@@ -186,6 +209,22 @@ class TestSlurmScriptGenerator:
 
         assert "apptainer exec --nv" in launch_cmd
         assert "source" not in launch_cmd
+
+    def test_generate_launch_cmd_singularity_no_local_weights(
+        self, singularity_params, monkeypatch
+    ):
+        """Test container launch when model weights directory is missing."""
+        monkeypatch.setattr(
+            "vec_inf.client._slurm_script_generator.Path.exists",
+            lambda self: False,
+        )
+
+        generator = SlurmScriptGenerator(singularity_params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert "exec --nv" in launch_cmd
+        assert "--bind /path/to/model_weights/test-model" not in launch_cmd
+        assert "vllm serve test-model" in launch_cmd
 
     def test_generate_launch_cmd_boolean_args(self, basic_params):
         """Test launch command with boolean vLLM arguments."""
@@ -390,6 +429,24 @@ class TestBatchSlurmScriptGenerator:
         assert len(generator.script_paths) == 1
         mock_touch.assert_called_once()
         mock_write_text.assert_called_once()
+
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.write_text")
+    def test_generate_model_launch_script_singularity_no_weights(
+        self, mock_write_text, mock_touch, batch_singularity_params, monkeypatch
+    ):
+        """Test batch model launch script when model weights don't exist."""
+        monkeypatch.setattr(
+            "vec_inf.client._slurm_script_generator.Path.exists",
+            lambda self: False,
+        )
+
+        generator = BatchSlurmScriptGenerator(batch_singularity_params)
+        script_path = generator._generate_model_launch_script("model1")
+
+        assert script_path.name == "launch_model1.sh"
+        call_args = mock_write_text.call_args[0][0]
+        assert "/path/to/model_weights/model1" not in call_args
 
     @patch("vec_inf.client._slurm_script_generator.datetime")
     @patch("pathlib.Path.touch")
