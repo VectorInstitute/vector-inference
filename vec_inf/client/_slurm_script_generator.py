@@ -266,7 +266,6 @@ class BatchSlurmScriptGenerator:
                 model_name,
             )
 
-
     def _write_to_log_dir(self, script_content: list[str], script_name: str) -> Path:
         """Write the generated Slurm script to the log directory.
 

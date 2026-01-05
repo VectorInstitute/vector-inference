@@ -486,7 +486,9 @@ def check_and_warn_hf_cache(
     )
 
     if not hf_cache_set:
-        model_prefix = f"Model weights for '{model_name}' " if model_name else "Model weights "
+        model_prefix = (
+            f"Model weights for '{model_name}' " if model_name else "Model weights "
+        )
         warnings.warn(
             f"{model_prefix}not found at '{model_weights_path}' and no "
             f"HuggingFace cache directory is set (HF_HOME, HF_HUB_CACHE, or "
