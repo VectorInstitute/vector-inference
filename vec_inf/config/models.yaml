@@ -483,9 +483,7 @@ models:
     vocab_size: 128256
     engine: sglang
     sglang_args:
-      --tensor-parallel-size: 4
-      --pipeline-parallel-size: 2
-      --context-length: 32768
+      --tensor-parallel-size: 8
   Qwen2.5-0.5B-Instruct:
     model_family: Qwen2.5
     model_variant: 0.5B-Instruct
@@ -568,6 +566,13 @@ models:
       --tensor-parallel-size: 4
     sglang_args:
       --tensor-parallel-size: 4
+  Qwen2.5-Coder-3B-Instruct:
+    model_family: Qwen2.5
+    model_variant: Coder-3B-Instruct
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
   Qwen2.5-Coder-7B-Instruct:
     model_family: Qwen2.5
     model_variant: Coder-7B-Instruct
@@ -662,6 +667,15 @@ models:
     sglang_args:
       --tensor-parallel-size: 4
       --context-length: 65536
+  InternVL2_5-8B:
+    model_family: InternVL2_5
+    model_variant: 8B
+    model_type: VLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 92553
+    vllm_args:
+      --trust-remote-code: true
   InternVL2_5-26B:
     model_family: InternVL2_5
     model_variant: 26B
@@ -671,6 +685,7 @@ models:
     vocab_size: 92553
     vllm_args:
       --tensor-parallel-size: 2
+      --trust-remote-code: true
     sglang_args:
       --tensor-parallel-size: 2
   InternVL2_5-38B:
@@ -682,6 +697,7 @@ models:
     vocab_size: 92553
     vllm_args:
       --tensor-parallel-size: 4
+      --trust-remote-code: true
     sglang_args:
       --tensor-parallel-size: 4
   aya-expanse-32b:
@@ -766,13 +782,6 @@ models:
     sglang_args:
       --tensor-parallel-size: 2
       --context-length: 65536
-  InternVL2_5-8B:
-    model_family: InternVL2_5
-    model_variant: 8B
-    model_type: VLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 92553
   glm-4v-9b:
     model_family: glm-4v
     model_variant: 9b
