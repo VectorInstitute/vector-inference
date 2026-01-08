@@ -62,7 +62,7 @@ To overwrite default inference engine arguments, you can specify the arguments i
 vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
 ```
 
-For the full list of inference engine arguments, you can find them here: 
+For the full list of inference engine arguments, you can find them here:
 * [vLLM](https://docs.vllm.ai/en/stable/serving/engine_args.html).
 * [SGLang](https://docs.sglang.io/advanced_features/server_arguments.html)
 
