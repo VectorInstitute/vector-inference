@@ -577,10 +577,12 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>vec-inf
 </span></code></pre></div>
 <p>Otherwise, we recommend using the provided <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vllm.Dockerfile"><code>vllm.Dockerfile</code></a> and <a href="https://github.com/VectorInstitute/vector-inference/blob/main/sglang.Dockerfile"><code>sglang.Dockerfile</code></a> to set up your own environment with the package. The built images are available through <a href="https://hub.docker.com/orgs/vectorinstitute/repositories">Docker Hub</a></p>
-<p>If you'd like to use <code>vec-inf</code> on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
-* Clone the repository and update the <code>environment.yaml</code> and the <code>models.yaml</code> file in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config"><code>vec_inf/config</code></a>, then install from source by running <code>pip install .</code>.
-* The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to <code>/model-weights/vec-inf-shared</code>, you would need to create an <code>environment.yaml</code> and a <code>models.yaml</code> following the format of these files in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config"><code>vec_inf/config</code></a>.
-* [OPTIONAL] The package would also look for an enviroment variable <code>VEC_INF_CONFIG_DIR</code>. You can put your <code>environment.yaml</code> and <code>models.yaml</code> in a directory of your choice and set the enviroment variable <code>VEC_INF_CONFIG_DIR</code> to point to that location.</p>
+<p>If you'd like to use <code>vec-inf</code> on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:</p>
+<ul>
+<li>Clone the repository and update the <code>environment.yaml</code> and the <code>models.yaml</code> file in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config"><code>vec_inf/config</code></a>, then install from source by running <code>pip install .</code>.</li>
+<li>The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to <code>/model-weights/vec-inf-shared</code>, you would need to create an <code>environment.yaml</code> and a <code>models.yaml</code> following the format of these files in <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config"><code>vec_inf/config</code></a>.</li>
+<li>[OPTIONAL] The package would also look for an enviroment variable <code>VEC_INF_CONFIG_DIR</code>. You can put your <code>environment.yaml</code> and <code>models.yaml</code> in a directory of your choice and set the enviroment variable <code>VEC_INF_CONFIG_DIR</code> to point to that location.</li>
+</ul>
 
 
 

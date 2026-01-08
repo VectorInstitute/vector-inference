@@ -910,9 +910,11 @@ You should see an output like the following:</p>
 </span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│ Inference Engine        │ vLLM                                                           │
 </span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>└─────────────────────────┴────────────────────────────────────────────────────────────────┘
 </span></code></pre></div>
-<p><strong>NOTE</strong>: You can set the required fields in the environment configuration (<code>environment.yaml</code>), it's a mapping between required arguments and their corresponding environment variables. On the Vector <strong>Killarney</strong> Cluster environment, the required fields are:
-  * <code>--account</code>, <code>-A</code>: The Slurm account, this argument can be set to default by setting environment variable <code>VEC_INF_ACCOUNT</code>.
-  * <code>--work-dir</code>, <code>-D</code>: A working directory other than your home directory, this argument can be set to default by seeting environment variable <code>VEC_INF_WORK_DIR</code>.</p>
+<p><strong>NOTE</strong>: You can set the required fields in the environment configuration (<code>environment.yaml</code>), it's a mapping between required arguments and their corresponding environment variables. On the Vector <strong>Killarney</strong> Cluster environment, the required fields are:</p>
+<ul>
+<li><code>--account</code>, <code>-A</code>: The Slurm account, this argument can be set to default by setting environment variable <code>VEC_INF_ACCOUNT</code>.</li>
+<li><code>--work-dir</code>, <code>-D</code>: A working directory other than your home directory, this argument can be set to default by seeting environment variable <code>VEC_INF_WORK_DIR</code>.</li>
+</ul>
 <h4 id="overrides">Overrides<a class="headerlink" href="#overrides" title="Permanent link">&para;</a></h4>
 <p>Models that are already supported by <code>vec-inf</code> would be launched using the cached configuration or <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config">default configuration</a>. You can override these values by providing additional parameters. Use <code>vec-inf launch --help</code> to see the full list of parameters that can be overriden. For example, if <code>resource-type</code> is to be overriden:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct<span class="w"> </span>--resource-type<span class="w"> </span>&lt;new_resource_type&gt;
@@ -924,18 +926,22 @@ You should see an output like the following:</p>
 <p>To overwrite default inference engine arguments, you can specify the arguments in a comma separated string using <code>--$ENGINE_NAME-args</code>:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>vec-inf<span class="w"> </span>launch<span class="w"> </span>Meta-Llama-3.1-8B-Instruct<span class="w"> </span>--vllm-args<span class="w"> </span><span class="s1">&#39;--max-model-len=65536,--compilation-config=3&#39;</span>
 </span></code></pre></div>
-<p>For the full list of inference engine arguments, you can find them here:
-* <a href="https://docs.vllm.ai/en/stable/serving/engine_args.html">vLLM</a>.
-* <a href="https://docs.sglang.io/advanced_features/server_arguments.html">SGLang</a></p>
+<p>For the full list of inference engine arguments, you can find them here:</p>
+<ul>
+<li><a href="https://docs.vllm.ai/en/stable/serving/engine_args.html">vLLM: <code>vllm serve</code> Arguments</a></li>
+<li><a href="https://docs.sglang.io/advanced_features/server_arguments.html">SGLang: Server Arguments</a></li>
+</ul>
 <h4 id="custom-models">Custom models<a class="headerlink" href="#custom-models" title="Permanent link">&para;</a></h4>
-<p>You can also launch your own custom model as long as the model architecture is supported by the underlying inference engine, and make sure to follow the instructions below:
-* Your model weights directory naming convention should follow <code>$MODEL_FAMILY-$MODEL_VARIANT</code> ($MODEL_VARIANT is OPTIONAL).
-* Your model weights directory should contain HuggingFace format weights.
-* You should specify your model configuration by:
-  * Creating a custom configuration file for your model and specify its path via setting the environment variable <code>VEC_INF_MODEL_CONFIG</code> (This one will supersede <code>VEC_INF_CONFIG_DIR</code> if that is also set). Check the <a href="vec_inf/config/models.yaml">default parameters</a> file for the format of the config file. All the parameters for the model should be specified in that config file.
-  * Add your model configuration to the cached <code>models.yaml</code> in your cluster environment (if you have write access to the cached configuration directory).
-  * Using launch command options to specify your model setup.
-* For other model launch parameters you can reference the default values for similar models using the <a href="#list-command"><code>list</code> command </a>.</p>
+<p>You can also launch your own custom model as long as the model architecture is supported by the underlying inference engine, and make sure to follow the instructions below:</p>
+<ul>
+<li>Your model weights directory naming convention should follow <code>$MODEL_FAMILY-$MODEL_VARIANT</code> ($MODEL_VARIANT is OPTIONAL).</li>
+<li>Your model weights directory should contain HuggingFace format weights.</li>
+<li>You should specify your model configuration by:</li>
+<li>Creating a custom configuration file for your model and specify its path via setting the environment variable <code>VEC_INF_MODEL_CONFIG</code> (This one will supersede <code>VEC_INF_CONFIG_DIR</code> if that is also set). Check the <a href="vec_inf/config/models.yaml">default parameters</a> file for the format of the config file. All the parameters for the model should be specified in that config file.</li>
+<li>Add your model configuration to the cached <code>models.yaml</code> in your cluster environment (if you have write access to the cached configuration directory).</li>
+<li>Using launch command options to specify your model setup.</li>
+<li>For other model launch parameters you can reference the default values for similar models using the <a href="#list-command"><code>list</code> command </a>.</li>
+</ul>
 <p>Here is an example to deploy a custom <a href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M">Qwen2.5-7B-Instruct-1M</a> model which is not
 supported in the default list of models using a user custom config. In this case, the model weights are assumed to be downloaded to
 a <code>model-weights</code> directory inside the user's home directory. The weights directory of the model follows the naming convention so it
