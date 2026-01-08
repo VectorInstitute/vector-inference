@@ -37,6 +37,7 @@ You should see an output like the following:
 ```
 
 **NOTE**: You can set the required fields in the environment configuration (`environment.yaml`), it's a mapping between required arguments and their corresponding environment variables. On the Vector **Killarney** Cluster environment, the required fields are:
+
   * `--account`, `-A`: The Slurm account, this argument can be set to default by setting environment variable `VEC_INF_ACCOUNT`.
   * `--work-dir`, `-D`: A working directory other than your home directory, this argument can be set to default by seeting environment variable `VEC_INF_WORK_DIR`.
 
@@ -63,12 +64,14 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--c
 ```
 
 For the full list of inference engine arguments, you can find them here:
-* [vLLM](https://docs.vllm.ai/en/stable/serving/engine_args.html).
-* [SGLang](https://docs.sglang.io/advanced_features/server_arguments.html)
+
+* [vLLM: `vllm serve` Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html)
+* [SGLang: Server Arguments](https://docs.sglang.io/advanced_features/server_arguments.html)
 
 #### Custom models
 
 You can also launch your own custom model as long as the model architecture is supported by the underlying inference engine, and make sure to follow the instructions below:
+
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:

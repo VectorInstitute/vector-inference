@@ -16,6 +16,7 @@ pip install vec-inf
 Otherwise, we recommend using the provided [`vllm.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/vllm.Dockerfile) and [`sglang.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/sglang.Dockerfile) to set up your own environment with the package. The built images are available through [Docker Hub](https://hub.docker.com/orgs/vectorinstitute/repositories)
 
 If you'd like to use `vec-inf` on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
+
 * Clone the repository and update the `environment.yaml` and the `models.yaml` file in [`vec_inf/config`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config), then install from source by running `pip install .`.
 * The package would try to look for cached configuration files in your environment before using the default configuration. The default cached configuration directory path points to `/model-weights/vec-inf-shared`, you would need to create an `environment.yaml` and a `models.yaml` following the format of these files in [`vec_inf/config`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config).
 * [OPTIONAL] The package would also look for an enviroment variable `VEC_INF_CONFIG_DIR`. You can put your `environment.yaml` and `models.yaml` in a directory of your choice and set the enviroment variable `VEC_INF_CONFIG_DIR` to point to that location.
