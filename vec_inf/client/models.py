@@ -68,7 +68,7 @@ def _model_type_to_enum_name(model_type: str) -> str:
 
 
 # Create ModelType enum dynamically from MODEL_TYPES
-ModelType = Enum(
+ModelType = Enum(  # type: ignore[misc]
     "ModelType",
     {_model_type_to_enum_name(mt): mt for mt in _MODEL_TYPE_VALUES},
     type=str,
