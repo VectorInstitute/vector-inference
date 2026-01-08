@@ -1,5 +1,8 @@
 paths:
-  image_path: "/model-weights/vec-inf-shared/vector-inference_latest.sif"
+  image_path: "/model-weights/vec-inf-shared/vector-inference_latest.sif" # Maintains backwards compatibility
+  vllm_image_path: "/model-weights/vec-inf-shared/vector-inference-vllm_latest.sif"
+  sglang_image_path: "/model-weights/vec-inf-shared/vector-inference-sglang_latest.sif"
+  cached_model_config_path: "/model-weights/vec-inf-shared/models.yaml"
 
 containerization:
   module_load_cmd: "module load apptainer"
@@ -19,13 +22,17 @@ required_args:
   account: "VEC_INF_ACCOUNT"
   work_dir: "VEC_INF_WORK_DIR"
 
+python_version: "python3.12"
+
+model_types: ["LLM", "VLM", "Text_Embedding", "Reward_Modeling", "OCR"] # Derived from models.yaml
+
 default_args:
   cpus_per_task: "16"
   mem_per_node: "64G"
   time: "08:00:00"
   qos: ""
   partition: ""
-  resource_type: ""
+  resource_type: "l40s"
   exclude: ""
   nodelist: ""
   bind: ""

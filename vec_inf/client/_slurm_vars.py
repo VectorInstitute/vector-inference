@@ -52,7 +52,11 @@ def load_env_config() -> dict[str, Any]:
 _config = load_env_config()
 
 # Extract path values
-IMAGE_PATH = _config["paths"]["image_path"]
+IMAGE_PATH = {
+    "vllm": _config["paths"]["vllm_image_path"],
+    "sglang": _config["paths"]["sglang_image_path"],
+}
+CACHED_MODEL_CONFIG_PATH = Path(_config["paths"]["cached_model_config_path"])
 
 # Extract containerization info
 CONTAINER_LOAD_CMD = _config["containerization"]["module_load_cmd"]
@@ -78,9 +82,14 @@ RESOURCE_TYPE: TypeAlias = create_literal_type(  # type: ignore[valid-type]
     _config["allowed_values"]["resource_type"]
 )
 
-# Extract required arguments, for launching jobs that don't have a default value and
-# their corresponding environment variables
-REQUIRED_ARGS: dict[str, str] = _config["required_args"]
+# Model types available derived from the cached model config
+MODEL_TYPES: TypeAlias = create_literal_type(_config["model_types"])  # type: ignore[valid-type]
+
+# Required arguments for launching jobs and corresponding environment variables
+REQUIRED_ARGS: dict[str, str | None] = _config["required_args"]
+
+# Running sglang requires python version
+PYTHON_VERSION: str = _config["python_version"]
 
 # Extract default arguments
 DEFAULT_ARGS: dict[str, str] = _config["default_args"]
