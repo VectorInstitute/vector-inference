@@ -82,11 +82,13 @@ RESOURCE_TYPE: TypeAlias = create_literal_type(  # type: ignore[valid-type]
     _config["allowed_values"]["resource_type"]
 )
 
-# Extract required arguments, for launching jobs that don't have a default value and
-# their corresponding environment variables
+# Model types available derived from the cached model config
+MODEL_TYPES: TypeAlias = create_literal_type(_config["model_types"])  # type: ignore[valid-type]
+
+# Required arguments for launching jobs and corresponding environment variables
 REQUIRED_ARGS: dict[str, str | None] = _config["required_args"]
 
-# Extract python version, running sglang requires python version
+# Running sglang requires python version
 PYTHON_VERSION: str = _config["python_version"]
 
 # Extract default arguments

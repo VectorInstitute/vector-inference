@@ -25,7 +25,9 @@ ModelInfo : datacitten
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, get_args
+
+from vec_inf.client._slurm_vars import MODEL_TYPES
 
 
 class ModelStatus(str, Enum):
@@ -55,25 +57,23 @@ class ModelStatus(str, Enum):
     UNAVAILABLE = "UNAVAILABLE"
 
 
-class ModelType(str, Enum):
-    """Enum representing the possible model types.
+# Extract model type values from the Literal type
+_MODEL_TYPE_VALUES = get_args(MODEL_TYPES)
 
-    Attributes
-    ----------
-    LLM : str
-        Large Language Model
-    VLM : str
-        Vision Language Model
-    TEXT_EMBEDDING : str
-        Text Embedding Model
-    REWARD_MODELING : str
-        Reward Modeling Model
-    """
 
-    LLM = "LLM"
-    VLM = "VLM"
-    TEXT_EMBEDDING = "Text_Embedding"
-    REWARD_MODELING = "Reward_Modeling"
+def _model_type_to_enum_name(model_type: str) -> str:
+    """Convert a model type string to a valid enum attribute name."""
+    # Convert to uppercase and replace hyphens with underscores
+    return model_type.upper().replace("-", "_")
+
+
+# Create ModelType enum dynamically from MODEL_TYPES
+ModelType = Enum(
+    "ModelType",
+    {_model_type_to_enum_name(mt): mt for mt in _MODEL_TYPE_VALUES},
+    type=str,
+    module=__name__,
+)
 
 
 @dataclass

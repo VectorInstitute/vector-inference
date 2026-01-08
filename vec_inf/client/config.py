@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Literal
 
 from vec_inf.client._slurm_vars import (
     DEFAULT_ARGS,
     MAX_CPUS_PER_TASK,
     MAX_GPUS_PER_NODE,
     MAX_NUM_NODES,
+    MODEL_TYPES,
     PARTITION,
     QOS,
     RESOURCE_TYPE,
@@ -88,9 +88,7 @@ class ModelConfig(BaseModel):
     model_variant: Optional[str] = Field(
         default=None, description="Specific variant/version of the model family"
     )
-    model_type: Literal["LLM", "VLM", "Text_Embedding", "Reward_Modeling"] = Field(
-        ..., description="Type of model architecture"
-    )
+    model_type: MODEL_TYPES = Field(..., description="Type of model architecture")
     gpus_per_node: int = Field(
         ..., gt=0, le=MAX_GPUS_PER_NODE, description="GPUs per node"
     )

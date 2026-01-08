@@ -24,6 +24,8 @@ required_args:
 
 python_version: "python3.12"
 
+model_types: ["LLM", "VLM", "Text_Embedding", "Reward_Modeling", "OCR"] # Derived from models.yaml
+
 default_args:
   cpus_per_task: "16"
   mem_per_node: "64G"
