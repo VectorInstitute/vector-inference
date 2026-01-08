@@ -542,22 +542,22 @@ models:
     sglang_args:
       --tensor-parallel-size: 4
   Qwen2.5-Math-1.5B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-1.5B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 1.5B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
   Qwen2.5-Math-7B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-7B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 7B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
   Qwen2.5-Math-72B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-72B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 72B-Instruct
     model_type: LLM
     gpus_per_node: 4
     num_nodes: 1
@@ -567,22 +567,22 @@ models:
     sglang_args:
       --tensor-parallel-size: 4
   Qwen2.5-Coder-3B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Coder-3B-Instruct
+    model_family: Qwen2.5-Coder
+    model_variant: 3B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
   Qwen2.5-Coder-7B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Coder-7B-Instruct
+    model_family: Qwen2.5-Coder
+    model_variant: 7B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
   Qwen2.5-Math-RM-72B:
-    model_family: Qwen2.5
-    model_variant: Math-RM-72B
+    model_family: Qwen2.5-Math-RM
+    model_variant: 72B
     model_type: Reward_Modeling
     gpus_per_node: 4
     num_nodes: 1
@@ -592,8 +592,8 @@ models:
     sglang_args:
       --tensor-parallel-size: 4
   Qwen2.5-Math-PRM-7B:
-    model_family: Qwen2.5
-    model_variant: Math-PRM-7B
+    model_family: Qwen2.5-Math-PRM
+    model_variant: 7B
     model_type: Reward_Modeling
     gpus_per_node: 1
     num_nodes: 1
@@ -880,3 +880,7 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 262208
+    vllm_args:
+      --tensor-parallel-size: 2
+    sglang_args:
+      --tensor-parallel-size: 2

@@ -147,6 +147,7 @@ This document tracks all model weights available in the `/model-weights` directo
 ### Qwen: Qwen2.5-Coder
 | Model | Configuration |
 |:------|:-------------|
+| `Qwen2.5-Coder-3B-Instruct` | ✅ |
 | `Qwen2.5-Coder-7B-Instruct` | ✅ |
 
 ### Qwen: QwQ
