@@ -86,7 +86,7 @@ jobs:
           gpg --keyserver keyserver.ubuntu.com --recv-keys 806BB28AED779869
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
