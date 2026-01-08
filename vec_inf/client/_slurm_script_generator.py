@@ -1,7 +1,7 @@
-"""Class for generating Slurm scripts to run vLLM servers.
+"""Class for generating Slurm scripts to run inference servers.
 
-This module provides functionality to generate Slurm scripts for running vLLM servers
-in both single-node and multi-node configurations.
+This module provides functionality to generate Slurm scripts for running inference
+servers in both single-node and multi-node configurations.
 """
 
 from datetime import datetime
@@ -14,11 +14,11 @@ from vec_inf.client._slurm_templates import (
     BATCH_SLURM_SCRIPT_TEMPLATE,
     SLURM_SCRIPT_TEMPLATE,
 )
-from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME
+from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
 
 
 class SlurmScriptGenerator:
-    """A class to generate Slurm scripts for running vLLM servers.
+    """A class to generate Slurm scripts for running inference servers.
 
     This class handles the generation of Slurm scripts for both single-node and
     multi-node configurations, supporting different virtualization environments
@@ -32,6 +32,7 @@ class SlurmScriptGenerator:
 
     def __init__(self, params: dict[str, Any]):
         self.params = params
+        self.engine = params.get("engine", "vllm")
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         self.additional_binds = (
@@ -123,16 +124,17 @@ class SlurmScriptGenerator:
         server_script.append(
             SLURM_SCRIPT_TEMPLATE["imports"].format(src_dir=self.params["src_dir"])
         )
-        if self.is_multinode:
+
+        if self.is_multinode and self.engine == "vllm":
             server_setup_str = "\n".join(
-                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode"]
+                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode_vllm"]
             ).format(gpus_per_node=self.params["gpus_per_node"])
             if self.use_container:
                 server_setup_str = server_setup_str.replace(
                     "CONTAINER_PLACEHOLDER",
                     SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                        model_weights_path=self.model_weights_path,
                         env_str=self.env_str,
+                        image_path=IMAGE_PATH[self.engine],
                     ),
                 )
             else:
@@ -140,12 +142,16 @@ class SlurmScriptGenerator:
                     "CONTAINER_PLACEHOLDER",
                     "\\",
                 )
+        elif self.is_multinode and self.engine == "sglang":
+            server_setup_str = "\n".join(
+                SLURM_SCRIPT_TEMPLATE["server_setup"]["multinode_sglang"]
+            )
         else:
             server_setup_str = "\n".join(
                 SLURM_SCRIPT_TEMPLATE["server_setup"]["single_node"]
             )
         server_script.append(server_setup_str)
-        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["find_vllm_port"]))
+        server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["find_server_port"]))
         server_script.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["write_to_json"]).format(
                 log_dir=self.params["log_dir"], model_name=self.params["model_name"]
@@ -154,38 +160,85 @@ class SlurmScriptGenerator:
         return "\n".join(server_script)
 
     def _generate_launch_cmd(self) -> str:
-        """Generate the vLLM server launch command.
+        """Generate the inference server launch command.
 
-        Creates the command to launch the vLLM server, handling different virtualization
-        environments (venv or singularity/apptainer).
+        Creates the command to launch the inference server, handling different
+        virtualization environments (venv or singularity/apptainer).
 
         Returns
         -------
         str
             Server launch command.
         """
-        launcher_script = ["\n"]
+        if self.is_multinode and self.engine == "sglang":
+            return self._generate_multinode_sglang_launch_cmd()
+
+        launch_cmd = ["\n"]
         if self.use_container:
-            launcher_script.append(
+            launch_cmd.append(
                 SLURM_SCRIPT_TEMPLATE["container_command"].format(
-                    model_weights_path=self.model_weights_path,
                     env_str=self.env_str,
+                    image_path=IMAGE_PATH[self.engine],
                 )
             )
 
-        launcher_script.append(
-            "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"]).format(
+        launch_cmd.append(
+            "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"][self.engine]).format(  # type: ignore[literal-required]
                 model_weights_path=self.model_weights_path,
                 model_name=self.params["model_name"],
             )
         )
 
-        for arg, value in self.params["vllm_args"].items():
+        for arg, value in self.params["engine_args"].items():
             if isinstance(value, bool):
-                launcher_script.append(f"    {arg} \\")
+                launch_cmd.append(f"    {arg} \\")
             else:
-                launcher_script.append(f"    {arg} {value} \\")
-        return "\n".join(launcher_script)
+                launch_cmd.append(f"    {arg} {value} \\")
+
+        # A known bug in vLLM requires setting backend to ray for multi-node
+        # Remove this when the bug is fixed
+        if self.is_multinode:
+            launch_cmd.append("    --distributed-executor-backend ray \\")
+
+        return "\n".join(launch_cmd).rstrip(" \\")
+
+    def _generate_multinode_sglang_launch_cmd(self) -> str:
+        """Generate the launch command for multi-node sglang setup.
+
+        Returns
+        -------
+        str
+            Multi-node sglang launch command.
+        """
+        launch_cmd = "\n" + "\n".join(
+            SLURM_SCRIPT_TEMPLATE["launch_cmd"]["sglang_multinode"]
+        ).format(
+            num_nodes=self.params["num_nodes"],
+            model_weights_path=self.model_weights_path,
+            model_name=self.params["model_name"],
+        )
+
+        container_placeholder = "\\"
+        if self.use_container:
+            container_placeholder = SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                env_str=self.env_str,
+                image_path=IMAGE_PATH[self.engine],
+            )
+        launch_cmd = launch_cmd.replace(
+            "CONTAINER_PLACEHOLDER",
+            container_placeholder,
+        )
+
+        engine_arg_str = ""
+        for arg, value in self.params["engine_args"].items():
+            if isinstance(value, bool):
+                engine_arg_str += f"            {arg} \\\n"
+            else:
+                engine_arg_str += f"            {arg} {value} \\\n"
+
+        return launch_cmd.replace(
+            "SGLANG_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
+        )
 
     def write_to_log_dir(self) -> Path:
         """Write the generated Slurm script to the log directory.
@@ -212,7 +265,7 @@ class BatchSlurmScriptGenerator:
     """A class to generate Slurm scripts for batch mode.
 
     This class handles the generation of Slurm scripts for batch mode, which
-    launches multiple vLLM servers with different configurations in parallel.
+    launches multiple inference servers with different configurations in parallel.
     """
 
     def __init__(self, params: dict[str, Any]):
@@ -246,7 +299,7 @@ class BatchSlurmScriptGenerator:
         return script_path
 
     def _generate_model_launch_script(self, model_name: str) -> Path:
-        """Generate the bash script for launching individual vLLM servers.
+        """Generate the bash script for launching individual inference servers.
 
         Parameters
         ----------
@@ -256,7 +309,7 @@ class BatchSlurmScriptGenerator:
         Returns
         -------
         Path
-            The bash script path for launching the vLLM server.
+            The bash script path for launching the inference server.
         """
         # Generate the bash script content
         script_content = []
@@ -286,21 +339,23 @@ class BatchSlurmScriptGenerator:
         if self.use_container:
             script_content.append(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_command"].format(
-                    model_weights_path=model_params["model_weights_path"],
+                    image_path=IMAGE_PATH[model_params["engine"]],
                 )
             )
         script_content.append(
-            "\n".join(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"]).format(
+            "\n".join(
+                BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][model_params["engine"]]
+            ).format(
                 model_weights_path=model_params["model_weights_path"],
                 model_name=model_name,
             )
         )
-        for arg, value in model_params["vllm_args"].items():
+        for arg, value in model_params["engine_args"].items():
             if isinstance(value, bool):
                 script_content.append(f"    {arg} \\")
             else:
                 script_content.append(f"    {arg} {value} \\")
-        script_content[-1] = script_content[-1].replace("\\", "")
+        script_content[-1] = script_content[-1].rstrip(" \\")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(
             script_content, f"launch_{model_name}.sh"
@@ -339,12 +394,12 @@ class BatchSlurmScriptGenerator:
         return "\n".join(shebang)
 
     def generate_batch_slurm_script(self) -> Path:
-        """Generate the Slurm script for launching multiple vLLM servers in batch mode.
+        """Generate the Slurm script for launching multiple inference servers in batch.
 
         Returns
         -------
         Path
-            The Slurm script for launching multiple vLLM servers in batch mode.
+            The Slurm script for launching multiple inference servers in batch.
         """
         script_content = []
 

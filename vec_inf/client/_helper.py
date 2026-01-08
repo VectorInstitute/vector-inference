@@ -17,9 +17,10 @@ import requests
 import vec_inf.client._utils as utils
 from vec_inf.client._client_vars import (
     BATCH_MODE_REQUIRED_MATCHING_ARGS,
+    ENGINE_SHORT_TO_LONG_MAP,
     KEY_METRICS,
     SRC_DIR,
-    VLLM_SHORT_TO_LONG_MAP,
+    SUPPORTED_ENGINES,
 )
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
@@ -63,6 +64,7 @@ class ModelLauncher:
         self.slurm_job_id = ""
         self.slurm_script_path = Path("")
         self.model_config = self._get_model_configuration(self.kwargs.get("config"))
+        self.engine = ""
         self.params = self._get_launch_params()
 
     def _warn(self, message: str) -> None:
@@ -137,32 +139,38 @@ class ModelLauncher:
             f"not found at expected path '{model_weights_path}'"
         )
 
-    def _process_vllm_args(self, arg_string: str) -> dict[str, Any]:
-        """Process the vllm_args string into a dictionary.
+    def _process_engine_args(
+        self, arg_string: str, engine_choice: str
+    ) -> dict[str, Any]:
+        """Process the engine_args string into a dictionary.
 
         Parameters
         ----------
         arg_string : str
-            Comma-separated string of vLLM arguments
+            Comma-separated string of inference engine arguments
 
         Returns
         -------
         dict[str, Any]
-            Processed vLLM arguments as key-value pairs
+            Processed inference engine arguments as key-value pairs
         """
-        vllm_args: dict[str, str | bool] = {}
+        engine_args: dict[str, str | bool] = {}
+        engine_arg_map = ENGINE_SHORT_TO_LONG_MAP[engine_choice]
+
         for arg in arg_string.split(","):
             if "=" in arg:
                 key, value = arg.split("=")
-                if key.strip() in VLLM_SHORT_TO_LONG_MAP:
-                    key = VLLM_SHORT_TO_LONG_MAP[key.strip()]
-                vllm_args[key.strip()] = value.strip()
+                if key.strip() in engine_arg_map:
+                    key = engine_arg_map[key.strip()]
+                engine_args[key.strip()] = value.strip()
             elif "-O" in arg.strip():
-                key = VLLM_SHORT_TO_LONG_MAP["-O"]
-                vllm_args[key] = arg.strip()[2:].strip()
+                if engine_choice != "vllm":
+                    raise ValueError("-O is only supported for vLLM")
+                key = engine_arg_map["-O"]
+                engine_args[key] = arg.strip()[2:].strip()
             else:
-                vllm_args[arg.strip()] = True
-        return vllm_args
+                engine_args[arg.strip()] = True
+        return engine_args
 
     def _process_env_vars(self, env_arg: str) -> dict[str, str]:
         """Process the env string into a dictionary of environment variables.
@@ -196,6 +204,63 @@ class ModelLauncher:
                         print(f"WARNING: Could not parse env var: {line}")
         return env_vars
 
+    def _engine_check_override(self, params: dict[str, Any]) -> None:
+        """Check for engine override in CLI args and warn user.
+
+        Parameters
+        ----------
+        params : dict[str, Any]
+            Dictionary of launch parameters to check
+        """
+
+        def overwrite_engine_args(params: dict[str, Any]) -> None:
+            engine_args = self._process_engine_args(
+                self.kwargs[f"{self.engine}_args"], self.engine
+            )
+            for key, value in engine_args.items():
+                params["engine_args"][key] = value
+            del self.kwargs[f"{self.engine}_args"]
+
+        # Infer engine name from engine-specific args if provided
+        extracted_engine = ""
+        for engine in SUPPORTED_ENGINES:
+            if self.kwargs.get(f"{engine}_args"):
+                if not extracted_engine:
+                    extracted_engine = engine
+                else:
+                    raise ValueError(
+                        "Cannot provide engine-specific args for multiple engines, please choose one"
+                    )
+        # Check for mismatch between provided engine arg and engine-specific args
+        input_engine = self.kwargs.get("engine", "")
+
+        if input_engine and extracted_engine:
+            if input_engine != extracted_engine:
+                raise ValueError(
+                    f"Mismatch between provided engine '{input_engine}' and engine-specific args '{extracted_engine}'"
+                )
+            self.engine = input_engine
+            params["engine_args"] = params[f"{self.engine}_args"]
+            overwrite_engine_args(params)
+        elif input_engine:
+            # Only engine arg in CLI, use default engine args from config
+            self.engine = input_engine
+            params["engine_args"] = params[f"{self.engine}_args"]
+        elif extracted_engine:
+            # Only engine-specific args in CLI, infer engine and warn user
+            self.engine = extracted_engine
+            params["engine_inferred"] = True
+            params["engine_args"] = params[f"{self.engine}_args"]
+            overwrite_engine_args(params)
+        else:
+            # No engine-related args in CLI, use defaults from config
+            self.engine = params.get("engine", "vllm")
+            params["engine_args"] = params[f"{self.engine}_args"]
+
+        # Remove $ENGINE_NAME_args from params as they won't get populated to sjob json.
+        for engine in SUPPORTED_ENGINES:
+            del params[f"{engine}_args"]
+
     def _apply_cli_overrides(self, params: dict[str, Any]) -> None:
         """Apply CLI argument overrides to params.
 
@@ -204,11 +269,7 @@ class ModelLauncher:
         params : dict[str, Any]
             Dictionary of launch parameters to override
         """
-        if self.kwargs.get("vllm_args"):
-            vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
-            for key, value in vllm_args.items():
-                params["vllm_args"][key] = value
-            del self.kwargs["vllm_args"]
+        self._engine_check_override(params)
 
         if self.kwargs.get("env"):
             env_vars = self._process_env_vars(self.kwargs["env"])
@@ -241,7 +302,7 @@ class ModelLauncher:
         """
         if (
             int(params["gpus_per_node"]) > 1
-            and params["vllm_args"].get("--tensor-parallel-size") is None
+            and params["engine_args"].get("--tensor-parallel-size") is None
         ):
             raise MissingRequiredFieldsError(
                 "--tensor-parallel-size is required when gpus_per_node > 1"
@@ -252,8 +313,8 @@ class ModelLauncher:
             raise ValueError("Total number of GPUs requested must be a power of two")
 
         total_parallel_sizes = int(
-            params["vllm_args"].get("--tensor-parallel-size", "1")
-        ) * int(params["vllm_args"].get("--pipeline-parallel-size", "1"))
+            params["engine_args"].get("--tensor-parallel-size", "1")
+        ) * int(params["engine_args"].get("--pipeline-parallel-size", "1"))
         if total_gpus_requested != total_parallel_sizes:
             raise ValueError(
                 "Mismatch between total number of GPUs requested and parallelization settings"
@@ -312,7 +373,8 @@ class ModelLauncher:
 
         # Convert path to string for JSON serialization
         for field in params:
-            if field in ["vllm_args", "env"]:
+            # Keep structured fields (dicts/bools) intact
+            if field in ["engine_args", "env", "engine_inferred"]:
                 continue
             params[field] = str(params[field])
 
@@ -370,7 +432,7 @@ class ModelLauncher:
 
         # Replace venv with image path if using container
         if self.params["venv"] == CONTAINER_MODULE_NAME:
-            self.params["venv"] = IMAGE_PATH
+            self.params["venv"] = IMAGE_PATH[self.params["engine"]]
 
         with job_json.open("w") as file:
             json.dump(self.params, file, indent=4)
@@ -453,6 +515,53 @@ class BatchModelLauncher:
 
         return model_configs_dict
 
+    def _validate_resource_and_parallel_settings(
+        self,
+        config: ModelConfig,
+        model_engine_args: dict[str, Any] | None,
+        model_name: str,
+    ) -> None:
+        """Validate resource allocation and parallelization settings for each model.
+
+        Parameters
+        ----------
+        config : ModelConfig
+            Configuration of the model to validate
+        model_engine_args : dict[str, Any] | None
+            Inference engine arguments of the model to validate
+        model_name : str
+            Name of the model to validate
+
+        Raises
+        ------
+        MissingRequiredFieldsError
+            If tensor parallel size is not specified when using multiple GPUs
+        ValueError
+            If total # of GPUs requested is not a power of two
+            If mismatch between total # of GPUs requested and parallelization settings
+        """
+        if (
+            int(config.gpus_per_node) > 1
+            and (model_engine_args or {}).get("--tensor-parallel-size") is None
+        ):
+            raise MissingRequiredFieldsError(
+                f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
+            )
+
+        total_gpus_requested = int(config.gpus_per_node) * int(config.num_nodes)
+        if not utils.is_power_of_two(total_gpus_requested):
+            raise ValueError(
+                f"Total number of GPUs requested must be a power of two, check your configuration for {model_name}"
+            )
+
+        total_parallel_sizes = int(
+            (model_engine_args or {}).get("--tensor-parallel-size", "1")
+        ) * int((model_engine_args or {}).get("--pipeline-parallel-size", "1"))
+        if total_gpus_requested != total_parallel_sizes:
+            raise ValueError(
+                f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
+            )
+
     def _get_launch_params(
         self, account: Optional[str] = None, work_dir: Optional[str] = None
     ) -> dict[str, Any]:
@@ -483,28 +592,15 @@ class BatchModelLauncher:
             params["models"][model_name] = config.model_dump(exclude_none=True)
             params["models"][model_name]["het_group_id"] = i
 
+            model_engine_args = getattr(config, f"{config.engine}_args", None)
+            params["models"][model_name]["engine_args"] = model_engine_args
+            for engine in SUPPORTED_ENGINES:
+                del params["models"][model_name][f"{engine}_args"]
+
             # Validate resource allocation and parallelization settings
-            if (
-                int(config.gpus_per_node) > 1
-                and (config.vllm_args or {}).get("--tensor-parallel-size") is None
-            ):
-                raise MissingRequiredFieldsError(
-                    f"--tensor-parallel-size is required when gpus_per_node > 1, check your configuration for {model_name}"
-                )
-
-            total_gpus_requested = int(config.gpus_per_node) * int(config.num_nodes)
-            if not utils.is_power_of_two(total_gpus_requested):
-                raise ValueError(
-                    f"Total number of GPUs requested must be a power of two, check your configuration for {model_name}"
-                )
-
-            total_parallel_sizes = int(
-                (config.vllm_args or {}).get("--tensor-parallel-size", "1")
-            ) * int((config.vllm_args or {}).get("--pipeline-parallel-size", "1"))
-            if total_gpus_requested != total_parallel_sizes:
-                raise ValueError(
-                    f"Mismatch between total number of GPUs requested and parallelization settings, check your configuration for {model_name}"
-                )
+            self._validate_resource_and_parallel_settings(
+                config, model_engine_args, model_name
+            )
 
             # Convert gpus_per_node and resource_type to gres
             params["models"][model_name]["gres"] = (
