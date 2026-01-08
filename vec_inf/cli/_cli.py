@@ -133,9 +133,19 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
+    "--engine",
+    type=str,
+    help="Inference engine to use, supports 'vllm' and 'sglang'",
+)
+@click.option(
     "--vllm-args",
     type=str,
-    help="vLLM engine arguments to be set, use the format as specified in vLLM documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
+    help="vLLM engine arguments to be set, use the format as specified in vLLM serve documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
+)
+@click.option(
+    "--sglang-args",
+    type=str,
+    help="SGLang engine arguments to be set, use the format as specified in SGLang Server Arguments documentation and separate arguments with commas, e.g. --sglang-args '--context-length=8192,--mem-fraction-static=0.85'",
 )
 @click.option(
     "--json-mode",
@@ -150,7 +160,7 @@ def cli() -> None:
 @click.option(
     "--config",
     type=str,
-    help="Path to a model config yaml file to use in place of the default",
+    help="Path to a model config yaml file to use in place of the default, you can also set VEC_INF_MODEL_CONFIG to the path to the model config file",
 )
 def launch(
     model_name: str,
@@ -201,7 +211,9 @@ def launch(
         - model_weights_parent_dir : str, optional
             Path to model weights directory
         - vllm_args : str, optional
-            vLLM engine arguments
+            vllm engine arguments
+        - sglang_args : str, optional
+            sglang engine arguments
         - env : str, optional
             Environment variables
         - config : str, optional
@@ -229,6 +241,10 @@ def launch(
         if json_mode:
             click.echo(json.dumps(launch_response.config))
         else:
+            if launch_response.config.get("engine_inferred"):
+                CONSOLE.print(
+                    "Warning: Inference engine inferred from engine-specific args"
+                )
             launch_formatter = LaunchResponseFormatter(
                 model_name, launch_response.config
             )

@@ -7,32 +7,55 @@ on:
     branches:
       - main
     paths:
-      - Dockerfile
+      - vllm.Dockerfile
+      - sglang.Dockerfile
       - .github/workflows/docker.yml
       - uv.lock
   pull_request:
     branches:
       - main
+      - f/sglang-support
     paths:
-      - Dockerfile
+      - vllm.Dockerfile
+      - sglang.Dockerfile
       - .github/workflows/docker.yml
       - uv.lock
 
 jobs:
   push_to_registry:
-    name: Push Docker image to Docker Hub
+    name: Build and push Docker images
     runs-on:
-      - self-hosted
-      - docker
+      - ubuntu-latest
+    strategy:
+      matrix:
+        backend: [vllm, sglang]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
 
-      - name: Extract vLLM version
-        id: vllm-version
+      - name: Extract backend version
+        id: backend-version
         run: |
-          VERSION=$(grep -A 1 'name = "vllm"' uv.lock | grep version | cut -d '"' -f 2)
+          VERSION=$(grep -A 1 "name = \"${{ matrix.backend }}\"" uv.lock | grep version | cut -d '"' -f 2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Maximize build space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          # Remove unnecessary pre-installed software
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          # Clean apt cache
+          sudo apt-get clean
+          # Remove docker images
+          docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          echo "Disk space after cleanup:"
+          df -h
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -47,15 +70,16 @@ jobs:
         id: meta
         uses: docker/metadata-action@318604b99e75e41977312d83839a89be02ca4893
         with:
-          images: vectorinstitute/vector-inference
+          images: vectorinstitute/vector-inference-${{ matrix.backend }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
-          file: ./Dockerfile
+          file: ./${{ matrix.backend }}.Dockerfile
           push: true
           tags: |
             ${{ steps.meta.outputs.tags }}
-            vectorinstitute/vector-inference:${{ steps.vllm-version.outputs.version }}
+            vectorinstitute/vector-inference-${{ matrix.backend }}:${{ steps.backend-version.outputs.version }}
+            vectorinstitute/vector-inference-${{ matrix.backend }}:latest
           labels: ${{ steps.meta.outputs.labels }}
