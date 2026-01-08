@@ -6,12 +6,14 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
       --max-model-len: 65536
+    sglang_args:
+      --pipeline-parallel-size: 2
+      --tensor-parallel-size: 4
+      --context-length: 65536
   c4ai-command-r-08-2024:
     model_family: c4ai-command-r
     model_variant: 08-2024
@@ -19,11 +21,12 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
+    sglang_args:
+      --tensor-parallel-size: 2
+      --context-length: 32768
   CodeLlama-7b-hf:
     model_family: CodeLlama
     model_variant: 7b-hf
@@ -31,10 +34,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 16384
   CodeLlama-7b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 7b-Instruct-hf
@@ -42,10 +41,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 16384
   CodeLlama-13b-hf:
     model_family: CodeLlama
     model_variant: 13b-hf
@@ -53,10 +48,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 16384
   CodeLlama-13b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 13b-Instruct-hf
@@ -64,10 +55,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 16384
   CodeLlama-34b-hf:
     model_family: CodeLlama
     model_variant: 34b-hf
@@ -75,11 +62,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 16384
+    sglang_args:
+      --tensor-parallel-size: 2
   CodeLlama-34b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 34b-Instruct-hf
@@ -87,11 +73,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 16384
+    sglang_args:
+      --tensor-parallel-size: 2
   CodeLlama-70b-hf:
     model_family: CodeLlama
     model_variant: 70b-hf
@@ -99,11 +84,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32016
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 4
   CodeLlama-70b-Instruct-hf:
     model_family: CodeLlama
     model_variant: 70b-Instruct-hf
@@ -111,11 +95,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32016
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 4
   gemma-2-2b-it:
     model_family: gemma-2
     model_variant: 2b-it
@@ -123,10 +106,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   gemma-2-9b:
     model_family: gemma-2
     model_variant: 9b
@@ -134,10 +113,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   gemma-2-9b-it:
     model_family: gemma-2
     model_variant: 9b-it
@@ -145,10 +120,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   gemma-2-27b:
     model_family: gemma-2
     model_variant: 27b
@@ -156,11 +127,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 2
   gemma-2-27b-it:
     model_family: gemma-2
     model_variant: 27b-it
@@ -168,11 +138,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 2
   Llama-2-7b-hf:
     model_family: Llama-2
     model_variant: 7b-hf
@@ -180,10 +149,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Llama-2-7b-chat-hf:
     model_family: Llama-2
     model_variant: 7b-chat-hf
@@ -191,10 +156,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Llama-2-13b-hf:
     model_family: Llama-2
     model_variant: 13b-hf
@@ -202,10 +163,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Llama-2-13b-chat-hf:
     model_family: Llama-2
     model_variant: 13b-chat-hf
@@ -213,22 +170,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
-  Llama-2-70b-hf:
-    model_family: Llama-2
-    model_variant: 70b-hf
-    model_type: LLM
-    gpus_per_node: 4
-    num_nodes: 1
-    vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 4
-      --max-model-len: 4096
   Llama-2-70b-chat-hf:
     model_family: Llama-2
     model_variant: 70b-chat-hf
@@ -236,11 +177,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 4
   llava-1.5-7b-hf:
     model_family: llava-1.5
     model_variant: 7b-hf
@@ -248,10 +188,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   llava-1.5-13b-hf:
     model_family: llava-1.5
     model_variant: 13b-hf
@@ -259,10 +195,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   llava-v1.6-mistral-7b-hf:
     model_family: llava-v1.6
     model_variant: mistral-7b-hf
@@ -270,10 +202,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   llava-v1.6-34b-hf:
     model_family: llava-v1.6
     model_variant: 34b-hf
@@ -281,11 +209,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 64064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 2
   Meta-Llama-3-8B:
     model_family: Meta-Llama-3
     model_variant: 8B
@@ -293,10 +220,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 8192
   Meta-Llama-3-8B-Instruct:
     model_family: Meta-Llama-3
     model_variant: 8B-Instruct
@@ -304,10 +227,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 8192
   Meta-Llama-3-70B:
     model_family: Meta-Llama-3
     model_variant: 70B
@@ -315,11 +234,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 8192
+    sglang_args:
+      --tensor-parallel-size: 4
   Meta-Llama-3-70B-Instruct:
     model_family: Meta-Llama-3
     model_variant: 70B-Instruct
@@ -327,11 +245,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 8192
+    sglang_args:
+      --tensor-parallel-size: 4
   Meta-Llama-3.1-8B:
     model_family: Meta-Llama-3.1
     model_variant: 8B
@@ -339,10 +256,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
   Meta-Llama-3.1-8B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 8B-Instruct
@@ -350,10 +263,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
   Meta-Llama-3.1-70B:
     model_family: Meta-Llama-3.1
     model_variant: 70B
@@ -361,11 +270,12 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 4
+      --context-length: 65536
   Meta-Llama-3.1-70B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 70B-Instruct
@@ -373,11 +283,12 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 4
+      --context-length: 65536
   Meta-Llama-3.1-405B-Instruct:
     model_family: Meta-Llama-3.1
     model_variant: 405B-Instruct
@@ -385,12 +296,14 @@ models:
     gpus_per_node: 4
     num_nodes: 8
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 8
       --tensor-parallel-size: 4
       --max-model-len: 16384
+    sglang_args:
+      --pipeline-parallel-size: 8
+      --tensor-parallel-size: 4
+      --context-length: 16384
   Mistral-7B-Instruct-v0.1:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.1
@@ -398,10 +311,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Mistral-7B-Instruct-v0.2:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.2
@@ -409,10 +318,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Mistral-7B-v0.3:
     model_family: Mistral
     model_variant: 7B-v0.3
@@ -420,10 +325,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Mistral-7B-Instruct-v0.3:
     model_family: Mistral
     model_variant: 7B-Instruct-v0.3
@@ -431,10 +332,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Mistral-Large-Instruct-2407:
     model_family: Mistral
     model_variant: Large-Instruct-2407
@@ -442,12 +339,14 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
       --max-model-len: 32768
+    sglang_args:
+      --pipeline-parallel-size: 2
+      --tensor-parallel-size: 4
+      --context-length: 32768
   Mistral-Large-Instruct-2411:
     model_family: Mistral
     model_variant: Large-Instruct-2411
@@ -455,12 +354,14 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
       --max-model-len: 32768
+    sglang_args:
+      --pipeline-parallel-size: 2
+      --tensor-parallel-size: 4
+      --context-length: 32768
   Mixtral-8x7B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x7B-Instruct-v0.1
@@ -468,11 +369,10 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 32768
+    sglang_args:
+      --tensor-parallel-size: 4
   Mixtral-8x22B-v0.1:
     model_family: Mixtral
     model_variant: 8x22B-v0.1
@@ -480,12 +380,12 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
-      --max-model-len: 65536
+    sglang_args:
+      --pipeline-parallel-size: 2
+      --tensor-parallel-size: 4
   Mixtral-8x22B-Instruct-v0.1:
     model_family: Mixtral
     model_variant: 8x22B-Instruct-v0.1
@@ -493,12 +393,12 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 32768
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --pipeline-parallel-size: 2
       --tensor-parallel-size: 4
-      --max-model-len: 65536
+    sglang_args:
+      --pipeline-parallel-size: 2
+      --tensor-parallel-size: 4
   Phi-3-medium-128k-instruct:
     model_family: Phi-3
     model_variant: medium-128k-instruct
@@ -506,11 +406,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 131072
+    sglang_args:
+      --tensor-parallel-size: 2
   Phi-3-vision-128k-instruct:
     model_family: Phi-3-vision
     model_variant: 128k-instruct
@@ -518,11 +417,12 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 32064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 2
+      --context-length: 65536
   Llama-3.1-Nemotron-70B-Instruct-HF:
     model_family: Llama-3.1-Nemotron
     model_variant: 70B-Instruct-HF
@@ -530,11 +430,12 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 4
+      --context-length: 65536
   Llama-3.2-1B:
     model_family: Llama-3.2
     model_variant: 1B
@@ -542,10 +443,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
   Llama-3.2-1B-Instruct:
     model_family: Llama-3.2
     model_variant: 1B-Instruct
@@ -553,10 +450,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
   Llama-3.2-3B:
     model_family: Llama-3.2
     model_variant: 3B
@@ -564,10 +457,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
   Llama-3.2-3B-Instruct:
     model_family: Llama-3.2
     model_variant: 3B-Instruct
@@ -575,24 +464,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
-  Llama-3.2-11B-Vision:
-    model_family: Llama-3.2
-    model_variant: 11B-Vision
-    model_type: VLM
-    gpus_per_node: 2
-    num_nodes: 1
-    vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 2
-      --max-model-len: 4096
-      --max-num-seqs: 64
-      --enforce-eager: true
   Llama-3.2-11B-Vision-Instruct:
     model_family: Llama-3.2
     model_variant: 11B-Vision-Instruct
@@ -600,27 +471,9 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
+    engine: sglang
+    sglang_args:
       --tensor-parallel-size: 2
-      --max-model-len: 4096
-      --max-num-seqs: 64
-      --enforce-eager: true
-  Llama-3.2-90B-Vision:
-    model_family: Llama-3.2
-    model_variant: 90B-Vision
-    model_type: VLM
-    gpus_per_node: 4
-    num_nodes: 2
-    vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 8
-      --max-model-len: 4096
-      --max-num-seqs: 32
-      --enforce-eager: true
   Llama-3.2-90B-Vision-Instruct:
     model_family: Llama-3.2
     model_variant: 90B-Vision-Instruct
@@ -628,13 +481,9 @@ models:
     gpus_per_node: 4
     num_nodes: 2
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
+    engine: sglang
+    sglang_args:
       --tensor-parallel-size: 8
-      --max-model-len: 4096
-      --max-num-seqs: 32
-      --enforce-eager: true
   Qwen2.5-0.5B-Instruct:
     model_family: Qwen2.5
     model_variant: 0.5B-Instruct
@@ -642,10 +491,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Qwen2.5-1.5B-Instruct:
     model_family: Qwen2.5
     model_variant: 1.5B-Instruct
@@ -653,10 +498,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Qwen2.5-3B-Instruct:
     model_family: Qwen2.5
     model_variant: 3B-Instruct
@@ -664,10 +505,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Qwen2.5-7B-Instruct:
     model_family: Qwen2.5
     model_variant: 7B-Instruct
@@ -675,10 +512,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Qwen2.5-14B-Instruct:
     model_family: Qwen2.5
     model_variant: 14B-Instruct
@@ -686,10 +519,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 32768
   Qwen2.5-32B-Instruct:
     model_family: Qwen2.5
     model_variant: 32B-Instruct
@@ -697,11 +526,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 32768
+    sglang_args:
+      --tensor-parallel-size: 2
   Qwen2.5-72B-Instruct:
     model_family: Qwen2.5
     model_variant: 72B-Instruct
@@ -709,79 +537,78 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 16384
+    sglang_args:
+      --tensor-parallel-size: 4
   Qwen2.5-Math-1.5B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-1.5B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 1.5B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Qwen2.5-Math-7B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-7B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 7B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Qwen2.5-Math-72B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Math-72B-Instruct
+    model_family: Qwen2.5-Math
+    model_variant: 72B-Instruct
     model_type: LLM
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
-      --max-model-len: 4096
-  Qwen2.5-Coder-7B-Instruct:
-    model_family: Qwen2.5
-    model_variant: Coder-7B-Instruct
+    sglang_args:
+      --tensor-parallel-size: 4
+  Qwen2.5-Coder-3B-Instruct:
+    model_family: Qwen2.5-Coder
+    model_variant: 3B-Instruct
     model_type: LLM
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
+  Qwen2.5-Coder-7B-Instruct:
+    model_family: Qwen2.5-Coder
+    model_variant: 7B-Instruct
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+  Qwen2.5-Math-RM-72B:
+    model_family: Qwen2.5-Math-RM
+    model_variant: 72B
+    model_type: Reward_Modeling
+    gpus_per_node: 4
+    num_nodes: 1
+    vocab_size: 152064
+    vllm_args:
+      --tensor-parallel-size: 4
+    sglang_args:
+      --tensor-parallel-size: 4
+  Qwen2.5-Math-PRM-7B:
+    model_family: Qwen2.5-Math-PRM
+    model_variant: 7B
+    model_type: Reward_Modeling
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+  Qwen2.5-VL-7B-Instruct:
+    model_family: Qwen2.5-VL
+    model_variant: 7B-Instruct
+    model_type: VLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
     vllm_args:
       --max-model-len: 32768
-  Qwen2.5-Math-RM-72B:
-    model_family: Qwen2.5
-    model_variant: Math-RM-72B
-    model_type: Reward_Modeling
-    gpus_per_node: 4
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 4
-      --max-model-len: 4096
-  Qwen2.5-Math-PRM-7B:
-    model_family: Qwen2.5
-    model_variant: Math-PRM-7B
-    model_type: Reward_Modeling
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
+    sglang_args:
+      --context-length: 32768
   QwQ-32B:
     model_family: QwQ
     model_variant: 32B
@@ -789,11 +616,12 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
       --max-model-len: 32768
+    sglang_args:
+      --tensor-parallel-size: 2
+      --context-length: 32768
   Pixtral-12B-2409:
     model_family: Pixtral
     model_variant: 12B-2409
@@ -801,10 +629,10 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 131072
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --max-model-len: 8192
+    sglang_args:
+      --context-length: 8192
   e5-mistral-7b-instruct:
     model_family: e5
     model_variant: mistral-7b-instruct
@@ -812,10 +640,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 32000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   bge-base-en-v1.5:
     model_family: bge
     model_variant: base-en-v1.5
@@ -823,10 +647,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 512
   all-MiniLM-L6-v2:
     model_family: all-MiniLM
     model_variant: L6-v2
@@ -834,10 +654,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 30522
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 512
   Llama-3.3-70B-Instruct:
     model_family: Llama-3.3
     model_variant: 70B-Instruct
@@ -845,127 +661,12 @@ models:
     gpus_per_node: 4
     num_nodes: 1
     vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 4
       --max-model-len: 65536
-  InternVL2_5-26B:
-    model_family: InternVL2_5
-    model_variant: 26B
-    model_type: VLM
-    gpus_per_node: 2
-    num_nodes: 1
-    vocab_size: 92553
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 2
-      --max-model-len: 32768
-  InternVL2_5-38B:
-    model_family: InternVL2_5
-    model_variant: 38B
-    model_type: VLM
-    gpus_per_node: 4
-    num_nodes: 1
-    vocab_size: 92553
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
+    sglang_args:
       --tensor-parallel-size: 4
-      --max-model-len: 32768
-  Aya-Expanse-32B:
-    model_family: Aya-Expanse
-    model_variant: 32B
-    model_type: LLM
-    gpus_per_node: 2
-    num_nodes: 1
-    vocab_size: 256000
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 2
-      --max-model-len: 8192
-  DeepSeek-R1-Distill-Llama-70B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Llama-70B
-    model_type: LLM
-    gpus_per_node: 4
-    num_nodes: 1
-    vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 4
-      --max-model-len: 65536
-  DeepSeek-R1-Distill-Llama-8B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Llama-8B
-    model_type: LLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 128256
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
-  DeepSeek-R1-Distill-Qwen-32B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Qwen-32B
-    model_type: LLM
-    gpus_per_node: 2
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 2
-      --max-model-len: 65536
-  DeepSeek-R1-Distill-Qwen-14B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Qwen-14B
-    model_type: LLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 65536
-  DeepSeek-R1-Distill-Qwen-7B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Qwen-7B
-    model_type: LLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
-  DeepSeek-R1-Distill-Qwen-1.5B:
-    model_family: DeepSeek-R1
-    model_variant: Distill-Qwen-1.5B
-    model_type: LLM
-    gpus_per_node: 1
-    num_nodes: 1
-    vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 131072
-  Phi-3.5-vision-instruct:
-    model_family: Phi-3.5-vision
-    model_variant: instruct
-    model_type: VLM
-    gpus_per_node: 2
-    num_nodes: 1
-    vocab_size: 32064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --tensor-parallel-size: 2
-      --max-model-len: 65536
+      --context-length: 65536
   InternVL2_5-8B:
     model_family: InternVL2_5
     model_variant: 8B
@@ -973,10 +674,114 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 92553
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
-      --max-model-len: 32768
+      --trust-remote-code: true
+  InternVL2_5-26B:
+    model_family: InternVL2_5
+    model_variant: 26B
+    model_type: VLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 92553
+    vllm_args:
+      --tensor-parallel-size: 2
+      --trust-remote-code: true
+    sglang_args:
+      --tensor-parallel-size: 2
+  InternVL2_5-38B:
+    model_family: InternVL2_5
+    model_variant: 38B
+    model_type: VLM
+    gpus_per_node: 4
+    num_nodes: 1
+    vocab_size: 92553
+    vllm_args:
+      --tensor-parallel-size: 4
+      --trust-remote-code: true
+    sglang_args:
+      --tensor-parallel-size: 4
+  aya-expanse-32b:
+    model_family: aya-expanse
+    model_variant: 32b
+    model_type: LLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 256000
+    vllm_args:
+      --tensor-parallel-size: 2
+    sglang_args:
+      --tensor-parallel-size: 2
+  DeepSeek-R1-Distill-Llama-70B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Llama-70B
+    model_type: LLM
+    gpus_per_node: 4
+    num_nodes: 1
+    vocab_size: 128256
+    vllm_args:
+      --tensor-parallel-size: 4
+      --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 4
+      --context-length: 65536
+  DeepSeek-R1-Distill-Llama-8B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Llama-8B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 128256
+  DeepSeek-R1-Distill-Qwen-32B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Qwen-32B
+    model_type: LLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 152064
+    vllm_args:
+      --tensor-parallel-size: 2
+      --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 2
+      --context-length: 65536
+  DeepSeek-R1-Distill-Qwen-14B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Qwen-14B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+    vllm_args:
+      --max-model-len: 65536
+    sglang_args:
+      --context-length: 65536
+  DeepSeek-R1-Distill-Qwen-7B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Qwen-7B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+  DeepSeek-R1-Distill-Qwen-1.5B:
+    model_family: DeepSeek-R1
+    model_variant: Distill-Qwen-1.5B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 152064
+  Phi-3.5-vision-instruct:
+    model_family: Phi-3.5-vision
+    model_variant: instruct
+    model_type: VLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 32064
+    vllm_args:
+      --tensor-parallel-size: 2
+      --max-model-len: 65536
+    sglang_args:
+      --tensor-parallel-size: 2
+      --context-length: 65536
   glm-4v-9b:
     model_family: glm-4v
     model_variant: 9b
@@ -984,10 +789,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 151552
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 8192
   Molmo-7B-D-0924:
     model_family: Molmo
     model_variant: 7B-D-0924
@@ -995,21 +796,16 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   deepseek-vl2:
     model_family: deepseek-vl2
     model_type: VLM
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 129280
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 4096
+    sglang_args:
+      --tensor-parallel-size: 2
   deepseek-vl2-small:
     model_family: deepseek-vl2
     model_variant: small
@@ -1017,10 +813,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 129280
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 4096
   Qwen3-8B:
     model_family: Qwen3
     model_variant: 8B
@@ -1028,10 +820,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 151936
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 40960
   Qwen3-14B:
     model_family: Qwen3
     model_variant: 14B
@@ -1039,10 +827,6 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 151936
-    time: 08:00:00
-    resource_type: l40s
-    vllm_args:
-      --max-model-len: 40960
   Qwen3-32B:
     model_family: Qwen3
     model_variant: 32B
@@ -1050,11 +834,10 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 151936
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 40960
+    sglang_args:
+      --tensor-parallel-size: 2
   gpt-oss-120b:
     model_family: gpt-oss
     model_variant: 120b
@@ -1062,8 +845,42 @@ models:
     gpus_per_node: 2
     num_nodes: 1
     vocab_size: 201088
-    time: 08:00:00
-    resource_type: l40s
     vllm_args:
       --tensor-parallel-size: 2
-      --max-model-len: 32768
+    sglang_args:
+      --tensor-parallel-size: 2
+  Llama-4-Maverick-17B-128E-Instruct:
+    model_family: Llama-4
+    model_variant: Maverick-17B-128E-Instruct
+    model_type: VLM
+    gpus_per_node: 4
+    num_nodes: 4
+    resource_type: h100
+    cpus_per_task: 6
+    mem-per-node: 60G
+    vocab_size: 202048
+    time: 03:00:00
+    vllm_args:
+      --tensor-parallel-size: 4
+      --pipeline-parallel-size: 4
+    sglang_args:
+      --tensor-parallel-size: 4
+      --pipeline-parallel-size: 4
+  medgemma-4b-it:
+    model_family: medgemma
+    model_variant: 4b-it
+    model_type: VLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 262208
+  medgemma-27b-it:
+    model_family: medgemma
+    model_variant: 27b-it
+    model_type: VLM
+    gpus_per_node: 2
+    num_nodes: 1
+    vocab_size: 262208
+    vllm_args:
+      --tensor-parallel-size: 2
+    sglang_args:
+      --tensor-parallel-size: 2

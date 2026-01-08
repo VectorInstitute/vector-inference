@@ -51,7 +51,9 @@ class TestModelLauncher:
             mem_per_node="32G",
             account="test-account",
             work_dir="/tmp/test-work",
+            engine="vllm",
             vllm_args={},
+            sglang_args={},
         )
 
     @pytest.fixture
@@ -110,19 +112,40 @@ class TestModelLauncher:
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
-    def test_process_vllm_args(self, mock_path_exists, mock_load_config, mock_configs):
+    def test_process_engine_args_vllm(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
         """Test vLLM args are parsed correctly into key-value pairs."""
         mock_load_config.return_value = mock_configs
         mock_path_exists.return_value = True
 
         launcher = ModelLauncher("test-model", {})
-        vllm_args = launcher._process_vllm_args(
-            "--tensor-parallel-size=4,--quantization=awq,-O3"
+        vllm_args = launcher._process_engine_args(
+            "--tensor-parallel-size=4,--quantization=awq,-O3", "vllm"
         )
 
         assert vllm_args["--tensor-parallel-size"] == "4"
         assert vllm_args["--quantization"] == "awq"
         assert vllm_args["--compilation-config"] == "3"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_sglang(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test SGLang args are parsed correctly into key-value pairs."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        sglang_args = launcher._process_engine_args(
+            "--context-length=8192,--tensor-parallel-size=4,--mem-fraction-static=0.85",
+            "sglang",
+        )
+
+        assert sglang_args["--context-length"] == "8192"
+        assert sglang_args["--tensor-parallel-size"] == "4"
+        assert sglang_args["--mem-fraction-static"] == "0.85"
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
@@ -144,7 +167,7 @@ class TestModelLauncher:
     def test_get_launch_params_merges_config_and_cli_args(
         self, mock_load_config, model_config
     ):
-        """Test _get_launch_params merges config and CLI vllm_args correctly."""
+        """Test _get_launch_params merges config and CLI engine_args correctly."""
         mock_load_config.return_value = [model_config]
         cli_kwargs = {"vllm_args": "--num-scheduler-steps=16, -pp=4", "num_nodes": 4}
 
@@ -152,7 +175,8 @@ class TestModelLauncher:
         params = launcher.params
 
         assert params["num_nodes"] == "4"
-        assert params["vllm_args"]["--num-scheduler-steps"] == "16"
+        assert params["engine_args"]["--num-scheduler-steps"] == "16"
+        assert params["engine_args"]["--pipeline-parallel-size"] == "4"
 
     @patch("vec_inf.client._helper.utils.load_config")
     def test_get_launch_params_with_multi_gpu_no_tp(
@@ -170,6 +194,98 @@ class TestModelLauncher:
             ModelLauncher("test-model", {})
 
         assert "--tensor-parallel-size" in str(excinfo.value)
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_engine_check_override_with_vllm(self, mock_load_config, model_config):
+        """Test vLLM engine selection with explicit engine arg."""
+        mock_load_config.return_value = [model_config]
+
+        launcher = ModelLauncher("test-model", {"engine": "vllm"})
+        params = launcher.params
+
+        assert launcher.engine == "vllm"
+        assert params["engine"] == "vllm"
+        assert "engine_args" in params
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_engine_check_override_with_sglang(self, mock_load_config, model_config):
+        """Test SGLang engine selection with explicit engine arg."""
+        updated_config = model_config.model_copy(
+            update={
+                "engine": "sglang",
+                "sglang_args": {"--context-length": "8192"},
+            }
+        )
+        mock_load_config.return_value = [updated_config]
+
+        launcher = ModelLauncher("test-model", {"engine": "sglang"})
+        params = launcher.params
+
+        assert launcher.engine == "sglang"
+        assert params["engine"] == "sglang"
+        assert params["engine_args"] == updated_config.sglang_args
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_engine_check_override_inferred_from_args(
+        self, mock_load_config, model_config
+    ):
+        """Test engine inference from engine-specific args."""
+        mock_load_config.return_value = [model_config]
+
+        launcher = ModelLauncher("test-model", {"sglang_args": "--context-length=8192"})
+
+        assert launcher.engine == "sglang"
+        assert launcher.params["engine_inferred"] is True
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_engine_check_override_mismatch_error(self, mock_load_config, model_config):
+        """Test error when engine and args mismatch."""
+        mock_load_config.return_value = [model_config]
+
+        with pytest.raises(ValueError, match="Mismatch between provided engine"):
+            ModelLauncher(
+                "test-model",
+                {"engine": "vllm", "sglang_args": "--context-length=8192"},
+            )
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_engine_check_override_multiple_engine_args_error(
+        self, mock_load_config, model_config
+    ):
+        """Test error when multiple engine args provided."""
+        mock_load_config.return_value = [model_config]
+
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide engine-specific args for multiple engines",
+        ):
+            ModelLauncher(
+                "test-model",
+                {
+                    "vllm_args": "--max-model-len=8192",
+                    "sglang_args": "--context-length=8192",
+                },
+            )
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_validate_resource_allocation_with_sglang(
+        self, mock_load_config, model_config
+    ):
+        """Test resource validation with SGLang engine."""
+        updated_config = model_config.model_copy(
+            update={
+                "engine": "sglang",
+                "gpus_per_node": 2,
+                "sglang_args": {"--tensor-parallel-size": "2"},
+            }
+        )
+        mock_load_config.return_value = [updated_config]
+
+        launcher = ModelLauncher("test-model", {})
+        params = launcher.params
+
+        assert launcher.engine == "sglang"
+        assert params["engine_args"]["--tensor-parallel-size"] == "2"
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("vec_inf.client._helper.utils.run_bash_command")
@@ -224,6 +340,47 @@ class TestModelLauncher:
         with pytest.raises(SlurmJobError):
             launcher.launch()
 
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("vec_inf.client._helper.utils.run_bash_command")
+    @patch("vec_inf.client._helper.SlurmScriptGenerator")
+    @patch("pathlib.Path.mkdir")
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.open")
+    @patch("pathlib.Path.rename")
+    def test_launch_with_sglang_engine(
+        self,
+        mock_rename,
+        mock_open,
+        mock_touch,
+        mock_mkdir,
+        mock_script_gen,
+        mock_run_bash,
+        mock_load_config,
+        model_config,
+    ):
+        """Test launch with SGLang engine."""
+        updated_config = model_config.model_copy(
+            update={
+                "engine": "sglang",
+                "sglang_args": {"--context-length": "8192"},
+            }
+        )
+        mock_open.return_value = mock.mock_open().return_value
+        mock_load_config.return_value = [updated_config]
+        mock_script_gen_instance = MagicMock()
+        mock_script_gen_instance.write_to_log_dir.return_value = Path(
+            "/path/to/slurm_script.sh"
+        )
+        mock_script_gen.return_value = mock_script_gen_instance
+        mock_run_bash.return_value = ("Submitted batch job 12345", "")
+
+        launcher = ModelLauncher("test-model", {"engine": "sglang"})
+        response = launcher.launch()
+
+        assert response.slurm_job_id == "12345"
+        assert launcher.engine == "sglang"
+        assert response.config["engine"] == "sglang"
+
 
 class TestBatchModelLauncher:
     """Tests for the BatchModelLauncher class."""
@@ -249,7 +406,9 @@ class TestBatchModelLauncher:
                 mem_per_node="32G",
                 account="test-account",
                 work_dir="/tmp/test-work",
+                engine="vllm",
                 vllm_args={},
+                sglang_args={},
             ),
             ModelConfig(
                 model_name="family2-variant1",
@@ -268,7 +427,9 @@ class TestBatchModelLauncher:
                 mem_per_node="32G",
                 account="test-account",
                 work_dir="/tmp/test-work",
+                engine="vllm",
                 vllm_args={},
+                sglang_args={},
             ),
             ModelConfig(
                 model_name="family1-variant2",
@@ -287,7 +448,9 @@ class TestBatchModelLauncher:
                 mem_per_node="32G",
                 account="test-account",
                 work_dir="/tmp/test-work",
+                engine="vllm",
                 vllm_args={},
+                sglang_args={},
             ),
         ]
 
@@ -595,6 +758,71 @@ class TestBatchModelLauncher:
         assert launcher.batch_config == "custom_config.yaml"
         # Verify load_config was called with the custom config
         mock_load_config.assert_called_with("custom_config.yaml")
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_get_launch_params_with_sglang_engine(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test batch launch with SGLang engine."""
+        updated_configs = [
+            batch_model_configs[0].model_copy(
+                update={
+                    "engine": "sglang",
+                    "sglang_args": {"--context-length": "8192"},
+                }
+            ),
+            batch_model_configs[1],
+        ]
+        mock_load_config.return_value = updated_configs
+
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
+        params = launcher.params
+
+        assert params["models"]["family1-variant1"]["engine"] == "sglang"
+        assert params["models"]["family1-variant1"]["engine_args"] == {
+            "--context-length": "8192"
+        }
+        assert params["models"]["family2-variant1"]["engine"] == "vllm"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    def test_launch_params_engine_args_selection(
+        self, mock_load_config, batch_model_configs
+    ):
+        """Test correct engine args selection per model."""
+        updated_configs = [
+            batch_model_configs[0].model_copy(
+                update={
+                    "engine": "sglang",
+                    "sglang_args": {"--context-length": "8192"},
+                }
+            ),
+            batch_model_configs[1].model_copy(
+                update={
+                    "engine": "vllm",
+                    "vllm_args": {"--max-model-len": "4096"},
+                }
+            ),
+        ]
+        mock_load_config.return_value = updated_configs
+
+        launcher = BatchModelLauncher(
+            ["family1-variant1", "family2-variant1"],
+            account="test-account",
+            work_dir="/tmp/test-work",
+        )
+        params = launcher.params
+
+        # Verify each model uses its correct engine args
+        assert params["models"]["family1-variant1"]["engine_args"] == {
+            "--context-length": "8192"
+        }
+        assert params["models"]["family2-variant1"]["engine_args"] == {
+            "--max-model-len": "4096"
+        }
 
 
 class TestModelStatusMonitor:

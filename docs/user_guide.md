@@ -6,7 +6,7 @@
 
 The `launch` command allows users to launch a OpenAI-compatible model inference server as a slurm job. If the job successfully launches, a URL endpoint is exposed for the user to send requests for inference.
 
-We will use the Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
+We will use the Meta Llama 3.1 model as example, to launch an OpenAI compatible inference server for Meta-Llama-3.1-8B-Instruct, run:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct
@@ -14,27 +14,26 @@ vec-inf launch Meta-Llama-3.1-8B-Instruct
 You should see an output like the following:
 
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Job Config              ┃ Value                                     ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Slurm Job ID            │ 598624                                    │
-│ Job Name                │ Meta-Llama-3.1-8B-Instruct                │
-│ Model Type              │ LLM                                       │
-│ Vocabulary Size         │ 128256                                    │
-│ Account                 │ aip-your-account                          │
-│ Working Directory       │ /your/working/directory                   │
-│ Resource Type           │ l40s                                      │
-│ Time Limit              │ 08:00:00                                  │
-│ Num Nodes               │ 1                                         │
-│ GPUs/Node               │ 1                                         │
-│ CPUs/Task               │ 16                                        │
-│ Memory/Node             │ 64G                                       │
-│ Model Weights Directory │ /model-weights/Meta-Llama-3.1-8B-Instruct │
-│ Log Directory           │ /h/vi_user/.vec-inf-logs/Meta-Llama-3.1   │
-│ vLLM Arguments:         │                                           │
-│   --max-model-len:      │ 131072                                    │
-│   --max-num-seqs:       │ 256                                       │
-└─────────────────────────┴───────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Job Config              ┃ Value                                                          ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Slurm Job ID            │ 1673493                                                        │
+│ Job Name                │ Meta-Llama-3.1-8B-Instruct                                     │
+│ Model Type              │ LLM                                                            │
+│ Vocabulary Size         │ 128256                                                         │
+│ Account                 │ aip-your-account                                               │
+│ Working Directory       │ /your/working/directory                                        │
+│ Resource Type           │ l40s                                                           │
+│ Time Limit              │ 08:00:00                                                       │
+│ Num Nodes               │ 1                                                              │
+│ GPUs/Node               │ 1                                                              │
+│ CPUs/Task               │ 16                                                             │
+│ Memory/Node             │ 64G                                                            │
+│ Virtual Environment     │ /model-weights/vec-inf-shared/vector-inference-vllm_latest.sif │
+│ Model Weights Directory │ /model-weights/Meta-Llama-3.1-8B-Instruct                      │
+│ Log Directory           │ /home/marshw/.vec-inf-logs/Meta-Llama-3.1                      │
+│ Inference Engine        │ vLLM                                                           │
+└─────────────────────────┴────────────────────────────────────────────────────────────────┘
 ```
 
 **NOTE**: You can set the required fields in the environment configuration (`environment.yaml`), it's a mapping between required arguments and their corresponding environment variables. On the Vector **Killarney** Cluster environment, the required fields are:
@@ -43,23 +42,33 @@ You should see an output like the following:
 
 #### Overrides
 
-Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config/models.yaml). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `resource-type` is to be overriden:
+Models that are already supported by `vec-inf` would be launched using the cached configuration or [default configuration](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/config). You can override these values by providing additional parameters. Use `vec-inf launch --help` to see the full list of parameters that can be overriden. For example, if `resource-type` is to be overriden:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --resource-type <new_resource_type>
 ```
 
-To overwrite default `vllm serve` arguments, you can specify the arguments in a comma separated string:
+To overwrite default inference engine choice, use `--engine`:
+
+```bash
+vec-inf launch Meta-Llama-3.1-8B-Instruct --engine sglang
+```
+
+**NOTE**: Some models are only supported by default inference engine, check supported model architectures from inference engine documentations.
+
+To overwrite default inference engine arguments, you can specify the arguments in a comma separated string using `--$ENGINE_NAME-args`:
 
 ```bash
 vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
 ```
 
-For the full list of `vllm serve` arguments, you can find them [here](https://docs.vllm.ai/en/stable/serving/engine_args.html), make sure you select the correct vLLM version.
+For the full list of inference engine arguments, you can find them here:
+* [vLLM](https://docs.vllm.ai/en/stable/serving/engine_args.html).
+* [SGLang](https://docs.sglang.io/advanced_features/server_arguments.html)
 
 #### Custom models
 
-You can also launch your own custom model as long as the model architecture is [supported by vLLM](https://docs.vllm.ai/en/stable/models/supported_models.html), and make sure to follow the instructions below:
+You can also launch your own custom model as long as the model architecture is supported by the underlying inference engine, and make sure to follow the instructions below:
 * Your model weights directory naming convention should follow `$MODEL_FAMILY-$MODEL_VARIANT` ($MODEL_VARIANT is OPTIONAL).
 * Your model weights directory should contain HuggingFace format weights.
 * You should specify your model configuration by:
@@ -82,7 +91,7 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
-    resource_type: l40s # You can also leave this field empty if your environment has a default type of resource to use
+    resource_type: l40s # You can also omit this field empty if your environment has a default type of resource to use
     time: 08:00:00
     model_weights_parent_dir: /h/<username>/model-weights
     vllm_args:
@@ -96,10 +105,7 @@ You would then set the `VEC_INF_MODEL_CONFIG` path using:
 export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 ```
 
-**NOTE**
-* There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py) for details.
-* Check [`vllm serve`](https://docs.vllm.ai/en/stable/cli/serve.html) for the full list of available vLLM engine arguments. The default parallel size for any parallelization defaults to 1, so none of the sizes were set specifically in this example.
-* For GPU partitions with non-Ampere architectures, e.g. `rtx6000`, `t4v2`, BF16 isn't supported. For models that have BF16 as the default type, when using a non-Ampere GPU, use FP16 instead, i.e. `--dtype: float16`.
+**NOTE**: There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py) for details.
 
 ### `batch-launch` command
 
