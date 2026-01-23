@@ -42,6 +42,9 @@ inference = [
     "torch>=2.7.0",
     "cupy-cuda12x>=12.3.0",
     "flashinfer-python>=0.4.0",
+    "ax-platform>=1.1.0",
+    "py3nvml",
+    "wandb>=0.17.0",
 ]
 
 [project.optional-dependencies]
