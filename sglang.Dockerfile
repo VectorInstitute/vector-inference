@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     wget build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev libffi-dev libncursesw5-dev \
     xz-utils tk-dev libxml2-dev libxmlsec1-dev liblzma-dev libnuma1 \
-    git vim \
+    git vim libavutil-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python
