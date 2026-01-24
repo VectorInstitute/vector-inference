@@ -55,7 +55,7 @@ vllm = [
     "ray[default]>=2.51.0",
     "vllm[audio]",
     "vllm[bench]",
-    "torchcodec",
+    "torchcodec>=0.9.0,<0.10.0",
 ]
 # SGLang inference backend (conflicts with vllm due to dependency version conflicts)
 # Install with: uv sync --extra sglang --group inference
