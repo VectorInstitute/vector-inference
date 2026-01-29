@@ -204,6 +204,10 @@ class ModelLauncher:
         params : dict[str, Any]
             Dictionary of launch parameters to override
         """
+        if self.kwargs.get("hf_model"):
+            params["hf_model"] = self.kwargs["hf_model"]
+            del self.kwargs["hf_model"]
+
         if self.kwargs.get("vllm_args"):
             vllm_args = self._process_vllm_args(self.kwargs["vllm_args"])
             for key, value in vllm_args.items():
