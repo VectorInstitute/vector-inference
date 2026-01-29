@@ -202,6 +202,21 @@ class TestSlurmScriptGenerator:
         assert "--max-model-len 8192" in launch_cmd
         assert "--enforce-eager" in launch_cmd
 
+    def test_generate_launch_cmd_with_hf_model_override(
+        self, basic_params, monkeypatch
+    ):
+        """Test launch command uses hf_model when local weights don't exist."""
+        monkeypatch.setattr(
+            "vec_inf.client._slurm_script_generator.Path.exists", lambda self: False
+        )
+        params = basic_params.copy()
+        params["hf_model"] = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+        generator = SlurmScriptGenerator(params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert "vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct" in launch_cmd
+        assert "vllm serve /path/to/model_weights/test-model" not in launch_cmd
+
     def test_generate_launch_cmd_singularity(self, singularity_params):
         """Test launch command generation with Singularity."""
         generator = SlurmScriptGenerator(singularity_params)
@@ -415,6 +430,25 @@ class TestBatchSlurmScriptGenerator:
         assert generator.script_paths[0] == script_path
         mock_touch.assert_called_once()
         mock_write_text.assert_called_once()
+
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.write_text")
+    def test_generate_model_launch_script_with_hf_model_override(
+        self, mock_write_text, mock_touch, batch_params, monkeypatch
+    ):
+        """Test batch launch script uses hf_model when local weights don't exist."""
+        monkeypatch.setattr(
+            "vec_inf.client._slurm_script_generator.Path.exists", lambda self: False
+        )
+        params = batch_params.copy()
+        params["models"] = {k: v.copy() for k, v in batch_params["models"].items()}
+        params["models"]["model1"]["hf_model"] = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+
+        generator = BatchSlurmScriptGenerator(params)
+        generator._generate_model_launch_script("model1")
+
+        call_args = mock_write_text.call_args[0][0]
+        assert "vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct" in call_args
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
