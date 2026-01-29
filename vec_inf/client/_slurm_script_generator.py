@@ -43,11 +43,13 @@ class SlurmScriptGenerator:
         )
         self.model_weights_exists = model_weights_path.exists()
         self.model_weights_path = str(model_weights_path)
-        self.model_source = (
-            self.model_weights_path
-            if self.model_weights_exists
-            else self.params["model_name"]
-        )
+        # Determine model source: local weights > hf_model > model name
+        if self.model_weights_exists:
+            self.model_source = self.model_weights_path
+        elif self.params.get("hf_model"):
+            self.model_source = self.params["hf_model"]
+        else:
+            self.model_source = self.params["model_name"]
         check_and_warn_hf_cache(
             self.model_weights_exists,
             self.model_weights_path,
@@ -256,9 +258,17 @@ class BatchSlurmScriptGenerator:
             self.params["models"][model_name]["model_weights_exists"] = (
                 model_weights_exists
             )
-            self.params["models"][model_name]["model_source"] = (
-                model_weights_path_str if model_weights_exists else model_name
-            )
+            # Determine model source: local weights > hf_model > model name
+            if model_weights_exists:
+                self.params["models"][model_name]["model_source"] = (
+                    model_weights_path_str
+                )
+            elif self.params["models"][model_name].get("hf_model"):
+                self.params["models"][model_name]["model_source"] = self.params[
+                    "models"
+                ][model_name]["hf_model"]
+            else:
+                self.params["models"][model_name]["model_source"] = model_name
             check_and_warn_hf_cache(
                 model_weights_exists,
                 model_weights_path_str,
