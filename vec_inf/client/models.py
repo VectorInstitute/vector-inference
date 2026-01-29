@@ -222,6 +222,9 @@ class LaunchOptions:
         Directory for logs
     model_weights_parent_dir : str, optional
         Parent directory containing model weights
+    hf_model : str, optional
+        HuggingFace model id for vLLM to download (e.g. "meta-llama/Llama-3.1-8B").
+        Used as model source when local weights don't exist.
     vllm_args : str, optional
         Additional arguments for vLLM
     env : str, optional
@@ -250,6 +253,7 @@ class LaunchOptions:
     venv: Optional[str] = None
     log_dir: Optional[str] = None
     model_weights_parent_dir: Optional[str] = None
+    hf_model: Optional[str] = None
     vllm_args: Optional[str] = None
     env: Optional[str] = None
     config: Optional[str] = None

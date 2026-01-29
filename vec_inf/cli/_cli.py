@@ -133,6 +133,15 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
+    "--hf-model",
+    type=str,
+    help=(
+        "Full HuggingFace model id/path to use for vLLM serve (e.g. "
+        "'meta-llama/Meta-Llama-3.1-8B-Instruct'). "
+        "Keeps model-name as the short identifier for config/logs/job naming."
+    ),
+)
+@click.option(
     "--vllm-args",
     type=str,
     help="vLLM engine arguments to be set, use the format as specified in vLLM documentation and separate arguments with commas, e.g. --vllm-args '--max-model-len=8192,--max-num-seqs=256,--enable-prefix-caching'",
@@ -200,6 +209,8 @@ def launch(
             Path to SLURM log directory
         - model_weights_parent_dir : str, optional
             Path to model weights directory
+        - hf_model : str, optional
+            Full HuggingFace model id/path to use for vLLM serve
         - vllm_args : str, optional
             vLLM engine arguments
         - env : str, optional
