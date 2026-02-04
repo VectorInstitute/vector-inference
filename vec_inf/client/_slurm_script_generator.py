@@ -112,7 +112,7 @@ class SlurmScriptGenerator:
             server_script.append("\n".join(SLURM_SCRIPT_TEMPLATE["container_setup"]))
             server_script.append(
                 SLURM_SCRIPT_TEMPLATE["bind_path"].format(
-                    work_dir=self.params["work_dir"],
+                    work_dir=self.params.get("work_dir", str(Path.home())),
                     model_weights_path=self.model_weights_path,
                     additional_binds=self.additional_binds,
                 )
@@ -320,7 +320,7 @@ class BatchSlurmScriptGenerator:
             script_content.append(BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["container_setup"])
         script_content.append(
             BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
-                work_dir=self.params["work_dir"],
+                work_dir=self.params.get("work_dir", str(Path.home())),
                 model_weights_path=model_params["model_weights_path"],
                 additional_binds=model_params["additional_binds"],
             )
