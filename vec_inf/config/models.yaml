@@ -813,6 +813,13 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 129280
+  Qwen3-0.6B:
+    model_family: Qwen3
+    model_variant: 0.6B
+    model_type: LLM
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 151936
   Qwen3-8B:
     model_family: Qwen3
     model_variant: 8B
@@ -853,19 +860,19 @@ models:
     model_family: Llama-4
     model_variant: Maverick-17B-128E-Instruct
     model_type: VLM
-    gpus_per_node: 4
-    num_nodes: 4
+    gpus_per_node: 8
+    num_nodes: 2
     resource_type: h100
     cpus_per_task: 6
     mem-per-node: 60G
     vocab_size: 202048
-    time: 03:00:00
+    time: 08:00:00
     vllm_args:
-      --tensor-parallel-size: 4
-      --pipeline-parallel-size: 4
+      --tensor-parallel-size: 8
+      --pipeline-parallel-size: 2
     sglang_args:
-      --tensor-parallel-size: 4
-      --pipeline-parallel-size: 4
+      --tensor-parallel-size: 8
+      --pipeline-parallel-size: 2
   medgemma-4b-it:
     model_family: medgemma
     model_variant: 4b-it
@@ -884,3 +891,38 @@ models:
       --tensor-parallel-size: 2
     sglang_args:
       --tensor-parallel-size: 2
+  Kimi-K2-Instruct:
+    model_family: Kimi-K2
+    model_variant: Instruct
+    model_type: LLM
+    gpus_per_node: 8
+    num_nodes: 2
+    resource_type: h100
+    cpus_per_task: 6
+    mem-per-node: 60G
+    vocab_size: 163840
+    vllm_args:
+      --tensor-parallel-size: 8
+      --pipeline-parallel-size: 2
+    sglang_args:
+      --tensor-parallel-size: 8
+      --pipeline-parallel-size: 2
+  Kimi-K2.5:
+    model_family: Kimi-K2.5
+    model_type: LLM
+    gpus_per_node: 8
+    num_nodes: 1
+    resource_type: h100
+    cpus_per_task: 6
+    mem-per-node: 60G
+    vocab_size: 163840
+    vllm_args:
+      --tensor-parallel-size: 8
+    sglang_args:
+      --tensor-parallel-size: 8
+  whisper-large-v3:
+    model_family: whisper-large-v3
+    model_type: Audio
+    gpus_per_node: 1
+    num_nodes: 1
+    vocab_size: 51866
