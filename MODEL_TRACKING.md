@@ -175,8 +175,9 @@ This document tracks all model weights available in the `/model-weights` directo
 ### Qwen: Qwen3
 | Model | Configuration |
 |:------|:-------------|
-| `Qwen3-14B` | ✅ |
+| `Qwen3-0.6B` | ✅ |
 | `Qwen3-8B` | ✅ |
+| `Qwen3-14B` | ✅ |
 | `Qwen3-32B` | ✅ |
 | `Qwen3-235B-A22B` | ❌ |
 | `Qwen3-Embedding-8B` | ❌ |
@@ -233,7 +234,8 @@ This document tracks all model weights available in the `/model-weights` directo
 #### Moonshot AI: Kimi
 | Model | Configuration |
 |:------|:-------------|
-| `Kimi-K2-Instruct` | ❌ |
+| `Kimi-K2-Instruct` | ✅ |
+| `Kimi-K2.5` | ✅ |
 
 #### Mistral AI: Ministral
 | Model | Configuration |
