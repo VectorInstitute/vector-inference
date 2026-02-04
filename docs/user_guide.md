@@ -110,7 +110,7 @@ export VEC_INF_MODEL_CONFIG=/h/<username>/my-model-config.yaml
 
 **NOTE**: There are other parameters that can also be added to the config but not shown in this example, check the [`ModelConfig`](https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py) for details.
 
-During the launch process, relevant log files and scripts will be written to a log directory (default to `.vec-inf-logs` in your home directory), and a cache directory (`.vec-inf-cache`) will be created in your working directory (defaults to your home directory if not specified or required) for torch compile cache. 
+During the launch process, relevant log files and scripts will be written to a log directory (default to `.vec-inf-logs` in your home directory), and a cache directory (`.vec-inf-cache`) will be created in your working directory (defaults to your home directory if not specified or required) for torch compile cache.
 
 ### `batch-launch` command
 
