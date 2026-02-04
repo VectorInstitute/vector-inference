@@ -358,6 +358,11 @@ class ModelLauncher:
         # Check for required fields without default vals, will raise an error if missing
         utils.check_required_fields(params)
 
+        if not params.get("work_dir"):
+            # This is last resort, work dir should always be a required field to avoid
+            # blowing up user home directory unless intended
+            params["work_dir"] = str(Path.home())
+
         # Validate resource allocation and parallelization settings
         self._validate_resource_allocation(params)
 
@@ -404,6 +409,10 @@ class ModelLauncher:
         SlurmJobError
             If SLURM job submission fails
         """
+        # Create cache directory if it doesn't exist
+        cache_dir = Path(self.params["work_dir"], ".vec-inf-cache").expanduser()
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
 
@@ -661,6 +670,10 @@ class BatchModelLauncher:
                 else:
                     params["models"][model_name][arg] = value
 
+        if not params.get("work_dir"):
+            # This is last resort, work dir should always be a required field to avoid
+            # blowing up user home directory unless intended
+            params["work_dir"] = str(Path.home())
         return params
 
     def _build_launch_command(self) -> str:
@@ -689,6 +702,10 @@ class BatchModelLauncher:
         SlurmJobError
             If SLURM job submission fails
         """
+        # Create cache directory if it doesn't exist
+        cache_dir = Path(self.params["work_dir"], ".vec-inf-cache").expanduser()
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
 
