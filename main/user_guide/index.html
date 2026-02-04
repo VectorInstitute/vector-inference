@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/favicon-48x48.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -965,6 +965,7 @@ would be named <code>Qwen2.5-7B-Instruct-1M</code>. The following yaml file woul
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VEC_INF_MODEL_CONFIG</span><span class="o">=</span>/h/&lt;username&gt;/my-model-config.yaml
 </span></code></pre></div>
 <p><strong>NOTE</strong>: There are other parameters that can also be added to the config but not shown in this example, check the <a href="https://github.com/VectorInstitute/vector-inference/blob/main/vec_inf/client/config.py"><code>ModelConfig</code></a> for details.</p>
+<p>During the launch process, relevant log files and scripts will be written to a log directory (default to <code>.vec-inf-logs</code> in your home directory), and a cache directory (<code>.vec-inf-cache</code>) will be created in your working directory (defaults to your home directory if not specified or required) for torch compile cache.</p>
 <h3 id="batch-launch-command"><code>batch-launch</code> command<a class="headerlink" href="#batch-launch-command" title="Permanent link">&para;</a></h3>
 <p>The <code>batch-launch</code> command allows users to launch multiple inference servers at once, here is an example of launching 2 models:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>vec-inf<span class="w"> </span>batch-launch<span class="w"> </span>Qwen2.5-1.5B-Instruct<span class="w"> </span>Qwen2.5-Math-PRM-7B
@@ -1285,10 +1286,10 @@ are also Python API usage examples in the <a href="https://github.com/VectorInst
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
