@@ -412,7 +412,7 @@ class ModelLauncher:
         # Create cache directory if it doesn't exist
         cache_dir = Path(self.params["work_dir"], ".vec-inf-cache").expanduser()
         cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
 
@@ -705,7 +705,7 @@ class BatchModelLauncher:
         # Create cache directory if it doesn't exist
         cache_dir = Path(self.params["work_dir"], ".vec-inf-cache").expanduser()
         cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Build and execute the launch command
         command_output, stderr = utils.run_bash_command(self._build_launch_command())
 
