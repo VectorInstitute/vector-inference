@@ -138,7 +138,7 @@ The example provided above is for the Vector Killarney cluster, change the varia
 If you found Vector Inference useful in your research or applications, please cite using the following BibTeX template:
 ```
 @software{vector_inference,
-  title        = {Vector Inference: Efficient LLM inference on Slurm clusters using vLLM},
+  title        = {Vector Inference: Efficient LLM inference on Slurm clusters},
   author       = {Wang, Marshall},
   organization = {Vector Institute},
   year         = {<YEAR_OF_RELEASE>},
