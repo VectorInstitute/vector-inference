@@ -345,7 +345,7 @@ def parse_launch_output(output: str) -> tuple[str, dict[str, str]]:
     command output. Configuration parameters are parsed from key-value pairs
     in the output text.
     """
-    slurm_job_id = output.split(" ")[-1].strip().strip("\n")
+    slurm_job_id = output.rsplit(" ", maxsplit=1)[-1].strip().strip("\n")
 
     # Extract config parameters
     config_dict = {}
