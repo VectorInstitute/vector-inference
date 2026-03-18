@@ -28,7 +28,7 @@ jobs:
   run-code-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
