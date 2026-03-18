@@ -117,7 +117,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         CONTAINER_LOAD_CMD,
     ],
     "imports": "source {src_dir}/find_port.sh",
-    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
+    "bind_path": f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,/dev,/tmp,{{work_dir}}/.vec-inf-cache:$HOME/.cache,{{model_weights_path}}{{additional_binds}}",
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {{image_path}} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
@@ -292,7 +292,7 @@ class BatchModelLaunchScriptTemplate(TypedDict):
 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "shebang": "#!/bin/bash\n",
     "container_setup": f"{CONTAINER_LOAD_CMD}\n",
-    "bind_path": f"export {CONTAINER_MODULE_NAME.upper()}_BINDPATH=${CONTAINER_MODULE_NAME.upper()}_BINDPATH,/dev,/tmp,{{model_weights_path}}{{additional_binds}}",
+    "bind_path": f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,/dev,/tmp,{{work_dir}}/.vec-inf-cache:$HOME/.cache,{{model_weights_path}}{{additional_binds}}",
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
