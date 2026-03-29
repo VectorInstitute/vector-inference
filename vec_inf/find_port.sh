@@ -28,7 +28,16 @@ find_available_port() {
     local base_port=$2
     local max_port=$3
 
-    for ((port=base_port; port<=max_port; port++)); do
+    # Generate shuffled list of ports; fallback to sequential if shuf not present
+    if command -v shuf >/dev/null 2>&1; then
+        local port_list
+        port_list=$(shuf -i "${base_port}-${max_port}")
+    else
+        local port_list
+        port_list=$(seq $base_port $max_port)
+    fi
+
+    for port in $port_list; do
         if is_port_available $ip $port; then
             echo $port
             return

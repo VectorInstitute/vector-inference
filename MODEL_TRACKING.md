@@ -94,6 +94,7 @@ This document tracks all model weights available in the `/model-weights` directo
 | Model | Configuration |
 |:------|:-------------|
 | `Llama-4-Scout-17B-16E-Instruct` | ❌ |
+| `Llama-4-Maverick-17B-128E-Instruct` | ❌ |
 
 ### Mistral AI: Mistral
 | Model | Configuration |
@@ -128,6 +129,7 @@ This document tracks all model weights available in the `/model-weights` directo
 |:------|:-------------|
 | `Qwen2.5-0.5B-Instruct` | ✅ |
 | `Qwen2.5-1.5B-Instruct` | ✅ |
+| `Qwen2.5-3B` | ❌ |
 | `Qwen2.5-3B-Instruct` | ✅ |
 | `Qwen2.5-7B-Instruct` | ✅ |
 | `Qwen2.5-14B-Instruct` | ✅ |
@@ -138,12 +140,14 @@ This document tracks all model weights available in the `/model-weights` directo
 | Model | Configuration |
 |:------|:-------------|
 | `Qwen2.5-Math-1.5B-Instruct` | ✅ |
+| `Qwen2.5-Math-7B` | ❌ |
 | `Qwen2.5-Math-7B-Instruct` | ✅ |
 | `Qwen2.5-Math-72B-Instruct` | ✅ |
 
 ### Qwen: Qwen2.5-Coder
 | Model | Configuration |
 |:------|:-------------|
+| `Qwen2.5-Coder-3B-Instruct` | ✅ |
 | `Qwen2.5-Coder-7B-Instruct` | ✅ |
 
 ### Qwen: QwQ
@@ -162,11 +166,18 @@ This document tracks all model weights available in the `/model-weights` directo
 | `Qwen2-Math-72B-Instruct` | ❌ |
 | `Qwen2-VL-7B-Instruct` | ❌ |
 
+### Qwen: Qwen2.5-VL
+| Model | Configuration |
+|:------|:-------------|
+| `Qwen2.5-VL-3B-Instruct` | ❌ |
+| `Qwen2.5-VL-7B-Instruct` | ✅ |
+
 ### Qwen: Qwen3
 | Model | Configuration |
 |:------|:-------------|
-| `Qwen3-14B` | ✅ |
+| `Qwen3-0.6B` | ✅ |
 | `Qwen3-8B` | ✅ |
+| `Qwen3-14B` | ✅ |
 | `Qwen3-32B` | ✅ |
 | `Qwen3-235B-A22B` | ❌ |
 | `Qwen3-Embedding-8B` | ❌ |
@@ -191,27 +202,77 @@ This document tracks all model weights available in the `/model-weights` directo
 | Model | Configuration |
 |:------|:-------------|
 | `gpt-oss-120b` | ✅ |
+| `gpt-oss-20b` | ✅ |
 
-### Other LLM Models
+
+#### AI21: Jamba
 | Model | Configuration |
 |:------|:-------------|
 | `AI21-Jamba-1.5-Mini` | ❌ |
-| `aya-expanse-32b` | ✅ (as Aya-Expanse-32B) |
+
+#### Cohere for AI: Aya
+| Model | Configuration |
+|:------|:-------------|
+| `aya-expanse-32b` | ✅ |
+
+#### OpenAI: GPT-2
+| Model | Configuration |
+|:------|:-------------|
 | `gpt2-large` | ❌ |
 | `gpt2-xl` | ❌ |
-| `gpt-oss-120b` | ❌ |
-| `instructblip-vicuna-7b` | ❌ |
+
+#### InternLM: InternLM2
+| Model | Configuration |
+|:------|:-------------|
 | `internlm2-math-plus-7b` | ❌ |
+
+#### Janus
+| Model | Configuration |
+|:------|:-------------|
 | `Janus-Pro-7B` | ❌ |
-| `Kimi-K2-Instruct` | ❌ |
+
+#### Moonshot AI: Kimi
+| Model | Configuration |
+|:------|:-------------|
+| `Kimi-K2-Instruct` | ✅ |
+| `Kimi-K2.5` | ✅ |
+
+#### Mistral AI: Ministral
+| Model | Configuration |
+|:------|:-------------|
 | `Ministral-8B-Instruct-2410` | ❌ |
-| `Molmo-7B-D-0924` | ✅ |
+
+#### AI2: OLMo
+| Model | Configuration |
+|:------|:-------------|
 | `OLMo-1B-hf` | ❌ |
 | `OLMo-7B-hf` | ❌ |
 | `OLMo-7B-SFT` | ❌ |
+
+#### EleutherAI: Pythia
+| Model | Configuration |
+|:------|:-------------|
 | `pythia` | ❌ |
+
+#### Qwen: Qwen1.5
+| Model | Configuration |
+|:------|:-------------|
 | `Qwen1.5-72B-Chat` | ❌ |
+
+#### ReasonFlux
+| Model | Configuration |
+|:------|:-------------|
 | `ReasonFlux-PRM-7B` | ❌ |
+
+#### LMSYS: Vicuna
+| Model | Configuration |
+|:------|:-------------|
+| `vicuna-13b-v1.5` | ❌ |
+
+#### Google: T5 (Encoder-Decoder Models)
+**Note**: These are encoder-decoder (T5) models, not decoder-only LLMs.
+| Model | Configuration |
+|:------|:-------------|
 | `t5-large-lm-adapt` | ❌ |
 | `t5-xl-lm-adapt` | ❌ |
 | `mt5-xl-lm-adapt` | ❌ |
@@ -238,10 +299,10 @@ This document tracks all model weights available in the `/model-weights` directo
 ### Meta: Llama 3.2 Vision
 | Model | Configuration |
 |:------|:-------------|
-| `Llama-3.2-11B-Vision` | ✅ |
-| `Llama-3.2-11B-Vision-Instruct` | ✅ |
-| `Llama-3.2-90B-Vision` | ✅ |
-| `Llama-3.2-90B-Vision-Instruct` | ✅ |
+| `Llama-3.2-11B-Vision` | ❌ |
+| `Llama-3.2-11B-Vision-Instruct` | ✅ | (SGLang only)
+| `Llama-3.2-90B-Vision` | ❌ |
+| `Llama-3.2-90B-Vision-Instruct` | ✅ | (SGLang only)
 
 ### Mistral: Pixtral
 | Model | Configuration |
@@ -266,10 +327,19 @@ This document tracks all model weights available in the `/model-weights` directo
 | `deepseek-vl2` | ✅ |
 | `deepseek-vl2-small` | ✅ |
 
+### Google: MedGemma
+| Model | Configuration |
+|:------|:-------------|
+| `medgemma-4b-it` | ✅ |
+| `medgemma-27b-it` | ✅ |
+| `medgemma-27b-text-it` | ❌ |
+
 ### Other VLM Models
 | Model | Configuration |
 |:------|:-------------|
+| `instructblip-vicuna-7b` | ❌ |
 | `MiniCPM-Llama3-V-2_5` | ❌ |
+| `Molmo-7B-D-0924` | ✅ |
 
 ---
 
@@ -298,6 +368,8 @@ This document tracks all model weights available in the `/model-weights` directo
 | `data2vec` | ❌ |
 | `gte-modernbert-base` | ❌ |
 | `gte-Qwen2-7B-instruct` | ❌ |
+| `KaLM-Embedding-Gemma3-12B-2511` | ❌ |
+| `llama-embed-nemotron-8b` | ❌ |
 | `m2-bert-80M-32k-retrieval` | ❌ |
 | `m2-bert-80M-8k-retrieval` | ❌ |
 
@@ -313,7 +385,7 @@ This document tracks all model weights available in the `/model-weights` directo
 
 ---
 
-## Multimodal Models
+## Vision Models
 
 ### CLIP
 | Model | Configuration |

@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from vec_inf.cli._utils import create_table
-from vec_inf.cli._vars import MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
+from vec_inf.cli._vars import ENGINE_NAME_MAP, MODEL_TYPE_COLORS, MODEL_TYPE_PRIORITY
 from vec_inf.client import ModelConfig, ModelInfo, StatusResponse
 
 
@@ -49,11 +49,12 @@ class LaunchResponseFormatter:
             if self.params.get(key):
                 table.add_row(label, self.params[key])
 
-    def _add_vllm_config(self, table: Table) -> None:
-        """Add vLLM configuration details to the table."""
-        if self.params.get("vllm_args"):
-            table.add_row("vLLM Arguments:", style="magenta")
-            for arg, value in self.params["vllm_args"].items():
+    def _add_engine_config(self, table: Table) -> None:
+        """Add inference engine configuration details to the table."""
+        if self.params.get("engine_args"):
+            engine_name = ENGINE_NAME_MAP[self.params["engine"]]
+            table.add_row(f"{engine_name} Arguments:", style="magenta")
+            for arg, value in self.params["engine_args"].items():
                 table.add_row(f"  {arg}:", str(value))
 
     def _add_env_vars(self, table: Table) -> None:
@@ -111,9 +112,10 @@ class LaunchResponseFormatter:
             str(Path(self.params["model_weights_parent_dir"], self.model_name)),
         )
         table.add_row("Log Directory", self.params["log_dir"])
+        table.add_row("Inference Engine", ENGINE_NAME_MAP[self.params["engine"]])
 
         # Add configuration details
-        self._add_vllm_config(table)
+        self._add_engine_config(table)
         self._add_env_vars(table)
         self._add_bind_paths(table)
 
@@ -184,6 +186,10 @@ class BatchLaunchResponseFormatter:
             )
             table.add_row(
                 "Memory/Node", f"  {self.params['models'][model_name]['mem_per_node']}"
+            )
+            table.add_row(
+                "Inference Engine",
+                f"  {ENGINE_NAME_MAP[self.params['models'][model_name]['engine']]}",
             )
 
         return table
@@ -479,14 +485,19 @@ class ListCmdDisplay:
             )
             return json.dumps(config_dict, indent=4)
 
+        excluded_list = ["venv", "log_dir"]
+
         table = create_table(key_title="Model Config", value_title="Value")
         for field, value in config.model_dump().items():
-            if field not in {"venv", "log_dir", "vllm_args"} and value:
+            if "args" in field:
+                if not value:
+                    continue
+                engine_name = ENGINE_NAME_MAP[field.split("_")[0]]
+                table.add_row(f"{engine_name} Arguments:", style="magenta")
+                for engine_arg, engine_value in value.items():
+                    table.add_row(f"  {engine_arg}:", str(engine_value))
+            elif field not in excluded_list and value:
                 table.add_row(field, str(value))
-            if field == "vllm_args":
-                table.add_row("vLLM Arguments:", style="magenta")
-                for vllm_arg, vllm_value in value.items():
-                    table.add_row(f"  {vllm_arg}:", str(vllm_value))
         return table
 
     def _format_all_models_output(

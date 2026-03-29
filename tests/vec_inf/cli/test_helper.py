@@ -37,7 +37,8 @@ class TestLaunchResponseFormatter:
             "model_weights_parent_dir": "/model-weights",
             "log_dir": "/tmp/logs",
             "venv": "/path/to/venv",
-            "vllm_args": {"max_model_len": 8192, "enable_prefix_caching": True},
+            "engine": "vllm",
+            "engine_args": {"max_model_len": 8192, "enable_prefix_caching": True},
             "env": {"CACHE": "/cache"},
         }
 
@@ -66,7 +67,8 @@ class TestLaunchResponseFormatter:
             "model_weights_parent_dir": "/weights",
             "log_dir": "/logs",
             "venv": "/path/to/venv",
-            "vllm_args": {},
+            "engine": "vllm",
+            "engine_args": {},
             "env": {},
         }
 
@@ -97,6 +99,7 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "1",
                     "cpus_per_task": "8",
                     "mem_per_node": "32G",
+                    "engine": "vllm",
                 },
                 "model2": {
                     "model_name": "model2",
@@ -107,6 +110,7 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "2",
                     "cpus_per_task": "16",
                     "mem_per_node": "64G",
+                    "engine": "vllm",
                 },
             },
         }
@@ -134,6 +138,7 @@ class TestBatchLaunchResponseFormatter:
                     "gpus_per_node": "0",
                     "cpus_per_task": "4",
                     "mem_per_node": "16G",
+                    "engine": "vllm",
                 }
             },
         }

@@ -40,7 +40,8 @@ def test_launch_command_success(runner):
             "model_weights_parent_dir": "/model-weights",
             "vocab_size": "128000",
             "venv": "/path/to/venv",
-            "vllm_args": {"max_model_len": 8192},
+            "engine": "vllm",
+            "engine_args": {"max_model_len": 8192},
             "env": {"CACHE": "/cache"},
         }
         mock_client.launch_model.return_value = mock_response
@@ -124,7 +125,9 @@ def test_list_single_model(runner):
             "model_family": "Meta-Llama-3.1",
             "model_type": "LLM",
             "model_weights_parent_dir": "/model-weights",
-            "vllm_args": {"max_model_len": 8192},
+            "engine": "vllm",
+            "vllm_args": {"--max-model-len": 8192},
+            "sglang_args": {},
         }
         mock_client.get_model_config.return_value = mock_config
 
@@ -422,6 +425,7 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",
                     "cpus_per_task": "8",
                     "mem_per_node": "32G",
+                    "engine": "vllm",
                 },
                 "Meta-Llama-3.1-70B": {
                     "model_name": "Meta-Llama-3.1-70B",
@@ -432,6 +436,7 @@ def test_batch_launch_command_success(runner):
                     "gpus_per_node": "1",
                     "cpus_per_task": "8",
                     "mem_per_node": "32G",
+                    "engine": "vllm",
                 },
             },
         }
@@ -510,3 +515,177 @@ def test_batch_launch_command_no_models(runner):
 
     # Should fail because no models were specified
     assert result.exit_code != 0
+
+
+def test_launch_command_with_engine_option(runner):
+    """Test launch command with --engine option."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_response = MagicMock()
+        mock_response.config = {
+            "slurm_job_id": "14933053",
+            "model_name": "Meta-Llama-3.1-8B",
+            "model_type": "LLM",
+            "vocab_size": "128000",
+            "partition": "gpu",
+            "qos": "normal",
+            "time": "1:00:00",
+            "num_nodes": "1",
+            "gpus_per_node": "1",
+            "cpus_per_task": "8",
+            "mem_per_node": "32G",
+            "model_weights_parent_dir": "/model-weights",
+            "log_dir": "/tmp/logs",
+            "engine": "sglang",
+            "engine_args": {},
+        }
+        mock_client.launch_model.return_value = mock_response
+
+        result = runner.invoke(
+            cli, ["launch", "Meta-Llama-3.1-8B", "--engine", "sglang"]
+        )
+
+        assert result.exit_code == 0
+        assert "14933053" in result.output
+        # Verify LaunchOptions was called with engine
+        call_args = mock_client.launch_model.call_args
+        assert call_args[0][0] == "Meta-Llama-3.1-8B"
+        assert call_args[0][1].engine == "sglang"
+
+
+def test_launch_command_with_vllm_args(runner):
+    """Test launch command with --vllm-args option."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_response = MagicMock()
+        mock_response.config = {
+            "slurm_job_id": "14933053",
+            "model_name": "Meta-Llama-3.1-8B",
+            "model_type": "LLM",
+            "vocab_size": "128000",
+            "partition": "gpu",
+            "qos": "normal",
+            "time": "1:00:00",
+            "num_nodes": "1",
+            "gpus_per_node": "1",
+            "cpus_per_task": "8",
+            "mem_per_node": "32G",
+            "model_weights_parent_dir": "/model-weights",
+            "log_dir": "/tmp/logs",
+            "engine": "vllm",
+            "engine_args": {},
+        }
+        mock_client.launch_model.return_value = mock_response
+
+        result = runner.invoke(
+            cli,
+            [
+                "launch",
+                "Meta-Llama-3.1-8B",
+                "--vllm-args",
+                "--max-model-len=8192,--tensor-parallel-size=4",
+            ],
+        )
+
+        assert result.exit_code == 0
+        call_args = mock_client.launch_model.call_args
+        assert (
+            call_args[0][1].vllm_args == "--max-model-len=8192,--tensor-parallel-size=4"
+        )
+
+
+def test_launch_command_with_sglang_args(runner):
+    """Test launch command with --sglang-args option."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_response = MagicMock()
+        mock_response.config = {
+            "slurm_job_id": "14933053",
+            "model_name": "Meta-Llama-3.1-8B",
+            "model_type": "LLM",
+            "vocab_size": "128000",
+            "partition": "gpu",
+            "qos": "normal",
+            "time": "1:00:00",
+            "num_nodes": "1",
+            "gpus_per_node": "1",
+            "cpus_per_task": "8",
+            "mem_per_node": "32G",
+            "model_weights_parent_dir": "/model-weights",
+            "log_dir": "/tmp/logs",
+            "engine": "sglang",
+            "engine_args": {},
+        }
+        mock_client.launch_model.return_value = mock_response
+
+        result = runner.invoke(
+            cli,
+            [
+                "launch",
+                "Meta-Llama-3.1-8B",
+                "--sglang-args",
+                "--context-length=8192,--tensor-parallel-size=4",
+            ],
+        )
+
+        assert result.exit_code == 0
+        call_args = mock_client.launch_model.call_args
+        assert (
+            call_args[0][1].sglang_args
+            == "--context-length=8192,--tensor-parallel-size=4"
+        )
+
+
+def test_launch_command_engine_mismatch_error(runner):
+    """Test launch command error when engine and args mismatch."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_client.launch_model.side_effect = ValueError(
+            "Mismatch between provided engine 'vllm' and engine-specific args 'sglang'"
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "launch",
+                "Meta-Llama-3.1-8B",
+                "--engine",
+                "vllm",
+                "--sglang-args",
+                "--context-length=8192",
+            ],
+        )
+
+        assert result.exit_code == 1
+        assert "Launch failed:" in result.output
+
+
+def test_list_single_model_sglang(runner):
+    """Test listing model with SGLang engine."""
+    with patch("vec_inf.cli._cli.VecInfClient") as mock_client_class:
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_config = MagicMock()
+        mock_config.model_dump.return_value = {
+            "model_name": "Meta-Llama-3.1-8B",
+            "model_family": "Meta-Llama-3.1",
+            "model_type": "LLM",
+            "engine": "sglang",
+            "sglang_args": {"--context-length": "8192"},
+        }
+        mock_client.get_model_config.return_value = mock_config
+
+        result = runner.invoke(cli, ["list", "Meta-Llama-3.1-8B"])
+
+        assert result.exit_code == 0
+        assert "Meta-Llama-3.1-8B" in result.output
+        assert "sglang" in result.output.lower() or "SGLang" in result.output

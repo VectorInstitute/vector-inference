@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0  # Fetch all history for proper versioning
 
@@ -67,7 +67,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --group docs --prerelease=allow
+        run: uv sync --group docs --prerelease=allow
 
       - name: Build docs
         run: uv run --frozen mkdocs build
@@ -76,7 +76,7 @@ jobs:
         run: touch site/.nojekyll
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docs-site
           path: site/
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0  # Fetch all history for proper versioning
 
@@ -104,7 +104,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --group docs --frozen
+        run: uv sync --group docs --frozen
 
       - name: Configure Git Credentials
         run: |
@@ -112,7 +112,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: docs-site
           path: site

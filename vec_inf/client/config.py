@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Literal
 
 from vec_inf.client._slurm_vars import (
     DEFAULT_ARGS,
     MAX_CPUS_PER_TASK,
     MAX_GPUS_PER_NODE,
     MAX_NUM_NODES,
+    MODEL_TYPES,
     PARTITION,
     QOS,
     RESOURCE_TYPE,
@@ -69,8 +69,12 @@ class ModelConfig(BaseModel):
     hf_model : str, optional
         HuggingFace model id for vLLM to download (e.g. "meta-llama/Llama-3.1-8B").
         Used as model source when local weights don't exist.
+    engine: str, optional
+        Inference engine to be used, supports 'vllm' and 'sglang'
     vllm_args : dict[str, Any], optional
         Additional arguments for vLLM engine configuration
+    sglang_args : dict[str, Any], optional
+        Additional arguments for SGLang engine configuration
 
     Notes
     -----
@@ -78,14 +82,16 @@ class ModelConfig(BaseModel):
     configured to be immutable (frozen) and forbids extra fields.
     """
 
+    model_config = ConfigDict(
+        extra="ignore", str_strip_whitespace=True, validate_default=True, frozen=True
+    )
+
     model_name: str = Field(..., min_length=3, pattern=r"^[a-zA-Z0-9\-_\.]+$")
     model_family: str = Field(..., min_length=2)
     model_variant: Optional[str] = Field(
         default=None, description="Specific variant/version of the model family"
     )
-    model_type: Literal["LLM", "VLM", "Text_Embedding", "Reward_Modeling"] = Field(
-        ..., description="Type of model architecture"
-    )
+    model_type: MODEL_TYPES = Field(..., description="Type of model architecture")
     gpus_per_node: int = Field(
         ..., gt=0, le=MAX_GPUS_PER_NODE, description="GPUs per node"
     )
@@ -156,14 +162,18 @@ class ModelConfig(BaseModel):
         description=(
             "Full HuggingFace model id/path to use for vLLM serve (e.g. "
             "'meta-llama/Meta-Llama-3.1-8B-Instruct')."
-        ),
+        )
+    )
+    engine: Optional[str] = Field(
+        default="vllm",
+        description="Inference engine to be used, supports 'vllm' and 'sglang'",
     )
     vllm_args: Optional[dict[str, Any]] = Field(
         default={}, description="vLLM engine arguments"
     )
+    sglang_args: Optional[dict[str, Any]] = Field(
+        default={}, description="SGLang engine arguments"
+    )
     env: Optional[dict[str, Any]] = Field(
         default={}, description="Environment variables to be set"
-    )
-    model_config = ConfigDict(
-        extra="forbid", str_strip_whitespace=True, validate_default=True, frozen=True
     )

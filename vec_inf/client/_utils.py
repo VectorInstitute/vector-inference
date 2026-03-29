@@ -16,7 +16,7 @@ import yaml
 
 from vec_inf.client._client_vars import MODEL_READY_SIGNATURE
 from vec_inf.client._exceptions import MissingRequiredFieldsError
-from vec_inf.client._slurm_vars import CACHED_CONFIG_DIR, REQUIRED_ARGS
+from vec_inf.client._slurm_vars import CACHED_MODEL_CONFIG_PATH, REQUIRED_ARGS
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
 
@@ -77,7 +77,7 @@ def read_slurm_log(
                 json_content: dict[str, str] = json.load(file)
                 return json_content
         else:
-            with file_path.open("r") as file:
+            with file_path.open("r", errors="replace") as file:
                 return file.readlines()
     except FileNotFoundError:
         return f"LOG FILE NOT FOUND: {file_path}"
@@ -249,7 +249,7 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
     -----
     Configuration is loaded from:
     1. User path: specified by config_path
-    2. Default path: package's config/models.yaml or CACHED_CONFIG if it exists
+    2. Default path: package's config/models.yaml or CACHED_MODEL_CONFIG_PATH if exists
     3. Environment variable: specified by VEC_INF_CONFIG environment variable
         and merged with default config
 
@@ -303,8 +303,8 @@ def load_config(config_path: Optional[str] = None) -> list[ModelConfig]:
 
     # 2. Otherwise, load default config
     default_path = (
-        CACHED_CONFIG_DIR / "models.yaml"
-        if CACHED_CONFIG_DIR.exists()
+        CACHED_MODEL_CONFIG_PATH
+        if CACHED_MODEL_CONFIG_PATH.exists()
         else Path(__file__).resolve().parent.parent / "config" / "models.yaml"
     )
     config = load_yaml_config(default_path)
@@ -444,10 +444,13 @@ def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
     params : dict[str, Any]
         Dictionary of parameters to check.
     """
-    env_overrides = {}
+    env_overrides: dict[str, str] = {}
+
+    if not REQUIRED_ARGS:
+        return env_overrides
     for arg in REQUIRED_ARGS:
         if not params.get(arg):
-            default_value = os.getenv(REQUIRED_ARGS[arg])
+            default_value = os.getenv(str(REQUIRED_ARGS[arg]))
             if default_value:
                 params[arg] = default_value
                 env_overrides[arg] = default_value
@@ -458,43 +461,90 @@ def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
     return env_overrides
 
 
-def check_and_warn_hf_cache(
-    model_weights_exists: bool,
-    model_weights_path: str,
-    env_dict: dict[str, str],
-    model_name: str | None = None,
-) -> None:
-    """Warn if model weights don't exist and HuggingFace cache directory is not set.
+def validate_weights_path(params: dict[str, Any], model_name: str) -> None:
+    """Validate that the model weights path exists or a HF model is provided.
+
+    If cached weights exist and ``hf_model`` is also set, a warning is issued
+    and ``hf_model`` is removed (cached weights take priority). If no cached
+    weights exist and no ``hf_model`` is provided, a :class:`FileNotFoundError`
+    is raised. If ``hf_model`` is set without cached weights,
+    :func:`check_hf_cache_and_bind` is called to verify cache configuration.
 
     Parameters
     ----------
-    model_weights_exists : bool
-        Whether the model weights exist at the expected path.
-    model_weights_path : str
-        The expected path to the model weights.
-    env_dict : dict[str, str]
-        Dictionary of environment variables to check (from --env parameter).
-    model_name : str | None, optional
-        Optional model name to include in the warning message (for batch mode).
+    params : dict[str, Any]
+        Launch parameters dict; must contain ``model_weights_parent_dir`` and
+        may contain ``hf_model``, ``env``, and ``bind``.
+    model_name : str
+        Name of the model being validated.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the model weights path does not exist and no ``hf_model`` is provided.
     """
-    if model_weights_exists:
-        return
+    model_weights_path = Path(
+        params["model_weights_parent_dir"], model_name
+    ).expanduser()
 
-    hf_cache_vars = ["HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"]
-    hf_cache_set = any(
-        os.environ.get(var) or env_dict.get(var) for var in hf_cache_vars
-    )
-
-    if not hf_cache_set:
-        model_prefix = (
-            f"Model weights for '{model_name}' " if model_name else "Model weights "
-        )
+    if model_weights_path.exists() and params.get("hf_model"):
         warnings.warn(
-            f"{model_prefix}not found at '{model_weights_path}' and no "
-            f"HuggingFace cache directory is set (HF_HOME, HF_HUB_CACHE, or "
-            f"HUGGINGFACE_HUB_CACHE). The model may be downloaded to your home "
-            f"directory, which could consume your storage quota. Consider setting "
-            f"one of these environment variables to a shared cache location.",
+            f"Model weights found at '{model_weights_path}' but 'hf_model' "
+            f"parameter is also set. Cached weights take priority, so 'hf_model' "
+            f"will be ignored.",
             UserWarning,
             stacklevel=4,
         )
+        del params["hf_model"]
+        return
+
+    if not model_weights_path.exists():
+        if not params.get("hf_model"):
+            raise FileNotFoundError(
+                f"Model weights path '{model_weights_path}' does not exist, and no HF path provided"
+            )
+        check_hf_cache_and_bind(params, model_name)
+
+
+def check_hf_cache_and_bind(params: dict[str, Any], model_name: str) -> None:
+    """Check HF cache configuration and update bind mounts if needed.
+
+    Inspects the ``env`` dict inside *params* for HuggingFace cache variables
+    (``HF_HOME``, ``HF_HUB_CACHE``, ``HUGGINGFACE_HUB_CACHE``). If none are
+    set, a warning is issued. If any are set, their values are added to the
+    ``bind`` string so the container can access the cache directory.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Launch parameters dict; may contain ``env`` and ``bind``.
+    model_name : str
+        Name of the model (used in the warning message).
+    """
+    hf_cache_vars = ["HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"]
+    env_vars = params.get("env", {})
+    set_cache_values = {
+        env_vars[var] for var in hf_cache_vars if var in env_vars
+    }
+
+    if not set_cache_values:
+        warnings.warn(
+            f"Model weights for '{model_name}' will be downloaded, but no HuggingFace "
+            f"cache directory is set (HF_HOME, HF_HUB_CACHE, or HUGGINGFACE_HUB_CACHE). "
+            f"The model may be downloaded to your home directory, which could consume "
+            f"your storage quota. Consider setting one of these environment variables "
+            f"to a shared cache location.",
+            UserWarning,
+            stacklevel=5,
+        )
+        return
+
+    bind_str = params.get("bind", "")
+    existing_hosts = {
+        b.split(":")[0] for b in bind_str.split(",") if b.strip()
+    } if bind_str else set()
+
+    new_paths = set_cache_values - existing_hosts
+    if new_paths:
+        all_binds = [bind_str] + list(new_paths) if bind_str else list(new_paths)
+        params["bind"] = ",".join(all_binds)
