@@ -32,6 +32,12 @@ from vec_inf.client.models import (
 class TestModelLauncher:
     """Tests for the ModelLauncher class."""
 
+    @pytest.fixture(autouse=True)
+    def _mock_validate_weights_path(self) -> None:
+        """Avoid disk checks for fake model paths in fixtures."""
+        with patch("vec_inf.client._helper.utils.validate_weights_path"):
+            yield
+
     @pytest.fixture
     def model_config(self) -> ModelConfig:
         """Fixture providing a basic model configuration for tests."""
@@ -384,6 +390,12 @@ class TestModelLauncher:
 
 class TestBatchModelLauncher:
     """Tests for the BatchModelLauncher class."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_validate_weights_path(self) -> None:
+        """Avoid disk checks for fake model paths in fixtures."""
+        with patch("vec_inf.client._helper.utils.validate_weights_path"):
+            yield
 
     @pytest.fixture
     def batch_model_configs(self) -> list[ModelConfig]:
