@@ -186,9 +186,7 @@ class TestSlurmScriptGenerator:
             "module load " in setup or "apptainer" in setup.lower()
         )  # Remove module name since it's inconsistent between clusters
 
-    def test_generate_server_setup_singularity_no_weights(
-        self, singularity_params
-    ):
+    def test_generate_server_setup_singularity_no_weights(self, singularity_params):
         """Test server setup when using hf_model (no local weights in bind path)."""
         params = singularity_params.copy()
         params["hf_model"] = "test-org/test-model"
@@ -345,9 +343,7 @@ class TestSlurmScriptGenerator:
         assert "apptainer exec --nv" in launch_cmd
         assert "source" not in launch_cmd
 
-    def test_generate_launch_cmd_singularity_no_local_weights(
-        self, singularity_params
-    ):
+    def test_generate_launch_cmd_singularity_no_local_weights(self, singularity_params):
         """Test container launch when using hf_model instead of local weights."""
         params = singularity_params.copy()
         params["hf_model"] = "test-org/test-model"
