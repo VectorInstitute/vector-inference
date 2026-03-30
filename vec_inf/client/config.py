@@ -162,7 +162,7 @@ class ModelConfig(BaseModel):
         description=(
             "Full HuggingFace model id/path to use for vLLM serve (e.g. "
             "'meta-llama/Meta-Llama-3.1-8B-Instruct')."
-        )
+        ),
     )
     engine: Optional[str] = Field(
         default="vllm",

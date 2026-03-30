@@ -5,7 +5,6 @@ metrics collection, and model registry operations.
 """
 
 import json
-import os
 import time
 import warnings
 from pathlib import Path
@@ -356,7 +355,7 @@ class ModelLauncher:
         # Override config defaults with CLI arguments
         self._apply_cli_overrides(params)
 
-        # Validate that weights path exists or HF model provided, and check HF cache configuration
+        # Validate weights path exists or HF model provided, and check HF cache config
         utils.validate_weights_path(params, self.model_name)
 
         # Check for required fields without default vals, will raise an error if missing

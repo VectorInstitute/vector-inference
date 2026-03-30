@@ -523,9 +523,7 @@ def check_hf_cache_and_bind(params: dict[str, Any], model_name: str) -> None:
     """
     hf_cache_vars = ["HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"]
     env_vars = params.get("env", {})
-    set_cache_values = {
-        env_vars[var] for var in hf_cache_vars if var in env_vars
-    }
+    set_cache_values = {env_vars[var] for var in hf_cache_vars if var in env_vars}
 
     if not set_cache_values:
         warnings.warn(
@@ -540,9 +538,11 @@ def check_hf_cache_and_bind(params: dict[str, Any], model_name: str) -> None:
         return
 
     bind_str = params.get("bind", "")
-    existing_hosts = {
-        b.split(":")[0] for b in bind_str.split(",") if b.strip()
-    } if bind_str else set()
+    existing_hosts = (
+        {b.split(":")[0] for b in bind_str.split(",") if b.strip()}
+        if bind_str
+        else set()
+    )
 
     new_paths = set_cache_values - existing_hosts
     if new_paths:
