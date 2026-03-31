@@ -66,6 +66,9 @@ class ModelConfig(BaseModel):
         Directory path for storing logs
     model_weights_parent_dir : Path, optional
         Base directory containing model weights
+    hf_model : str, optional
+        HuggingFace model id for vLLM to download (e.g. "meta-llama/Llama-3.1-8B").
+        Used as model source when local weights don't exist.
     engine: str, optional
         Inference engine to be used, supports 'vllm' and 'sglang'
     vllm_args : dict[str, Any], optional
@@ -153,6 +156,13 @@ class ModelConfig(BaseModel):
     model_weights_parent_dir: Path = Field(
         default=Path(DEFAULT_ARGS["model_weights_parent_dir"]),
         description="Base directory for model weights",
+    )
+    hf_model: Optional[str] = Field(
+        default=None,
+        description=(
+            "Full HuggingFace model id/path to use for vLLM serve (e.g. "
+            "'meta-llama/Meta-Llama-3.1-8B-Instruct')."
+        ),
     )
     engine: Optional[str] = Field(
         default="vllm",

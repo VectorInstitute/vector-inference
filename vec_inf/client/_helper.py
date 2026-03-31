@@ -355,6 +355,9 @@ class ModelLauncher:
         # Override config defaults with CLI arguments
         self._apply_cli_overrides(params)
 
+        # Validate weights path exists or HF model provided, and check HF cache config
+        utils.validate_weights_path(params, self.model_name)
+
         # Check for required fields without default vals, will raise an error if missing
         utils.check_required_fields(params)
 
@@ -605,6 +608,9 @@ class BatchModelLauncher:
             params["models"][model_name]["engine_args"] = model_engine_args
             for engine in SUPPORTED_ENGINES:
                 del params["models"][model_name][f"{engine}_args"]
+
+            # Validate that weights path exists or HF model provided
+            utils.validate_weights_path(params["models"][model_name], model_name)
 
             # Validate resource allocation and parallelization settings
             self._validate_resource_and_parallel_settings(

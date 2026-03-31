@@ -24,6 +24,12 @@ class TestEngineSelection:
         monkeypatch.setenv("VEC_INF_ACCOUNT", "test-account")
         monkeypatch.setenv("VEC_INF_WORK_DIR", "/tmp")
 
+    @pytest.fixture(autouse=True)
+    def _mock_validate_weights_path(self) -> None:
+        """Avoid disk checks for fake model paths in fixtures."""
+        with patch("vec_inf.client._helper.utils.validate_weights_path"):
+            yield
+
     @pytest.fixture
     def model_config_vllm(self) -> ModelConfig:
         """Fixture providing a vLLM model configuration."""
@@ -186,6 +192,12 @@ class TestEngineArgsProcessing:
         """Provide dummy required Slurm env vars so tests don't depend on host env."""
         monkeypatch.setenv("VEC_INF_ACCOUNT", "test-account")
         monkeypatch.setenv("VEC_INF_WORK_DIR", "/tmp")
+
+    @pytest.fixture(autouse=True)
+    def _mock_validate_weights_path(self) -> None:
+        """Avoid disk checks for fake model paths in fixtures."""
+        with patch("vec_inf.client._helper.utils.validate_weights_path"):
+            yield
 
     @pytest.fixture
     def model_config(self) -> ModelConfig:
