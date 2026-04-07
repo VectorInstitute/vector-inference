@@ -35,9 +35,7 @@ class SlurmScriptGenerator:
         self.engine = params.get("engine", "vllm")
         self.is_multinode = int(self.params["num_nodes"]) > 1
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
-        self.additional_binds = (
-            f",{self.params['bind']}" if self.params.get("bind") else ""
-        )
+        self.additional_binds = self.params["bind"] if self.params.get("bind") else ""
         self.model_weights_path = str(
             Path(self.params["model_weights_parent_dir"], self.params["model_name"])
         )
@@ -113,7 +111,9 @@ class SlurmScriptGenerator:
             server_script.append(
                 SLURM_SCRIPT_TEMPLATE["bind_path"].format(
                     work_dir=self.params.get("work_dir", str(Path.home())),
-                    model_weights_path=self.model_weights_path,
+                    model_weights_path=f"{self.model_weights_path},"
+                    if not self.params.get("hf_model")
+                    else "",
                     additional_binds=self.additional_binds,
                 )
             )
@@ -185,7 +185,8 @@ class SlurmScriptGenerator:
 
         launch_cmd.append(
             "\n".join(SLURM_SCRIPT_TEMPLATE["launch_cmd"][self.engine]).format(  # type: ignore[literal-required]
-                model_weights_path=self.model_weights_path,
+                model_weights_path=self.params.get("hf_model")
+                or self.model_weights_path,
                 model_name=self.params["model_name"],
             )
         )
@@ -215,7 +216,7 @@ class SlurmScriptGenerator:
             SLURM_SCRIPT_TEMPLATE["launch_cmd"]["sglang_multinode"]
         ).format(
             num_nodes=self.params["num_nodes"],
-            model_weights_path=self.model_weights_path,
+            model_weights_path=self.params.get("hf_model") or self.model_weights_path,
             model_name=self.params["model_name"],
         )
 
@@ -275,7 +276,7 @@ class BatchSlurmScriptGenerator:
         self.use_container = self.params["venv"] == CONTAINER_MODULE_NAME
         for model_name in self.params["models"]:
             self.params["models"][model_name]["additional_binds"] = (
-                f",{self.params['models'][model_name]['bind']}"
+                self.params["models"][model_name]["bind"]
                 if self.params["models"][model_name].get("bind")
                 else ""
             )
@@ -321,7 +322,9 @@ class BatchSlurmScriptGenerator:
         script_content.append(
             BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["bind_path"].format(
                 work_dir=self.params.get("work_dir", str(Path.home())),
-                model_weights_path=model_params["model_weights_path"],
+                model_weights_path=f"{model_params['model_weights_path']},"
+                if not model_params.get("hf_model")
+                else "",
                 additional_binds=model_params["additional_binds"],
             )
         )
@@ -348,7 +351,8 @@ class BatchSlurmScriptGenerator:
             "\n".join(
                 BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE["launch_cmd"][model_params["engine"]]
             ).format(
-                model_weights_path=model_params["model_weights_path"],
+                model_weights_path=model_params.get("hf_model")
+                or model_params["model_weights_path"],
                 model_name=model_name,
             )
         )
