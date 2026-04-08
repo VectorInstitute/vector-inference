@@ -118,12 +118,22 @@ class ModelLauncher:
 
         model_weights_path = Path(model_weights_parent_dir, self.model_name)
 
-        # Only give a warning if weights exist but config missing
+        if self.kwargs.get("hf_model"):
+            return ModelConfig(
+                model_name=self.model_name,
+                model_family="model_family_placeholder",
+                model_type="LLM",
+                gpus_per_node=1,
+                num_nodes=1,
+                vocab_size=1000,
+                model_weights_parent_dir=Path(str(model_weights_parent_dir)),
+            )
+
         if model_weights_path.exists():
             self._warn(
-                f"Warning: '{self.model_name}' configuration not found in config, please ensure model configuration are properly set in command arguments",
+                f"Warning: '{self.model_name}' configuration not found in config, "
+                "please ensure model configuration are properly set in command arguments",
             )
-            # Return a dummy model config object with model name and weights parent dir
             return ModelConfig(
                 model_name=self.model_name,
                 model_family="model_family_placeholder",
@@ -354,6 +364,9 @@ class ModelLauncher:
 
         # Override config defaults with CLI arguments
         self._apply_cli_overrides(params)
+
+        # Validate weights path exists or HF model provided, and check HF cache config
+        utils.validate_weights_path(params, self.model_name)
 
         # Check for required fields without default vals, will raise an error if missing
         utils.check_required_fields(params)
@@ -605,6 +618,9 @@ class BatchModelLauncher:
             params["models"][model_name]["engine_args"] = model_engine_args
             for engine in SUPPORTED_ENGINES:
                 del params["models"][model_name][f"{engine}_args"]
+
+            # Validate that weights path exists or HF model provided
+            utils.validate_weights_path(params["models"][model_name], model_name)
 
             # Validate resource allocation and parallelization settings
             self._validate_resource_and_parallel_settings(

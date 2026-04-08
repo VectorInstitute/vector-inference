@@ -459,3 +459,92 @@ def check_required_fields(params: dict[str, Any]) -> dict[str, Any]:
                     f"{arg} is required, please set it in the command arguments or environment variables"
                 )
     return env_overrides
+
+
+def validate_weights_path(params: dict[str, Any], model_name: str) -> None:
+    """Validate that the model weights path exists or a HF model is provided.
+
+    If cached weights exist and ``hf_model`` is also set, a warning is issued
+    and ``hf_model`` is removed (cached weights take priority). If no cached
+    weights exist and no ``hf_model`` is provided, a :class:`FileNotFoundError`
+    is raised. If ``hf_model`` is set without cached weights,
+    :func:`check_hf_cache_and_bind` is called to verify cache configuration.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Launch parameters dict; must contain ``model_weights_parent_dir`` and
+        may contain ``hf_model``, ``env``, and ``bind``.
+    model_name : str
+        Name of the model being validated.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the model weights path does not exist and no ``hf_model`` is provided.
+    """
+    model_weights_path = Path(
+        params["model_weights_parent_dir"], model_name
+    ).expanduser()
+
+    if model_weights_path.exists() and params.get("hf_model"):
+        warnings.warn(
+            f"Model weights found at '{model_weights_path}' but 'hf_model' "
+            f"parameter is also set. Cached weights take priority, so 'hf_model' "
+            f"will be ignored.",
+            UserWarning,
+            stacklevel=4,
+        )
+        del params["hf_model"]
+        return
+
+    if not model_weights_path.exists():
+        if not params.get("hf_model"):
+            raise FileNotFoundError(
+                f"Model weights path '{model_weights_path}' does not exist, and no HF path provided"
+            )
+        check_hf_cache_and_bind(params, model_name)
+
+
+def check_hf_cache_and_bind(params: dict[str, Any], model_name: str) -> None:
+    """Check HF cache configuration and update bind mounts if needed.
+
+    Inspects the ``env`` dict inside *params* for HuggingFace cache variables
+    (``HF_HOME``, ``HF_HUB_CACHE``, ``HUGGINGFACE_HUB_CACHE``). If none are
+    set, a warning is issued. If any are set, their values are added to the
+    ``bind`` string so the container can access the cache directory.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Launch parameters dict; may contain ``env`` and ``bind``.
+    model_name : str
+        Name of the model (used in the warning message).
+    """
+    hf_cache_vars = ["HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE"]
+    env_vars = params.get("env", {})
+    set_cache_values = {env_vars[var] for var in hf_cache_vars if var in env_vars}
+
+    if not set_cache_values:
+        warnings.warn(
+            f"Model weights for '{model_name}' will be downloaded, but no HuggingFace "
+            f"cache directory is set (HF_HOME, HF_HUB_CACHE, or HUGGINGFACE_HUB_CACHE). "
+            f"The model may be downloaded to your home directory, which could consume "
+            f"your storage quota. Consider setting one of these environment variables "
+            f"to a shared cache location.",
+            UserWarning,
+            stacklevel=5,
+        )
+        return
+
+    bind_str = params.get("bind", "")
+    existing_hosts = (
+        {b.split(":")[0] for b in bind_str.split(",") if b.strip()}
+        if bind_str
+        else set()
+    )
+
+    new_paths = set_cache_values - existing_hosts
+    if new_paths:
+        all_binds = [bind_str] + list(new_paths) if bind_str else list(new_paths)
+        params["bind"] = ",".join(all_binds)
