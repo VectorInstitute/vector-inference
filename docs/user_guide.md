@@ -63,6 +63,17 @@ To overwrite default inference engine arguments, you can specify the arguments i
 vec-inf launch Meta-Llama-3.1-8B-Instruct --vllm-args '--max-model-len=65536,--compilation-config=3'
 ```
 
+To download models directly from HuggingFace Hub without needing cached local weights, use `--hf-model`:
+
+```bash
+vec-inf launch Qwen2.5-3B-Instruct \
+  --hf-model Qwen/Qwen2.5-3B-Instruct \
+  --env 'HF_HOME=/path/to/cache' \
+  --vllm-args '--max-model-len=4096'
+```
+
+`--env` parses environment variables to the container. If cached local weights exist, they take priority over `--hf-model`.
+
 For the full list of inference engine arguments, you can find them here:
 
 * [vLLM: `vllm serve` Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html)

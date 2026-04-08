@@ -133,6 +133,15 @@ def cli() -> None:
     help="Path to parent directory containing model weights",
 )
 @click.option(
+    "--hf-model",
+    type=str,
+    help=(
+        "Full HuggingFace model id/path to use for vLLM serve (e.g. "
+        "'meta-llama/Meta-Llama-3.1-8B-Instruct'). "
+        "Keeps model-name as the short identifier for config/logs/job naming."
+    ),
+)
+@click.option(
     "--engine",
     type=str,
     help="Inference engine to use, supports 'vllm' and 'sglang'",
@@ -210,6 +219,8 @@ def launch(
             Path to SLURM log directory
         - model_weights_parent_dir : str, optional
             Path to model weights directory
+        - hf_model : str, optional
+            Full HuggingFace model id/path to use for vLLM serve
         - vllm_args : str, optional
             vllm engine arguments
         - sglang_args : str, optional
