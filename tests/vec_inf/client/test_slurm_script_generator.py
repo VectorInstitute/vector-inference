@@ -115,7 +115,7 @@ class TestSlurmScriptGenerator:
         assert generator.params == singularity_params
         assert generator.use_container
         assert not generator.is_multinode
-        assert generator.additional_binds == ",/scratch:/scratch,/data:/data"
+        assert generator.additional_binds == "/scratch:/scratch,/data:/data"
         assert generator.model_weights_path == "/path/to/model_weights/test-model"
         assert (
             generator.env_str
@@ -185,6 +185,17 @@ class TestSlurmScriptGenerator:
         assert (
             "module load " in setup or "apptainer" in setup.lower()
         )  # Remove module name since it's inconsistent between clusters
+
+    def test_generate_server_setup_singularity_no_weights(self, singularity_params):
+        """Test server setup when using hf_model (no local weights in bind path)."""
+        params = singularity_params.copy()
+        params["hf_model"] = "test-org/test-model"
+
+        generator = SlurmScriptGenerator(params)
+        setup = generator._generate_server_setup()
+
+        assert "module load" in setup or "apptainer" in setup.lower()
+        assert "/path/to/model_weights/test-model" not in setup
 
     def test_generate_launch_cmd_venv(self, basic_params):
         """Test launch command generation with virtual environment."""
@@ -314,6 +325,16 @@ class TestSlurmScriptGenerator:
         assert "sglang.launch_server" in content
         assert "find_available_port" in content
 
+    def test_generate_launch_cmd_with_hf_model_override(self, basic_params):
+        """Test launch command uses hf_model when specified."""
+        params = basic_params.copy()
+        params["hf_model"] = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+        generator = SlurmScriptGenerator(params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert "vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct" in launch_cmd
+        assert "vllm serve /path/to/model_weights/test-model" not in launch_cmd
+
     def test_generate_launch_cmd_singularity(self, singularity_params):
         """Test launch command generation with Singularity."""
         generator = SlurmScriptGenerator(singularity_params)
@@ -321,6 +342,18 @@ class TestSlurmScriptGenerator:
 
         assert "apptainer exec --nv" in launch_cmd
         assert "source" not in launch_cmd
+
+    def test_generate_launch_cmd_singularity_no_local_weights(self, singularity_params):
+        """Test container launch when using hf_model instead of local weights."""
+        params = singularity_params.copy()
+        params["hf_model"] = "test-org/test-model"
+
+        generator = SlurmScriptGenerator(params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert "exec --nv" in launch_cmd
+        assert "vllm serve test-org/test-model" in launch_cmd
+        assert "vllm serve /path/to/model_weights/test-model" not in launch_cmd
 
     def test_generate_launch_cmd_boolean_args(self, basic_params):
         """Test launch command with boolean vLLM arguments."""
@@ -468,11 +501,11 @@ class TestBatchSlurmScriptGenerator:
         assert generator.use_container
         assert (
             generator.params["models"]["model1"]["additional_binds"]
-            == ",/scratch:/scratch,/data:/data"
+            == "/scratch:/scratch,/data:/data"
         )
         assert (
             generator.params["models"]["model2"]["additional_binds"]
-            == ",/scratch:/scratch,/data:/data"
+            == "/scratch:/scratch,/data:/data"
         )
 
     def test_init_singularity_no_bind(self, batch_params):
@@ -516,6 +549,22 @@ class TestBatchSlurmScriptGenerator:
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
+    def test_generate_model_launch_script_with_hf_model_override(
+        self, mock_write_text, mock_touch, batch_params
+    ):
+        """Test batch launch script uses hf_model when specified."""
+        params = batch_params.copy()
+        params["models"] = {k: v.copy() for k, v in batch_params["models"].items()}
+        params["models"]["model1"]["hf_model"] = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+
+        generator = BatchSlurmScriptGenerator(params)
+        generator._generate_model_launch_script("model1")
+
+        call_args = mock_write_text.call_args[0][0]
+        assert "vllm serve meta-llama/Meta-Llama-3.1-8B-Instruct" in call_args
+
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.write_text")
     def test_generate_model_launch_script_singularity(
         self, mock_write_text, mock_touch, batch_singularity_params
     ):
@@ -527,6 +576,26 @@ class TestBatchSlurmScriptGenerator:
         assert len(generator.script_paths) == 1
         mock_touch.assert_called_once()
         mock_write_text.assert_called_once()
+
+    @patch("pathlib.Path.touch")
+    @patch("pathlib.Path.write_text")
+    def test_generate_model_launch_script_singularity_no_weights(
+        self, mock_write_text, mock_touch, batch_singularity_params
+    ):
+        """Test batch model launch script when using hf_model (no local weights)."""
+        params = batch_singularity_params.copy()
+        params["models"] = {
+            k: v.copy() for k, v in batch_singularity_params["models"].items()
+        }
+        params["models"]["model1"]["hf_model"] = "test-org/model1"
+
+        generator = BatchSlurmScriptGenerator(params)
+        script_path = generator._generate_model_launch_script("model1")
+
+        assert script_path.name == "launch_model1.sh"
+        call_args = mock_write_text.call_args[0][0]
+        assert "/path/to/model_weights/model1" not in call_args
+        assert "vllm serve test-org/model1" in call_args
 
     @patch("vec_inf.client._slurm_script_generator.datetime")
     @patch("pathlib.Path.touch")
