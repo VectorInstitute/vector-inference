@@ -7,13 +7,11 @@
 [![code checks](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/code_checks.yml)
 [![docs](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml/badge.svg)](https://github.com/VectorInstitute/vector-inference/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/github/VectorInstitute/vector-inference/branch/main/graph/badge.svg?token=NI88QSIGAC)](https://app.codecov.io/github/VectorInstitute/vector-inference/tree/main)
-[![vLLM](https://img.shields.io/badge/vLLM-0.15.0-blue)](https://docs.vllm.ai/en/v0.15.0/)
-[![SGLang](https://img.shields.io/badge/SGLang-0.5.8-blue)](https://docs.sglang.io/index.html)
+[![vLLM](https://img.shields.io/badge/vLLM-0.19.0-blue)](https://docs.vllm.ai/en/v0.19.0/)
+[![SGLang](https://img.shields.io/badge/SGLang-0.5.9-blue)](https://docs.sglang.io/index.html)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/vector-inference)
 
-This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using open-source inference engines ([vLLM](https://docs.vllm.ai/en/v0.15.0/), [SGLang](https://docs.sglang.io/index.html)). **This package runs natively on the Vector Institute cluster environments**. To adapt to other environments, follow the instructions in [Installation](#installation).
-
-**NOTE**: Supported models on Killarney are tracked [here](./MODEL_TRACKING.md)
+This repository provides an easy-to-use solution to run inference servers on [Slurm](https://slurm.schedmd.com/overview.html)-managed computing clusters using open-source inference engines ([vLLM](https://docs.vllm.ai/en/v0.19.0/), [SGLang](https://docs.sglang.io/index.html)). **This package runs natively on the Vector Institute cluster environments**. To adapt to other environments, follow the instructions in [Installation](#installation).
 
 ## Installation
 If you are using the Vector cluster environment, and you don't need any customization to the inference server environment, run the following to install package:
