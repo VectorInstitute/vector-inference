@@ -35,7 +35,7 @@ default_args:
   resource_type: "l40s"
   exclude: ""
   nodelist: ""
-  bind: ""
+  bind: "$SLURM_TMPDIR:$HOME/.cache"
   venv: "apptainer"
   data_type: "auto"
   log_dir: "~/.vec-inf-logs"
