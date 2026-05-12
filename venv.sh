@@ -12,7 +12,7 @@ export UV_CACHE_DIR=/scratch/$(whoami)/uv_cache
 
 # To see if the cache directory is set correctly, run the following command
 # uv config get cache-dir
-echo "Cache directory set to: $(uv config get cache-dir)"
+echo "Cache directory set to: $(uv cache dir)"
 
 # Install dependencies via uv
 uv sync
