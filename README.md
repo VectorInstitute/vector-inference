@@ -65,7 +65,7 @@ For more details on the usage of these commands, refer to the [User Guide](https
 Example:
 
 ```python
-from vec_inf.client import VecInfClient
+ffrom vec_inf.client import VecInfClient
 from vec_inf.client.models import ModelStatus
 
 client = VecInfClient()
@@ -73,13 +73,8 @@ client = VecInfClient()
 response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
 job_id = response.slurm_job_id
 status = client.get_status(job_id)
-if status.status == ModelStatus.READY:
+if status == ModelStatus.READY:
     print(f"Model is ready at {status.base_url}")
-# Alternatively, use wait_until_ready which will either return a StatusResponse or throw a ServerError
-try:
-    status = wait_until_ready(job_id)
-    except ServerError as e:
-    print(f"Model launch failed: {e}")
 client.shutdown_model(job_id)
 ```
 
