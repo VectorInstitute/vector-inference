@@ -21,6 +21,13 @@ on:
       - .github/workflows/docker.yml
       - uv.lock
 
+# Required for Workload Identity Federation to GCP.
+# `id-token: write` lets the runner mint an OIDC token that GCP exchanges for
+# short-lived credentials. `contents: read` is needed for actions/checkout.
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   push_to_registry:
     name: Build and push Docker images
@@ -29,6 +36,17 @@ jobs:
     strategy:
       matrix:
         backend: [vllm, sglang]
+    env:
+      # These are read from GitHub Actions repository variables (Settings ->
+      # Secrets and variables -> Actions -> Variables). Set them once for the
+      # repo and they apply to every workflow run.
+      #
+      #   GCP_AR_REGION       e.g. us-central1, northamerica-northeast1
+      #   GCP_PROJECT_ID      e.g. my-gcp-project-123456
+      #   GCP_AR_REPOSITORY   e.g. vector-inference   (must already exist in GAR)
+      GCP_AR_REGION: ${{ vars.GCP_AR_REGION }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_AR_REPOSITORY: ${{ vars.GCP_AR_REPOSITORY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6.0.2
@@ -39,20 +57,23 @@ jobs:
           VERSION=$(grep -A 1 "name = \"${{ matrix.backend }}\"" uv.lock | grep version | cut -d '"' -f 2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Compute image base path
+        id: image
+        run: |
+          BASE="${GCP_AR_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_AR_REPOSITORY}/vector-inference-${{ matrix.backend }}"
+          echo "base=${BASE}" >> $GITHUB_OUTPUT
+
       - name: Maximize build space
         run: |
           echo "Disk space before cleanup:"
           df -h
-          # Remove unnecessary pre-installed software
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           sudo rm -rf /usr/local/share/boost
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          # Clean apt cache
           sudo apt-get clean
-          # Remove docker images
           docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
           echo "Disk space after cleanup:"
           df -h
@@ -60,17 +81,34 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
+      # Authenticate to Google Cloud using Workload Identity Federation.
+      # No long-lived service-account JSON key is stored in GitHub.
+      #
+      # Required secrets:
+      #   GCP_WIF_PROVIDER         Full resource name of the Workload Identity
+      #                            Provider, e.g.
+      #                            projects/123456789/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+      #   GCP_WIF_SERVICE_ACCOUNT  Email of the service account to impersonate,
+      #                            e.g. gh-actions-pusher@my-project.iam.gserviceaccount.com
+      - name: Authenticate to Google Cloud
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+
+      - name: Log in to Google Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GCP_AR_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.gcp-auth.outputs.access_token }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
-          images: vectorinstitute/vector-inference-${{ matrix.backend }}
+          images: ${{ steps.image.outputs.base }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -80,6 +118,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.tags }}
-            vectorinstitute/vector-inference-${{ matrix.backend }}:${{ steps.backend-version.outputs.version }}
-            vectorinstitute/vector-inference-${{ matrix.backend }}:latest
+            ${{ steps.image.outputs.base }}:${{ steps.backend-version.outputs.version }}
+            ${{ steps.image.outputs.base }}:latest
           labels: ${{ steps.meta.outputs.labels }}
