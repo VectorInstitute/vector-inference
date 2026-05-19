@@ -91,18 +91,15 @@ jobs:
       #   GCP_WIF_SERVICE_ACCOUNT  Email of the service account to impersonate,
       #                            e.g. gh-actions-pusher@my-project.iam.gserviceaccount.com
       - name: Authenticate to Google Cloud
-        id: gcp-auth
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
 
-      - name: Log in to Google Artifact Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.GCP_AR_REGION }}-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.gcp-auth.outputs.access_token }}
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_AR_REGION }}-docker.pkg.dev --quiet
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
