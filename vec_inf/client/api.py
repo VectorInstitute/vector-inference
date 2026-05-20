@@ -71,7 +71,7 @@ class VecInfClient:
 
     Examples
     --------
-    >>> from vec_inf.api import VecInfClient
+    >>> from vec_inf.client import VecInfClient
     >>> client = VecInfClient()
     >>> response = client.launch_model("Meta-Llama-3.1-8B-Instruct")
     >>> job_id = response.slurm_job_id
