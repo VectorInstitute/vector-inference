@@ -113,8 +113,12 @@ jobs:
           context: .
           file: ./${{ matrix.backend }}.Dockerfile
           push: true
+          # A pull_request publishes only the metadata-action tag
+          # (pr-<number>), so the PR image is pullable for testing but cannot
+          # overwrite :latest or :<version>. Merges to main and releases
+          # publish all three tags.
           tags: |
             ${{ steps.meta.outputs.tags }}
-            ${{ steps.image.outputs.base }}:${{ steps.backend-version.outputs.version }}
-            ${{ steps.image.outputs.base }}:latest
+            ${{ github.event_name != 'pull_request' && format('{0}:{1}', steps.image.outputs.base, steps.backend-version.outputs.version) || '' }}
+            ${{ github.event_name != 'pull_request' && format('{0}:latest', steps.image.outputs.base) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
