@@ -56,10 +56,31 @@ ENV NCCL_DEBUG=INFO
 WORKDIR /vec-inf
 COPY . /vec-inf
 
-# Install project dependencies with vllm backend and inference group
-# Use --no-cache to prevent uv from storing both downloaded and extracted packages
-RUN uv pip install --system -e .[vllm] --group inference --prerelease=allow --no-cache && \
+# Install project dependencies pinned to uv.lock.
+#
+# `uv pip install` does NOT consult uv.lock -- only `uv sync` does, and
+# `uv sync` requires a venv (incompatible with --system). Without this,
+# every image build does fresh PyPI resolution and may pick a different
+# transitive set than what the lockfile records (this is how :0.19.0
+# shipped with the pyarrow/datasets ABI mismatch). Instead:
+#   1. Export uv.lock to a fully-pinned requirements.txt (no resolver).
+#   2. Install transitives with --no-deps so nothing is re-resolved.
+#   3. Install the project itself editable, also --no-deps.
+RUN uv export --frozen --no-emit-project --no-hashes \
+        --extra vllm --group inference \
+        -o /tmp/requirements.txt && \
+    uv pip install --system --no-cache --no-deps --prerelease=allow \
+        -r /tmp/requirements.txt && \
+    uv pip install --system --no-cache --no-deps -e . && \
+    rm -f /tmp/requirements.txt && \
     rm -rf /root/.cache/uv /tmp/*
+
+# Build-time canary: fail the build if the locked deps cannot be imported
+# together. This is the check that would have caught the pyarrow/datasets
+# ABI mismatch in :0.19.0 at build time instead of at job start.
+RUN python3.12 -c "import vllm, datasets, pyarrow, transformers, torch; \
+    print('vllm', vllm.__version__, '/ datasets', datasets.__version__, \
+          '/ pyarrow', pyarrow.__version__, '/ torch', torch.__version__)"
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\
