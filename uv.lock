@@ -1472,14 +1472,12 @@ name = "cuda-bindings"
 version = "12.9.4"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12'",
+    "python_full_version == '3.11.*'",
+    "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "cuda-pathfinder", marker = "(python_full_version >= '3.14' and sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-vllm') or (python_full_version >= '3.14' and sys_platform == 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang')" },
+    { name = "cuda-pathfinder", marker = "extra == 'extra-7-vec-inf-sglang'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/37/31/bfcc870f69c6a017c4ad5c42316207fc7551940db6f3639aa4466ec5faf3/cuda_bindings-12.9.4-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a022c96b8bd847e8dc0675523431149a4c3e872f440e3002213dbb9e08f0331a", size = 11800959, upload-time = "2025-10-21T14:51:26.458Z" },
@@ -1510,6 +1508,8 @@ name = "cuda-bindings"
 version = "13.2.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
@@ -1525,7 +1525,7 @@ resolution-markers = [
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "cuda-pathfinder", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
+    { name = "cuda-pathfinder", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1a/fe/7351d7e586a8b4c9f89731bfe4cf0148223e8f9903ff09571f78b3fb0682/cuda_bindings-13.2.0-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:08b395f79cb89ce0cd8effff07c4a1e20101b873c256a1aeb286e8fd7bd0f556", size = 5744254, upload-time = "2026-03-11T00:12:29.798Z" },
@@ -1574,24 +1574,11 @@ wheels = [
 
 [[package]]
 name = "cuda-python"
-version = "12.9.4"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version >= '3.14' and sys_platform == 'emscripten'",
-]
-dependencies = [
-    { name = "cuda-bindings", version = "12.9.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-vllm') or (python_full_version >= '3.14' and sys_platform == 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/f3/6b032a554019cfb3447e671798c1bd3e79b5f1af20d10253f56cea269ef2/cuda_python-12.9.4-py3-none-any.whl", hash = "sha256:d2cacea882a69863f1e7d27ee71d75f0684f4c76910aff839067e4f89c902279", size = 7594, upload-time = "2025-10-21T14:55:12.846Z" },
-]
-
-[[package]]
-name = "cuda-python"
 version = "13.2.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
@@ -1607,8 +1594,8 @@ resolution-markers = [
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "cuda-bindings", version = "13.2.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
-    { name = "cuda-pathfinder", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
+    { name = "cuda-bindings", version = "13.2.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
+    { name = "cuda-pathfinder", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4a/da/b4dbe129f941afe1c24a09ba53521b78875626763d96414798a74763282f/cuda_python-13.2.0-py3-none-any.whl", hash = "sha256:2f092b0ec13a860115fa595411889ee939ad203450ea4f91e9461b174ea7b084", size = 8145, upload-time = "2026-03-11T13:55:19.143Z" },
@@ -1646,7 +1633,7 @@ wheels = [
 
 [package.optional-dependencies]
 cublas = [
-    { name = "nvidia-cublas", version = "13.1.0.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "nvidia-cublas", marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 cudart = [
     { name = "nvidia-cuda-runtime", marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
@@ -1673,7 +1660,7 @@ nvjitlink = [
     { name = "nvidia-nvjitlink", marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 nvrtc = [
-    { name = "nvidia-cuda-nvrtc", version = "13.0.88", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "nvidia-cuda-nvrtc", marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 nvtx = [
     { name = "nvidia-nvtx", marker = "(python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'linux' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
@@ -4873,32 +4860,10 @@ wheels = [
 name = "nvidia-cublas"
 version = "13.1.0.3"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e1/a5/fce49e2ae977e0ccc084e5adafceb4f0ac0c8333cb6863501618a7277f67/nvidia_cublas-13.1.0.3-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:c86fc7f7ae36d7528288c5d88098edcb7b02c633d262e7ddbb86b0ad91be5df2", size = 542851226, upload-time = "2025-10-09T08:59:04.818Z" },
     { url = "https://files.pythonhosted.org/packages/e7/44/423ac00af4dd95a5aeb27207e2c0d9b7118702149bf4704c3ddb55bb7429/nvidia_cublas-13.1.0.3-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:ee8722c1f0145ab246bccb9e452153b5e0515fd094c3678df50b2a0888b8b171", size = 423133236, upload-time = "2025-10-09T08:59:32.536Z" },
     { url = "https://files.pythonhosted.org/packages/10/f5/f50bc3f5c2bb57ab8f5b4d78bc1146b57810d42cb8fcb28cbe2e14050376/nvidia_cublas-13.1.0.3-py3-none-win_amd64.whl", hash = "sha256:2a3b94a37def342471c59fad7856caee4926809a72dd5270155d6a31b5b277be", size = 404355960, upload-time = "2025-10-09T09:07:00.987Z" },
-]
-
-[[package]]
-name = "nvidia-cublas"
-version = "13.4.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "nvidia-cuda-nvrtc", version = "13.2.78", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/d0/4e327087b6026a15d83b31ee1268fa16292e3bb71fb402bbe017bf6649ac/nvidia_cublas-13.4.1.1-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:6351d2d921527479d6d5002e620fe1971d3e10c730b544c02a36d65301efb00d", size = 513048233, upload-time = "2026-04-28T21:25:23.612Z" },
-    { url = "https://files.pythonhosted.org/packages/f8/79/0cefdaa1d9e45018a227bac64a79b92d2733cde28a8fd09c65362de08622/nvidia_cublas-13.4.1.1-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:28c983c8c03aa9a2d7b36cddcef2bfeeea85e13241d77df7622665502159f347", size = 404870806, upload-time = "2026-04-28T21:25:06.483Z" },
 ]
 
 [[package]]
@@ -4935,30 +4900,10 @@ wheels = [
 name = "nvidia-cuda-nvrtc"
 version = "13.0.88"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c3/68/483a78f5e8f31b08fb1bb671559968c0ca3a065ac7acabfc7cee55214fd6/nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:ad9b6d2ead2435f11cbb6868809d2adeeee302e9bb94bcf0539c7a40d80e8575", size = 90215200, upload-time = "2025-09-04T08:28:44.204Z" },
     { url = "https://files.pythonhosted.org/packages/b7/dc/6bb80850e0b7edd6588d560758f17e0550893a1feaf436807d64d2da040f/nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d27f20a0ca67a4bb34268a5e951033496c5b74870b868bacd046b1b8e0c3267b", size = 43015449, upload-time = "2025-09-04T08:28:20.239Z" },
     { url = "https://files.pythonhosted.org/packages/4a/af/345fedb9f4c76c84ab4fa445b36bd4048a4d9db60e6bc76b4f913ff4b852/nvidia_cuda_nvrtc-13.0.88-py3-none-win_amd64.whl", hash = "sha256:6bcd4e7f8e205cbe644f5a98f2f799bef9556fefc89dd786e79a16312ce49872", size = 76807835, upload-time = "2025-09-04T08:39:15.274Z" },
-]
-
-[[package]]
-name = "nvidia-cuda-nvrtc"
-version = "13.2.78"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5f/96/237b40b171e06eb65905375c4ad5c96f78c2f861ac6e8ae7f650d95e1dfd/nvidia_cuda_nvrtc-13.2.78-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:a9049031da08cbedd0c20e3470e5a978dc330af0e0326b3b05774718c665dc3e", size = 47019062, upload-time = "2026-04-13T09:45:33.875Z" },
-    { url = "https://files.pythonhosted.org/packages/af/be/8476aa006686fb264d61de43e0408a8dbd001003a702574759b25e645587/nvidia_cuda_nvrtc-13.2.78-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:a50367a7e2a0bd00fb27e5648179149cc7a60e7c7811740a5ff559f06234526d", size = 44754755, upload-time = "2026-04-13T09:44:58.919Z" },
-    { url = "https://files.pythonhosted.org/packages/48/35/41b84ff9b4a9acc42590be44e69f32fc867a57d7018e87c532019d627f17/nvidia_cuda_nvrtc-13.2.78-py3-none-win_amd64.whl", hash = "sha256:46aff2df5615c408f23fb968a75e5641060f89fa611a85af51a387dff9bf375b", size = 40817783, upload-time = "2026-04-13T10:06:31.711Z" },
 ]
 
 [[package]]
@@ -5009,8 +4954,7 @@ name = "nvidia-cudnn-cu13"
 version = "9.19.0.56"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas", version = "13.1.0.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
-    { name = "nvidia-cublas", version = "13.4.1.1", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "nvidia-cublas", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f1/84/26025437c1e6b61a707442184fa0c03d083b661adf3a3eecfd6d21677740/nvidia_cudnn_cu13-9.19.0.56-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:6ed29ffaee1176c612daf442e4dd6cfeb6a0caa43ddcbeb59da94953030b1be4", size = 433781201, upload-time = "2026-02-03T20:40:53.805Z" },
@@ -5109,7 +5053,7 @@ name = "nvidia-cusolver"
 version = "12.0.4.66"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas", version = "13.1.0.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
+    { name = "nvidia-cublas", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
     { name = "nvidia-cusparse", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
     { name = "nvidia-nvjitlink", marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
 ]
@@ -5238,8 +5182,7 @@ name = "nvidia-cutlass-dsl-libs-base"
 version = "4.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cuda-python", version = "12.9.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-vllm') or (python_full_version >= '3.14' and sys_platform == 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "cuda-python", version = "13.2.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra == 'extra-7-vec-inf-vllm') or (sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang') or (sys_platform == 'emscripten' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
+    { name = "cuda-python", version = "13.2.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "numpy", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
 ]
@@ -6201,15 +6144,15 @@ wheels = [
 
 [[package]]
 name = "prometheus-fastapi-instrumentator"
-version = "7.1.0"
+version = "8.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "prometheus-client" },
     { name = "starlette" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/69/6d/24d53033cf93826aa7857699a4450c1c67e5b9c710e925b1ed2b320c04df/prometheus_fastapi_instrumentator-7.1.0.tar.gz", hash = "sha256:be7cd61eeea4e5912aeccb4261c6631b3f227d8924542d79eaf5af3f439cbe5e", size = 20220, upload-time = "2025-03-19T19:35:05.351Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/7a/fe49b7060e585e2cfa28cc1d13ebfe9c2904dcd80cf11071d5de0f622ff2/prometheus_fastapi_instrumentator-8.0.0.tar.gz", hash = "sha256:c31ed192db077e75467b28b2fe5055362517f53369b798cb8dac9ff85f3f1c38", size = 20357, upload-time = "2026-05-29T13:04:43.327Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/27/72/0824c18f3bc75810f55dacc2dd933f6ec829771180245ae3cc976195dec0/prometheus_fastapi_instrumentator-7.1.0-py3-none-any.whl", hash = "sha256:978130f3c0bb7b8ebcc90d35516a6fe13e02d2eb358c8f83887cdef7020c31e9", size = 19296, upload-time = "2025-03-19T19:35:04.323Z" },
+    { url = "https://files.pythonhosted.org/packages/73/ad/b14ed2fe73bb1d37bcc947e75afae018f795526415d5b849aeb99c403cd1/prometheus_fastapi_instrumentator-8.0.0-py3-none-any.whl", hash = "sha256:e3c967c402124dfe81cf5aad35208d9f96db5452c6cb752350d9358ca0a96198", size = 19411, upload-time = "2026-05-29T13:04:44.17Z" },
 ]
 
 [[package]]
@@ -8637,15 +8580,15 @@ wheels = [
 
 [[package]]
 name = "starlette"
-version = "0.52.1"
+version = "1.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/68/79977123bb7be889ad680d79a40f339082c1978b5cfcf62c2d8d196873ac/starlette-0.52.1.tar.gz", hash = "sha256:834edd1b0a23167694292e94f597773bc3f89f362be6effee198165a35d62933", size = 2653702, upload-time = "2026-01-18T13:34:11.062Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/a3/84e821cc54b4ab50ae6dbc6ac3800a651b65ec35f045cc73785380654057/starlette-1.0.1.tar.gz", hash = "sha256:512399c5f1de7fac99c88572212ded9ddeddef2fb32afa82d724000e88b38f4f", size = 2659596, upload-time = "2026-05-21T21:58:58.433Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/0d/13d1d239a25cbfb19e740db83143e95c772a1fe10202dda4b76792b114dd/starlette-0.52.1-py3-none-any.whl", hash = "sha256:0029d43eb3d273bc4f83a08720b4912ea4b071087a3b48db01b7c839f7954d74", size = 74272, upload-time = "2026-01-18T13:34:09.188Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/e1/b2df4bc09a1e51ff664c1e17018a4274b42e5e9352e4a478ea540512dc88/starlette-1.0.1-py3-none-any.whl", hash = "sha256:7c0e69b2ee1c848bd54669d908500117a3ee13de603a21427e5c6fc1adf98dcd", size = 72802, upload-time = "2026-05-21T21:58:56.551Z" },
 ]
 
 [[package]]
