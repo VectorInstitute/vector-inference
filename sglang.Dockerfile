@@ -56,10 +56,20 @@ ENV NCCL_DEBUG=INFO
 WORKDIR /vec-inf
 COPY . /vec-inf
 
-# Install project dependencies with sglang backend and inference group
-# Use --no-cache to prevent uv from storing both downloaded and extracted packages
-RUN uv pip install --system -e .[sglang] --group inference --prerelease=allow --no-cache && \
+# Install project dependencies pinned to uv.lock.
+# See vllm.Dockerfile for the full rationale; same logic, sglang extra.
+RUN uv export --frozen --no-emit-project --no-hashes \
+        --extra sglang --group inference \
+        -o /tmp/requirements.txt && \
+    uv pip install --system --no-cache --no-deps --prerelease=allow \
+        -r /tmp/requirements.txt && \
+    uv pip install --system --no-cache --no-deps -e . && \
+    rm -f /tmp/requirements.txt && \
     rm -rf /root/.cache/uv /tmp/*
+
+# Build-time canary: fail the build if the locked deps cannot be imported.
+RUN python3.12 -c "import sglang, torch; \
+    print('sglang', sglang.__version__, '/ torch', torch.__version__)"
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\

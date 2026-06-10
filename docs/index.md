@@ -11,7 +11,7 @@ If you are using the Vector cluster environment, and you don't need any customiz
 pip install vec-inf
 ```
 
-Otherwise, we recommend using the provided [`vllm.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/vllm.Dockerfile) and [`sglang.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/sglang.Dockerfile) to set up your own environment with the package. The built images are available through [Docker Hub](https://hub.docker.com/orgs/vectorinstitute/repositories)
+Otherwise, we recommend using the provided [`vllm.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/vllm.Dockerfile) and [`sglang.Dockerfile`](https://github.com/VectorInstitute/vector-inference/blob/main/sglang.Dockerfile) to set up your own environment with the package. The built images are published to **Google Artifact Registry** at `<REGION>-docker.pkg.dev/<PROJECT_ID>/<REPOSITORY>/vector-inference-{vllm,sglang}`. Run `gcloud auth configure-docker <REGION>-docker.pkg.dev` once, then `docker pull` the image you want.
 
 If you'd like to use `vec-inf` on your own Slurm cluster, you would need to update the configuration files, there are 3 ways to do it:
 
