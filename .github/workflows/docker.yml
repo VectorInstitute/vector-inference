@@ -122,3 +122,4 @@ jobs:
             ${{ github.event_name != 'pull_request' && format('{0}:{1}', steps.image.outputs.base, steps.backend-version.outputs.version) || '' }}
             ${{ github.event_name != 'pull_request' && format('{0}:latest', steps.image.outputs.base) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
