@@ -82,10 +82,17 @@ jobs:
           uv run --frozen pytest tests/test_imports.py
 
       - name: Import Codecov GPG public key
+        if: github.actor != 'dependabot[bot]'
         run: |
           gpg --keyserver keyserver.ubuntu.com --recv-keys 806BB28AED779869
 
+      # Dependabot PRs never receive repository secrets (GitHub withholds
+      # them from dependabot-triggered runs), so CODECOV_TOKEN is empty and
+      # this step fails with "Token required because branch is protected",
+      # taking down the whole job even though the tests above passed. Skip
+      # the upload in that case.
       - name: Upload coverage to Codecov
+        if: github.actor != 'dependabot[bot]'
         uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
