@@ -145,6 +145,7 @@ ignore = [
     "D213", # Multi-line docstring summary should start at the second line
     "PLR2004", # Replace magic number with named constant
     "PLR0913", # Too many arguments
+    "PLR0917", # Too many positional arguments
     "COM812", # Missing trailing comma
 ]
 
