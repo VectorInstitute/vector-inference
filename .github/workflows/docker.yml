@@ -31,6 +31,11 @@ permissions:
 jobs:
   push_to_registry:
     name: Build and push Docker images
+    # Dependabot PRs never receive repository secrets (GitHub withholds them
+    # from dependabot-triggered runs), so GCP auth always fails here. Skip
+    # the job for those PRs instead of reporting a false CI failure; the
+    # real image build/push still runs on merge to main and on release.
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     runs-on:
       - ubuntu-latest
     strategy:
