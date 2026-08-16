@@ -54,7 +54,7 @@ jobs:
       GCP_AR_REPOSITORY: ${{ vars.GCP_AR_REPOSITORY }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.1
 
       - name: Extract backend version
         id: backend-version
