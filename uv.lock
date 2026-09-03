@@ -10,15 +10,15 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 conflicts = [[
@@ -256,8 +256,8 @@ dependencies = [
     { name = "docstring-parser" },
     { name = "httpx" },
     { name = "jiter" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
@@ -501,11 +501,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -722,11 +722,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -1125,8 +1125,8 @@ version = "0.15.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "loguru" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-sglang'" },
     { name = "torch", version = "2.11.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm'" },
     { name = "transformers", version = "4.57.1", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-sglang'" },
@@ -1223,11 +1223,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -1532,12 +1532,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -1601,12 +1601,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -1936,8 +1936,8 @@ version = "0.135.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "starlette" },
     { name = "typing-extensions" },
     { name = "typing-inspection" },
@@ -1987,8 +1987,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastar" },
     { name = "httpx" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "rich-toolkit" },
     { name = "rignore" },
     { name = "sentry-sdk" },
@@ -2218,12 +2218,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -2853,12 +2853,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -3686,8 +3686,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "interegular" },
     { name = "packaging" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pyyaml" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/84/d5/41cd417ba7dfdbbcfe46cebf81fb3dfd7c591b89897560ad05bb410a465d/lm_format_enforcer-0.11.3.tar.gz", hash = "sha256:e68081c108719cce284a9bcc889709b26ffb085a1945b5eba3a12cfa96d528da", size = 40258, upload-time = "2025-08-24T19:37:47.527Z" }
@@ -4027,8 +4027,8 @@ dependencies = [
     { name = "httpx" },
     { name = "httpx-sse" },
     { name = "jsonschema" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pydantic-settings" },
     { name = "pyjwt", extra = ["crypto"], marker = "extra == 'extra-7-vec-inf-vllm'" },
     { name = "python-multipart" },
@@ -4087,8 +4087,8 @@ dependencies = [
     { name = "jsonschema" },
     { name = "numpy" },
     { name = "pillow" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pydantic-extra-types", extra = ["pycountry"], marker = "extra == 'extra-7-vec-inf-vllm'" },
     { name = "requests" },
     { name = "tiktoken" },
@@ -4162,7 +4162,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.7.6"
+version = "9.7.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
@@ -4177,9 +4177,9 @@ dependencies = [
     { name = "pymdown-extensions" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/45/29/6d2bcf41ae40802c4beda2432396fff97b8456fb496371d1bc7aad6512ec/mkdocs_material-9.7.6.tar.gz", hash = "sha256:00bdde50574f776d328b1862fe65daeaf581ec309bd150f7bff345a098c64a69", size = 4097959, upload-time = "2026-03-19T15:41:58.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/cd/c05d3a530ba7934f144fb45f7203cd236adc25c7bdcc34673d202f4b0278/mkdocs_material-9.7.7.tar.gz", hash = "sha256:c0649c065b1b0512d60aad8c10f947f8e455284475239b364b610f2deb4d0855", size = 4097923, upload-time = "2026-07-17T16:21:33.156Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/01/bc663630c510822c95c47a66af9fa7a443c295b47d5f041e5e6ae62ef659/mkdocs_material-9.7.6-py3-none-any.whl", hash = "sha256:71b84353921b8ea1ba84fe11c50912cc512da8fe0881038fcc9a0761c0e635ba", size = 9305470, upload-time = "2026-03-19T15:41:55.217Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/21/17c1bc9e6f47c972ad66fb2ac2568f99f90f1207eeb6fc3b34d094dba7b5/mkdocs_material-9.7.7-py3-none-any.whl", hash = "sha256:8ea9bb1737a5b524a5f9dcf2e1b4ebda8274ae3008aa7845720a97083bef708f", size = 9305438, upload-time = "2026-07-17T16:21:30.017Z" },
 ]
 
 [[package]]
@@ -4339,8 +4339,8 @@ dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
     { name = "jmespath" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "setuptools" },
     { name = "starlette" },
     { name = "supervisor" },
@@ -4825,11 +4825,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6a/51/63fe664f3908c97be9d2e4f1158eb633317598cfa6e1fc14af5383f17512/networkx-3.6.1.tar.gz", hash = "sha256:26b7c357accc0c8cde558ad486283728b65b6a95d85ee1cd66bafab4c8168509", size = 2517025, upload-time = "2025-12-08T17:02:39.908Z" }
@@ -5311,12 +5311,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -5513,12 +5513,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -5526,8 +5526,8 @@ dependencies = [
     { name = "distro", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "httpx", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "jiter", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra != 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "sniffio", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "tqdm", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
@@ -5586,8 +5586,8 @@ resolution-markers = [
     "python_full_version < '3.11' and sys_platform != 'darwin'",
 ]
 dependencies = [
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3e/92/2d038d096f29179c7c9571b431f9e739f87a487121901725e23fe338dd9d/openai_harmony-0.0.8.tar.gz", hash = "sha256:6e43f98e6c242fa2de6f8ea12eab24af63fa2ed3e89c06341fb9d92632c5cbdf", size = 284777, upload-time = "2025-11-05T19:07:06.727Z" }
 wheels = [
@@ -6912,24 +6912,20 @@ name = "pydantic"
 version = "2.12.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "annotated-types", marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic-core", version = "2.41.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-inspection", marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "annotated-types", marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic-core", version = "2.41.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-inspection", marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/69/44/36f1a6e523abc58ae5f928898e4aca2e0ea509b5aa6f6f392a5d882be928/pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49", size = 821591, upload-time = "2025-11-26T15:11:46.471Z" }
 wheels = [
@@ -6938,7 +6934,7 @@ wheels = [
 
 [package.optional-dependencies]
 email = [
-    { name = "email-validator", marker = "python_full_version < '3.14'" },
+    { name = "email-validator", marker = "python_full_version < '3.12'" },
 ]
 
 [[package]]
@@ -6950,14 +6946,18 @@ resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "annotated-types", marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic-core", version = "2.46.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-extensions", marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-inspection", marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "annotated-types", marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic-core", version = "2.46.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-inspection", marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/18/a5/b60d21ac674192f8ab0ba4e9fd860690f9b4a6e51ca5df118733b487d8d6/pydantic-2.13.4.tar.gz", hash = "sha256:c40756b57adaa8b1efeeced5c196f3f3b7c435f90e84ea7f443901bec8099ef6", size = 844775, upload-time = "2026-05-06T13:43:05.343Z" }
 wheels = [
@@ -6966,7 +6966,7 @@ wheels = [
 
 [package.optional-dependencies]
 email = [
-    { name = "email-validator", marker = "python_full_version >= '3.14'" },
+    { name = "email-validator", marker = "python_full_version >= '3.12'" },
 ]
 
 [[package]]
@@ -6974,21 +6974,17 @@ name = "pydantic-core"
 version = "2.41.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/71/70/23b021c950c2addd24ec408e9ab05d59b035b39d97cdc1130e1bce647bb6/pydantic_core-2.41.5.tar.gz", hash = "sha256:08daa51ea16ad373ffd5e7606252cc32f07bc72b28284b6bc9c6df804816476e", size = 460952, upload-time = "2025-11-04T13:43:49.098Z" }
 wheels = [
@@ -7110,11 +7106,15 @@ resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9d/56/921726b776ace8d8f5db44c4ef961006580d91dc52b803c489fafd1aa249/pydantic_core-2.46.4.tar.gz", hash = "sha256:62f875393d7f270851f20523dd2e29f082bcc82292d66db2b64ea71f64b6e1c1", size = 471464, upload-time = "2026-05-06T13:37:06.98Z" }
 wheels = [
@@ -7230,8 +7230,8 @@ name = "pydantic-extra-types"
 version = "2.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/41/d3/3be31542180c0300b6860129ff1e3a428f3ef580727616ce22462626129b/pydantic_extra_types-2.11.2.tar.gz", hash = "sha256:3a2b83b61fe920925688e7838b59caa90a45637d1dbba2b1364b8d1f7ff72a0a", size = 203929, upload-time = "2026-04-05T20:50:51.556Z" }
@@ -7249,8 +7249,8 @@ name = "pydantic-settings"
 version = "2.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "python-dotenv" },
     { name = "typing-inspection" },
 ]
@@ -7804,8 +7804,8 @@ default = [
     { name = "opentelemetry-sdk" },
     { name = "prometheus-client" },
     { name = "py-spy" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "requests" },
     { name = "smart-open" },
     { name = "virtualenv" },
@@ -8345,11 +8345,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -8473,11 +8473,11 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -9329,12 +9329,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -9746,12 +9746,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
@@ -9809,12 +9809,12 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 wheels = [
@@ -9976,8 +9976,8 @@ version = "0.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "rich" },
@@ -10161,8 +10161,8 @@ dependencies = [
     { name = "psutil" },
     { name = "py-cpuinfo" },
     { name = "pybase64" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "python-json-logger" },
     { name = "pyyaml" },
     { name = "pyzmq" },
@@ -10221,8 +10221,8 @@ dependencies = [
     { name = "packaging" },
     { name = "platformdirs" },
     { name = "protobuf" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14' or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "sentry-sdk" },
@@ -10612,20 +10612,20 @@ resolution-markers = [
     "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
-    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
-    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
     { name = "apache-tvm-ffi", version = "0.1.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm'" },
     { name = "apache-tvm-ffi", version = "0.1.10", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm') or (extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm')" },
     { name = "numpy", marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
-    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (python_full_version < '3.12' and extra != 'extra-7-vec-inf-sglang') or (python_full_version < '3.14' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra != 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "torch", version = "2.11.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "transformers", version = "5.9.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-vllm' or extra != 'extra-7-vec-inf-sglang'" },
     { name = "triton", version = "3.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
