@@ -67,6 +67,9 @@ sglang = [
 ]
 
 [tool.uv]
+# transformers (5.6.x / 5.9.x) only supports kernels>=0.12,<0.13; newer kernels
+# raise "Either a revision or a version must be specified." on import.
+constraint-dependencies = ["kernels>=0.12.0,<0.13"]
 # Declare that vllm and sglang extras are mutually exclusive
 # This prevents uv from trying to resolve both together in the lock file
 conflicts = [
