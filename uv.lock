@@ -10072,7 +10072,7 @@ docs = [
     { name = "mkdocs-material", specifier = ">=9.5.12" },
     { name = "mkdocstrings", specifier = ">=0.24.1" },
     { name = "mkdocstrings-python", specifier = ">=1.8.0" },
-    { name = "pymdown-extensions", specifier = ">=10.7.1" },
+    { name = "pymdown-extensions", specifier = ">=10.7.1,<12" },
 ]
 inference = [
     { name = "ax-platform", specifier = ">=1.1.0" },
