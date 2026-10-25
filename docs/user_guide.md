@@ -267,7 +267,7 @@ And you will see the performance metrics streamed to your console, note that the
 * KV cache usage is the share of the GPU KV cache in use. vLLM 0.32 no longer reports separate GPU and CPU cache usage or swapped requests, so those rows were replaced by **KV Cache Usage** and **Preemptions**.
 * The prefix cache hit rate shows whenever the server reports it (prefix caching is on by default in vLLM and SGLang). For vLLM it is the share of prompt tokens served from the prefix cache since the server started. For SGLang it is SGLang's own `cache_hit_rate` gauge, which covers recent batches only.
 * For vLLM, **Successful Requests** counts requests that finished normally; requests aborted by the client or failed with an error are not counted. SGLang does not report how requests ended, so for SGLang servers the row is **Finished Requests** and includes aborted requests.
-* SGLang reports scheduler metrics once per tensor, pipeline and expert parallel rank. Only rank 0 is counted so running and waiting requests are not multiplied by the number of ranks; data parallel ranks are added up.
+* SGLang can report scheduler metrics from several tensor, pipeline and expert parallel ranks of the same data parallel group. Only the lowest reporting rank of each group is counted, so running and waiting requests are not multiplied by the number of ranks; data parallel groups are added up.
 * SGLang servers launched by `vec-inf` are started with `--enable-metrics`, which SGLang needs before it serves `/metrics`.
 
 ### `shutdown` command
@@ -412,7 +412,13 @@ The vLLM image moved from vLLM 0.22.0 to 0.32.0. Things you may notice:
     | `successful_requests_total` (SGLang) | `finished_requests_total`; vLLM keeps `successful_requests_total` |
 
     New keys: `preemptions_total`, `queue_time_count` and `avg_queue_time`. The `enabled_prefix_caching` attribute of `PerformanceMetricsCollector` and of the CLI's `MetricsResponseFormatter` is gone.
-* **Engine arguments**: values are now quoted in the generated Slurm script, so JSON values such as `--vllm-args '-sc={"method":"ngram","num_speculative_tokens":3}'` reach the engine unchanged. Commas inside `{}`, `[]` or quotes no longer split arguments, and `-tp 2` works like `-tp=2`. Values that contain `$` or start with `~/` are still expanded by the shell.
+* **Engine arguments** (`--vllm-args`, `--sglang-args` and `*_args` in `models.yaml`):
+    * Commas inside `{}` or `[]` (and inside quoted strings within them) no longer split arguments, so JSON values such as `--vllm-args '-sc={"method":"ngram","num_speculative_tokens":3}'` reach the engine unchanged. Unbalanced braces, brackets or quotes are reported as an error.
+    * A flag and its value can be separated by `=` or a space: `-tp=2` and `-tp 2` are the same.
+    * Values are quoted in the generated Slurm script. A value starting with `{` or `[` is passed as one word. Other values are split into words, so flags that take several values work in both forms, for example `--cudagraph-capture-sizes=1 2 4 8` or `--served-model-name a b`. To pass one word that contains spaces, quote it: `--chat-template='/path/with space/t.jinja'`.
+    * A word that references a variable (`$NAME` or `${NAME}`) is still expanded by the shell, `\$` gives a literal dollar sign, and a leading `~/` still expands to your home directory. Any other `$` (for example `price$5`) is passed literally.
+* **Multi-node networking**: multi-node vLLM containers now receive the NCCL settings from the launch script's RDMA check. On nodes with RDMA tools, RoCE links get `NCCL_IB_GID_INDEX=3` and InfiniBand links `0` (override with `--env NCCL_IB_GID_INDEX=...`). Without `ibv_devices` on the host the script no longer forces `NCCL_IB_DISABLE=1`; NCCL picks the transport itself and falls back to TCP sockets when there is no usable device.
+* **Ports**: the server port is now picked between 20000 and 55535, and the Ray head port between 20000 and 65535.
 
 ### Supported GPUs
 

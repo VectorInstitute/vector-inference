@@ -4,6 +4,7 @@ This module provides functionality to generate Slurm scripts for running inferen
 servers in both single-node and multi-node configurations.
 """
 
+import re
 import shlex
 from datetime import datetime
 from pathlib import Path
@@ -18,15 +19,47 @@ from vec_inf.client._slurm_templates import (
 from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
 
 
+# A shell variable reference that is not escaped: $NAME or ${...}
+_SHELL_VAR_RE = re.compile(r"(?<!\\)\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[^}]+\})")
+
+
+def _quote_token(token: str) -> str:
+    """Quote one shell word, keeping real variable references expandable.
+
+    Parameters
+    ----------
+    token : str
+        One word of an engine argument value
+
+    Returns
+    -------
+    str
+        The word, quoted for bash
+    """
+    if _SHELL_VAR_RE.search(token) or "\\$" in token:
+        # Double quotes keep $VAR and ${VAR} expanding. Backslashes are left
+        # as they are, so an escaped \$ stays a literal dollar sign, as it
+        # would on a command line.
+        return '"' + token.replace('"', '\\"').replace("`", "\\`") + '"'
+    if token.startswith("~/"):
+        return "~/" + shlex.quote(token[2:])
+    return shlex.quote(token)
+
+
 def format_engine_arg_value(value: Any) -> str:
     r"""Quote an engine argument value for the generated bash script.
 
-    Values are single-quoted with ``shlex.quote`` so JSON (e.g. for
-    ``--speculative-config``) and values with spaces reach the engine
-    unchanged. Two cases keep shell expansion on purpose: a value containing
-    ``$`` is double-quoted (escaping ``\\``, ``"`` and backticks) so variables
-    such as ``$SLURM_TMPDIR`` still expand, and a leading ``~/`` is left
-    unquoted so it still expands to the home directory.
+    * JSON values (starting with ``{`` or ``[``) are single-quoted as one
+      word, so they reach the engine unchanged.
+    * Other values are split into words with ``shlex.split`` and each word is
+      quoted on its own, so flags that take several values keep working
+      (``--cudagraph-capture-sizes 1 2 4 8``, ``--served-model-name a b``).
+      Quote a value that is one word with spaces in it, for example
+      ``--chat-template='/path/with space/t.jinja'``.
+    * A word that references a shell variable (``$NAME`` or ``${...}``) is
+      double-quoted so the variable still expands, and a leading ``~/`` is
+      left unquoted so it still expands to the home directory. Any other
+      ``$`` stays literal.
 
     Parameters
     ----------
@@ -39,12 +72,22 @@ def format_engine_arg_value(value: Any) -> str:
         The value, quoted for bash
     """
     text = str(value)
-    if "$" in text:
-        escaped = text.replace("\\", "\\\\").replace('"', '\\"').replace("`", "\\`")
-        return f'"{escaped}"'
-    if text.startswith("~/"):
-        return "~/" + shlex.quote(text[2:])
-    return shlex.quote(text)
+    stripped = text.strip()
+    if stripped.startswith(("{", "[")):
+        return shlex.quote(stripped)
+    # Split like a shell would on whitespace and quotes, but keep backslashes
+    # so escaped dollar signs survive to _quote_token
+    lexer = shlex.shlex(text, posix=True)
+    lexer.whitespace_split = True
+    lexer.escape = ""
+    try:
+        tokens = list(lexer)
+    except ValueError:
+        # Unbalanced quotes: pass the value through as a single word
+        tokens = [text]
+    if not tokens:
+        return shlex.quote(text)
+    return " ".join(_quote_token(token) for token in tokens)
 
 
 class SlurmScriptGenerator:

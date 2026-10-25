@@ -82,10 +82,11 @@ KEY_METRICS_EXCLUDED_LABELS: dict[str, dict[str, set[str]]] = {
 
 # SGLang reports scheduler metrics once per tensor, pipeline and expert parallel
 # rank (with pipeline parallelism, or --enable-metrics-for-all-schedulers), and
-# every rank sees the same requests. Only samples from rank 0 of these groups
-# are counted, so running/waiting requests are not multiplied by the number of
+# every rank of a data parallel group sees the same requests. For each metric and
+# dp_rank only the samples from the lowest (pp_rank, tp_rank, moe_ep_rank) are
+# counted, so running/waiting requests are not multiplied by the number of
 # ranks. Data parallel ranks (dp_rank) serve different requests and are summed.
-SGLANG_PRIMARY_RANK_LABELS = ("tp_rank", "pp_rank", "moe_ep_rank")
+SGLANG_PRIMARY_RANK_LABELS = ("pp_rank", "tp_rank", "moe_ep_rank")
 
 # Slurm job configuration arguments
 SLURM_JOB_CONFIG_ARGS = {

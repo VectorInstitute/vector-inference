@@ -10,6 +10,7 @@ import pytest
 from vec_inf.client._slurm_script_generator import (
     BatchSlurmScriptGenerator,
     SlurmScriptGenerator,
+    format_engine_arg_value,
 )
 
 
@@ -262,11 +263,12 @@ class TestSlurmScriptGenerator:
     def test_engine_arg_values_survive_bash(
         self, basic_params, num_nodes, engine, tmp_path
     ):
-        """JSON and spaced values reach the engine exactly as configured.
+        """JSON, multi-value and quoted values reach the engine as intended.
 
-        The generated script must pass ``bash -n``, and the engine command,
-        run through bash with ``echo`` in place of the engine, must print each
-        value unchanged (no stripped quotes, no word splitting).
+        The generated script must pass ``bash -n``, and the engine arguments,
+        run through bash with ``printf`` in place of the engine, must come out
+        as the engine should see them: JSON as one word, flags that take
+        several values as several words, and a quoted path as one word.
         """
         spec = '{"method":"ngram","num_speculative_tokens":3}'
         params = basic_params.copy()
@@ -274,7 +276,8 @@ class TestSlurmScriptGenerator:
         params["num_nodes"] = num_nodes
         params["engine_args"] = {
             "--speculative-config": spec,
-            "--chat-template": "/path/with space/template.jinja",
+            "--chat-template": "'/path/with space/template.jinja'",
+            "--cudagraph-capture-sizes": "1 2 4 8",
             "--max-model-len": "8192",
             "--enforce-eager": True,
         }
@@ -306,8 +309,41 @@ class TestSlurmScriptGenerator:
             echoed[echoed.index("--chat-template") + 1]
             == "/path/with space/template.jinja"
         )
+        sizes = echoed.index("--cudagraph-capture-sizes")
+        assert echoed[sizes + 1 : sizes + 5] == ["1", "2", "4", "8"]
         assert echoed[echoed.index("--max-model-len") + 1] == "8192"
         assert "--enforce-eager" in echoed
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("1 2 4 8", ["1", "2", "4", "8"]),
+            ("model-a model-b", ["model-a", "model-b"]),
+            ('{"a": "x $y", "b": [1, 2]}', ['{"a": "x $y", "b": [1, 2]}']),
+            ("[1, 2, 4]", ["[1, 2, 4]"]),
+            ("'/p q/t.jinja'", ["/p q/t.jinja"]),
+            ("price$5", ["price$5"]),
+            ("a\\$b", ["a$b"]),
+            ("$SLURM_TMPDIR/x", ["/tmp/job1/x"]),
+            ("${SLURM_TMPDIR}/x", ["/tmp/job1/x"]),
+            ("$SLURM_TMPDIR/a\\$b", ["/tmp/job1/a$b"]),
+            ("~/t.jinja", ["/home/u/t.jinja"]),
+            ("it's", ["it's"]),
+            ('q"x', ['q"x']),
+        ],
+    )
+    def test_format_engine_arg_value_through_bash(self, value, expected):
+        """Each value expands in bash to exactly the expected words."""
+        quoted = format_engine_arg_value(value)
+        words = subprocess.run(
+            ["bash", "-c", f"printf '%s\\n' {quoted}"],
+            env={"SLURM_TMPDIR": "/tmp/job1", "HOME": "/home/u", "y": "Y"},
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.splitlines()
+
+        assert words == expected
 
     def test_engine_arg_values_keep_shell_expansion(self, basic_params):
         """Values with $VAR or a leading ~/ are still expanded by bash."""
@@ -335,13 +371,13 @@ class TestSlurmScriptGenerator:
 
     @pytest.mark.parametrize("engine", ["vllm", "sglang"])
     def test_server_port_leaves_room_for_sglang_grpc(self, basic_params, engine):
-        """SGLang binds server port + 10000 for gRPC, so cap the port at 55535."""
+        """Server port is above Ray's worker ports and leaves room for SGLang gRPC."""
         params = basic_params.copy()
         params["engine"] = engine
         setup = SlurmScriptGenerator(params)._generate_server_setup()
 
         assert (
-            "server_port_number=$(find_available_port $head_node 8080 55535)" in setup
+            "server_port_number=$(find_available_port $head_node 20000 55535)" in setup
         )
 
     def test_multinode_vllm_ray_port_outside_worker_range(self, multinode_params):
@@ -363,6 +399,9 @@ class TestSlurmScriptGenerator:
         assert all("$NCCL_ENV_ARG" in line for line in container_lines)
         # Unquoted so "--env NCCL_IB_GID_INDEX=3" splits into two arguments
         assert '"$NCCL_ENV_ARG"' not in content
+        # Without RDMA tools NCCL picks the transport itself (IB is not forced off)
+        assert 'export NCCL_ENV_ARG=""' in content
+        assert "NCCL_IB_DISABLE=1" not in content
         # The GID index default must be a parameter expansion, not literal text
         assert "${NCCL_IB_GID_INDEX:-3}" in content
         assert "${NCCL_IB_GID_INDEX:-0}" in content

@@ -58,8 +58,11 @@ _PROM_LABEL_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"')
 def _split_engine_args(arg_string: str) -> list[str]:
     """Split a comma-separated engine argument string.
 
-    Commas inside braces, brackets or quotes do not split, so JSON values such
-    as ``-sc={"method":"ngram","num_speculative_tokens":3}`` stay in one piece.
+    Commas inside braces or brackets (and inside quoted strings within them)
+    do not split, so JSON values such as
+    ``-sc={"method":"ngram","num_speculative_tokens":3}`` stay in one piece.
+    Quotes outside braces and brackets are ordinary characters, so a value
+    like ``it's`` does not swallow the arguments after it.
 
     Parameters
     ----------
@@ -70,6 +73,11 @@ def _split_engine_args(arg_string: str) -> list[str]:
     -------
     list[str]
         The individual arguments
+
+    Raises
+    ------
+    ValueError
+        If a brace, bracket or quoted string inside one is left open
     """
     parts: list[str] = []
     current: list[str] = []
@@ -79,17 +87,25 @@ def _split_engine_args(arg_string: str) -> list[str]:
         if quote:
             if char == quote:
                 quote = ""
-        elif char in "\"'":
+        elif depth > 0 and char in "\"'":
             quote = char
         elif char in "{[":
             depth += 1
         elif char in "}]":
-            depth = max(depth - 1, 0)
+            if depth == 0:
+                raise ValueError(
+                    f"Unbalanced '{char}' in engine arguments: {arg_string!r}"
+                )
+            depth -= 1
         elif char == "," and depth == 0:
             parts.append("".join(current))
             current = []
             continue
         current.append(char)
+    if quote:
+        raise ValueError(f"Unclosed {quote} quote in engine arguments: {arg_string!r}")
+    if depth:
+        raise ValueError(f"Unclosed '{{' or '[' in engine arguments: {arg_string!r}")
     parts.append("".join(current))
     return parts
 
@@ -1069,6 +1085,52 @@ class PerformanceMetricsCollector:
             for name, value in _PROM_LABEL_RE.findall(label_text)
         }
 
+    @staticmethod
+    def _primary_rank_samples(
+        samples: list[tuple[str, dict[str, str], float]],
+    ) -> list[tuple[str, float]]:
+        """Keep one reporting rank per SGLang data parallel group.
+
+        SGLang repeats scheduler metrics for every tensor, pipeline and expert
+        parallel rank of a data parallel group (with pipeline parallelism, or
+        ``--enable-metrics-for-all-schedulers``). Within each metric and
+        ``dp_rank`` only the samples from the lowest rank are kept, so the
+        group is counted once whichever rank reports it (with
+        ``--enable-dp-attention`` the reporting rank need not be tp_rank 0).
+        Different ``dp_rank`` values serve different requests and are kept.
+
+        Parameters
+        ----------
+        samples : list[tuple[str, dict[str, str], float]]
+            (metric name, labels, value) for each SGLang sample
+
+        Returns
+        -------
+        list[tuple[str, float]]
+            (metric name, value) for the samples to aggregate
+        """
+
+        def rank_key(labels: dict[str, str]) -> tuple[int, ...]:
+            ranks = []
+            for label in SGLANG_PRIMARY_RANK_LABELS:
+                try:
+                    ranks.append(int(labels.get(label, "0")))
+                except ValueError:
+                    ranks.append(0)
+            return tuple(ranks)
+
+        lowest: dict[tuple[str, str], tuple[int, ...]] = {}
+        for metric_name, labels, _ in samples:
+            group = (metric_name, labels.get("dp_rank", ""))
+            key = rank_key(labels)
+            if group not in lowest or key < lowest[group]:
+                lowest[group] = key
+        return [
+            (metric_name, value)
+            for metric_name, labels, value in samples
+            if rank_key(labels) == lowest[(metric_name, labels.get("dp_rank", ""))]
+        ]
+
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
         """Parse Prometheus text exposition into vec-inf metric values.
 
@@ -1088,6 +1150,8 @@ class PerformanceMetricsCollector:
             Parsed metrics as key-value pairs
         """
         samples: dict[str, list[float]] = {}
+        # SGLang samples are kept with their rank labels and filtered below
+        sglang_samples: list[tuple[str, dict[str, str], float]] = []
         for raw_line in metrics_text.splitlines():
             line = raw_line.strip()
             if not line or line.startswith("#"):
@@ -1106,15 +1170,17 @@ class PerformanceMetricsCollector:
                 labels.get(k) in values for k, values in excluded.items()
             ):
                 continue
-            if metric_name.startswith("sglang:") and any(
-                labels.get(k, "0") != "0" for k in SGLANG_PRIMARY_RANK_LABELS
-            ):
-                continue
 
             try:
                 value = float(value_text)
             except ValueError:
                 continue
+            if metric_name.startswith("sglang:"):
+                sglang_samples.append((metric_name, labels, value))
+            else:
+                samples.setdefault(metric_name, []).append(value)
+
+        for metric_name, value in self._primary_rank_samples(sglang_samples):
             samples.setdefault(metric_name, []).append(value)
 
         parsed: dict[str, float] = {}

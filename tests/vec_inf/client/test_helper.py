@@ -21,6 +21,7 @@ from vec_inf.client._helper import (
     ModelStatusMonitor,
     PerformanceMetricsCollector,
 )
+from vec_inf.client._slurm_script_generator import format_engine_arg_value
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     ModelStatus,
@@ -172,7 +173,6 @@ class TestModelLauncher:
             '-cc={"cudagraph_capture_sizes":[1,2,4]},'
             "--max-model-len=8192,"
             '-ac={"backend": "FLASH_ATTN"},'
-            "--chat-template-content-format='a,b',"
             '-dc={"steps": 4}',
             "vllm",
         )
@@ -184,9 +184,69 @@ class TestModelLauncher:
             "--compilation-config": '{"cudagraph_capture_sizes":[1,2,4]}',
             "--max-model-len": "8192",
             "--attention-config": '{"backend": "FLASH_ATTN"}',
-            "--chat-template-content-format": "'a,b'",
             "--diffusion-config": '{"steps": 4}',
         }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_multi_value_flags(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Flags taking several values keep all of them, in both forms."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        for arg_string in (
+            "--cudagraph-capture-sizes 1 2 4 8,--served-model-name a b",
+            "--cudagraph-capture-sizes=1 2 4 8,--served-model-name=a b",
+        ):
+            args = launcher._process_engine_args(arg_string, "vllm")
+            assert args == {
+                "--cudagraph-capture-sizes": "1 2 4 8",
+                "--served-model-name": "a b",
+            }
+            # Each value becomes separate words in the generated script
+            assert format_engine_arg_value(args["--cudagraph-capture-sizes"]) == (
+                "1 2 4 8"
+            )
+            assert format_engine_arg_value(args["--served-model-name"]) == "a b"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_quotes_outside_json(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """A quote outside braces does not swallow the following arguments."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        args = launcher._process_engine_args("--x=it's,-tp=2", "vllm")
+
+        assert args == {"--x": "it's", "--tensor-parallel-size": "2"}
+
+    @pytest.mark.parametrize(
+        "arg_string",
+        [
+            '-sc={"method":"ngram",-tp=2',
+            "-cc=[1,2,-tp=2",
+            '-sc={"method":"ngram},-tp=2',
+            "-tp=2}",
+        ],
+    )
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_unbalanced(
+        self, mock_path_exists, mock_load_config, arg_string, mock_configs
+    ):
+        """Unbalanced braces, brackets or quotes raise a clear error."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        with pytest.raises(ValueError, match="engine arguments"):
+            launcher._process_engine_args(arg_string, "vllm")
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
@@ -1327,6 +1387,29 @@ sglang:num_requests_total{model_name="m"} 9.0
         assert parsed["requests_waiting"] == 2.0
         assert parsed["kv_cache_usage"] == 0.5
         assert parsed["finished_requests_total"] == 9.0
+
+    def test_parse_sglang_dp_attention_ranks(self, collector):
+        """With --enable-dp-attention each DP group reports from its own rank.
+
+        Here TP=4 is split into two DP attention groups; group 0 reports from
+        tp_rank 0 and group 1 from tp_rank 2. Both groups must be counted, and
+        a group that reports from several ranks must be counted once.
+        """
+        text = """\
+sglang:num_running_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 5.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="1"} 5.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 3.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="3"} 3.0
+sglang:num_queue_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 1.0
+sglang:num_queue_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 2.0
+sglang:token_usage{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 0.2
+sglang:token_usage{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 0.4
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 8.0
+        assert parsed["requests_waiting"] == 3.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.3)
 
     def test_parse_vllm_data_parallel_engines(self, collector):
         """Samples from several engines are summed, KV cache usage is averaged."""

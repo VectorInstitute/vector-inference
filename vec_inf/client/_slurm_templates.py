@@ -144,9 +144,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
             "\n# Check for RDMA devices and set environment variable accordingly",
             "if ! command -v ibv_devices >/dev/null 2>&1; then",
-            '   echo "ibv_devices not found; forcing TCP. (No RDMA userland on host?)"',
-            "   export NCCL_IB_DISABLE=1",
-            '   export NCCL_ENV_ARG="--env NCCL_IB_DISABLE=1"',
+            "   # No RDMA tools on the host: leave the choice to NCCL, which",
+            "   # falls back to TCP sockets when it finds no usable IB device.",
+            '   echo "ibv_devices not found; letting NCCL pick the transport"',
+            '   export NCCL_ENV_ARG=""',
             "else",
             "   # Pick GID index based on link layer (IB vs RoCE)",
             '   if ibv_devinfo 2>/dev/null | grep -q "link_layer:.*Ethernet"; then',
@@ -195,9 +196,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         ],
     },
     "find_server_port": [
-        # Max 55535: SGLang also binds a gRPC port at server port + 10000 and
-        # refuses to start if that is above 65535
-        "\nserver_port_number=$(find_available_port $head_node 8080 55535)",
+        # 20000-55535: stay above Ray's worker port range (10002-19999), and
+        # SGLang also binds a gRPC port at server port + 10000, which must not
+        # go above 65535
+        "\nserver_port_number=$(find_available_port $head_node 20000 55535)",
         'server_address="http://${head_node}:${server_port_number}/v1"',
     ],
     "write_to_json": [
@@ -320,8 +322,9 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
-        # Max 55535: SGLang also binds a gRPC port at server port + 10000
-        "server_port_number=$(find_available_port $head_node_ip 8080 55535)",
+        # 20000-55535: above Ray's worker port range, and SGLang also binds a
+        # gRPC port at server port + 10000
+        "server_port_number=$(find_available_port $head_node_ip 20000 55535)",
         'server_address="http://${{head_node_ip}}:${{server_port_number}}/v1"\n',
         "echo $server_address\n",
     ],
