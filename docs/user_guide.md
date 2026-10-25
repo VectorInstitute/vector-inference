@@ -76,8 +76,10 @@ vec-inf launch Qwen2.5-3B-Instruct \
 
 For the full list of inference engine arguments, you can find them here:
 
-* [vLLM: `vllm serve` Arguments](https://docs.vllm.ai/en/stable/serving/engine_args.html)
+* [vLLM: `vllm serve` Arguments](https://docs.vllm.ai/en/v0.32.0/configuration/engine_args.html)
 * [SGLang: Server Arguments](https://docs.sglang.io/advanced_features/server_arguments.html)
+
+Short aliases are expanded to the long argument names before launch. For vLLM these are the aliases `vllm serve` itself accepts, for example `-tp`, `-pp`, `-dp`, `-ep` (`--enable-expert-parallel`), `-cc` (`--compilation-config`), `-q` (`--quantization`) and `-O3` (`--optimization-level 3`). For SGLang, `--tp`, `--pp`, `--dp` and `--ep`/`--ep-size` map to `--tensor-parallel-size`, `--pipeline-parallel-size`, `--data-parallel-size` and `--expert-parallel-size`.
 
 #### Custom models
 
@@ -241,22 +243,31 @@ vec-inf metrics 15373800
 And you will see the performance metrics streamed to your console, note that the metrics are updated with a 2-second interval.
 
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
-┃ Metric                  ┃ Value           ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
-│ Prompt Throughput       │ 10.9 tokens/s   │
-│ Generation Throughput   │ 34.2 tokens/s   │
-│ Requests Running        │ 1 reqs          │
-│ Requests Waiting        │ 0 reqs          │
-│ Requests Swapped        │ 0 reqs          │
-│ GPU Cache Usage         │ 0.1%            │
-│ CPU Cache Usage         │ 0.0%            │
-│ Avg Request Latency     │ 2.6 s           │
-│ Total Prompt Tokens     │ 441 tokens      │
-│ Total Generation Tokens │ 1748 tokens     │
-│ Successful Requests     │ 14 reqs         │
-└─────────────────────────┴─────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Metric                  ┃ Value         ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ Prompt Throughput       │ 16.9 tokens/s │
+│ Generation Throughput   │ 50.8 tokens/s │
+│ Requests Running        │ 0 reqs        │
+│ Requests Waiting        │ 0 reqs        │
+│ KV Cache Usage          │ 0.0%          │
+│ Preemptions             │ 0             │
+│ Prefix Cache Hit Rate   │ 0.0%          │
+│ Avg Request Latency     │ 0.1 s         │
+│ Avg Queue Time          │ 0.00 s        │
+│ Total Prompt Tokens     │ 69 tokens     │
+│ Total Generation Tokens │ 208 tokens    │
+│ Successful Requests     │ 8 reqs        │
+└─────────────────────────┴───────────────┘
 ```
+
+**Notes**
+
+* The metrics come from the server's Prometheus `/metrics` endpoint. Counters are summed over all engines (for example with `--data-parallel-size`), and KV cache usage is averaged over them.
+* KV cache usage is the share of the GPU KV cache in use. vLLM 0.32 no longer reports separate GPU and CPU cache usage or swapped requests, so those rows were replaced by **KV Cache Usage** and **Preemptions**.
+* The prefix cache hit rate is the share of prompt tokens served from the prefix cache since the server started. Prefix caching is on by default in vLLM and SGLang, so the row is shown whenever the server reports it.
+* **Successful Requests** counts requests that finished normally. Requests aborted by the client or failed with an error are not counted.
+* SGLang servers launched by `vec-inf` are started with `--enable-metrics`, which SGLang needs before it serves `/metrics`.
 
 ### `shutdown` command
 
@@ -347,8 +358,7 @@ Once the inference server is ready, you can start sending in inference requests.
                 "content":"Arrr, I be Captain Chatbeard, the scurviest chatbot on the seven seas! Ye be wantin' to know me identity, eh? Well, matey, I be a swashbucklin' AI, here to provide ye with answers and swappin' tales, savvy?",
                 "role":"assistant",
                 "function_call":null,
-                "tool_calls":[],
-                "reasoning_content":null
+                "reasoning":null
             },
             "stop_reason":null
         }

@@ -61,8 +61,11 @@ vllm = [
 # SGLang inference backend (conflicts with vllm due to dependency version conflicts)
 # Install with: uv sync --extra sglang --group inference
 sglang = [
+    # sglang pins its own kernel package (sglang-kernel). Do not add the older
+    # sgl-kernel distribution here: both install the sgl_kernel module, and the
+    # old one is built for a different torch, so importing it fails with an
+    # undefined c10 symbol.
     "sglang>=0.5.5",
-    "sgl_kernel>=0.3.0",
     "orjson>=3.11.0",
     "torchao>=0.9.0",
 ]

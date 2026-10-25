@@ -10417,15 +10417,6 @@ wheels = [
 ]
 
 [[package]]
-name = "sgl-kernel"
-version = "0.3.21"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/2b/f1aeca98bc856c14d870f1dcf38bca35cf84ffe58874c67402b0f862ed18/sgl_kernel-0.3.21-cp310-abi3-manylinux2014_aarch64.whl", hash = "sha256:bafdcc26e9ce1e9102b99e4186d652fefbafe5c22ea2cbb5ffe07b331e83be1f", size = 626572173, upload-time = "2026-01-15T03:48:32.615Z" },
-    { url = "https://files.pythonhosted.org/packages/36/9f/f836e126002c7cfcfe35418f6cff5a63fe3f529c609b334ca4775354b4d5/sgl_kernel-0.3.21-cp310-abi3-manylinux2014_x86_64.whl", hash = "sha256:57dfb3a2a3cd759f499c32e2bad5f6489b7c58f7f9a84ee00c53ec92d303aaab", size = 535601072, upload-time = "2026-01-14T05:41:11.594Z" },
-]
-
-[[package]]
 name = "sglang"
 version = "0.5.12.post1"
 source = { registry = "https://pypi.org/simple" }
@@ -12019,7 +12010,6 @@ dependencies = [
 [package.optional-dependencies]
 sglang = [
     { name = "orjson" },
-    { name = "sgl-kernel" },
     { name = "sglang" },
     { name = "torchao" },
 ]
@@ -12078,7 +12068,6 @@ requires-dist = [
     { name = "ray", extras = ["default"], marker = "extra == 'vllm'", specifier = ">=2.51.0" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "rich", specifier = ">=13.7.0" },
-    { name = "sgl-kernel", marker = "extra == 'sglang'", specifier = ">=0.3.0" },
     { name = "sglang", marker = "extra == 'sglang'", specifier = ">=0.5.5" },
     { name = "torchao", marker = "extra == 'sglang'", specifier = ">=0.9.0" },
     { name = "torchcodec", marker = "extra == 'vllm'", specifier = ">=0.14.0" },

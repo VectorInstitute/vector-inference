@@ -1180,6 +1180,150 @@ vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert "Connection refused" in result
 
 
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+class TestPrometheusMetricsParsing:
+    """Parsing of real vLLM 0.32 and SGLang Prometheus exposition text."""
+
+    @pytest.fixture
+    def collector(self, mock_status_response):
+        """Return a collector whose status lookup is mocked out."""
+        with patch("vec_inf.client._helper.ModelStatusMonitor") as monitor:
+            monitor.return_value.process_model_status.return_value = (
+                mock_status_response
+            )
+            yield PerformanceMetricsCollector("12345")
+
+    def test_parse_vllm_0_32_live_capture(self, collector):
+        """Parse /metrics captured from a live vLLM 0.32.0 server.
+
+        The fixture was scraped from Llama-3.2-1B-Instruct served by vec-inf on
+        two A40 nodes (pipeline parallel 2) while 48 requests were in flight.
+        """
+        text = (FIXTURES_DIR / "vllm_0.32.0_metrics.txt").read_text()
+
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 5.0
+        assert parsed["requests_waiting"] == 0.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.0001261901306698343)
+        assert parsed["preemptions_total"] == 0.0
+        assert parsed["total_prompt_tokens"] == 572.0
+        assert parsed["total_generation_tokens"] == 217.0
+        assert parsed["request_latency_sum"] == pytest.approx(6.5164635181427)
+        assert parsed["request_latency_count"] == 8.0
+        assert parsed["queue_time_count"] == 8.0
+        # stop (1) + length (7); abort, error and repetition are all 0 here
+        assert parsed["successful_requests_total"] == 8.0
+        assert parsed["prefix_cache_queries"] == 1307.0
+        assert parsed["prefix_cache_hits"] == 960.0
+        assert parsed["prefix_cache_hit_rate"] == pytest.approx(960.0 / 1307.0)
+        # The removed V0 metrics are not in the output, so they are not reported
+        assert "gpu_cache_usage" not in parsed
+        assert "requests_swapped" not in parsed
+
+    def test_parse_vllm_data_parallel_engines(self, collector):
+        """Samples from several engines are summed, KV cache usage is averaged."""
+        text = """\
+# HELP vllm:num_requests_running Number of requests in model execution batches.
+# TYPE vllm:num_requests_running gauge
+vllm:num_requests_running{engine="0",model_name="m"} 3.0
+vllm:num_requests_running{engine="1",model_name="m"} 2.0
+vllm:num_requests_waiting{engine="0",model_name="m"} 1.0
+vllm:num_requests_waiting{engine="1",model_name="m"} 4.0
+vllm:kv_cache_usage_perc{engine="0",model_name="m"} 0.2
+vllm:kv_cache_usage_perc{engine="1",model_name="m"} 0.6
+# TYPE vllm:prompt_tokens counter
+vllm:prompt_tokens_total{engine="0",model_name="m"} 100.0
+vllm:prompt_tokens_total{engine="1",model_name="m"} 50.0
+vllm:prompt_tokens_created{engine="0",model_name="m"} 1.7929e+09
+vllm:num_preemptions_total{engine="0",model_name="m"} 1.0
+vllm:num_preemptions_total{engine="1",model_name="m"} 2.0
+vllm:prefix_cache_queries_total{engine="0",model_name="m"} 100.0
+vllm:prefix_cache_queries_total{engine="1",model_name="m"} 300.0
+vllm:prefix_cache_hits_total{engine="0",model_name="m"} 50.0
+vllm:prefix_cache_hits_total{engine="1",model_name="m"} 50.0
+vllm:request_success_total{engine="0",finished_reason="stop",model_name="m"} 5.0
+vllm:request_success_total{engine="0",finished_reason="length",model_name="m"} 2.0
+vllm:request_success_total{engine="0",finished_reason="abort",model_name="m"} 7.0
+vllm:request_success_total{engine="1",finished_reason="error",model_name="m"} 9.0
+vllm:request_success_total{engine="1",finished_reason="repetition",model_name="m"} 1.0
+vllm:e2e_request_latency_seconds_sum{engine="0",model_name="m"} 4.0 1792949107000
+vllm:e2e_request_latency_seconds_count{engine="0",model_name="m"} 2.0
+vllm:e2e_request_latency_seconds_sum{engine="1",model_name="m"} 2.0
+vllm:e2e_request_latency_seconds_count{engine="1",model_name="m"} 2.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 5.0
+        assert parsed["requests_waiting"] == 5.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.4)
+        assert parsed["total_prompt_tokens"] == 150.0
+        assert parsed["preemptions_total"] == 3.0
+        assert parsed["prefix_cache_hit_rate"] == pytest.approx(100.0 / 400.0)
+        # abort and error are excluded, repetition counts as finished
+        assert parsed["successful_requests_total"] == 8.0
+        # trailing exposition timestamps are ignored
+        assert parsed["request_latency_sum"] == 6.0
+        assert parsed["request_latency_count"] == 4.0
+
+    def test_parse_prefix_cache_without_queries(self, collector):
+        """A fresh server reports 0 queries; the hit rate is 0, not a crash."""
+        text = """\
+vllm:prefix_cache_queries_total{engine="0",model_name="m"} 0.0
+vllm:prefix_cache_hits_total{engine="0",model_name="m"} 0.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["prefix_cache_hit_rate"] == 0.0
+
+    def test_parse_label_values_with_spaces_and_quotes(self, collector):
+        """Label values may contain spaces, commas and escaped quotes."""
+        text = (
+            'vllm:request_success_total{engine="0",finished_reason="abort",'
+            'model_name="my model, \\"v2\\""} 3.0\n'
+            'vllm:request_success_total{engine="0",finished_reason="stop",'
+            'model_name="my model, \\"v2\\""} 4.0\n'
+            'vllm:num_requests_running{engine="0",model_name="a b"} 2.0\n'
+        )
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["successful_requests_total"] == 4.0
+        assert parsed["requests_running"] == 2.0
+
+    def test_parse_sglang_metrics(self, collector):
+        """Parse SGLang metrics (names from SGLang 0.5.12.post1)."""
+        text = """\
+# HELP sglang:num_running_reqs The number of running requests.
+# TYPE sglang:num_running_reqs gauge
+sglang:num_running_reqs{model_name="m",pp_rank="0",tp_rank="0"} 3.0
+sglang:num_queue_reqs{model_name="m",pp_rank="0",tp_rank="0"} 2.0
+sglang:token_usage{model_name="m",pp_rank="0",tp_rank="0"} 0.25
+sglang:cache_hit_rate{model_name="m",pp_rank="0",tp_rank="0"} 0.5
+sglang:num_retracted_requests_total{model_name="m",pp_rank="0",tp_rank="0"} 1.0
+sglang:prompt_tokens_total{model_name="m"} 1000.0
+sglang:generation_tokens_total{model_name="m"} 400.0
+sglang:num_requests_total{model_name="m"} 10.0
+sglang:e2e_request_latency_seconds_sum{model_name="m"} 5.0
+sglang:e2e_request_latency_seconds_count{model_name="m"} 10.0
+sglang:queue_time_seconds_sum{model_name="m"} 0.5
+sglang:queue_time_seconds_count{model_name="m"} 10.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 3.0
+        assert parsed["requests_waiting"] == 2.0
+        assert parsed["kv_cache_usage"] == 0.25
+        assert parsed["prefix_cache_hit_rate"] == 0.5
+        assert parsed["preemptions_total"] == 1.0
+        assert parsed["total_prompt_tokens"] == 1000.0
+        assert parsed["total_generation_tokens"] == 400.0
+        assert parsed["successful_requests_total"] == 10.0
+        assert parsed["request_latency_sum"] == 5.0
+        assert parsed["queue_time_sum"] == 0.5
+
+
 class TestModelRegistry:
     """Unit tests for the ModelRegistry class."""
 

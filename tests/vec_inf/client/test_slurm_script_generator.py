@@ -1,5 +1,6 @@
 """Unit tests for slurm script generator component in the vec_inf.client module."""
 
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import mock_open, patch
@@ -243,6 +244,49 @@ class TestSlurmScriptGenerator:
         assert "sglang.launch_server" in launch_cmd
         assert "--context-length 8192" in launch_cmd
         assert "--tensor-parallel-size 4" in launch_cmd
+
+    def test_generate_launch_cmd_vllm_executor_backend(
+        self, basic_params, multinode_params
+    ):
+        """Only multi-node vLLM selects the Ray executor started by the script."""
+        single = SlurmScriptGenerator(basic_params)._generate_launch_cmd()
+        multi = SlurmScriptGenerator(multinode_params)._generate_launch_cmd()
+
+        assert "--distributed-executor-backend" not in single
+        assert multi.rstrip().endswith("--distributed-executor-backend ray")
+        # The command must not end with a dangling line continuation
+        assert not single.rstrip().endswith("\\")
+
+    @pytest.mark.parametrize("num_nodes", ["1", "2"])
+    @pytest.mark.parametrize("engine_args", [{}, {"--context-length": "8192"}])
+    def test_generate_launch_cmd_sglang_enables_metrics(
+        self, basic_params, num_nodes, engine_args
+    ):
+        """SGLang is always launched with --enable-metrics so /metrics exists."""
+        sglang_params = basic_params.copy()
+        sglang_params["engine"] = "sglang"
+        sglang_params["num_nodes"] = num_nodes
+        sglang_params["engine_args"] = engine_args
+
+        generator = SlurmScriptGenerator(sglang_params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert launch_cmd.count("--enable-metrics") == 1
+        # The whole generated script must still be valid bash
+        result = subprocess.run(
+            ["bash", "-n"],
+            input=generator._generate_script_content(),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr
+
+    def test_generate_launch_cmd_vllm_has_no_enable_metrics(self, basic_params):
+        """VLLM always serves /metrics; the SGLang flag must not leak into it."""
+        launch_cmd = SlurmScriptGenerator(basic_params)._generate_launch_cmd()
+
+        assert "--enable-metrics" not in launch_cmd
 
     def test_generate_server_setup_sglang_multinode(self, basic_params):
         """Test SGLang multi-node setup."""
@@ -723,6 +767,8 @@ class TestBatchSlurmScriptGenerator:
         # Verify the script content includes SGLang command
         call_args = mock_write_text.call_args[0][0]
         assert "sglang.launch_server" in call_args
+        assert "--enable-metrics" in call_args
+        assert not call_args.rstrip().endswith("\\")
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")
