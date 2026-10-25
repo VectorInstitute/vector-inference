@@ -259,6 +259,13 @@ class TestStatusResponseFormatter:
         assert "failed_reason" in json_dict
 
 
+def _table_rows(table: Table) -> dict[str, str]:
+    """Return a rich table's rows as {first column: second column}."""
+    names = [str(cell) for cell in table.columns[0]._cells]
+    values = [str(cell) for cell in table.columns[1]._cells]
+    return dict(zip(names, values))
+
+
 class TestMetricsResponseFormatter:
     """Test cases for MetricsResponseFormatter."""
 
@@ -269,9 +276,8 @@ class TestMetricsResponseFormatter:
             "generation_tokens_per_sec": 250.2,
             "requests_running": 3,
             "requests_waiting": 1,
-            "requests_swapped": 0,
-            "gpu_cache_usage": 0.75,
-            "cpu_cache_usage": 0.25,
+            "kv_cache_usage": 0.75,
+            "preemptions_total": 2,
             "total_prompt_tokens": 1000,
             "total_generation_tokens": 2500,
             "successful_requests_total": 10,
@@ -281,20 +287,30 @@ class TestMetricsResponseFormatter:
         formatter.format_metrics()
 
         assert isinstance(formatter.table, Table)
-        assert len(formatter.table.rows) > 0
+        rows = _table_rows(formatter.table)
+        assert rows["Prompt Throughput"] == "100.5 tokens/s"
+        assert rows["Generation Throughput"] == "250.2 tokens/s"
+        assert rows["Requests Running"] == "3 reqs"
+        assert rows["Requests Waiting"] == "1 reqs"
+        assert rows["KV Cache Usage"] == "75.0%"
+        assert rows["Preemptions"] == "2"
+        assert rows["Successful Requests"] == "10 reqs"
+        # Metrics vLLM V1 no longer exports must not be shown
+        assert "Requests Swapped" not in rows
+        assert "GPU Cache Usage" not in rows
+        assert "CPU Cache Usage" not in rows
+        # No prefix cache data, no prefix cache row
+        assert "Prefix Cache Hit Rate" not in rows
 
     def test_format_metrics_with_prefix_caching(self):
-        """Test formatting metrics with prefix caching enabled."""
+        """Test the prefix cache hit rate row is shown when reported."""
         metrics = {
             "prompt_tokens_per_sec": 100.0,
             "generation_tokens_per_sec": 200.0,
             "requests_running": 2,
             "requests_waiting": 0,
-            "requests_swapped": 0,
-            "gpu_cache_usage": 0.5,
-            "cpu_cache_usage": 0.1,
-            "gpu_prefix_cache_hit_rate": 0.8,
-            "cpu_prefix_cache_hit_rate": 0.6,
+            "kv_cache_usage": 0.5,
+            "prefix_cache_hit_rate": 0.8,
             "total_prompt_tokens": 500,
             "total_generation_tokens": 1000,
             "successful_requests_total": 5,
@@ -303,9 +319,9 @@ class TestMetricsResponseFormatter:
         formatter = MetricsResponseFormatter(metrics)
         formatter.format_metrics()
 
-        assert formatter.enabled_prefix_caching is True
-        assert isinstance(formatter.table, Table)
-        assert len(formatter.table.rows) > 0
+        rows = _table_rows(formatter.table)
+        assert rows["Prefix Cache Hit Rate"] == "80.0%"
+        assert rows["KV Cache Usage"] == "50.0%"
 
     def test_format_metrics_with_latency(self):
         """Test formatting metrics with latency information."""
@@ -314,10 +330,9 @@ class TestMetricsResponseFormatter:
             "generation_tokens_per_sec": 300.0,
             "requests_running": 1,
             "requests_waiting": 0,
-            "requests_swapped": 0,
-            "gpu_cache_usage": 0.3,
-            "cpu_cache_usage": 0.1,
+            "kv_cache_usage": 0.3,
             "avg_request_latency": 2.5,
+            "avg_queue_time": 0.125,
             "total_prompt_tokens": 750,
             "total_generation_tokens": 1500,
             "successful_requests_total": 8,
@@ -326,8 +341,9 @@ class TestMetricsResponseFormatter:
         formatter = MetricsResponseFormatter(metrics)
         formatter.format_metrics()
 
-        assert isinstance(formatter.table, Table)
-        assert len(formatter.table.rows) > 0
+        rows = _table_rows(formatter.table)
+        assert rows["Avg Request Latency"] == "2.5 s"
+        assert rows["Avg Queue Time"] == "0.12 s"
 
     def test_format_failed_metrics(self):
         """Test formatting failed metrics with error message."""
@@ -349,18 +365,6 @@ class TestMetricsResponseFormatter:
         metrics_dict = {"prompt_tokens_per_sec": 100.0}
         formatter = MetricsResponseFormatter(metrics_dict)
         assert formatter.metrics == metrics_dict
-
-    def test_check_prefix_caching_enabled(self):
-        """Test prefix caching detection when enabled."""
-        metrics = {"gpu_prefix_cache_hit_rate": 0.8}
-        formatter = MetricsResponseFormatter(metrics)
-        assert formatter.enabled_prefix_caching is True
-
-    def test_check_prefix_caching_disabled(self):
-        """Test prefix caching detection when disabled."""
-        metrics = {"prompt_tokens_per_sec": 100.0}
-        formatter = MetricsResponseFormatter(metrics)
-        assert formatter.enabled_prefix_caching is False
 
 
 class TestListCmdDisplay:

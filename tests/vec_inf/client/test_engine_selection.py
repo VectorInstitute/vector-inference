@@ -294,8 +294,17 @@ class TestEngineArgsProcessing:
         launcher = ModelLauncher("test-model", {})
 
         # Should work for vLLM
+        # vLLM expands -O<n> to --optimization-level <n>, not --compilation-config
         processed_args = launcher._process_engine_args("-O3", "vllm")
-        assert processed_args["--compilation-config"] == "3"
+        assert processed_args == {"--optimization-level": "3"}
+        assert launcher._process_engine_args("-O=2", "vllm") == {
+            "--optimization-level": "2"
+        }
+        assert launcher._process_engine_args("-O 1", "vllm") == {
+            "--optimization-level": "1"
+        }
+        with pytest.raises(ValueError, match="-O requires an optimization level"):
+            launcher._process_engine_args("-O", "vllm")
 
         # Should raise error for SGLang
         with pytest.raises(ValueError, match="-O is only supported for vLLM"):
@@ -350,7 +359,9 @@ class TestEngineConstants:
         assert "-tp" in VLLM_SHORT_TO_LONG_MAP
         assert VLLM_SHORT_TO_LONG_MAP["-tp"] == "--tensor-parallel-size"
         assert "-O" in VLLM_SHORT_TO_LONG_MAP
-        assert VLLM_SHORT_TO_LONG_MAP["-O"] == "--compilation-config"
+        assert VLLM_SHORT_TO_LONG_MAP["-O"] == "--optimization-level"
+        assert VLLM_SHORT_TO_LONG_MAP["-cc"] == "--compilation-config"
+        assert VLLM_SHORT_TO_LONG_MAP["-ep"] == "--enable-expert-parallel"
 
     def test_sglang_short_to_long_map(self):
         """Test SGLang short to long argument mappings."""

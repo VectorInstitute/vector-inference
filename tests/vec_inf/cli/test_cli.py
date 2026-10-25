@@ -306,7 +306,7 @@ def test_metrics_command_server_ready(runner):
         mock_response.metrics = {
             "prompt_tokens_per_sec": 100.0,
             "generation_tokens_per_sec": 500.0,
-            "gpu_cache_usage": 0.5,
+            "kv_cache_usage": 0.5,
         }
         mock_client.get_metrics.return_value = mock_response
 

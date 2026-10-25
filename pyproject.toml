@@ -50,12 +50,13 @@ inference = [
 [project.optional-dependencies]
 # vLLM inference backend (conflicts with sglang due to dependency version conflicts)
 # Install with: uv sync --extra vllm --group inference
+# vLLM 0.32 requires Python 3.11 or newer, so the extra skips vllm on Python 3.10
+# (the vec-inf client itself still supports 3.10). vLLM 0.32 needs torchcodec
+# 0.14 or newer for video decoding.
 vllm = [
-    "vllm>=0.11.2",
+    "vllm[audio,bench]==0.32.0; python_version >= '3.11'",
     "ray[default]>=2.51.0",
-    "vllm[audio]",
-    "vllm[bench]",
-    "torchcodec>=0.9.0,<0.10.0",
+    "torchcodec>=0.14.0",
 ]
 # SGLang inference backend (conflicts with vllm due to dependency version conflicts)
 # Install with: uv sync --extra sglang --group inference

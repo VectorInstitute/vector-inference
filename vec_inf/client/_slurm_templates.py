@@ -209,6 +209,8 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
+            # SGLang only serves /metrics (used by `vec-inf metrics`) with this flag
+            "    --enable-metrics \\",
         ],
         "sglang_multinode": [
             "for ((i = 0; i < $SLURM_JOB_NUM_NODES; i++)); do",
@@ -221,6 +223,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "            --served-model-name {model_name} \\",
             '            --host "0.0.0.0" \\',
             "            --port $server_port_number \\",
+            "            --enable-metrics \\",
             '            --nccl-init-addr "$NCCL_INIT_ADDR" \\',
             "            --nnodes {num_nodes} \\",
             '            --node-rank "$i" \\',
@@ -332,6 +335,8 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
+            # SGLang only serves /metrics (used by `vec-inf metrics`) with this flag
+            "    --enable-metrics \\",
         ],
     },
 }

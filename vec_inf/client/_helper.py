@@ -5,6 +5,7 @@ metrics collection, and model registry operations.
 """
 
 import json
+import re
 import time
 import warnings
 from pathlib import Path
@@ -19,6 +20,7 @@ from vec_inf.client._client_vars import (
     BATCH_MODE_REQUIRED_MATCHING_ARGS,
     ENGINE_SHORT_TO_LONG_MAP,
     KEY_METRICS,
+    KEY_METRICS_EXCLUDED_LABELS,
     SRC_DIR,
     SUPPORTED_ENGINES,
 )
@@ -42,6 +44,14 @@ from vec_inf.client.models import (
     ModelType,
     StatusResponse,
 )
+
+
+# One Prometheus sample line: name, optional {labels}, value (timestamp ignored)
+_PROM_SAMPLE_RE = re.compile(
+    r"^([a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{(.*)\})?\s+(\S+)(?:\s+\S+)?$"
+)
+# One label pair inside the braces, allowing escaped quotes in the value
+_PROM_LABEL_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"')
 
 
 class ModelLauncher:
@@ -167,19 +177,24 @@ class ModelLauncher:
         engine_args: dict[str, str | bool] = {}
         engine_arg_map = ENGINE_SHORT_TO_LONG_MAP[engine_choice]
 
-        for arg in arg_string.split(","):
-            if "=" in arg:
-                key, value = arg.split("=")
-                if key.strip() in engine_arg_map:
-                    key = engine_arg_map[key.strip()]
-                engine_args[key.strip()] = value.strip()
-            elif "-O" in arg.strip():
+        for raw_arg in arg_string.split(","):
+            arg = raw_arg.strip()
+            if not arg:
+                continue
+            if arg.startswith("-O"):
+                # vLLM optimization level shorthand: -O3, -O=3 or -O 3
                 if engine_choice != "vllm":
                     raise ValueError("-O is only supported for vLLM")
-                key = engine_arg_map["-O"]
-                engine_args[key] = arg.strip()[2:].strip()
+                level = arg[2:].lstrip("= ").strip()
+                if not level:
+                    raise ValueError("-O requires an optimization level, e.g. -O3")
+                engine_args[engine_arg_map["-O"]] = level
+            elif "=" in arg:
+                key, value = arg.split("=", 1)
+                key = key.strip()
+                engine_args[engine_arg_map.get(key, key)] = value.strip()
             else:
-                engine_args[arg.strip()] = True
+                engine_args[engine_arg_map.get(arg, arg)] = True
         return engine_args
 
     def _process_env_vars(self, env_arg: str) -> dict[str, str]:
@@ -949,7 +964,6 @@ class PerformanceMetricsCollector:
         self.status_info = self._get_status_info()
         self.log_dir = self.status_info.log_dir
         self.metrics_url = self._build_metrics_url()
-        self.enabled_prefix_caching = self._check_prefix_caching()
 
         self._prev_prompt_tokens: float = 0.0
         self._prev_generation_tokens: float = 0.0
@@ -992,26 +1006,32 @@ class PerformanceMetricsCollector:
             (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
         )
 
-    def _check_prefix_caching(self) -> bool:
-        """Check if prefix caching is enabled.
+    @staticmethod
+    def _parse_labels(label_text: str) -> dict[str, str]:
+        """Parse the label set of a Prometheus sample.
+
+        Parameters
+        ----------
+        label_text : str
+            Text between the braces, e.g. ``engine="0",model_name="m"``
 
         Returns
         -------
-        bool
-            True if prefix caching is enabled, False otherwise
+        dict[str, str]
+            Label names mapped to their (unescaped) values
         """
-        job_json = utils.read_slurm_log(
-            self.status_info.model_name,
-            self.slurm_job_id,
-            "json",
-            self.log_dir,
-        )
-        if isinstance(job_json, str):
-            return False
-        return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
+        return {
+            name: value.replace('\\"', '"').replace("\\\\", "\\")
+            for name, value in _PROM_LABEL_RE.findall(label_text)
+        }
 
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
-        """Parse metrics with latency count and sum.
+        """Parse Prometheus text exposition into vec-inf metric values.
+
+        Every sample of a tracked metric is aggregated across its label sets
+        (engines, finish reasons, ranks) as configured in ``KEY_METRICS``. The
+        prefix cache hit rate is derived from the hit and query counters when
+        the server does not export it directly.
 
         Parameters
         ----------
@@ -1023,27 +1043,42 @@ class PerformanceMetricsCollector:
         dict[str, float]
             Parsed metrics as key-value pairs
         """
-        key_metrics = KEY_METRICS
+        samples: dict[str, list[float]] = {}
+        for raw_line in metrics_text.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
 
-        if self.enabled_prefix_caching:
-            key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
-            key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
+            match = _PROM_SAMPLE_RE.match(line)
+            if not match:
+                continue
+            metric_name, label_text, value_text = match.groups()
+            if metric_name not in KEY_METRICS:
+                continue
+
+            excluded = KEY_METRICS_EXCLUDED_LABELS.get(metric_name)
+            if excluded and label_text:
+                labels = self._parse_labels(label_text)
+                if any(labels.get(k) in values for k, values in excluded.items()):
+                    continue
+
+            try:
+                value = float(value_text)
+            except ValueError:
+                continue
+            samples.setdefault(metric_name, []).append(value)
 
         parsed: dict[str, float] = {}
-        for line in metrics_text.split("\n"):
-            if line.startswith("#") or not line.strip():
-                continue
+        for metric_name, values in samples.items():
+            key, aggregation = KEY_METRICS[metric_name]
+            total = sum(values)
+            parsed[key] = total / len(values) if aggregation == "mean" else total
 
-            parts = line.split()
-            if len(parts) < 2:
-                continue
-
-            metric_name = parts[0].split("{")[0]
-            if metric_name in key_metrics:
-                try:
-                    parsed[key_metrics[metric_name]] = float(parts[1])
-                except (ValueError, IndexError):
-                    continue
+        if "prefix_cache_hit_rate" not in parsed and "prefix_cache_queries" in parsed:
+            queries = parsed["prefix_cache_queries"]
+            parsed["prefix_cache_hit_rate"] = (
+                parsed.get("prefix_cache_hits", 0.0) / queries if queries > 0 else 0.0
+            )
         return parsed
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
@@ -1119,6 +1154,18 @@ class PerformanceMetricsCollector:
                 latency_count = current_metrics["request_latency_count"]
                 current_metrics["avg_request_latency"] = (
                     latency_sum / latency_count if latency_count > 0 else 0.0
+                )
+
+            # Calculate average queue time if data is available
+            if (
+                "queue_time_sum" in current_metrics
+                and "queue_time_count" in current_metrics
+            ):
+                queue_count = current_metrics["queue_time_count"]
+                current_metrics["avg_queue_time"] = (
+                    current_metrics["queue_time_sum"] / queue_count
+                    if queue_count > 0
+                    else 0.0
                 )
 
             return current_metrics

@@ -197,8 +197,9 @@ class SlurmScriptGenerator:
             else:
                 launch_cmd.append(f"    {arg} {value} \\")
 
-        # A known bug in vLLM requires setting backend to ray for multi-node
-        # Remove this when the bug is fixed
+        # Multi-node vLLM runs on the Ray cluster started in the server setup
+        # section, so the Ray executor must be selected explicitly. vLLM only
+        # picks Ray on its own when it is already connected to a Ray cluster.
         if self.is_multinode:
             launch_cmd.append("    --distributed-executor-backend ray \\")
 

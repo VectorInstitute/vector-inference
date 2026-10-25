@@ -6,6 +6,7 @@ and configuration handling for the vector inference package.
 
 import json
 import os
+import re
 import subprocess
 import warnings
 from pathlib import Path
@@ -19,6 +20,19 @@ from vec_inf.client._exceptions import MissingRequiredFieldsError
 from vec_inf.client._slurm_vars import CACHED_MODEL_CONFIG_PATH, REQUIRED_ARGS
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import ModelStatus
+
+
+# Log lines that carry an explicit non-error level are never treated as fatal,
+# even when they mention a failure. For example Ray logs a warning that it
+# failed to connect to its observability pubsub during multi-node startup.
+# Patterns, in order: vLLM log lines (level then MM-DD HH:MM:SS), Ray Python
+# logging (date, time, then level) and Ray C++ glog lines (single letter level
+# inside the leading bracket).
+_NON_ERROR_LOG_LINE_PATTERNS = (
+    re.compile(r"\b(?:DEBUG|INFO|WARNING) \d{2}-\d{2} \d{2}:\d{2}:\d{2}\b"),
+    re.compile(r"^\d{4}-\d{2}-\d{2} [\d:,.]+\s+(?:DEBUG|INFO|WARNING)\s"),
+    re.compile(r"^\[\d{4}-\d{2}-\d{2} [\d:,.]+ [DIW] \d+ \d+\]"),
+)
 
 
 def run_bash_command(command: str) -> tuple[str, str]:
@@ -144,6 +158,9 @@ def is_server_running(
         if not ready_signature_found:
             # Skip lines that match ignore patterns
             if any(ignore_pattern in line_lower for ignore_pattern in ignore_patterns):
+                continue
+            # Skip log lines with an explicit non-error level
+            if any(p.search(line) for p in _NON_ERROR_LOG_LINE_PATTERNS):
                 continue
 
             # Check for fatal error patterns

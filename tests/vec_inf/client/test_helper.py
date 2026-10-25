@@ -132,7 +132,63 @@ class TestModelLauncher:
 
         assert vllm_args["--tensor-parallel-size"] == "4"
         assert vllm_args["--quantization"] == "awq"
-        assert vllm_args["--compilation-config"] == "3"
+        assert vllm_args["--optimization-level"] == "3"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_vllm_short_aliases(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test vLLM short aliases, including boolean ones, map to long names."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            "-tp=2, -pp=2, -dp=2, -ep, -q=fp8, --max-model-len=4096", "vllm"
+        )
+
+        assert vllm_args == {
+            "--tensor-parallel-size": "2",
+            "--pipeline-parallel-size": "2",
+            "--data-parallel-size": "2",
+            "--enable-expert-parallel": True,
+            "--quantization": "fp8",
+            "--max-model-len": "4096",
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_value_with_equals(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test only the first '=' separates the flag from its value."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            "--override-generation-config=temperature=0.5", "vllm"
+        )
+
+        assert vllm_args == {"--override-generation-config": "temperature=0.5"}
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_sglang_expert_parallel_aliases(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test --ep and --ep-size both map to SGLang's --expert-parallel-size."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        assert launcher._process_engine_args("--ep-size=4", "sglang") == {
+            "--expert-parallel-size": "4"
+        }
+        assert launcher._process_engine_args("--ep=2", "sglang") == {
+            "--expert-parallel-size": "2"
+        }
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
@@ -975,10 +1031,11 @@ vllm:generation_tokens_total{engine="0",model_name="test-model"} 1000.0
 vllm:e2e_request_latency_seconds_sum{engine="0",model_name="test-model"} 6.0
 vllm:e2e_request_latency_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_queue_time_seconds_sum{engine="0",model_name="test-model"} 1.5
+vllm:request_queue_time_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_success_total{engine="0",finished_reason="length",model_name="test-model"} 2.0
 vllm:num_requests_running{engine="0",model_name="test-model"} 1.0
 vllm:num_requests_waiting{engine="0",model_name="test-model"} 0.0
-vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
+vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.123
 """
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
@@ -994,26 +1051,6 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
-        assert collector.enabled_prefix_caching is False
-
-    @patch("vec_inf.client._helper.ModelStatusMonitor")
-    @patch("vec_inf.client._helper.utils.read_slurm_log")
-    def test_init_check_prefix_caching_enabled(
-        self, mock_read_slurm_log, mock_status_monitor, mock_status_response
-    ):
-        """Test __init__ when enable prefix caching is True."""
-        mock_status_monitor.return_value.process_model_status.return_value = (
-            mock_status_response
-        )
-        mock_read_slurm_log.return_value = {"enable_prefix_caching": True}
-
-        collector = PerformanceMetricsCollector("12345")
-
-        assert collector.slurm_job_id == "12345"
-        assert collector._prev_prompt_tokens == 0.0
-        assert collector._prev_generation_tokens == 0.0
-        assert collector._last_updated is None
-        assert collector.enabled_prefix_caching is True
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
     @patch("vec_inf.client._helper.utils.get_base_url")
@@ -1096,10 +1133,11 @@ vllm:generation_tokens_total{engine="0",model_name="test-model"} 1012.0
 vllm:e2e_request_latency_seconds_sum{engine="0",model_name="test-model"} 6.0
 vllm:e2e_request_latency_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_queue_time_seconds_sum{engine="0",model_name="test-model"} 1.5
+vllm:request_queue_time_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_success_total{engine="0",finished_reason="length",model_name="test-model"} 2.0
 vllm:num_requests_running{engine="0",model_name="test-model"} 1.0
 vllm:num_requests_waiting{engine="0",model_name="test-model"} 0.0
-vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
+vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.123
 """
         mock_response.text = updated_metrics
         metrics = collector.fetch_metrics()
@@ -1118,7 +1156,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert metrics["successful_requests_total"] == 2.0
         assert metrics["requests_running"] == 1.0
         assert metrics["requests_waiting"] == 0.0
-        assert metrics["gpu_cache_usage"] == 0.123
+        assert metrics["kv_cache_usage"] == 0.123
+        assert metrics["avg_request_latency"] == pytest.approx(3.0)
+        assert metrics["avg_queue_time"] == pytest.approx(0.75)
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
     @patch("vec_inf.client._helper.requests.get")
