@@ -82,6 +82,8 @@ class SlurmScriptTemplate(TypedDict):
         Bind path environment variable for the container
     container_command : str
         Template for container execution command
+    container_command_ray : str
+        Template for container execution command for multi-node vLLM (Ray)
     activate_venv : str
         Template for virtual environment activation
     server_setup : ServerSetupConfig
@@ -99,6 +101,7 @@ class SlurmScriptTemplate(TypedDict):
     imports: str
     bind_path: str
     container_command: str
+    container_command_ray: str
     activate_venv: str
     server_setup: ServerSetupConfig
     find_server_port: list[str]
@@ -119,6 +122,16 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "imports": "source {src_dir}/find_port.sh",
     "bind_path": f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,/dev,/tmp,{{work_dir}}/.vec-inf-cache:$HOME/.cache,{{model_weights_path}}{{additional_binds}}",
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {{image_path}} \\",
+    # Multi-node vLLM runs the Ray head/worker and `vllm serve` in separate
+    # container instances on the same node. Ray (2.56) finds the local raylet by
+    # scanning the process table, so these containers must share the host PID
+    # and IPC namespaces: --contain --cleanenv instead of --containall.
+    # $NCCL_ENV_ARG (set by the RDMA check in multinode_vllm, e.g.
+    # "--env NCCL_IB_GID_INDEX=3") is left unquoted on purpose so it splits into
+    # apptainer arguments; --cleanenv would otherwise drop the NCCL_IB_* exports.
+    # It comes before {env_str}: for repeated --env keys apptainer keeps the
+    # last value, so a user's --env NCCL_IB_GID_INDEX=... wins.
+    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv $NCCL_ENV_ARG {{env_str}} --contain --cleanenv {{image_path}} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -133,23 +146,27 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             'head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)',
             "\n# Check for RDMA devices and set environment variable accordingly",
             "if ! command -v ibv_devices >/dev/null 2>&1; then",
-            '   echo "ibv_devices not found; forcing TCP. (No RDMA userland on host?)"',
-            "   export NCCL_IB_DISABLE=1",
-            '   export NCCL_ENV_ARG="--env NCCL_IB_DISABLE=1"',
+            "   # No RDMA tools on the host: leave the choice to NCCL, which",
+            "   # falls back to TCP sockets when it finds no usable IB device.",
+            '   echo "ibv_devices not found; letting NCCL pick the transport"',
+            '   export NCCL_ENV_ARG=""',
             "else",
             "   # Pick GID index based on link layer (IB vs RoCE)",
             '   if ibv_devinfo 2>/dev/null | grep -q "link_layer:.*Ethernet"; then',
             "       # RoCEv2 typically needs a nonzero GID index; 3 is common, try 2 if your fabric uses it",
-            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}",
-            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}"',
+            "       export NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-3}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-3}}"',
             "   else",
             "       # Native InfiniBand => GID 0",
-            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}",
-            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}"',
+            "       export NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-0}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-0}}"',
             "   fi",
             "fi",
             "\n# Start Ray head node",
-            "head_node_port=$(find_available_port $head_node 8080 65535)",
+            # Keep the Ray GCS port out of Ray's default worker port range
+            # (10002-19999); a GCS port in that range makes `ray start` fail
+            # with "worker_ports is trying to use a port number ...".
+            "head_node_port=$(find_available_port $head_node 20000 65535)",
             "ray_head=$head_node_ip:$head_node_port",
             'echo "Ray Head IP: $ray_head"',
             'echo "Starting HEAD at $head_node"',
@@ -181,7 +198,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         ],
     },
     "find_server_port": [
-        "\nserver_port_number=$(find_available_port $head_node 8080 65535)",
+        # 20000-55535: stay above Ray's worker port range (10002-19999), and
+        # SGLang also binds a gRPC port at server port + 10000, which must not
+        # go above 65535
+        "\nserver_port_number=$(find_available_port $head_node 20000 55535)",
         'server_address="http://${head_node}:${server_port_number}/v1"',
     ],
     "write_to_json": [
@@ -209,6 +229,8 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
+            # SGLang only serves /metrics (used by `vec-inf metrics`) with this flag
+            "    --enable-metrics \\",
         ],
         "sglang_multinode": [
             "for ((i = 0; i < $SLURM_JOB_NUM_NODES; i++)); do",
@@ -221,6 +243,7 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "            --served-model-name {model_name} \\",
             '            --host "0.0.0.0" \\',
             "            --port $server_port_number \\",
+            "            --enable-metrics \\",
             '            --nccl-init-addr "$NCCL_INIT_ADDR" \\',
             "            --nnodes {num_nodes} \\",
             '            --node-rank "$i" \\',
@@ -301,7 +324,9 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
-        "server_port_number=$(find_available_port $head_node_ip 8080 65535)",
+        # 20000-55535: above Ray's worker port range, and SGLang also binds a
+        # gRPC port at server port + 10000
+        "server_port_number=$(find_available_port $head_node_ip 20000 55535)",
         'server_address="http://${{head_node_ip}}:${{server_port_number}}/v1"\n',
         "echo $server_address\n",
     ],
@@ -332,6 +357,8 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
             "    --served-model-name {model_name} \\",
             '    --host "0.0.0.0" \\',
             "    --port $server_port_number \\",
+            # SGLang only serves /metrics (used by `vec-inf metrics`) with this flag
+            "    --enable-metrics \\",
         ],
     },
 }

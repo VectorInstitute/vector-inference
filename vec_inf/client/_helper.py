@@ -5,6 +5,7 @@ metrics collection, and model registry operations.
 """
 
 import json
+import re
 import time
 import warnings
 from pathlib import Path
@@ -19,6 +20,8 @@ from vec_inf.client._client_vars import (
     BATCH_MODE_REQUIRED_MATCHING_ARGS,
     ENGINE_SHORT_TO_LONG_MAP,
     KEY_METRICS,
+    KEY_METRICS_EXCLUDED_LABELS,
+    SGLANG_PRIMARY_RANK_LABELS,
     SRC_DIR,
     SUPPORTED_ENGINES,
 )
@@ -42,6 +45,69 @@ from vec_inf.client.models import (
     ModelType,
     StatusResponse,
 )
+
+
+# One Prometheus sample line: name, optional {labels}, value (timestamp ignored)
+_PROM_SAMPLE_RE = re.compile(
+    r"^([a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{(.*)\})?\s+(\S+)(?:\s+\S+)?$"
+)
+# One label pair inside the braces, allowing escaped quotes in the value
+_PROM_LABEL_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"')
+
+
+def _split_engine_args(arg_string: str) -> list[str]:
+    """Split a comma-separated engine argument string.
+
+    Commas inside braces or brackets (and inside quoted strings within them)
+    do not split, so JSON values such as
+    ``-sc={"method":"ngram","num_speculative_tokens":3}`` stay in one piece.
+    Quotes outside braces and brackets are ordinary characters, so a value
+    like ``it's`` does not swallow the arguments after it.
+
+    Parameters
+    ----------
+    arg_string : str
+        Comma-separated engine arguments
+
+    Returns
+    -------
+    list[str]
+        The individual arguments
+
+    Raises
+    ------
+    ValueError
+        If a brace, bracket or quoted string inside one is left open
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote = ""
+    for char in arg_string:
+        if quote:
+            if char == quote:
+                quote = ""
+        elif depth > 0 and char in "\"'":
+            quote = char
+        elif char in "{[":
+            depth += 1
+        elif char in "}]":
+            if depth == 0:
+                raise ValueError(
+                    f"Unbalanced '{char}' in engine arguments: {arg_string!r}"
+                )
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append("".join(current))
+            current = []
+            continue
+        current.append(char)
+    if quote:
+        raise ValueError(f"Unclosed {quote} quote in engine arguments: {arg_string!r}")
+    if depth:
+        raise ValueError(f"Unclosed '{{' or '[' in engine arguments: {arg_string!r}")
+    parts.append("".join(current))
+    return parts
 
 
 class ModelLauncher:
@@ -167,19 +233,28 @@ class ModelLauncher:
         engine_args: dict[str, str | bool] = {}
         engine_arg_map = ENGINE_SHORT_TO_LONG_MAP[engine_choice]
 
-        for arg in arg_string.split(","):
-            if "=" in arg:
-                key, value = arg.split("=")
-                if key.strip() in engine_arg_map:
-                    key = engine_arg_map[key.strip()]
-                engine_args[key.strip()] = value.strip()
-            elif "-O" in arg.strip():
+        for raw_arg in _split_engine_args(arg_string):
+            arg = raw_arg.strip()
+            if not arg:
+                continue
+            if arg.startswith("-O"):
+                # vLLM optimization level shorthand: -O3, -O=3 or -O 3
                 if engine_choice != "vllm":
                     raise ValueError("-O is only supported for vLLM")
-                key = engine_arg_map["-O"]
-                engine_args[key] = arg.strip()[2:].strip()
+                level = arg[2:].lstrip("= ").strip()
+                if not level:
+                    raise ValueError("-O requires an optimization level, e.g. -O3")
+                engine_args[engine_arg_map["-O"]] = level
+                continue
+            # A flag and its value are separated by whichever of "=" or
+            # whitespace comes first, so both "-tp=2" and "-tp 2" work and a
+            # value may itself contain "=" or spaces (e.g. JSON).
+            match = re.match(r"^(\S+?)(?:=|\s+)(.*)$", arg, re.DOTALL)
+            if match:
+                key, value = match.group(1), match.group(2).strip()
+                engine_args[engine_arg_map.get(key, key)] = value
             else:
-                engine_args[arg.strip()] = True
+                engine_args[engine_arg_map.get(arg, arg)] = True
         return engine_args
 
     def _process_env_vars(self, env_arg: str) -> dict[str, str]:
@@ -949,7 +1024,6 @@ class PerformanceMetricsCollector:
         self.status_info = self._get_status_info()
         self.log_dir = self.status_info.log_dir
         self.metrics_url = self._build_metrics_url()
-        self.enabled_prefix_caching = self._check_prefix_caching()
 
         self._prev_prompt_tokens: float = 0.0
         self._prev_generation_tokens: float = 0.0
@@ -992,26 +1066,78 @@ class PerformanceMetricsCollector:
             (parsed.scheme, parsed.netloc, f"{clean_path}/metrics", "", "", "")
         )
 
-    def _check_prefix_caching(self) -> bool:
-        """Check if prefix caching is enabled.
+    @staticmethod
+    def _parse_labels(label_text: str) -> dict[str, str]:
+        """Parse the label set of a Prometheus sample.
+
+        Parameters
+        ----------
+        label_text : str
+            Text between the braces, e.g. ``engine="0",model_name="m"``
 
         Returns
         -------
-        bool
-            True if prefix caching is enabled, False otherwise
+        dict[str, str]
+            Label names mapped to their (unescaped) values
         """
-        job_json = utils.read_slurm_log(
-            self.status_info.model_name,
-            self.slurm_job_id,
-            "json",
-            self.log_dir,
-        )
-        if isinstance(job_json, str):
-            return False
-        return bool(cast(dict[str, str], job_json).get("enable_prefix_caching", False))
+        return {
+            name: value.replace('\\"', '"').replace("\\\\", "\\")
+            for name, value in _PROM_LABEL_RE.findall(label_text)
+        }
+
+    @staticmethod
+    def _primary_rank_samples(
+        samples: list[tuple[str, dict[str, str], float]],
+    ) -> list[tuple[str, float]]:
+        """Keep one reporting rank per SGLang data parallel group.
+
+        SGLang repeats scheduler metrics for every tensor, pipeline and expert
+        parallel rank of a data parallel group (with pipeline parallelism, or
+        ``--enable-metrics-for-all-schedulers``). Within each metric and
+        ``dp_rank`` only the samples from the lowest rank are kept, so the
+        group is counted once whichever rank reports it (with
+        ``--enable-dp-attention`` the reporting rank need not be tp_rank 0).
+        Different ``dp_rank`` values serve different requests and are kept.
+
+        Parameters
+        ----------
+        samples : list[tuple[str, dict[str, str], float]]
+            (metric name, labels, value) for each SGLang sample
+
+        Returns
+        -------
+        list[tuple[str, float]]
+            (metric name, value) for the samples to aggregate
+        """
+
+        def rank_key(labels: dict[str, str]) -> tuple[int, ...]:
+            ranks = []
+            for label in SGLANG_PRIMARY_RANK_LABELS:
+                try:
+                    ranks.append(int(labels.get(label, "0")))
+                except ValueError:
+                    ranks.append(0)
+            return tuple(ranks)
+
+        lowest: dict[tuple[str, str], tuple[int, ...]] = {}
+        for metric_name, labels, _ in samples:
+            group = (metric_name, labels.get("dp_rank", ""))
+            key = rank_key(labels)
+            if group not in lowest or key < lowest[group]:
+                lowest[group] = key
+        return [
+            (metric_name, value)
+            for metric_name, labels, value in samples
+            if rank_key(labels) == lowest[(metric_name, labels.get("dp_rank", ""))]
+        ]
 
     def _parse_metrics(self, metrics_text: str) -> dict[str, float]:
-        """Parse metrics with latency count and sum.
+        """Parse Prometheus text exposition into vec-inf metric values.
+
+        Every sample of a tracked metric is aggregated across its label sets
+        (engines, finish reasons, ranks) as configured in ``KEY_METRICS``. The
+        prefix cache hit rate is derived from the hit and query counters when
+        the server does not export it directly.
 
         Parameters
         ----------
@@ -1023,27 +1149,51 @@ class PerformanceMetricsCollector:
         dict[str, float]
             Parsed metrics as key-value pairs
         """
-        key_metrics = KEY_METRICS
+        samples: dict[str, list[float]] = {}
+        # SGLang samples are kept with their rank labels and filtered below
+        sglang_samples: list[tuple[str, dict[str, str], float]] = []
+        for raw_line in metrics_text.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
 
-        if self.enabled_prefix_caching:
-            key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
-            key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
+            match = _PROM_SAMPLE_RE.match(line)
+            if not match:
+                continue
+            metric_name, label_text, value_text = match.groups()
+            if metric_name not in KEY_METRICS:
+                continue
+
+            labels = self._parse_labels(label_text) if label_text else {}
+            excluded = KEY_METRICS_EXCLUDED_LABELS.get(metric_name)
+            if excluded and any(
+                labels.get(k) in values for k, values in excluded.items()
+            ):
+                continue
+
+            try:
+                value = float(value_text)
+            except ValueError:
+                continue
+            if metric_name.startswith("sglang:"):
+                sglang_samples.append((metric_name, labels, value))
+            else:
+                samples.setdefault(metric_name, []).append(value)
+
+        for metric_name, value in self._primary_rank_samples(sglang_samples):
+            samples.setdefault(metric_name, []).append(value)
 
         parsed: dict[str, float] = {}
-        for line in metrics_text.split("\n"):
-            if line.startswith("#") or not line.strip():
-                continue
+        for metric_name, values in samples.items():
+            key, aggregation = KEY_METRICS[metric_name]
+            total = sum(values)
+            parsed[key] = total / len(values) if aggregation == "mean" else total
 
-            parts = line.split()
-            if len(parts) < 2:
-                continue
-
-            metric_name = parts[0].split("{")[0]
-            if metric_name in key_metrics:
-                try:
-                    parsed[key_metrics[metric_name]] = float(parts[1])
-                except (ValueError, IndexError):
-                    continue
+        if "prefix_cache_hit_rate" not in parsed and "prefix_cache_queries" in parsed:
+            queries = parsed["prefix_cache_queries"]
+            parsed["prefix_cache_hit_rate"] = (
+                parsed.get("prefix_cache_hits", 0.0) / queries if queries > 0 else 0.0
+            )
         return parsed
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:
@@ -1119,6 +1269,18 @@ class PerformanceMetricsCollector:
                 latency_count = current_metrics["request_latency_count"]
                 current_metrics["avg_request_latency"] = (
                     latency_sum / latency_count if latency_count > 0 else 0.0
+                )
+
+            # Calculate average queue time if data is available
+            if (
+                "queue_time_sum" in current_metrics
+                and "queue_time_count" in current_metrics
+            ):
+                queue_count = current_metrics["queue_time_count"]
+                current_metrics["avg_queue_time"] = (
+                    current_metrics["queue_time_sum"] / queue_count
+                    if queue_count > 0
+                    else 0.0
                 )
 
             return current_metrics

@@ -68,8 +68,11 @@ RUN uv export --frozen --no-emit-project --no-hashes \
     rm -rf /root/.cache/uv /tmp/*
 
 # Build-time canary: fail the build if the locked deps cannot be imported.
-RUN python3.12 -c "import sglang, torch; \
-    print('sglang', sglang.__version__, '/ torch', torch.__version__)"
+RUN python3.12 -c "import sglang, datasets, pyarrow, transformers, torch; \
+    from google import protobuf; \
+    print('sglang', sglang.__version__, '/ datasets', datasets.__version__, \
+          '/ pyarrow', pyarrow.__version__, '/ protobuf', protobuf.__version__, \
+          '/ torch', torch.__version__, '/ torch CUDA', torch.version.cuda)"
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\

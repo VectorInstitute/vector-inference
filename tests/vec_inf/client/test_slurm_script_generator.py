@@ -1,5 +1,6 @@
 """Unit tests for slurm script generator component in the vec_inf.client module."""
 
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import mock_open, patch
@@ -9,6 +10,7 @@ import pytest
 from vec_inf.client._slurm_script_generator import (
     BatchSlurmScriptGenerator,
     SlurmScriptGenerator,
+    format_engine_arg_value,
 )
 
 
@@ -243,6 +245,241 @@ class TestSlurmScriptGenerator:
         assert "sglang.launch_server" in launch_cmd
         assert "--context-length 8192" in launch_cmd
         assert "--tensor-parallel-size 4" in launch_cmd
+
+    def test_generate_launch_cmd_vllm_executor_backend(
+        self, basic_params, multinode_params
+    ):
+        """Only multi-node vLLM selects the Ray executor started by the script."""
+        single = SlurmScriptGenerator(basic_params)._generate_launch_cmd()
+        multi = SlurmScriptGenerator(multinode_params)._generate_launch_cmd()
+
+        assert "--distributed-executor-backend" not in single
+        assert multi.rstrip().endswith("--distributed-executor-backend ray")
+        # The command must not end with a dangling line continuation
+        assert not single.rstrip().endswith("\\")
+
+    @pytest.mark.parametrize("num_nodes", ["1", "2"])
+    @pytest.mark.parametrize("engine", ["vllm", "sglang"])
+    def test_engine_arg_values_survive_bash(
+        self, basic_params, num_nodes, engine, tmp_path
+    ):
+        """JSON, multi-value and quoted values reach the engine as intended.
+
+        The generated script must pass ``bash -n``, and the engine arguments,
+        run through bash with ``printf`` in place of the engine, must come out
+        as the engine should see them: JSON as one word, flags that take
+        several values as several words, and a quoted path as one word.
+        """
+        spec = '{"method":"ngram","num_speculative_tokens":3}'
+        params = basic_params.copy()
+        params["engine"] = engine
+        params["num_nodes"] = num_nodes
+        params["engine_args"] = {
+            "--speculative-config": spec,
+            "--chat-template": "'/path/with space/template.jinja'",
+            "--cudagraph-capture-sizes": "1 2 4 8",
+            "--max-model-len": "8192",
+            "--enforce-eager": True,
+        }
+        generator = SlurmScriptGenerator(params)
+        content = generator._generate_script_content()
+
+        syntax = subprocess.run(
+            ["bash", "-n"], input=content, text=True, capture_output=True, check=False
+        )
+        assert syntax.returncode == 0, syntax.stderr
+
+        # Re-run only the argument list through bash and print one per line
+        lines = generator._generate_launch_cmd().splitlines()
+        start = next(i for i, line in enumerate(lines) if "--served-model-name" in line)
+        arg_lines = [
+            line
+            for line in lines[start:]
+            if line.strip().startswith("--") and "$" not in line
+        ]
+        script = "printf '%s\\n' " + " ".join(
+            line.strip().rstrip("\\").strip() for line in arg_lines
+        )
+        echoed = subprocess.run(
+            ["bash", "-c", script], text=True, capture_output=True, check=True
+        ).stdout.splitlines()
+
+        assert echoed[echoed.index("--speculative-config") + 1] == spec
+        assert (
+            echoed[echoed.index("--chat-template") + 1]
+            == "/path/with space/template.jinja"
+        )
+        sizes = echoed.index("--cudagraph-capture-sizes")
+        assert echoed[sizes + 1 : sizes + 5] == ["1", "2", "4", "8"]
+        assert echoed[echoed.index("--max-model-len") + 1] == "8192"
+        assert "--enforce-eager" in echoed
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("1 2 4 8", ["1", "2", "4", "8"]),
+            ("model-a model-b", ["model-a", "model-b"]),
+            ('{"a": "x $y", "b": [1, 2]}', ['{"a": "x $y", "b": [1, 2]}']),
+            ("[1, 2, 4]", ["[1, 2, 4]"]),
+            ("'/p q/t.jinja'", ["/p q/t.jinja"]),
+            ("price$5", ["price$5"]),
+            ("a\\$b", ["a$b"]),
+            ("$SLURM_TMPDIR/x", ["/tmp/job1/x"]),
+            ("${SLURM_TMPDIR}/x", ["/tmp/job1/x"]),
+            ("$SLURM_TMPDIR/a\\$b", ["/tmp/job1/a$b"]),
+            ("~/t.jinja", ["/home/u/t.jinja"]),
+            ("it's", ["it's"]),
+            ('q"x', ['q"x']),
+            # Backslashes inside double quotes are escaped, except before $
+            ('$SLURM_TMPDIR\\"q', ['/tmp/job1\\"q']),
+            ("$SLURM_TMPDIR\\\\x", ["/tmp/job1\\\\x"]),
+            # $$ is not a variable reference
+            ("$$", ["$$"]),
+            ("$$SLURM_TMPDIR", ["$$SLURM_TMPDIR"]),
+            # Quotes inside a word are literal, a leading quote groups words
+            ("a'b'c", ["a'b'c"]),
+            ("don't stop", ["don't", "stop"]),
+            ('"/p q/t" x', ["/p q/t", "x"]),
+        ],
+    )
+    def test_format_engine_arg_value_through_bash(self, value, expected):
+        """Each value expands in bash to exactly the expected words."""
+        quoted = format_engine_arg_value(value)
+        words = subprocess.run(
+            ["bash", "-c", f"printf '%s\\n' {quoted}"],
+            env={"SLURM_TMPDIR": "/tmp/job1", "HOME": "/home/u", "y": "Y"},
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.splitlines()
+
+        assert words == expected
+
+    def test_engine_arg_values_keep_shell_expansion(self, basic_params):
+        """Values with $VAR or a leading ~/ are still expanded by bash."""
+        params = basic_params.copy()
+        params["engine_args"] = {
+            "--download-dir": "$SLURM_TMPDIR/weights",
+            "--chat-template": "~/templates/chat.jinja",
+        }
+        launch_cmd = SlurmScriptGenerator(params)._generate_launch_cmd()
+
+        assert '--download-dir "$SLURM_TMPDIR/weights"' in launch_cmd
+        assert "--chat-template ~/templates/chat.jinja" in launch_cmd
+        echoed = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'printf "%s\\n" "$SLURM_TMPDIR/weights" ~/templates/chat.jinja',
+            ],
+            env={"SLURM_TMPDIR": "/tmp/job1", "HOME": "/home/u"},
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.splitlines()
+        assert echoed == ["/tmp/job1/weights", "/home/u/templates/chat.jinja"]
+
+    @pytest.mark.parametrize("engine", ["vllm", "sglang"])
+    def test_server_port_leaves_room_for_sglang_grpc(self, basic_params, engine):
+        """Server port is above Ray's worker ports and leaves room for SGLang gRPC."""
+        params = basic_params.copy()
+        params["engine"] = engine
+        setup = SlurmScriptGenerator(params)._generate_server_setup()
+
+        assert (
+            "server_port_number=$(find_available_port $head_node 20000 55535)" in setup
+        )
+
+    def test_multinode_vllm_ray_port_outside_worker_range(self, multinode_params):
+        """The Ray head port is picked above Ray's worker port range."""
+        setup = SlurmScriptGenerator(multinode_params)._generate_server_setup()
+
+        assert "head_node_port=$(find_available_port $head_node 20000 65535)" in setup
+
+    def test_multinode_vllm_container_passes_nccl_env(self, singularity_params):
+        """NCCL_IB_* settings from the RDMA check reach the Ray containers."""
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        container_lines = [
+            line for line in content.splitlines() if "--contain --cleanenv" in line
+        ]
+        assert len(container_lines) == 3
+        assert all("$NCCL_ENV_ARG" in line for line in container_lines)
+        # Unquoted so "--env NCCL_IB_GID_INDEX=3" splits into two arguments
+        assert '"$NCCL_ENV_ARG"' not in content
+        # Without RDMA tools NCCL picks the transport itself (IB is not forced off)
+        assert 'export NCCL_ENV_ARG=""' in content
+        assert "NCCL_IB_DISABLE=1" not in content
+        # The GID index default must be a parameter expansion, not literal text
+        assert "${NCCL_IB_GID_INDEX:-3}" in content
+        assert "${NCCL_IB_GID_INDEX:-0}" in content
+        assert "={NCCL_IB_GID_INDEX" not in content
+
+    def test_multinode_user_env_overrides_nccl_defaults(self, singularity_params):
+        """User --env values come after $NCCL_ENV_ARG so they win in apptainer."""
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        multinode["env"] = {"NCCL_IB_GID_INDEX": "2"}
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        container_lines = [
+            line for line in content.splitlines() if "--contain --cleanenv" in line
+        ]
+        assert len(container_lines) == 3
+        for line in container_lines:
+            assert line.index("$NCCL_ENV_ARG") < line.index("--env NCCL_IB_GID_INDEX=2")
+
+    def test_multinode_vllm_container_shares_pid_namespace(self, singularity_params):
+        """Ray and vllm serve containers must share the host PID namespace.
+
+        Ray finds the local raylet by scanning the process table, so with
+        --containall (a private PID namespace per container) vllm serve cannot
+        attach to the Ray cluster started by the script.
+        """
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        assert "--containall" not in content
+        # ray start on the head, ray start on the workers, and vllm serve
+        assert content.count("--contain --cleanenv") == 3
+
+        single = SlurmScriptGenerator(singularity_params)._generate_script_content()
+        assert "--containall" in single
+        assert "--contain --cleanenv" not in single
+
+    @pytest.mark.parametrize("num_nodes", ["1", "2"])
+    @pytest.mark.parametrize("engine_args", [{}, {"--context-length": "8192"}])
+    def test_generate_launch_cmd_sglang_enables_metrics(
+        self, basic_params, num_nodes, engine_args
+    ):
+        """SGLang is always launched with --enable-metrics so /metrics exists."""
+        sglang_params = basic_params.copy()
+        sglang_params["engine"] = "sglang"
+        sglang_params["num_nodes"] = num_nodes
+        sglang_params["engine_args"] = engine_args
+
+        generator = SlurmScriptGenerator(sglang_params)
+        launch_cmd = generator._generate_launch_cmd()
+
+        assert launch_cmd.count("--enable-metrics") == 1
+        # The whole generated script must still be valid bash
+        result = subprocess.run(
+            ["bash", "-n"],
+            input=generator._generate_script_content(),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr
+
+    def test_generate_launch_cmd_vllm_has_no_enable_metrics(self, basic_params):
+        """VLLM always serves /metrics; the SGLang flag must not leak into it."""
+        launch_cmd = SlurmScriptGenerator(basic_params)._generate_launch_cmd()
+
+        assert "--enable-metrics" not in launch_cmd
 
     def test_generate_server_setup_sglang_multinode(self, basic_params):
         """Test SGLang multi-node setup."""
@@ -723,6 +960,8 @@ class TestBatchSlurmScriptGenerator:
         # Verify the script content includes SGLang command
         call_args = mock_write_text.call_args[0][0]
         assert "sglang.launch_server" in call_args
+        assert "--enable-metrics" in call_args
+        assert not call_args.rstrip().endswith("\\")
 
     @patch("pathlib.Path.touch")
     @patch("pathlib.Path.write_text")

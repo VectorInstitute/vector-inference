@@ -4,6 +4,8 @@ This module provides functionality to generate Slurm scripts for running inferen
 servers in both single-node and multi-node configurations.
 """
 
+import re
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -15,6 +17,145 @@ from vec_inf.client._slurm_templates import (
     SLURM_SCRIPT_TEMPLATE,
 )
 from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
+
+
+# A shell variable reference, $NAME or ${...}, that is not escaped with a
+# backslash and not part of "$$"
+_SHELL_VAR_RE = re.compile(r"(?<![\\$])\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[^}]+\})")
+
+
+def _split_words(text: str) -> list[str]:
+    """Split a value into words on whitespace.
+
+    A word that starts with a single or double quote runs to the matching
+    closing quote and may contain spaces; the quotes are removed. Quotes
+    anywhere else are ordinary characters, so apostrophes inside a word
+    (``it's``, ``a'b'c``) are kept. Backslashes are kept as they are.
+
+    Parameters
+    ----------
+    text : str
+        The value to split
+
+    Returns
+    -------
+    list[str]
+        The words
+
+    Raises
+    ------
+    ValueError
+        If a word starts with a quote that is never closed
+    """
+    words: list[str] = []
+    i, n = 0, len(text)
+    while i < n:
+        if text[i].isspace():
+            i += 1
+            continue
+        if text[i] in "'\"":
+            end = text.find(text[i], i + 1)
+            if end == -1:
+                raise ValueError(f"Unclosed {text[i]} quote in {text!r}")
+            word = text[i + 1 : end]
+            i = end + 1
+        else:
+            word = ""
+        start = i
+        while i < n and not text[i].isspace():
+            i += 1
+        words.append(word + text[start:i])
+    return words
+
+
+def _double_quote(token: str) -> str:
+    """Double-quote a word so variables expand but nothing else does.
+
+    Every backslash is escaped except one directly before ``$``, which keeps
+    escaping that dollar sign. ``"`` and backticks are escaped.
+
+    Parameters
+    ----------
+    token : str
+        The word
+
+    Returns
+    -------
+    str
+        The word in double quotes
+    """
+    out = []
+    for i, char in enumerate(token):
+        if char == "\\":
+            out.append("\\" if token[i + 1 : i + 2] == "$" else "\\\\")
+        elif char in '"`':
+            out.append("\\" + char)
+        else:
+            out.append(char)
+    return '"' + "".join(out) + '"'
+
+
+def _quote_token(token: str) -> str:
+    """Quote one shell word, keeping real variable references expandable.
+
+    Parameters
+    ----------
+    token : str
+        One word of an engine argument value
+
+    Returns
+    -------
+    str
+        The word, quoted for bash
+    """
+    if _SHELL_VAR_RE.search(token) or "\\$" in token:
+        # Double quotes keep $VAR and ${VAR} expanding, and an escaped \$
+        # stays a literal dollar sign, as it would on a command line.
+        return _double_quote(token)
+    if token.startswith("~/"):
+        return "~/" + shlex.quote(token[2:])
+    return shlex.quote(token)
+
+
+def format_engine_arg_value(value: Any) -> str:
+    r"""Quote an engine argument value for the generated bash script.
+
+    * JSON values (starting with ``{`` or ``[``) are single-quoted as one
+      word, so they reach the engine unchanged.
+    * Other values are split into words on whitespace and each word is quoted
+      on its own, so flags that take several values keep working
+      (``--cudagraph-capture-sizes 1 2 4 8``, ``--served-model-name a b``).
+      A word that starts with a quote runs to the matching quote, so a value
+      with spaces can be passed as one word:
+      ``--chat-template='/path/with space/t.jinja'``. Quotes inside a word
+      are kept literally.
+    * A word that references a shell variable (``$NAME`` or ``${...}``) is
+      double-quoted so the variable still expands, ``\$`` gives a literal
+      dollar sign, and a leading ``~/`` is left unquoted so it still expands
+      to the home directory. Any other ``$`` (including ``$$``) stays literal.
+
+    Parameters
+    ----------
+    value : Any
+        The argument value
+
+    Returns
+    -------
+    str
+        The value, quoted for bash
+    """
+    text = str(value)
+    stripped = text.strip()
+    if stripped.startswith(("{", "[")):
+        return shlex.quote(stripped)
+    try:
+        tokens = _split_words(text)
+    except ValueError:
+        # Unbalanced quotes: pass the value through as a single word
+        tokens = [text]
+    if not tokens:
+        return shlex.quote(text)
+    return " ".join(_quote_token(token) for token in tokens)
 
 
 class SlurmScriptGenerator:
@@ -133,7 +274,7 @@ class SlurmScriptGenerator:
             if self.use_container:
                 server_setup_str = server_setup_str.replace(
                     "CONTAINER_PLACEHOLDER",
-                    SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                    SLURM_SCRIPT_TEMPLATE["container_command_ray"].format(
                         env_str=self.env_str,
                         image_path=IMAGE_PATH[self.engine],
                     ),
@@ -176,8 +317,12 @@ class SlurmScriptGenerator:
 
         launch_cmd = ["\n"]
         if self.use_container:
+            # Multi-node vLLM must see the Ray processes started above
+            container_key = (
+                "container_command_ray" if self.is_multinode else "container_command"
+            )
             launch_cmd.append(
-                SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                SLURM_SCRIPT_TEMPLATE[container_key].format(  # type: ignore[literal-required]
                     env_str=self.env_str,
                     image_path=IMAGE_PATH[self.engine],
                 )
@@ -195,10 +340,11 @@ class SlurmScriptGenerator:
             if isinstance(value, bool):
                 launch_cmd.append(f"    {arg} \\")
             else:
-                launch_cmd.append(f"    {arg} {value} \\")
+                launch_cmd.append(f"    {arg} {format_engine_arg_value(value)} \\")
 
-        # A known bug in vLLM requires setting backend to ray for multi-node
-        # Remove this when the bug is fixed
+        # Multi-node vLLM runs on the Ray cluster started in the server setup
+        # section, so the Ray executor must be selected explicitly. vLLM only
+        # picks Ray on its own when it is already connected to a Ray cluster.
         if self.is_multinode:
             launch_cmd.append("    --distributed-executor-backend ray \\")
 
@@ -236,7 +382,9 @@ class SlurmScriptGenerator:
             if isinstance(value, bool):
                 engine_arg_str += f"            {arg} \\\n"
             else:
-                engine_arg_str += f"            {arg} {value} \\\n"
+                engine_arg_str += (
+                    f"            {arg} {format_engine_arg_value(value)} \\\n"
+                )
 
         return launch_cmd.replace(
             "SGLANG_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
@@ -360,7 +508,7 @@ class BatchSlurmScriptGenerator:
             if isinstance(value, bool):
                 script_content.append(f"    {arg} \\")
             else:
-                script_content.append(f"    {arg} {value} \\")
+                script_content.append(f"    {arg} {format_engine_arg_value(value)} \\")
         script_content[-1] = script_content[-1].rstrip(" \\")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(

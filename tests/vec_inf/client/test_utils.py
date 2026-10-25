@@ -71,6 +71,38 @@ def test_read_slurm_log_not_found():
         (["ERROR: something wrong"], ("FAILED", "ERROR: something wrong")),
         ([], "LAUNCHING"),
         (["some other content"], "LAUNCHING"),
+        # Non-error log levels that mention a failure are not fatal
+        (
+            [
+                "[2026-10-25 13:02:09,274 W 1401493 1401493] rpc_client.h:638: "
+                "Failed to connect to the observability pubsub at address "
+                "172.17.8.32:12558 within 5 seconds.\n"
+            ],
+            "LAUNCHING",
+        ),
+        (
+            [
+                "(EngineCore pid=1) WARNING 10-25 13:01:04 [utils.py:10] "
+                "Could not find a faster kernel, falling back.\n"
+            ],
+            "LAUNCHING",
+        ),
+        (
+            ["2026-10-25 13:01:48,362\tWARNING worker.py:1 -- Failed to set env\n"],
+            "LAUNCHING",
+        ),
+        # Errors at ERROR level are still fatal
+        (
+            [
+                "(EngineCore pid=1) ERROR 10-25 13:01:04 [core.py:1510] "
+                "EngineCore failed to start.\n"
+            ],
+            (
+                "FAILED",
+                "(EngineCore pid=1) ERROR 10-25 13:01:04 [core.py:1510] "
+                "EngineCore failed to start.",
+            ),
+        ),
     ],
 )
 def test_is_server_running_statuses(log_content, expected):

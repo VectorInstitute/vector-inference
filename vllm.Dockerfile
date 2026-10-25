@@ -1,4 +1,8 @@
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+# vLLM 0.32 ships torch 2.13 built for CUDA 13.0, and FlashInfer compiles some
+# kernels at runtime with the system nvcc. Keep the toolkit on the same CUDA
+# major version as torch (this matches vLLM's own image). CUDA 13 needs NVIDIA
+# driver 580 or newer on the GPU nodes.
+FROM nvidia/cuda:13.0.3-cudnn-devel-ubuntu24.04
 
 # Non-interactive apt-get commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -80,7 +84,8 @@ RUN uv export --frozen --no-emit-project --no-hashes \
 # ABI mismatch in :0.19.0 at build time instead of at job start.
 RUN python3.12 -c "import vllm, datasets, pyarrow, transformers, torch; \
     print('vllm', vllm.__version__, '/ datasets', datasets.__version__, \
-          '/ pyarrow', pyarrow.__version__, '/ torch', torch.__version__)"
+          '/ pyarrow', pyarrow.__version__, '/ torch', torch.__version__, \
+          '/ torch CUDA', torch.version.cuda)"
 
 # Install a single, system NCCL (from NVIDIA CUDA repo in base image)
 RUN apt-get update && apt-get install -y --allow-change-held-packages\

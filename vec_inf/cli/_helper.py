@@ -328,7 +328,6 @@ class MetricsResponseFormatter:
     def __init__(self, metrics: Union[dict[str, float], str]):
         self.metrics = self._set_metrics(metrics)
         self.table = create_table("Metric", "Value")
-        self.enabled_prefix_caching = self._check_prefix_caching()
 
     def _set_metrics(self, metrics: Union[dict[str, float], str]) -> dict[str, float]:
         """Set the metrics attribute.
@@ -344,16 +343,6 @@ class MetricsResponseFormatter:
             Processed metrics dictionary
         """
         return metrics if isinstance(metrics, dict) else {}
-
-    def _check_prefix_caching(self) -> bool:
-        """Check if prefix caching is enabled.
-
-        Returns
-        -------
-        bool
-            True if prefix caching metrics are present
-        """
-        return self.metrics.get("gpu_prefix_cache_hit_rate") is not None
 
     def format_failed_metrics(self, message: str) -> None:
         """Format error message for failed metrics collection.
@@ -371,8 +360,8 @@ class MetricsResponseFormatter:
         Formats and adds to the table:
         - Throughput metrics
         - Request queue metrics
-        - Cache usage metrics
-        - Prefix cache metrics (if enabled)
+        - KV cache usage and preemptions
+        - Prefix cache hit rate (if the server reports it)
         - Latency metrics
         - Token counts
         """
@@ -395,29 +384,21 @@ class MetricsResponseFormatter:
             "Requests Waiting",
             f"{self.metrics.get('requests_waiting', 0):.0f} reqs",
         )
+
+        # KV cache metrics
         self.table.add_row(
-            "Requests Swapped",
-            f"{self.metrics.get('requests_swapped', 0):.0f} reqs",
+            "KV Cache Usage",
+            f"{self.metrics.get('kv_cache_usage', 0) * 100:.1f}%",
+        )
+        self.table.add_row(
+            "Preemptions",
+            f"{self.metrics.get('preemptions_total', 0):.0f}",
         )
 
-        # Cache usage metrics
-        self.table.add_row(
-            "GPU Cache Usage",
-            f"{self.metrics.get('gpu_cache_usage', 0) * 100:.1f}%",
-        )
-        self.table.add_row(
-            "CPU Cache Usage",
-            f"{self.metrics.get('cpu_cache_usage', 0) * 100:.1f}%",
-        )
-
-        if self.enabled_prefix_caching:
+        if "prefix_cache_hit_rate" in self.metrics:
             self.table.add_row(
-                "GPU Prefix Cache Hit Rate",
-                f"{self.metrics.get('gpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
-            )
-            self.table.add_row(
-                "CPU Prefix Cache Hit Rate",
-                f"{self.metrics.get('cpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
+                "Prefix Cache Hit Rate",
+                f"{self.metrics['prefix_cache_hit_rate'] * 100:.1f}%",
             )
 
         # Show average latency if available
@@ -425,6 +406,11 @@ class MetricsResponseFormatter:
             self.table.add_row(
                 "Avg Request Latency",
                 f"{self.metrics['avg_request_latency']:.1f} s",
+            )
+        if "avg_queue_time" in self.metrics:
+            self.table.add_row(
+                "Avg Queue Time",
+                f"{self.metrics['avg_queue_time']:.2f} s",
             )
 
         # Token counts
@@ -436,10 +422,18 @@ class MetricsResponseFormatter:
             "Total Generation Tokens",
             f"{self.metrics.get('total_generation_tokens', 0):.0f} tokens",
         )
-        self.table.add_row(
-            "Successful Requests",
-            f"{self.metrics.get('successful_requests_total', 0):.0f} reqs",
-        )
+        # SGLang only reports finished requests (including aborted ones),
+        # vLLM reports them by finish reason so successes can be counted
+        if "finished_requests_total" in self.metrics:
+            self.table.add_row(
+                "Finished Requests",
+                f"{self.metrics['finished_requests_total']:.0f} reqs",
+            )
+        else:
+            self.table.add_row(
+                "Successful Requests",
+                f"{self.metrics.get('successful_requests_total', 0):.0f} reqs",
+            )
 
 
 class ListCmdDisplay:

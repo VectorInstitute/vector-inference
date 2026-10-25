@@ -21,6 +21,7 @@ from vec_inf.client._helper import (
     ModelStatusMonitor,
     PerformanceMetricsCollector,
 )
+from vec_inf.client._slurm_script_generator import format_engine_arg_value
 from vec_inf.client.config import ModelConfig
 from vec_inf.client.models import (
     ModelStatus,
@@ -132,7 +133,179 @@ class TestModelLauncher:
 
         assert vllm_args["--tensor-parallel-size"] == "4"
         assert vllm_args["--quantization"] == "awq"
-        assert vllm_args["--compilation-config"] == "3"
+        assert vllm_args["--optimization-level"] == "3"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_vllm_short_aliases(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test vLLM short aliases, including boolean ones, map to long names."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            "-tp=2, -pp=2, -dp=2, -ep, -q=fp8, --max-model-len=4096", "vllm"
+        )
+
+        assert vllm_args == {
+            "--tensor-parallel-size": "2",
+            "--pipeline-parallel-size": "2",
+            "--data-parallel-size": "2",
+            "--enable-expert-parallel": True,
+            "--quantization": "fp8",
+            "--max-model-len": "4096",
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_json_values(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Commas inside JSON objects, lists and quotes do not split arguments."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            '-sc={"method":"ngram","num_speculative_tokens":3,"prompt_lookup_max":4},'
+            '-cc={"cudagraph_capture_sizes":[1,2,4]},'
+            "--max-model-len=8192,"
+            '-ac={"backend": "FLASH_ATTN"},'
+            '-dc={"steps": 4}',
+            "vllm",
+        )
+
+        assert vllm_args == {
+            "--speculative-config": (
+                '{"method":"ngram","num_speculative_tokens":3,"prompt_lookup_max":4}'
+            ),
+            "--compilation-config": '{"cudagraph_capture_sizes":[1,2,4]}',
+            "--max-model-len": "8192",
+            "--attention-config": '{"backend": "FLASH_ATTN"}',
+            "--diffusion-config": '{"steps": 4}',
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_multi_value_flags(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Flags taking several values keep all of them, in both forms."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        for arg_string in (
+            "--cudagraph-capture-sizes 1 2 4 8,--served-model-name a b",
+            "--cudagraph-capture-sizes=1 2 4 8,--served-model-name=a b",
+        ):
+            args = launcher._process_engine_args(arg_string, "vllm")
+            assert args == {
+                "--cudagraph-capture-sizes": "1 2 4 8",
+                "--served-model-name": "a b",
+            }
+            # Each value becomes separate words in the generated script
+            assert format_engine_arg_value(args["--cudagraph-capture-sizes"]) == (
+                "1 2 4 8"
+            )
+            assert format_engine_arg_value(args["--served-model-name"]) == "a b"
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_quotes_outside_json(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """A quote outside braces does not swallow the following arguments."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        args = launcher._process_engine_args("--x=it's,-tp=2", "vllm")
+
+        assert args == {"--x": "it's", "--tensor-parallel-size": "2"}
+
+    @pytest.mark.parametrize(
+        "arg_string",
+        [
+            '-sc={"method":"ngram",-tp=2',
+            "-cc=[1,2,-tp=2",
+            '-sc={"method":"ngram},-tp=2',
+            "-tp=2}",
+        ],
+    )
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_unbalanced(
+        self, mock_path_exists, mock_load_config, arg_string, mock_configs
+    ):
+        """Unbalanced braces, brackets or quotes raise a clear error."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+        launcher = ModelLauncher("test-model", {})
+
+        with pytest.raises(ValueError, match="engine arguments"):
+            launcher._process_engine_args(arg_string, "vllm")
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_space_separated_values(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """'-tp 2' is handled like '-tp=2', and JSON may follow a space."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            '-tp 2, --max-model-len 4096, -sc {"method": "ngram"}, -ep', "vllm"
+        )
+
+        assert vllm_args == {
+            "--tensor-parallel-size": "2",
+            "--max-model-len": "4096",
+            "--speculative-config": '{"method": "ngram"}',
+            "--enable-expert-parallel": True,
+        }
+        sglang_args = launcher._process_engine_args("--tp 4, --ep-size 2", "sglang")
+        assert sglang_args == {
+            "--tensor-parallel-size": "4",
+            "--expert-parallel-size": "2",
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_value_with_equals(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test only the first '=' separates the flag from its value."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            "--override-generation-config=temperature=0.5", "vllm"
+        )
+
+        assert vllm_args == {"--override-generation-config": "temperature=0.5"}
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_sglang_expert_parallel_aliases(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Test --ep and --ep-size both map to SGLang's --expert-parallel-size."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        assert launcher._process_engine_args("--ep-size=4", "sglang") == {
+            "--expert-parallel-size": "4"
+        }
+        assert launcher._process_engine_args("--ep=2", "sglang") == {
+            "--expert-parallel-size": "2"
+        }
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
@@ -975,10 +1148,11 @@ vllm:generation_tokens_total{engine="0",model_name="test-model"} 1000.0
 vllm:e2e_request_latency_seconds_sum{engine="0",model_name="test-model"} 6.0
 vllm:e2e_request_latency_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_queue_time_seconds_sum{engine="0",model_name="test-model"} 1.5
+vllm:request_queue_time_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_success_total{engine="0",finished_reason="length",model_name="test-model"} 2.0
 vllm:num_requests_running{engine="0",model_name="test-model"} 1.0
 vllm:num_requests_waiting{engine="0",model_name="test-model"} 0.0
-vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
+vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.123
 """
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
@@ -994,26 +1168,6 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert collector._prev_prompt_tokens == 0.0
         assert collector._prev_generation_tokens == 0.0
         assert collector._last_updated is None
-        assert collector.enabled_prefix_caching is False
-
-    @patch("vec_inf.client._helper.ModelStatusMonitor")
-    @patch("vec_inf.client._helper.utils.read_slurm_log")
-    def test_init_check_prefix_caching_enabled(
-        self, mock_read_slurm_log, mock_status_monitor, mock_status_response
-    ):
-        """Test __init__ when enable prefix caching is True."""
-        mock_status_monitor.return_value.process_model_status.return_value = (
-            mock_status_response
-        )
-        mock_read_slurm_log.return_value = {"enable_prefix_caching": True}
-
-        collector = PerformanceMetricsCollector("12345")
-
-        assert collector.slurm_job_id == "12345"
-        assert collector._prev_prompt_tokens == 0.0
-        assert collector._prev_generation_tokens == 0.0
-        assert collector._last_updated is None
-        assert collector.enabled_prefix_caching is True
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
     @patch("vec_inf.client._helper.utils.get_base_url")
@@ -1096,10 +1250,11 @@ vllm:generation_tokens_total{engine="0",model_name="test-model"} 1012.0
 vllm:e2e_request_latency_seconds_sum{engine="0",model_name="test-model"} 6.0
 vllm:e2e_request_latency_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_queue_time_seconds_sum{engine="0",model_name="test-model"} 1.5
+vllm:request_queue_time_seconds_count{engine="0",model_name="test-model"} 2.0
 vllm:request_success_total{engine="0",finished_reason="length",model_name="test-model"} 2.0
 vllm:num_requests_running{engine="0",model_name="test-model"} 1.0
 vllm:num_requests_waiting{engine="0",model_name="test-model"} 0.0
-vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
+vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.123
 """
         mock_response.text = updated_metrics
         metrics = collector.fetch_metrics()
@@ -1118,7 +1273,9 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert metrics["successful_requests_total"] == 2.0
         assert metrics["requests_running"] == 1.0
         assert metrics["requests_waiting"] == 0.0
-        assert metrics["gpu_cache_usage"] == 0.123
+        assert metrics["kv_cache_usage"] == 0.123
+        assert metrics["avg_request_latency"] == pytest.approx(3.0)
+        assert metrics["avg_queue_time"] == pytest.approx(0.75)
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
     @patch("vec_inf.client._helper.requests.get")
@@ -1138,6 +1295,221 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert isinstance(result, str)
         assert "Metrics request failed" in result
         assert "Connection refused" in result
+
+
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+class TestPrometheusMetricsParsing:
+    """Parsing of real vLLM 0.32 and SGLang Prometheus exposition text."""
+
+    @pytest.fixture
+    def collector(self, mock_status_response):
+        """Return a collector whose status lookup is mocked out."""
+        with patch("vec_inf.client._helper.ModelStatusMonitor") as monitor:
+            monitor.return_value.process_model_status.return_value = (
+                mock_status_response
+            )
+            yield PerformanceMetricsCollector("12345")
+
+    def test_parse_vllm_0_32_live_capture(self, collector):
+        """Parse /metrics captured from a live vLLM 0.32.0 server.
+
+        The fixture was scraped from Llama-3.2-1B-Instruct served by vec-inf on
+        two A40 nodes (pipeline parallel 2) while 48 requests were in flight.
+        """
+        text = (FIXTURES_DIR / "vllm_0.32.0_metrics.txt").read_text()
+
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 5.0
+        assert parsed["requests_waiting"] == 0.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.0001261901306698343)
+        assert parsed["preemptions_total"] == 0.0
+        assert parsed["total_prompt_tokens"] == 572.0
+        assert parsed["total_generation_tokens"] == 217.0
+        assert parsed["request_latency_sum"] == pytest.approx(6.5164635181427)
+        assert parsed["request_latency_count"] == 8.0
+        assert parsed["queue_time_count"] == 8.0
+        # stop (1) + length (7); abort, error and repetition are all 0 here
+        assert parsed["successful_requests_total"] == 8.0
+        assert parsed["prefix_cache_queries"] == 1307.0
+        assert parsed["prefix_cache_hits"] == 960.0
+        assert parsed["prefix_cache_hit_rate"] == pytest.approx(960.0 / 1307.0)
+        # The removed V0 metrics are not in the output, so they are not reported
+        assert "gpu_cache_usage" not in parsed
+        assert "requests_swapped" not in parsed
+
+    def test_parse_sglang_0_5_12_live_capture(self, collector):
+        """Parse /metrics captured from a live SGLang 0.5.12.post1 server.
+
+        The fixture was scraped from Qwen2.5-0.5B-Instruct on one A40, started
+        with --enable-metrics, after a health check, one chat and five
+        completion requests.
+        """
+        text = (FIXTURES_DIR / "sglang_0.5.12.post1_metrics.txt").read_text()
+
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["total_prompt_tokens"] == 65.0
+        assert parsed["total_generation_tokens"] == 183.0
+        assert parsed["finished_requests_total"] == 7.0
+        assert "successful_requests_total" not in parsed
+        assert parsed["request_latency_count"] == 7.0
+        assert parsed["queue_time_count"] == 8.0
+        assert parsed["requests_running"] == 1.0
+        assert parsed["requests_waiting"] == 0.0
+        assert parsed["kv_cache_usage"] == 0.0
+        assert parsed["prefix_cache_hit_rate"] == 0.0
+
+    def test_parse_sglang_per_rank_gauges(self, collector):
+        """SGLang scheduler gauges repeated per TP/PP rank are counted once.
+
+        With pipeline parallelism (or --enable-metrics-for-all-schedulers) each
+        rank reports the same running and waiting requests. Data parallel ranks
+        serve different requests and are summed.
+        """
+        text = """\
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="0"} 4.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="1",tp_rank="0"} 4.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="1"} 4.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="0"} 3.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",moe_ep_rank="0",pp_rank="1",tp_rank="0"} 3.0
+sglang:num_queue_reqs{model_name="m",pp_rank="0",tp_rank="0"} 2.0
+sglang:num_queue_reqs{model_name="m",pp_rank="1",tp_rank="0"} 2.0
+sglang:token_usage{model_name="m",pp_rank="0",tp_rank="0"} 0.5
+sglang:token_usage{model_name="m",pp_rank="1",tp_rank="0"} 0.1
+sglang:num_requests_total{model_name="m"} 9.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 7.0
+        assert parsed["requests_waiting"] == 2.0
+        assert parsed["kv_cache_usage"] == 0.5
+        assert parsed["finished_requests_total"] == 9.0
+
+    def test_parse_sglang_dp_attention_ranks(self, collector):
+        """With --enable-dp-attention each DP group reports from its own rank.
+
+        Here TP=4 is split into two DP attention groups; group 0 reports from
+        tp_rank 0 and group 1 from tp_rank 2. Both groups must be counted, and
+        a group that reports from several ranks must be counted once.
+        """
+        text = """\
+sglang:num_running_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 5.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="1"} 5.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 3.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="3"} 3.0
+sglang:num_queue_reqs{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 1.0
+sglang:num_queue_reqs{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 2.0
+sglang:token_usage{dp_rank="0",model_name="m",pp_rank="0",tp_rank="0"} 0.2
+sglang:token_usage{dp_rank="1",model_name="m",pp_rank="0",tp_rank="2"} 0.4
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 8.0
+        assert parsed["requests_waiting"] == 3.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.3)
+
+    def test_parse_vllm_data_parallel_engines(self, collector):
+        """Samples from several engines are summed, KV cache usage is averaged."""
+        text = """\
+# HELP vllm:num_requests_running Number of requests in model execution batches.
+# TYPE vllm:num_requests_running gauge
+vllm:num_requests_running{engine="0",model_name="m"} 3.0
+vllm:num_requests_running{engine="1",model_name="m"} 2.0
+vllm:num_requests_waiting{engine="0",model_name="m"} 1.0
+vllm:num_requests_waiting{engine="1",model_name="m"} 4.0
+vllm:kv_cache_usage_perc{engine="0",model_name="m"} 0.2
+vllm:kv_cache_usage_perc{engine="1",model_name="m"} 0.6
+# TYPE vllm:prompt_tokens counter
+vllm:prompt_tokens_total{engine="0",model_name="m"} 100.0
+vllm:prompt_tokens_total{engine="1",model_name="m"} 50.0
+vllm:prompt_tokens_created{engine="0",model_name="m"} 1.7929e+09
+vllm:num_preemptions_total{engine="0",model_name="m"} 1.0
+vllm:num_preemptions_total{engine="1",model_name="m"} 2.0
+vllm:prefix_cache_queries_total{engine="0",model_name="m"} 100.0
+vllm:prefix_cache_queries_total{engine="1",model_name="m"} 300.0
+vllm:prefix_cache_hits_total{engine="0",model_name="m"} 50.0
+vllm:prefix_cache_hits_total{engine="1",model_name="m"} 50.0
+vllm:request_success_total{engine="0",finished_reason="stop",model_name="m"} 5.0
+vllm:request_success_total{engine="0",finished_reason="length",model_name="m"} 2.0
+vllm:request_success_total{engine="0",finished_reason="abort",model_name="m"} 7.0
+vllm:request_success_total{engine="1",finished_reason="error",model_name="m"} 9.0
+vllm:request_success_total{engine="1",finished_reason="repetition",model_name="m"} 1.0
+vllm:e2e_request_latency_seconds_sum{engine="0",model_name="m"} 4.0 1792949107000
+vllm:e2e_request_latency_seconds_count{engine="0",model_name="m"} 2.0
+vllm:e2e_request_latency_seconds_sum{engine="1",model_name="m"} 2.0
+vllm:e2e_request_latency_seconds_count{engine="1",model_name="m"} 2.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 5.0
+        assert parsed["requests_waiting"] == 5.0
+        assert parsed["kv_cache_usage"] == pytest.approx(0.4)
+        assert parsed["total_prompt_tokens"] == 150.0
+        assert parsed["preemptions_total"] == 3.0
+        assert parsed["prefix_cache_hit_rate"] == pytest.approx(100.0 / 400.0)
+        # abort and error are excluded, repetition counts as finished
+        assert parsed["successful_requests_total"] == 8.0
+        # trailing exposition timestamps are ignored
+        assert parsed["request_latency_sum"] == 6.0
+        assert parsed["request_latency_count"] == 4.0
+
+    def test_parse_prefix_cache_without_queries(self, collector):
+        """A fresh server reports 0 queries; the hit rate is 0, not a crash."""
+        text = """\
+vllm:prefix_cache_queries_total{engine="0",model_name="m"} 0.0
+vllm:prefix_cache_hits_total{engine="0",model_name="m"} 0.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["prefix_cache_hit_rate"] == 0.0
+
+    def test_parse_label_values_with_spaces_and_quotes(self, collector):
+        """Label values may contain spaces, commas and escaped quotes."""
+        text = (
+            'vllm:request_success_total{engine="0",finished_reason="abort",'
+            'model_name="my model, \\"v2\\""} 3.0\n'
+            'vllm:request_success_total{engine="0",finished_reason="stop",'
+            'model_name="my model, \\"v2\\""} 4.0\n'
+            'vllm:num_requests_running{engine="0",model_name="a b"} 2.0\n'
+        )
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["successful_requests_total"] == 4.0
+        assert parsed["requests_running"] == 2.0
+
+    def test_parse_sglang_metrics(self, collector):
+        """Parse SGLang metrics (names from SGLang 0.5.12.post1)."""
+        text = """\
+# HELP sglang:num_running_reqs The number of running requests.
+# TYPE sglang:num_running_reqs gauge
+sglang:num_running_reqs{model_name="m",pp_rank="0",tp_rank="0"} 3.0
+sglang:num_queue_reqs{model_name="m",pp_rank="0",tp_rank="0"} 2.0
+sglang:token_usage{model_name="m",pp_rank="0",tp_rank="0"} 0.25
+sglang:cache_hit_rate{model_name="m",pp_rank="0",tp_rank="0"} 0.5
+sglang:num_retracted_requests_total{model_name="m",pp_rank="0",tp_rank="0"} 1.0
+sglang:prompt_tokens_total{model_name="m"} 1000.0
+sglang:generation_tokens_total{model_name="m"} 400.0
+sglang:num_requests_total{model_name="m"} 10.0
+sglang:e2e_request_latency_seconds_sum{model_name="m"} 5.0
+sglang:e2e_request_latency_seconds_count{model_name="m"} 10.0
+sglang:queue_time_seconds_sum{model_name="m"} 0.5
+sglang:queue_time_seconds_count{model_name="m"} 10.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 3.0
+        assert parsed["requests_waiting"] == 2.0
+        assert parsed["kv_cache_usage"] == 0.25
+        assert parsed["prefix_cache_hit_rate"] == 0.5
+        assert parsed["preemptions_total"] == 1.0
+        assert parsed["total_prompt_tokens"] == 1000.0
+        assert parsed["total_generation_tokens"] == 400.0
+        assert parsed["finished_requests_total"] == 10.0
+        assert parsed["request_latency_sum"] == 5.0
+        assert parsed["queue_time_sum"] == 0.5
 
 
 class TestModelRegistry:
