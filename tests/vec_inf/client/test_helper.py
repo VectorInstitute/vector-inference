@@ -1223,6 +1223,27 @@ class TestPrometheusMetricsParsing:
         assert "gpu_cache_usage" not in parsed
         assert "requests_swapped" not in parsed
 
+    def test_parse_sglang_0_5_12_live_capture(self, collector):
+        """Parse /metrics captured from a live SGLang 0.5.12.post1 server.
+
+        The fixture was scraped from Qwen2.5-0.5B-Instruct on one A40, started
+        with --enable-metrics, after a health check, one chat and five
+        completion requests.
+        """
+        text = (FIXTURES_DIR / "sglang_0.5.12.post1_metrics.txt").read_text()
+
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["total_prompt_tokens"] == 65.0
+        assert parsed["total_generation_tokens"] == 183.0
+        assert parsed["successful_requests_total"] == 7.0
+        assert parsed["request_latency_count"] == 7.0
+        assert parsed["queue_time_count"] == 8.0
+        assert parsed["requests_running"] == 1.0
+        assert parsed["requests_waiting"] == 0.0
+        assert parsed["kv_cache_usage"] == 0.0
+        assert parsed["prefix_cache_hit_rate"] == 0.0
+
     def test_parse_vllm_data_parallel_engines(self, collector):
         """Samples from several engines are summed, KV cache usage is averaged."""
         text = """\

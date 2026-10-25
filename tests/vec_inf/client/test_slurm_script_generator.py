@@ -257,6 +257,25 @@ class TestSlurmScriptGenerator:
         # The command must not end with a dangling line continuation
         assert not single.rstrip().endswith("\\")
 
+    def test_multinode_vllm_container_shares_pid_namespace(self, singularity_params):
+        """Ray and vllm serve containers must share the host PID namespace.
+
+        Ray finds the local raylet by scanning the process table, so with
+        --containall (a private PID namespace per container) vllm serve cannot
+        attach to the Ray cluster started by the script.
+        """
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        assert "--containall" not in content
+        # ray start on the head, ray start on the workers, and vllm serve
+        assert content.count("--contain --cleanenv") == 3
+
+        single = SlurmScriptGenerator(singularity_params)._generate_script_content()
+        assert "--containall" in single
+        assert "--contain --cleanenv" not in single
+
     @pytest.mark.parametrize("num_nodes", ["1", "2"])
     @pytest.mark.parametrize("engine_args", [{}, {"--context-length": "8192"}])
     def test_generate_launch_cmd_sglang_enables_metrics(

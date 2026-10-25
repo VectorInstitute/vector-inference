@@ -387,6 +387,19 @@ ssh -L 8081:10.1.1.29:8081 username@v.vectorinstitute.ai -N
 ```
 The example provided above is for the Vector Killarney cluster, change the variables accordingly for your environment. The IP address for the compute nodes on Killarney follow `10.1.1.XX` pattern, where `XX` is the GPU number (`kn029` -> `29` in this example). Similarly, for Bon Echo it's `172.17.8.XX`, where `XX` is from `gpuXX`.
 
+## Notes on the vLLM 0.32 upgrade
+
+The vLLM image moved from vLLM 0.22.0 to 0.32.0. Things you may notice:
+
+* **Python, CUDA and drivers**: vLLM 0.32 needs Python 3.11 or newer, so the `vllm` extra skips vLLM on Python 3.10. The image uses torch 2.13 built for CUDA 13.0 on a CUDA 13.0.3 base image, which needs NVIDIA driver 580 or newer on the GPU nodes.
+* **Your own environment (`--venv`)**: FlashInfer compiles some kernels the first time a server starts and needs a CUDA 13.0 toolkit whose `nvcc` and headers match (set `CUDA_HOME`). Without one, startup fails with "Could not find nvcc"; pass `--env VLLM_USE_FLASHINFER_SAMPLER=0` to avoid the compile. The container image already has the toolkit.
+* **Removed model architectures** (since 0.22): Aquila, Arctic, AyaVision, Baichuan, Bamba, Chameleon, Cheers, Dots1, ERNIE (embedding and classification), Fairseq2Llama, FireRedLID, Fuyu, GritLM, Grok-1, HCXVision, the `InternLMForCausalLM` alias, JAIS (`JAISLMHeadModel`), Mantis, MiniMax-Text-01, MiniMax-M1 and MiniMax-VL-01, Mono-InternVL (`InternLM2VEForCausalLM`), MPT, MusicFlamingo, Ouro, Persimmon, Plamo2, PrithviGeoSpatialMAE, first generation Qwen and Qwen-VL (`QWenLMHeadModel`), Tarsier and Tarsier2, TeleChat, Xverse, and the `RWForCausalLM` and `StableLMEpochForCausalLM` aliases. None of the models in the default `models.yaml` use them.
+* **Plugins**: GGUF and bitsandbytes checkpoints now need out-of-tree vLLM plugins that are not in the image. GPTQ act-order (`g_idx`) is ignored.
+* **Defaults**: Model Runner V2 is used for all models, `--max-num-batched-tokens` defaults to 16384 (was 8192), and the server allows no CORS origins unless you pass `--allowed-origins`. `max_tokens` is now only an upper bound and is no longer reserved from the context window.
+* **API responses**: chat responses use `reasoning` instead of `reasoning_content`, and an empty `tool_calls` list is left out.
+* **Flags**: `-O3` means `--optimization-level 3`. The removed flags `--max-num-partial-prefills`, `--max-long-partial-prefills`, `--calculate-kv-scales` and `--override-attention-dtype` now fail to parse, and `--disable-cascade-attn` only prints a warning.
+* **`metrics` command**: see the [`metrics` command](#metrics-command) section for the new rows.
+
 ## Python API Usage
 
 You can also use the `vec_inf` Python API to launch and manage inference servers.

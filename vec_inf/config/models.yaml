@@ -418,9 +418,11 @@ models:
     num_nodes: 1
     vocab_size: 32064
     vllm_args:
+      --trust-remote-code: true
       --tensor-parallel-size: 2
       --max-model-len: 65536
     sglang_args:
+      --trust-remote-code: true
       --tensor-parallel-size: 2
       --context-length: 65536
   Llama-3.1-Nemotron-70B-Instruct-HF:
@@ -777,9 +779,11 @@ models:
     num_nodes: 1
     vocab_size: 32064
     vllm_args:
+      --trust-remote-code: true
       --tensor-parallel-size: 2
       --max-model-len: 65536
     sglang_args:
+      --trust-remote-code: true
       --tensor-parallel-size: 2
       --context-length: 65536
   glm-4v-9b:
@@ -796,6 +800,10 @@ models:
     gpus_per_node: 1
     num_nodes: 1
     vocab_size: 152064
+    vllm_args:
+      --trust-remote-code: true
+    sglang_args:
+      --trust-remote-code: true
   deepseek-vl2:
     model_family: deepseek-vl2
     model_type: VLM

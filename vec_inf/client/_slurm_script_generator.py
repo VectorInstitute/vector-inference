@@ -133,7 +133,7 @@ class SlurmScriptGenerator:
             if self.use_container:
                 server_setup_str = server_setup_str.replace(
                     "CONTAINER_PLACEHOLDER",
-                    SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                    SLURM_SCRIPT_TEMPLATE["container_command_ray"].format(
                         env_str=self.env_str,
                         image_path=IMAGE_PATH[self.engine],
                     ),
@@ -176,8 +176,12 @@ class SlurmScriptGenerator:
 
         launch_cmd = ["\n"]
         if self.use_container:
+            # Multi-node vLLM must see the Ray processes started above
+            container_key = (
+                "container_command_ray" if self.is_multinode else "container_command"
+            )
             launch_cmd.append(
-                SLURM_SCRIPT_TEMPLATE["container_command"].format(
+                SLURM_SCRIPT_TEMPLATE[container_key].format(  # type: ignore[literal-required]
                     env_str=self.env_str,
                     image_path=IMAGE_PATH[self.engine],
                 )

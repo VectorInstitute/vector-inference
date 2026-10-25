@@ -82,6 +82,8 @@ class SlurmScriptTemplate(TypedDict):
         Bind path environment variable for the container
     container_command : str
         Template for container execution command
+    container_command_ray : str
+        Template for container execution command for multi-node vLLM (Ray)
     activate_venv : str
         Template for virtual environment activation
     server_setup : ServerSetupConfig
@@ -99,6 +101,7 @@ class SlurmScriptTemplate(TypedDict):
     imports: str
     bind_path: str
     container_command: str
+    container_command_ray: str
     activate_venv: str
     server_setup: ServerSetupConfig
     find_server_port: list[str]
@@ -119,6 +122,11 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     "imports": "source {src_dir}/find_port.sh",
     "bind_path": f"export {CONTAINER_MODULE_NAME_UPPER}_BINDPATH=${CONTAINER_MODULE_NAME_UPPER}_BINDPATH,/dev,/tmp,{{work_dir}}/.vec-inf-cache:$HOME/.cache,{{model_weights_path}}{{additional_binds}}",
     "container_command": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --containall {{image_path}} \\",
+    # Multi-node vLLM runs the Ray head/worker and `vllm serve` in separate
+    # container instances on the same node. Ray (2.56) finds the local raylet by
+    # scanning the process table, so these containers must share the host PID
+    # and IPC namespaces: --contain --cleanenv instead of --containall.
+    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --contain --cleanenv {{image_path}} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
