@@ -59,7 +59,11 @@ jobs:
       - name: Extract backend version
         id: backend-version
         run: |
-          VERSION=$(grep -A 1 "name = \"${{ matrix.backend }}\"" uv.lock | grep version | cut -d '"' -f 2)
+          # Anchor on the package header line. Unanchored, the pattern also
+          # matches dependency entries such as `{ name = "vllm", marker =
+          # "python_full_version >= '3.11' ..." }`, whose marker contains
+          # "version", and the step writes several lines to GITHUB_OUTPUT.
+          VERSION=$(grep -A 1 "^name = \"${{ matrix.backend }}\"$" uv.lock | grep '^version = ' | head -n 1 | cut -d '"' -f 2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Compute image base path
