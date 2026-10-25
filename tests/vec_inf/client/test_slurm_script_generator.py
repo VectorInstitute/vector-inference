@@ -330,6 +330,16 @@ class TestSlurmScriptGenerator:
             ("~/t.jinja", ["/home/u/t.jinja"]),
             ("it's", ["it's"]),
             ('q"x', ['q"x']),
+            # Backslashes inside double quotes are escaped, except before $
+            ('$SLURM_TMPDIR\\"q', ['/tmp/job1\\"q']),
+            ("$SLURM_TMPDIR\\\\x", ["/tmp/job1\\\\x"]),
+            # $$ is not a variable reference
+            ("$$", ["$$"]),
+            ("$$SLURM_TMPDIR", ["$$SLURM_TMPDIR"]),
+            # Quotes inside a word are literal, a leading quote groups words
+            ("a'b'c", ["a'b'c"]),
+            ("don't stop", ["don't", "stop"]),
+            ('"/p q/t" x', ["/p q/t", "x"]),
         ],
     )
     def test_format_engine_arg_value_through_bash(self, value, expected):
@@ -406,6 +416,20 @@ class TestSlurmScriptGenerator:
         assert "${NCCL_IB_GID_INDEX:-3}" in content
         assert "${NCCL_IB_GID_INDEX:-0}" in content
         assert "={NCCL_IB_GID_INDEX" not in content
+
+    def test_multinode_user_env_overrides_nccl_defaults(self, singularity_params):
+        """User --env values come after $NCCL_ENV_ARG so they win in apptainer."""
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        multinode["env"] = {"NCCL_IB_GID_INDEX": "2"}
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        container_lines = [
+            line for line in content.splitlines() if "--contain --cleanenv" in line
+        ]
+        assert len(container_lines) == 3
+        for line in container_lines:
+            assert line.index("$NCCL_ENV_ARG") < line.index("--env NCCL_IB_GID_INDEX=2")
 
     def test_multinode_vllm_container_shares_pid_namespace(self, singularity_params):
         """Ray and vllm serve containers must share the host PID namespace.

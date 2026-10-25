@@ -19,8 +19,80 @@ from vec_inf.client._slurm_templates import (
 from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
 
 
-# A shell variable reference that is not escaped: $NAME or ${...}
-_SHELL_VAR_RE = re.compile(r"(?<!\\)\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[^}]+\})")
+# A shell variable reference, $NAME or ${...}, that is not escaped with a
+# backslash and not part of "$$"
+_SHELL_VAR_RE = re.compile(r"(?<![\\$])\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[^}]+\})")
+
+
+def _split_words(text: str) -> list[str]:
+    """Split a value into words on whitespace.
+
+    A word that starts with a single or double quote runs to the matching
+    closing quote and may contain spaces; the quotes are removed. Quotes
+    anywhere else are ordinary characters, so apostrophes inside a word
+    (``it's``, ``a'b'c``) are kept. Backslashes are kept as they are.
+
+    Parameters
+    ----------
+    text : str
+        The value to split
+
+    Returns
+    -------
+    list[str]
+        The words
+
+    Raises
+    ------
+    ValueError
+        If a word starts with a quote that is never closed
+    """
+    words: list[str] = []
+    i, n = 0, len(text)
+    while i < n:
+        if text[i].isspace():
+            i += 1
+            continue
+        if text[i] in "'\"":
+            end = text.find(text[i], i + 1)
+            if end == -1:
+                raise ValueError(f"Unclosed {text[i]} quote in {text!r}")
+            word = text[i + 1 : end]
+            i = end + 1
+        else:
+            word = ""
+        start = i
+        while i < n and not text[i].isspace():
+            i += 1
+        words.append(word + text[start:i])
+    return words
+
+
+def _double_quote(token: str) -> str:
+    """Double-quote a word so variables expand but nothing else does.
+
+    Every backslash is escaped except one directly before ``$``, which keeps
+    escaping that dollar sign. ``"`` and backticks are escaped.
+
+    Parameters
+    ----------
+    token : str
+        The word
+
+    Returns
+    -------
+    str
+        The word in double quotes
+    """
+    out = []
+    for i, char in enumerate(token):
+        if char == "\\":
+            out.append("\\" if token[i + 1 : i + 2] == "$" else "\\\\")
+        elif char in '"`':
+            out.append("\\" + char)
+        else:
+            out.append(char)
+    return '"' + "".join(out) + '"'
 
 
 def _quote_token(token: str) -> str:
@@ -37,10 +109,9 @@ def _quote_token(token: str) -> str:
         The word, quoted for bash
     """
     if _SHELL_VAR_RE.search(token) or "\\$" in token:
-        # Double quotes keep $VAR and ${VAR} expanding. Backslashes are left
-        # as they are, so an escaped \$ stays a literal dollar sign, as it
-        # would on a command line.
-        return '"' + token.replace('"', '\\"').replace("`", "\\`") + '"'
+        # Double quotes keep $VAR and ${VAR} expanding, and an escaped \$
+        # stays a literal dollar sign, as it would on a command line.
+        return _double_quote(token)
     if token.startswith("~/"):
         return "~/" + shlex.quote(token[2:])
     return shlex.quote(token)
@@ -51,15 +122,17 @@ def format_engine_arg_value(value: Any) -> str:
 
     * JSON values (starting with ``{`` or ``[``) are single-quoted as one
       word, so they reach the engine unchanged.
-    * Other values are split into words with ``shlex.split`` and each word is
-      quoted on its own, so flags that take several values keep working
+    * Other values are split into words on whitespace and each word is quoted
+      on its own, so flags that take several values keep working
       (``--cudagraph-capture-sizes 1 2 4 8``, ``--served-model-name a b``).
-      Quote a value that is one word with spaces in it, for example
-      ``--chat-template='/path/with space/t.jinja'``.
+      A word that starts with a quote runs to the matching quote, so a value
+      with spaces can be passed as one word:
+      ``--chat-template='/path/with space/t.jinja'``. Quotes inside a word
+      are kept literally.
     * A word that references a shell variable (``$NAME`` or ``${...}``) is
-      double-quoted so the variable still expands, and a leading ``~/`` is
-      left unquoted so it still expands to the home directory. Any other
-      ``$`` stays literal.
+      double-quoted so the variable still expands, ``\$`` gives a literal
+      dollar sign, and a leading ``~/`` is left unquoted so it still expands
+      to the home directory. Any other ``$`` (including ``$$``) stays literal.
 
     Parameters
     ----------
@@ -75,13 +148,8 @@ def format_engine_arg_value(value: Any) -> str:
     stripped = text.strip()
     if stripped.startswith(("{", "[")):
         return shlex.quote(stripped)
-    # Split like a shell would on whitespace and quotes, but keep backslashes
-    # so escaped dollar signs survive to _quote_token
-    lexer = shlex.shlex(text, posix=True)
-    lexer.whitespace_split = True
-    lexer.escape = ""
     try:
-        tokens = list(lexer)
+        tokens = _split_words(text)
     except ValueError:
         # Unbalanced quotes: pass the value through as a single word
         tokens = [text]

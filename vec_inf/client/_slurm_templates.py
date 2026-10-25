@@ -129,7 +129,9 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     # $NCCL_ENV_ARG (set by the RDMA check in multinode_vllm, e.g.
     # "--env NCCL_IB_GID_INDEX=3") is left unquoted on purpose so it splits into
     # apptainer arguments; --cleanenv would otherwise drop the NCCL_IB_* exports.
-    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} $NCCL_ENV_ARG --contain --cleanenv {{image_path}} \\",
+    # It comes before {env_str}: for repeated --env keys apptainer keeps the
+    # last value, so a user's --env NCCL_IB_GID_INDEX=... wins.
+    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv $NCCL_ENV_ARG {{env_str}} --contain --cleanenv {{image_path}} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
