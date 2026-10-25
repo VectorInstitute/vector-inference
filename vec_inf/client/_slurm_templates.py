@@ -195,7 +195,9 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
         ],
     },
     "find_server_port": [
-        "\nserver_port_number=$(find_available_port $head_node 8080 65535)",
+        # Max 55535: SGLang also binds a gRPC port at server port + 10000 and
+        # refuses to start if that is above 65535
+        "\nserver_port_number=$(find_available_port $head_node 8080 55535)",
         'server_address="http://${head_node}:${server_port_number}/v1"',
     ],
     "write_to_json": [
@@ -318,7 +320,8 @@ BATCH_MODEL_LAUNCH_SCRIPT_TEMPLATE: BatchModelLaunchScriptTemplate = {
     "server_address_setup": [
         "source {src_dir}/find_port.sh",
         "head_node_ip=${{SLURMD_NODENAME}}",
-        "server_port_number=$(find_available_port $head_node_ip 8080 65535)",
+        # Max 55535: SGLang also binds a gRPC port at server port + 10000
+        "server_port_number=$(find_available_port $head_node_ip 8080 55535)",
         'server_address="http://${{head_node_ip}}:${{server_port_number}}/v1"\n',
         "echo $server_address\n",
     ],

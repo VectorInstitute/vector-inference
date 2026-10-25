@@ -333,6 +333,17 @@ class TestSlurmScriptGenerator:
         ).stdout.splitlines()
         assert echoed == ["/tmp/job1/weights", "/home/u/templates/chat.jinja"]
 
+    @pytest.mark.parametrize("engine", ["vllm", "sglang"])
+    def test_server_port_leaves_room_for_sglang_grpc(self, basic_params, engine):
+        """SGLang binds server port + 10000 for gRPC, so cap the port at 55535."""
+        params = basic_params.copy()
+        params["engine"] = engine
+        setup = SlurmScriptGenerator(params)._generate_server_setup()
+
+        assert (
+            "server_port_number=$(find_available_port $head_node 8080 55535)" in setup
+        )
+
     def test_multinode_vllm_ray_port_outside_worker_range(self, multinode_params):
         """The Ray head port is picked above Ray's worker port range."""
         setup = SlurmScriptGenerator(multinode_params)._generate_server_setup()
