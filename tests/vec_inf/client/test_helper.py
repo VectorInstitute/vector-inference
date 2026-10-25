@@ -159,6 +159,63 @@ class TestModelLauncher:
 
     @patch("vec_inf.client._helper.utils.load_config")
     @patch("pathlib.Path.exists")
+    def test_process_engine_args_json_values(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """Commas inside JSON objects, lists and quotes do not split arguments."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            '-sc={"method":"ngram","num_speculative_tokens":3,"prompt_lookup_max":4},'
+            '-cc={"cudagraph_capture_sizes":[1,2,4]},'
+            "--max-model-len=8192,"
+            '-ac={"backend": "FLASH_ATTN"},'
+            "--chat-template-content-format='a,b',"
+            '-dc={"steps": 4}',
+            "vllm",
+        )
+
+        assert vllm_args == {
+            "--speculative-config": (
+                '{"method":"ngram","num_speculative_tokens":3,"prompt_lookup_max":4}'
+            ),
+            "--compilation-config": '{"cudagraph_capture_sizes":[1,2,4]}',
+            "--max-model-len": "8192",
+            "--attention-config": '{"backend": "FLASH_ATTN"}',
+            "--chat-template-content-format": "'a,b'",
+            "--diffusion-config": '{"steps": 4}',
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
+    def test_process_engine_args_space_separated_values(
+        self, mock_path_exists, mock_load_config, mock_configs
+    ):
+        """'-tp 2' is handled like '-tp=2', and JSON may follow a space."""
+        mock_load_config.return_value = mock_configs
+        mock_path_exists.return_value = True
+
+        launcher = ModelLauncher("test-model", {})
+        vllm_args = launcher._process_engine_args(
+            '-tp 2, --max-model-len 4096, -sc {"method": "ngram"}, -ep', "vllm"
+        )
+
+        assert vllm_args == {
+            "--tensor-parallel-size": "2",
+            "--max-model-len": "4096",
+            "--speculative-config": '{"method": "ngram"}',
+            "--enable-expert-parallel": True,
+        }
+        sglang_args = launcher._process_engine_args("--tp 4, --ep-size 2", "sglang")
+        assert sglang_args == {
+            "--tensor-parallel-size": "4",
+            "--expert-parallel-size": "2",
+        }
+
+    @patch("vec_inf.client._helper.utils.load_config")
+    @patch("pathlib.Path.exists")
     def test_process_engine_args_value_with_equals(
         self, mock_path_exists, mock_load_config, mock_configs
     ):
@@ -1236,13 +1293,40 @@ class TestPrometheusMetricsParsing:
 
         assert parsed["total_prompt_tokens"] == 65.0
         assert parsed["total_generation_tokens"] == 183.0
-        assert parsed["successful_requests_total"] == 7.0
+        assert parsed["finished_requests_total"] == 7.0
+        assert "successful_requests_total" not in parsed
         assert parsed["request_latency_count"] == 7.0
         assert parsed["queue_time_count"] == 8.0
         assert parsed["requests_running"] == 1.0
         assert parsed["requests_waiting"] == 0.0
         assert parsed["kv_cache_usage"] == 0.0
         assert parsed["prefix_cache_hit_rate"] == 0.0
+
+    def test_parse_sglang_per_rank_gauges(self, collector):
+        """SGLang scheduler gauges repeated per TP/PP rank are counted once.
+
+        With pipeline parallelism (or --enable-metrics-for-all-schedulers) each
+        rank reports the same running and waiting requests. Data parallel ranks
+        serve different requests and are summed.
+        """
+        text = """\
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="0"} 4.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="1",tp_rank="0"} 4.0
+sglang:num_running_reqs{dp_rank="0",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="1"} 4.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",moe_ep_rank="0",pp_rank="0",tp_rank="0"} 3.0
+sglang:num_running_reqs{dp_rank="1",model_name="m",moe_ep_rank="0",pp_rank="1",tp_rank="0"} 3.0
+sglang:num_queue_reqs{model_name="m",pp_rank="0",tp_rank="0"} 2.0
+sglang:num_queue_reqs{model_name="m",pp_rank="1",tp_rank="0"} 2.0
+sglang:token_usage{model_name="m",pp_rank="0",tp_rank="0"} 0.5
+sglang:token_usage{model_name="m",pp_rank="1",tp_rank="0"} 0.1
+sglang:num_requests_total{model_name="m"} 9.0
+"""
+        parsed = collector._parse_metrics(text)
+
+        assert parsed["requests_running"] == 7.0
+        assert parsed["requests_waiting"] == 2.0
+        assert parsed["kv_cache_usage"] == 0.5
+        assert parsed["finished_requests_total"] == 9.0
 
     def test_parse_vllm_data_parallel_engines(self, collector):
         """Samples from several engines are summed, KV cache usage is averaged."""
@@ -1340,7 +1424,7 @@ sglang:queue_time_seconds_count{model_name="m"} 10.0
         assert parsed["preemptions_total"] == 1.0
         assert parsed["total_prompt_tokens"] == 1000.0
         assert parsed["total_generation_tokens"] == 400.0
-        assert parsed["successful_requests_total"] == 10.0
+        assert parsed["finished_requests_total"] == 10.0
         assert parsed["request_latency_sum"] == 5.0
         assert parsed["queue_time_sum"] == 0.5
 

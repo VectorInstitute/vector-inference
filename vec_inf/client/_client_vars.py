@@ -13,6 +13,8 @@ KEY_METRICS : dict
     Mapping of vLLM and SGLang Prometheus metrics to output keys and aggregation
 KEY_METRICS_EXCLUDED_LABELS : dict
     Label values to skip when aggregating a metric
+SGLANG_PRIMARY_RANK_LABELS : tuple
+    SGLang rank labels whose non-zero ranks repeat rank 0's scheduler metrics
 SLURM_JOB_CONFIG_ARGS : dict
     Mapping of SLURM configuration arguments to their parameter names
 VLLM_SHORT_TO_LONG_MAP : dict
@@ -62,7 +64,8 @@ KEY_METRICS: dict[str, tuple[str, str]] = {
     "sglang:e2e_request_latency_seconds_count": ("request_latency_count", "sum"),
     "sglang:queue_time_seconds_sum": ("queue_time_sum", "sum"),
     "sglang:queue_time_seconds_count": ("queue_time_count", "sum"),
-    "sglang:num_requests_total": ("successful_requests_total", "sum"),
+    # Counts every finished request, including aborted ones
+    "sglang:num_requests_total": ("finished_requests_total", "sum"),
     "sglang:num_running_reqs": ("requests_running", "sum"),
     "sglang:num_queue_reqs": ("requests_waiting", "sum"),
     "sglang:num_retracted_requests_total": ("preemptions_total", "sum"),
@@ -76,6 +79,13 @@ KEY_METRICS: dict[str, tuple[str, str]] = {
 KEY_METRICS_EXCLUDED_LABELS: dict[str, dict[str, set[str]]] = {
     "vllm:request_success_total": {"finished_reason": {"abort", "error"}},
 }
+
+# SGLang reports scheduler metrics once per tensor, pipeline and expert parallel
+# rank (with pipeline parallelism, or --enable-metrics-for-all-schedulers), and
+# every rank sees the same requests. Only samples from rank 0 of these groups
+# are counted, so running/waiting requests are not multiplied by the number of
+# ranks. Data parallel ranks (dp_rank) serve different requests and are summed.
+SGLANG_PRIMARY_RANK_LABELS = ("tp_rank", "pp_rank", "moe_ep_rank")
 
 # Slurm job configuration arguments
 SLURM_JOB_CONFIG_ARGS = {
@@ -114,6 +124,7 @@ VLLM_SHORT_TO_LONG_MAP = {
     "-dpe": "--data-parallel-external-lb",
     "-dpm": "--data-parallel-multi-port-external-lb",
     "-asc": "--api-server-count",
+    "-dc": "--diffusion-config",
     "-ep": "--enable-expert-parallel",
     "-sc": "--speculative-config",
     "-cc": "--compilation-config",

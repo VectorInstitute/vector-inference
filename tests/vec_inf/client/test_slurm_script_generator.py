@@ -257,6 +257,100 @@ class TestSlurmScriptGenerator:
         # The command must not end with a dangling line continuation
         assert not single.rstrip().endswith("\\")
 
+    @pytest.mark.parametrize("num_nodes", ["1", "2"])
+    @pytest.mark.parametrize("engine", ["vllm", "sglang"])
+    def test_engine_arg_values_survive_bash(
+        self, basic_params, num_nodes, engine, tmp_path
+    ):
+        """JSON and spaced values reach the engine exactly as configured.
+
+        The generated script must pass ``bash -n``, and the engine command,
+        run through bash with ``echo`` in place of the engine, must print each
+        value unchanged (no stripped quotes, no word splitting).
+        """
+        spec = '{"method":"ngram","num_speculative_tokens":3}'
+        params = basic_params.copy()
+        params["engine"] = engine
+        params["num_nodes"] = num_nodes
+        params["engine_args"] = {
+            "--speculative-config": spec,
+            "--chat-template": "/path/with space/template.jinja",
+            "--max-model-len": "8192",
+            "--enforce-eager": True,
+        }
+        generator = SlurmScriptGenerator(params)
+        content = generator._generate_script_content()
+
+        syntax = subprocess.run(
+            ["bash", "-n"], input=content, text=True, capture_output=True, check=False
+        )
+        assert syntax.returncode == 0, syntax.stderr
+
+        # Re-run only the argument list through bash and print one per line
+        lines = generator._generate_launch_cmd().splitlines()
+        start = next(i for i, line in enumerate(lines) if "--served-model-name" in line)
+        arg_lines = [
+            line
+            for line in lines[start:]
+            if line.strip().startswith("--") and "$" not in line
+        ]
+        script = "printf '%s\\n' " + " ".join(
+            line.strip().rstrip("\\").strip() for line in arg_lines
+        )
+        echoed = subprocess.run(
+            ["bash", "-c", script], text=True, capture_output=True, check=True
+        ).stdout.splitlines()
+
+        assert echoed[echoed.index("--speculative-config") + 1] == spec
+        assert (
+            echoed[echoed.index("--chat-template") + 1]
+            == "/path/with space/template.jinja"
+        )
+        assert echoed[echoed.index("--max-model-len") + 1] == "8192"
+        assert "--enforce-eager" in echoed
+
+    def test_engine_arg_values_keep_shell_expansion(self, basic_params):
+        """Values with $VAR or a leading ~/ are still expanded by bash."""
+        params = basic_params.copy()
+        params["engine_args"] = {
+            "--download-dir": "$SLURM_TMPDIR/weights",
+            "--chat-template": "~/templates/chat.jinja",
+        }
+        launch_cmd = SlurmScriptGenerator(params)._generate_launch_cmd()
+
+        assert '--download-dir "$SLURM_TMPDIR/weights"' in launch_cmd
+        assert "--chat-template ~/templates/chat.jinja" in launch_cmd
+        echoed = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'printf "%s\\n" "$SLURM_TMPDIR/weights" ~/templates/chat.jinja',
+            ],
+            env={"SLURM_TMPDIR": "/tmp/job1", "HOME": "/home/u"},
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.splitlines()
+        assert echoed == ["/tmp/job1/weights", "/home/u/templates/chat.jinja"]
+
+    def test_multinode_vllm_container_passes_nccl_env(self, singularity_params):
+        """NCCL_IB_* settings from the RDMA check reach the Ray containers."""
+        multinode = singularity_params.copy()
+        multinode["num_nodes"] = "2"
+        content = SlurmScriptGenerator(multinode)._generate_script_content()
+
+        container_lines = [
+            line for line in content.splitlines() if "--contain --cleanenv" in line
+        ]
+        assert len(container_lines) == 3
+        assert all("$NCCL_ENV_ARG" in line for line in container_lines)
+        # Unquoted so "--env NCCL_IB_GID_INDEX=3" splits into two arguments
+        assert '"$NCCL_ENV_ARG"' not in content
+        # The GID index default must be a parameter expansion, not literal text
+        assert "${NCCL_IB_GID_INDEX:-3}" in content
+        assert "${NCCL_IB_GID_INDEX:-0}" in content
+        assert "={NCCL_IB_GID_INDEX" not in content
+
     def test_multinode_vllm_container_shares_pid_namespace(self, singularity_params):
         """Ray and vllm serve containers must share the host PID namespace.
 

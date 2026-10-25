@@ -265,8 +265,9 @@ And you will see the performance metrics streamed to your console, note that the
 
 * The metrics come from the server's Prometheus `/metrics` endpoint. Counters are summed over all engines (for example with `--data-parallel-size`), and KV cache usage is averaged over them.
 * KV cache usage is the share of the GPU KV cache in use. vLLM 0.32 no longer reports separate GPU and CPU cache usage or swapped requests, so those rows were replaced by **KV Cache Usage** and **Preemptions**.
-* The prefix cache hit rate is the share of prompt tokens served from the prefix cache since the server started. Prefix caching is on by default in vLLM and SGLang, so the row is shown whenever the server reports it.
-* **Successful Requests** counts requests that finished normally. Requests aborted by the client or failed with an error are not counted.
+* The prefix cache hit rate shows whenever the server reports it (prefix caching is on by default in vLLM and SGLang). For vLLM it is the share of prompt tokens served from the prefix cache since the server started. For SGLang it is SGLang's own `cache_hit_rate` gauge, which covers recent batches only.
+* For vLLM, **Successful Requests** counts requests that finished normally; requests aborted by the client or failed with an error are not counted. SGLang does not report how requests ended, so for SGLang servers the row is **Finished Requests** and includes aborted requests.
+* SGLang reports scheduler metrics once per tensor, pipeline and expert parallel rank. Only rank 0 is counted so running and waiting requests are not multiplied by the number of ranks; data parallel ranks are added up.
 * SGLang servers launched by `vec-inf` are started with `--enable-metrics`, which SGLang needs before it serves `/metrics`.
 
 ### `shutdown` command
@@ -399,6 +400,31 @@ The vLLM image moved from vLLM 0.22.0 to 0.32.0. Things you may notice:
 * **API responses**: chat responses use `reasoning` instead of `reasoning_content`, and an empty `tool_calls` list is left out.
 * **Flags**: `-O3` means `--optimization-level 3`. The removed flags `--max-num-partial-prefills`, `--max-long-partial-prefills`, `--calculate-kv-scales` and `--override-attention-dtype` now fail to parse, and `--disable-cascade-attn` only prints a warning.
 * **`metrics` command**: see the [`metrics` command](#metrics-command) section for the new rows.
+* **Python API metric keys**: `VecInfClient.get_metrics()` returns different keys, because vLLM no longer exports the old metrics:
+
+    | Old key | New key |
+    | ------- | ------- |
+    | `gpu_cache_usage` | `kv_cache_usage` |
+    | `cpu_cache_usage` | removed, vLLM has no separate CPU cache gauge |
+    | `requests_swapped` | removed, vLLM no longer swaps; the closest signal is `preemptions_total` |
+    | `gpu_prefix_cache_hit_rate` | `prefix_cache_hit_rate` (also `prefix_cache_hits` and `prefix_cache_queries`) |
+    | `cpu_prefix_cache_hit_rate` | removed |
+    | `successful_requests_total` (SGLang) | `finished_requests_total`; vLLM keeps `successful_requests_total` |
+
+    New keys: `preemptions_total`, `queue_time_count` and `avg_queue_time`. The `enabled_prefix_caching` attribute of `PerformanceMetricsCollector` and of the CLI's `MetricsResponseFormatter` is gone.
+* **Engine arguments**: values are now quoted in the generated Slurm script, so JSON values such as `--vllm-args '-sc={"method":"ngram","num_speculative_tokens":3}'` reach the engine unchanged. Commas inside `{}`, `[]` or quotes no longer split arguments, and `-tp 2` works like `-tp=2`. Values that contain `$` or start with `~/` are still expanded by the shell.
+
+### Supported GPUs
+
+The vLLM image uses CUDA 13.0, which needs NVIDIA driver 580 or newer and a GPU with compute capability 7.5 or higher (Turing or newer). On the Vector **Bon Echo** cluster all GPU partitions qualify: every GPU type runs driver 580.178.04 (checked October 2026), and vLLM 0.32 was tested serving models on A40 and RTX 6000 nodes.
+
+| Partitions | GPU | Compute capability |
+| ---------- | --- | ------------------ |
+| `a100_b1` to `a100_b5` | A100 80GB | 8.0 |
+| `a40_b1` to `a40_b5`, `interac` | A40 | 8.6 |
+| `rtx6000_b1` to `rtx6000_b5`, `interac` | Quadro RTX 6000 | 7.5 |
+
+Turing GPUs (RTX 6000, T4) have no bfloat16 support, so vLLM loads bfloat16 models in float16 there. Older GPUs (Volta V100 and earlier) are not supported by CUDA 13.
 
 ## Python API Usage
 

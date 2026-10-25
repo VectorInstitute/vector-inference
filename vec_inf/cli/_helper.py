@@ -422,10 +422,18 @@ class MetricsResponseFormatter:
             "Total Generation Tokens",
             f"{self.metrics.get('total_generation_tokens', 0):.0f} tokens",
         )
-        self.table.add_row(
-            "Successful Requests",
-            f"{self.metrics.get('successful_requests_total', 0):.0f} reqs",
-        )
+        # SGLang only reports finished requests (including aborted ones),
+        # vLLM reports them by finish reason so successes can be counted
+        if "finished_requests_total" in self.metrics:
+            self.table.add_row(
+                "Finished Requests",
+                f"{self.metrics['finished_requests_total']:.0f} reqs",
+            )
+        else:
+            self.table.add_row(
+                "Successful Requests",
+                f"{self.metrics.get('successful_requests_total', 0):.0f} reqs",
+            )
 
 
 class ListCmdDisplay:

@@ -345,6 +345,17 @@ class TestMetricsResponseFormatter:
         assert rows["Avg Request Latency"] == "2.5 s"
         assert rows["Avg Queue Time"] == "0.12 s"
 
+    def test_format_metrics_sglang_finished_requests(self):
+        """SGLang only reports finished requests, shown under that name."""
+        metrics = {"finished_requests_total": 7, "kv_cache_usage": 0.1}
+
+        formatter = MetricsResponseFormatter(metrics)
+        formatter.format_metrics()
+
+        rows = _table_rows(formatter.table)
+        assert rows["Finished Requests"] == "7 reqs"
+        assert "Successful Requests" not in rows
+
     def test_format_failed_metrics(self):
         """Test formatting failed metrics with error message."""
         error_message = "ERROR: Server not ready"

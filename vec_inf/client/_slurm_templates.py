@@ -126,7 +126,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
     # container instances on the same node. Ray (2.56) finds the local raylet by
     # scanning the process table, so these containers must share the host PID
     # and IPC namespaces: --contain --cleanenv instead of --containall.
-    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} --contain --cleanenv {{image_path}} \\",
+    # $NCCL_ENV_ARG (set by the RDMA check in multinode_vllm, e.g.
+    # "--env NCCL_IB_GID_INDEX=3") is left unquoted on purpose so it splits into
+    # apptainer arguments; --cleanenv would otherwise drop the NCCL_IB_* exports.
+    "container_command_ray": f"{CONTAINER_MODULE_NAME} exec --nv {{env_str}} $NCCL_ENV_ARG --contain --cleanenv {{image_path}} \\",
     "activate_venv": "source {venv}/bin/activate",
     "server_setup": {
         "single_node": [
@@ -148,12 +151,12 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "   # Pick GID index based on link layer (IB vs RoCE)",
             '   if ibv_devinfo 2>/dev/null | grep -q "link_layer:.*Ethernet"; then',
             "       # RoCEv2 typically needs a nonzero GID index; 3 is common, try 2 if your fabric uses it",
-            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}",
-            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-3}}"',
+            "       export NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-3}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-3}}"',
             "   else",
             "       # Native InfiniBand => GID 0",
-            "       export NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}",
-            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX={{NCCL_IB_GID_INDEX:-0}}"',
+            "       export NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-0}}",
+            '       export NCCL_ENV_ARG="--env NCCL_IB_GID_INDEX=${{NCCL_IB_GID_INDEX:-0}}"',
             "   fi",
             "fi",
             "\n# Start Ray head node",

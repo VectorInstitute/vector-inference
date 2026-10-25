@@ -54,7 +54,7 @@ inference = [
 # (the vec-inf client itself still supports 3.10). vLLM 0.32 needs torchcodec
 # 0.14 or newer for video decoding.
 vllm = [
-    "vllm[audio,bench]==0.32.0; python_version >= '3.11'",
+    "vllm[audio,bench]>=0.32,<0.33; python_version >= '3.11'",
     "ray[default]>=2.51.0",
     "torchcodec>=0.14.0",
 ]

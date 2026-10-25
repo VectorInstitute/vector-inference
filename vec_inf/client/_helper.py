@@ -21,6 +21,7 @@ from vec_inf.client._client_vars import (
     ENGINE_SHORT_TO_LONG_MAP,
     KEY_METRICS,
     KEY_METRICS_EXCLUDED_LABELS,
+    SGLANG_PRIMARY_RANK_LABELS,
     SRC_DIR,
     SUPPORTED_ENGINES,
 )
@@ -52,6 +53,45 @@ _PROM_SAMPLE_RE = re.compile(
 )
 # One label pair inside the braces, allowing escaped quotes in the value
 _PROM_LABEL_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"')
+
+
+def _split_engine_args(arg_string: str) -> list[str]:
+    """Split a comma-separated engine argument string.
+
+    Commas inside braces, brackets or quotes do not split, so JSON values such
+    as ``-sc={"method":"ngram","num_speculative_tokens":3}`` stay in one piece.
+
+    Parameters
+    ----------
+    arg_string : str
+        Comma-separated engine arguments
+
+    Returns
+    -------
+    list[str]
+        The individual arguments
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote = ""
+    for char in arg_string:
+        if quote:
+            if char == quote:
+                quote = ""
+        elif char in "\"'":
+            quote = char
+        elif char in "{[":
+            depth += 1
+        elif char in "}]":
+            depth = max(depth - 1, 0)
+        elif char == "," and depth == 0:
+            parts.append("".join(current))
+            current = []
+            continue
+        current.append(char)
+    parts.append("".join(current))
+    return parts
 
 
 class ModelLauncher:
@@ -177,7 +217,7 @@ class ModelLauncher:
         engine_args: dict[str, str | bool] = {}
         engine_arg_map = ENGINE_SHORT_TO_LONG_MAP[engine_choice]
 
-        for raw_arg in arg_string.split(","):
+        for raw_arg in _split_engine_args(arg_string):
             arg = raw_arg.strip()
             if not arg:
                 continue
@@ -189,10 +229,14 @@ class ModelLauncher:
                 if not level:
                     raise ValueError("-O requires an optimization level, e.g. -O3")
                 engine_args[engine_arg_map["-O"]] = level
-            elif "=" in arg:
-                key, value = arg.split("=", 1)
-                key = key.strip()
-                engine_args[engine_arg_map.get(key, key)] = value.strip()
+                continue
+            # A flag and its value are separated by whichever of "=" or
+            # whitespace comes first, so both "-tp=2" and "-tp 2" work and a
+            # value may itself contain "=" or spaces (e.g. JSON).
+            match = re.match(r"^(\S+?)(?:=|\s+)(.*)$", arg, re.DOTALL)
+            if match:
+                key, value = match.group(1), match.group(2).strip()
+                engine_args[engine_arg_map.get(key, key)] = value
             else:
                 engine_args[engine_arg_map.get(arg, arg)] = True
         return engine_args
@@ -1056,11 +1100,16 @@ class PerformanceMetricsCollector:
             if metric_name not in KEY_METRICS:
                 continue
 
+            labels = self._parse_labels(label_text) if label_text else {}
             excluded = KEY_METRICS_EXCLUDED_LABELS.get(metric_name)
-            if excluded and label_text:
-                labels = self._parse_labels(label_text)
-                if any(labels.get(k) in values for k, values in excluded.items()):
-                    continue
+            if excluded and any(
+                labels.get(k) in values for k, values in excluded.items()
+            ):
+                continue
+            if metric_name.startswith("sglang:") and any(
+                labels.get(k, "0") != "0" for k in SGLANG_PRIMARY_RANK_LABELS
+            ):
+                continue
 
             try:
                 value = float(value_text)

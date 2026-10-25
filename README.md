@@ -19,6 +19,8 @@ If you are using the Vector cluster environment, and you don't need any customiz
 ```bash
 pip install vec-inf
 ```
+The `vec-inf` client supports Python 3.10 and newer. The optional `vllm` extra (`pip install "vec-inf[vllm]"`) installs vLLM 0.32, which needs Python 3.11 or newer: on Python 3.10 the extra installs its other packages but not vLLM.
+
 Otherwise, we recommend using the provided [`vllm.Dockerfile`](vllm.Dockerfile) and [`sglang.Dockerfile`](sglang.Dockerfile) to set up your own environment with the package. The built images are published to **Google Artifact Registry** at:
 
 ```

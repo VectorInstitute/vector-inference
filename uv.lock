@@ -12071,7 +12071,7 @@ requires-dist = [
     { name = "sglang", marker = "extra == 'sglang'", specifier = ">=0.5.5" },
     { name = "torchao", marker = "extra == 'sglang'", specifier = ">=0.9.0" },
     { name = "torchcodec", marker = "extra == 'vllm'", specifier = ">=0.14.0" },
-    { name = "vllm", extras = ["audio", "bench"], marker = "python_full_version >= '3.11' and extra == 'vllm'", specifier = "==0.32.0" },
+    { name = "vllm", extras = ["audio", "bench"], marker = "python_full_version >= '3.11' and extra == 'vllm'", specifier = ">=0.32,<0.33" },
 ]
 provides-extras = ["vllm", "sglang"]
 

@@ -4,6 +4,7 @@ This module provides functionality to generate Slurm scripts for running inferen
 servers in both single-node and multi-node configurations.
 """
 
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,35 @@ from vec_inf.client._slurm_templates import (
     SLURM_SCRIPT_TEMPLATE,
 )
 from vec_inf.client._slurm_vars import CONTAINER_MODULE_NAME, IMAGE_PATH
+
+
+def format_engine_arg_value(value: Any) -> str:
+    r"""Quote an engine argument value for the generated bash script.
+
+    Values are single-quoted with ``shlex.quote`` so JSON (e.g. for
+    ``--speculative-config``) and values with spaces reach the engine
+    unchanged. Two cases keep shell expansion on purpose: a value containing
+    ``$`` is double-quoted (escaping ``\\``, ``"`` and backticks) so variables
+    such as ``$SLURM_TMPDIR`` still expand, and a leading ``~/`` is left
+    unquoted so it still expands to the home directory.
+
+    Parameters
+    ----------
+    value : Any
+        The argument value
+
+    Returns
+    -------
+    str
+        The value, quoted for bash
+    """
+    text = str(value)
+    if "$" in text:
+        escaped = text.replace("\\", "\\\\").replace('"', '\\"').replace("`", "\\`")
+        return f'"{escaped}"'
+    if text.startswith("~/"):
+        return "~/" + shlex.quote(text[2:])
+    return shlex.quote(text)
 
 
 class SlurmScriptGenerator:
@@ -199,7 +229,7 @@ class SlurmScriptGenerator:
             if isinstance(value, bool):
                 launch_cmd.append(f"    {arg} \\")
             else:
-                launch_cmd.append(f"    {arg} {value} \\")
+                launch_cmd.append(f"    {arg} {format_engine_arg_value(value)} \\")
 
         # Multi-node vLLM runs on the Ray cluster started in the server setup
         # section, so the Ray executor must be selected explicitly. vLLM only
@@ -241,7 +271,9 @@ class SlurmScriptGenerator:
             if isinstance(value, bool):
                 engine_arg_str += f"            {arg} \\\n"
             else:
-                engine_arg_str += f"            {arg} {value} \\\n"
+                engine_arg_str += (
+                    f"            {arg} {format_engine_arg_value(value)} \\\n"
+                )
 
         return launch_cmd.replace(
             "SGLANG_ARGS_PLACEHOLDER", engine_arg_str.rstrip("\\\n")
@@ -365,7 +397,7 @@ class BatchSlurmScriptGenerator:
             if isinstance(value, bool):
                 script_content.append(f"    {arg} \\")
             else:
-                script_content.append(f"    {arg} {value} \\")
+                script_content.append(f"    {arg} {format_engine_arg_value(value)} \\")
         script_content[-1] = script_content[-1].rstrip(" \\")
         # Write the bash script to the log directory
         launch_script_path = self._write_to_log_dir(
