@@ -160,7 +160,10 @@ SLURM_SCRIPT_TEMPLATE: SlurmScriptTemplate = {
             "   fi",
             "fi",
             "\n# Start Ray head node",
-            "head_node_port=$(find_available_port $head_node 8080 65535)",
+            # Keep the Ray GCS port out of Ray's default worker port range
+            # (10002-19999); a GCS port in that range makes `ray start` fail
+            # with "worker_ports is trying to use a port number ...".
+            "head_node_port=$(find_available_port $head_node 20000 65535)",
             "ray_head=$head_node_ip:$head_node_port",
             'echo "Ray Head IP: $ray_head"',
             'echo "Starting HEAD at $head_node"',

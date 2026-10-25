@@ -333,6 +333,12 @@ class TestSlurmScriptGenerator:
         ).stdout.splitlines()
         assert echoed == ["/tmp/job1/weights", "/home/u/templates/chat.jinja"]
 
+    def test_multinode_vllm_ray_port_outside_worker_range(self, multinode_params):
+        """The Ray head port is picked above Ray's worker port range."""
+        setup = SlurmScriptGenerator(multinode_params)._generate_server_setup()
+
+        assert "head_node_port=$(find_available_port $head_node 20000 65535)" in setup
+
     def test_multinode_vllm_container_passes_nccl_env(self, singularity_params):
         """NCCL_IB_* settings from the RDMA check reach the Ray containers."""
         multinode = singularity_params.copy()
