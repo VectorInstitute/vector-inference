@@ -49,5 +49,16 @@ jobs:
         uses: pypa/gh-action-pip-audit@v1.1.0
         with:
           virtual-environment: .venv/
-          # Temporary: ignore pip advisory until fixed in pip>=25.3
-          ignore-vulns: GHSA-4xh5-x5gv-qwph
+          # Temporary: ignore pip advisory until fixed in pip>=25.3.
+          # filelock CVE-2026-1129xx: fixed only in filelock>=4.2.1, which needs
+          # Python>=3.11. uv.lock uses 4.2.4 on 3.11+, but this job runs on 3.10
+          # (.python-version), where 4.1.0 is the newest installable release.
+          # Remove once Python 3.10 support is dropped.
+          ignore-vulns: >-
+            GHSA-4xh5-x5gv-qwph
+            CVE-2026-112906
+            CVE-2026-112907
+            CVE-2026-112913
+            CVE-2026-112914
+            CVE-2026-112937
+            CVE-2026-112940
