@@ -66,7 +66,8 @@ dependencies = [
     { name = "frozenlist" },
     { name = "multidict" },
     { name = "propcache" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "yarl" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/93/2f/6a91adaa2dc26877d6ed2f54c0370c8910f019db7d77c5c6a194611e93ea/aiohttp-3.14.4.tar.gz", hash = "sha256:831fc5bd39ec2517851e348f613ddb5447a47cf4b71cb09845af7ad7ed45d8f9", size = 8077839, upload-time = "2026-10-05T17:43:48.309Z" }
@@ -251,7 +252,8 @@ version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "frozenlist" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/61/62/06741b579156360248d1ec624842ad0edf697050bbaf7c3e46394e106ad1/aiosignal-1.4.0.tar.gz", hash = "sha256:f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7", size = 25007, upload-time = "2025-07-03T22:54:43.528Z" }
 wheels = [
@@ -311,7 +313,8 @@ dependencies = [
     { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "sniffio" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c2/70/2429d6f7c2516db99fb342c3ad89575ab3e0cd31d3d2f6cba5fdf5e9c65b/anthropic-0.93.0.tar.gz", hash = "sha256:fea8376f7d5cdf99d5e8e85a48fe7a7bd8ab307cdfee4b1e8283a18b1c0ce1b5", size = 654155, upload-time = "2026-04-09T18:13:53.522Z" }
 wheels = [
@@ -325,7 +328,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
     { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
 wheels = [
@@ -361,7 +365,8 @@ resolution-markers = [
     "python_full_version < '3.11' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6f/60/1e787a0b5ebf318483235be2a689ee367173983067e441b8379564f667c0/apache_tvm_ffi-0.1.9.tar.gz", hash = "sha256:d2d402587e8906de0a07f4746aa78f3d452c7efe3625d4bb39ac2ad693bce530", size = 2513731, upload-time = "2026-02-27T19:28:06.602Z" }
 wheels = [
@@ -401,7 +406,8 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "(extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/17/b0/5114e30faffe3279a51a5f3b45dd1b7ce09af1246b62447b45a39a374e54/apache_tvm_ffi-0.1.10.tar.gz", hash = "sha256:974c208766c304c780c17c6d405449e862f83b22c7b6b2b8c28b29d55a806ae3", size = 2691605, upload-time = "2026-04-07T19:58:51.767Z" }
 wheels = [
@@ -632,7 +638,8 @@ name = "blake3"
 version = "1.0.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version == '3.11.*' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/75/aa/abcd75e9600987a0bc6cfe9b6b2ff3f0e2cb08c170addc6e76035b5c4cb3/blake3-1.0.8.tar.gz", hash = "sha256:513cc7f0f5a7c035812604c2c852a0c1468311345573de647e310aca4ab165ba", size = 117308, upload-time = "2025-10-14T06:47:48.83Z" }
 wheels = [
@@ -766,7 +773,7 @@ dependencies = [
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" } },
     { name = "threadpoolctl" },
     { name = "torch" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a0/2e/6f4f5de03baa5e34892383bdd81d9786029d076220396d1f87a6c44ffa07/botorch-0.16.1.tar.gz", hash = "sha256:2a9ec7e43f1acddcf0c170ba084443e128696bc02f0ef9a48cc720f13f71713b", size = 2536271, upload-time = "2025-11-21T16:37:09.42Z" }
 wheels = [
@@ -813,7 +820,7 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" } },
     { name = "threadpoolctl" },
     { name = "torch" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/28/07/0e1b595021f74497677d4b7eba624e806622f0966920fd50e215444580f3/botorch-0.17.2.tar.gz", hash = "sha256:371461f35d882796a87e70ca9a529f31287f9ed984fd9ca3a1d311af58d3fa0c", size = 3747911, upload-time = "2026-03-05T01:08:55.605Z" }
 wheels = [
@@ -1512,7 +1519,7 @@ version = "50.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cffi", marker = "platform_python_implementation != 'PyPy'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/de/41/6cbdcf9142d00fe82836fbb51e503e58088575cf7a0fe1dbff6695bf0840/cryptography-50.0.0.tar.gz", hash = "sha256:eeac2acb5a20ed25e0ad6d1df9891a520b78b404266b6d11778f25d5d691a6c9", size = 880201, upload-time = "2026-07-31T14:25:10.11Z" }
 wheels = [
@@ -1616,7 +1623,8 @@ name = "cuda-tile"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/46/c8/1687a83d0739151ca410a5716b5f1dfb6f8feb6381c7c695d72264f17e1c/cuda_tile-1.3.0-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:c55616c648f06f84808648a521c67f2d7c790574d6b53ddf8c3bfbc995d36d45", size = 245438, upload-time = "2026-04-20T15:51:18.862Z" },
@@ -1720,7 +1728,8 @@ dependencies = [
     { name = "packageurl-python" },
     { name = "py-serializable" },
     { name = "sortedcontainers" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/21/0d/64f02d3fd9c116d6f50a540d04d1e4f2e3c487f5062d2db53733ddb25917/cyclonedx_python_lib-11.7.0.tar.gz", hash = "sha256:fb1bc3dedfa31208444dbd743007f478ab6984010a184e5bd466bffd969e936e", size = 1411174, upload-time = "2026-03-17T15:19:16.606Z" }
 wheels = [
@@ -1846,11 +1855,11 @@ wheels = [
 
 [[package]]
 name = "distlib"
-version = "0.4.0"
+version = "0.4.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/96/8e/709914eb2b5749865801041647dc7f4e6d00b549cfe88b65ca192995f07c/distlib-0.4.0.tar.gz", hash = "sha256:feec40075be03a04501a973d81f633735b4b69f98b05450592310c0f401a4e0d", size = 614605, upload-time = "2025-07-17T16:52:00.465Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/68/bc/d36966de7304047a1001a7559fbf266c464bb5d8cc85464536ef8c9bcc32/distlib-0.4.4.tar.gz", hash = "sha256:ca4175b4ac7f71223cc30ed7248c45d2b38c2439d8ee6e498ab67ed63cf3508d", size = 621304, upload-time = "2026-10-16T13:56:34.203Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/6b/e0547afaf41bf2c42e52430072fa5658766e3d65bd4b03a563d1b6336f57/distlib-0.4.0-py2.py3-none-any.whl", hash = "sha256:9659f7d87e46584a30b5780e43ac7a2143098441670ff0a49d5f9034c54a6c16", size = 469047, upload-time = "2025-07-17T16:51:58.613Z" },
+    { url = "https://files.pythonhosted.org/packages/c1/2b/238f02a4927fa2e27aa995371d240a468b52e42eae44a678434aff736b38/distlib-0.4.4-py2.py3-none-any.whl", hash = "sha256:cf09d55b1e85a89576b036aeb71550bfd68320f3f21761ca329eadadad918638", size = 472099, upload-time = "2026-10-16T13:56:32.053Z" },
 ]
 
 [[package]]
@@ -1916,7 +1925,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1941,7 +1950,8 @@ dependencies = [
     { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "starlette" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "typing-inspection" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f7/e6/7adb4c5fa231e82c35b8f5741a9f2d055f520c29af5546fd70d3e8e1cd2e/fastapi-0.135.3.tar.gz", hash = "sha256:bd6d7caf1a2bdd8d676843cdcd2287729572a1ef524fc4d65c17ae002a1be654", size = 396524, upload-time = "2026-04-01T16:23:58.188Z" }
@@ -2154,7 +2164,8 @@ dependencies = [
     { name = "quack-kernels" },
     { name = "torch" },
     { name = "torch-c-dlpack-ext" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/01/53/3788ac9984b65bc45988939e9c7ebab3f96a2fdc7c314d011e00134c375d/flash_attn_4-4.0.0b15.tar.gz", hash = "sha256:9e79d345f337e2306b3513fafd3c658179c6d910431a61f24dc93f8017909807", size = 313657, upload-time = "2026-05-27T09:18:12.917Z" }
 wheels = [
@@ -2616,7 +2627,8 @@ name = "grpcio"
 version = "1.83.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0c/98/304898ac4e04e2d5e4e4c2eadc178b1f2a16d5f4bc2f91306c87d64680b9/grpcio-1.83.0.tar.gz", hash = "sha256:7674587248fbbb2ac6e4eecf83a8a0f3d91a928f941de571acfd3a2f007fbc24", size = 13428824, upload-time = "2026-07-23T15:20:37.759Z" }
 wheels = [
@@ -2832,7 +2844,8 @@ dependencies = [
     { name = "pyyaml" },
     { name = "tqdm" },
     { name = "typer" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/bb/b6/e22bd20a25299c34b8c5922c1545a6320825b13906eb0f7298edfd034a0b/huggingface_hub-1.15.0.tar.gz", hash = "sha256:28abfdddda3927fd4de6a63cf26ab012498a2c24dae52baf150c5c6edf98a1d5", size = 784100, upload-time = "2026-05-15T11:42:52.149Z" }
 wheels = [
@@ -3029,7 +3042,7 @@ dependencies = [
     { name = "pygments" },
     { name = "stack-data" },
     { name = "traitlets" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/40/18/f8598d287006885e7136451fdea0755af4ebcbfe342836f24deefaed1164/ipython-8.39.0.tar.gz", hash = "sha256:4110ae96012c379b8b6db898a07e186c40a2a1ef5d57a7fa83166047d9da7624", size = 5513971, upload-time = "2026-03-27T10:02:13.94Z" }
 wheels = [
@@ -3058,7 +3071,7 @@ dependencies = [
     { name = "pygments" },
     { name = "stack-data" },
     { name = "traitlets" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c5/25/daae0e764047b0a2480c7bbb25d48f4f509b5818636562eeac145d06dfee/ipython-9.10.1.tar.gz", hash = "sha256:e170e9b2a44312484415bdb750492699bf329233b03f2557a9692cce6466ada4", size = 4426663, upload-time = "2026-03-27T09:53:26.244Z" }
 wheels = [
@@ -4025,7 +4038,8 @@ dependencies = [
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "sse-starlette" },
     { name = "starlette" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "typing-inspection" },
     { name = "uvicorn", marker = "sys_platform != 'emscripten'" },
 ]
@@ -4082,7 +4096,8 @@ dependencies = [
     { name = "pydantic-extra-types", extra = ["pycountry"], marker = "extra == 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
     { name = "requests" },
     { name = "tiktoken" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c2/eb/12167a1bea9714582e5b4f539f9c019323363e314a499c72855ff0e5ad43/mistral_common-1.11.2.tar.gz", hash = "sha256:79f68fc2d1190f28637f40e053f919c8c2697e00b2aa679ddee562a95183f4ad", size = 6357845, upload-time = "2026-05-04T19:47:40.413Z" }
 wheels = [
@@ -4206,7 +4221,7 @@ dependencies = [
     { name = "griffelib" },
     { name = "mkdocs-autorefs" },
     { name = "mkdocstrings" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/29/33/c225eaf898634bdda489a6766fc35d1683c640bffe0e0acd10646b13536d/mkdocstrings_python-2.0.3.tar.gz", hash = "sha256:c518632751cc869439b31c9d3177678ad2bfa5c21b79b863956ad68fc92c13b8", size = 199083, upload-time = "2026-02-20T10:38:36.368Z" }
 wheels = [
@@ -4457,7 +4472,7 @@ name = "multidict"
 version = "6.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1a/c2/c2d94cbe6ac1753f3fc980da97b3d930efe1da3af3c9f5125354436c073d/multidict-6.7.1.tar.gz", hash = "sha256:ec6652a1bee61c53a3e5776b6049172c53b6aaba34f18c9ad04f82712bac623d", size = 102010, upload-time = "2026-01-26T02:46:45.979Z" }
 wheels = [
@@ -4631,7 +4646,8 @@ dependencies = [
     { name = "mypy-extensions" },
     { name = "pathspec" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f8/5c/b0089fe7fef0a994ae5ee07029ced0526082c6cfaaa4c10d40a10e33b097/mypy-1.20.0.tar.gz", hash = "sha256:eb96c84efcc33f0b5e0e04beacf00129dd963b67226b01c00b9dfc8affb464c3", size = 3815028, upload-time = "2026-03-31T16:55:14.959Z" }
 wheels = [
@@ -5156,7 +5172,8 @@ resolution-markers = [
 dependencies = [
     { name = "cuda-python", marker = "extra == 'extra-7-vec-inf-sglang'" },
     { name = "numpy", marker = "extra == 'extra-7-vec-inf-sglang'" },
-    { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-sglang'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8a/4a/46d0698f30b27350ae96872bb5727b94c6379ac47cd142f1e2b9129ffeb9/nvidia_cutlass_dsl_libs_base-4.5.1-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:7833ba3524b1e972e8502499a1b2445ee1971b1fd6ed5a165ef6ce1c7c0e810b", size = 75634359, upload-time = "2026-05-15T14:44:02.592Z" },
@@ -5195,7 +5212,8 @@ resolution-markers = [
 dependencies = [
     { name = "cuda-python", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
     { name = "numpy", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
-    { name = "typing-extensions", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/3e/2cca8745885aaba0d835a8be29e516e56930791c01f0806da95d3017a495/nvidia_cutlass_dsl_libs_base-4.5.2-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:b62807bc5ea13bbdef648212893fac407ed943f940cece56b880d44af243e075", size = 75635922, upload-time = "2026-05-25T03:46:33.526Z" },
@@ -5232,7 +5250,8 @@ dependencies = [
     { name = "cuda-python" },
     { name = "numpy" },
     { name = "nvidia-cutlass-dsl-libs-base", version = "4.5.1", source = { registry = "https://pypi.org/simple" } },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7c/ea/ff1aafabaf39512548a8eee0d5675586f83672ed746b28a67fda2d4d467d/nvidia_cutlass_dsl_libs_cu13-4.5.1-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:9fb821348a38356f0eec7c654a3f7b1db9bb022bdf14faf799b8ffd7f046407b", size = 79080434, upload-time = "2026-05-15T14:40:04.819Z" },
@@ -5269,7 +5288,8 @@ dependencies = [
     { name = "cuda-python" },
     { name = "numpy" },
     { name = "nvidia-cutlass-dsl-libs-base", version = "4.5.2", source = { registry = "https://pypi.org/simple" } },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/12/96/1519dc5fb936b2e8d519710a1134ecfd162dfbdb014f15ea4534f52ca221/nvidia_cutlass_dsl_libs_cu13-4.5.2-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:696c65ca03995713b6719bc59b7df06f8ec1d263d7eb6ac77aa011201e142bd5", size = 79086862, upload-time = "2026-05-25T03:39:21.998Z" },
@@ -5366,7 +5386,8 @@ dependencies = [
     { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "sniffio", marker = "extra == 'extra-7-vec-inf-sglang'" },
     { name = "tqdm", marker = "extra == 'extra-7-vec-inf-sglang'" },
-    { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-sglang'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c4/44/303deb97be7c1c9b53118b52825cbd1557aeeff510f3a52566b1fa66f6a2/openai-2.6.1.tar.gz", hash = "sha256:27ae704d190615fca0c0fc2b796a38f8b5879645a3a52c9c453b23f97141bb49", size = 593043, upload-time = "2025-10-24T13:29:52.79Z" }
 wheels = [
@@ -5403,7 +5424,8 @@ dependencies = [
     { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "sniffio", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
     { name = "tqdm", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
-    { name = "typing-extensions", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/94/fe/64b3d035780b3188f86c4f6f1bc202e7bb74757ef028802112273b9dcacf/openai-2.31.0.tar.gz", hash = "sha256:43ca59a88fc973ad1848d86b98d7fac207e265ebbd1828b5e4bdfc85f79427a5", size = 684772, upload-time = "2026-04-08T21:01:41.797Z" }
 wheels = [
@@ -5532,7 +5554,8 @@ version = "1.41.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "importlib-metadata" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/47/8e/3778a7e87801d994869a9396b9fc2a289e5f9be91ff54a27d41eace494b0/opentelemetry_api-1.41.0.tar.gz", hash = "sha256:9421d911326ec12dee8bc933f7839090cad7a3f13fcfb0f9e82f8174dc003c09", size = 71416, upload-time = "2026-04-09T14:38:34.544Z" }
 wheels = [
@@ -5575,7 +5598,8 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp-proto-common" },
     { name = "opentelemetry-proto" },
     { name = "opentelemetry-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/46/d75a3f8c91915f2e58f61d0a2e4ada63891e7c7a37a20ff7949ba184a6b2/opentelemetry_exporter_otlp_proto_grpc-1.41.0.tar.gz", hash = "sha256:f704201251c6f65772b11bddea1c948000554459101bdbb0116e0a01b70592f6", size = 25754, upload-time = "2026-04-09T14:38:37.423Z" }
 wheels = [
@@ -5593,7 +5617,8 @@ dependencies = [
     { name = "opentelemetry-proto" },
     { name = "opentelemetry-sdk" },
     { name = "requests" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/19/63/d9f43cd75f3fabb7e01148c89cfa9491fc18f6580a6764c554ff7c953c46/opentelemetry_exporter_otlp_proto_http-1.41.0.tar.gz", hash = "sha256:dcd6e0686f56277db4eecbadd5262124e8f2cc739cadbc3fae3d08a12c976cf5", size = 24139, upload-time = "2026-04-09T14:38:38.128Z" }
 wheels = [
@@ -5633,7 +5658,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-semantic-conventions" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f8/0e/a586df1186f9f56b5a0879d52653effc40357b8e88fc50fe300038c3c08b/opentelemetry_sdk-1.41.0.tar.gz", hash = "sha256:7bddf3961131b318fc2d158947971a8e37e38b1cd23470cfb72b624e7cc108bd", size = 230181, upload-time = "2026-04-09T14:38:47.225Z" }
 wheels = [
@@ -5646,7 +5672,8 @@ version = "0.62b0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "opentelemetry-api" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a3/b0/c14f723e86c049b7bf8ff431160d982519b97a7be2857ed2247377397a24/opentelemetry_semantic_conventions-0.62b0.tar.gz", hash = "sha256:cbfb3c8fc259575cf68a6e1b94083cc35adc4a6b06e8cf431efa0d62606c0097", size = 145753, upload-time = "2026-04-09T14:38:48.274Z" }
 wheels = [
@@ -5778,7 +5805,8 @@ dependencies = [
     { name = "requests" },
     { name = "torch" },
     { name = "tqdm" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ac/d0/d59ae830bf7026425942899e3d48e77b58a713cff946a695e5405808da1b/outlines-0.1.11.tar.gz", hash = "sha256:0997bd9da1cc050e430bd08995dc7d4bd855918bafa4531e49d3f37110a23aba", size = 2488858, upload-time = "2024-12-13T07:24:08.426Z" }
 wheels = [
@@ -5900,11 +5928,11 @@ wheels = [
 
 [[package]]
 name = "packaging"
-version = "26.0"
+version = "26.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz", hash = "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4", size = 143416, upload-time = "2026-01-21T20:50:39.064Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79", size = 313412, upload-time = "2026-08-04T18:15:28.737Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl", hash = "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529", size = 74366, upload-time = "2026-01-21T20:50:37.788Z" },
+    { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
 ]
 
 [[package]]
@@ -6813,7 +6841,8 @@ resolution-markers = [
 dependencies = [
     { name = "annotated-types" },
     { name = "pydantic-core", version = "2.41.5", source = { registry = "https://pypi.org/simple" } },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version != '3.11.*'" },
     { name = "typing-inspection" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/69/44/36f1a6e523abc58ae5f928898e4aca2e0ea509b5aa6f6f392a5d882be928/pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49", size = 821591, upload-time = "2025-11-26T15:11:46.471Z" }
@@ -6850,7 +6879,7 @@ resolution-markers = [
 dependencies = [
     { name = "annotated-types" },
     { name = "pydantic-core", version = "2.46.4", source = { registry = "https://pypi.org/simple" } },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" } },
     { name = "typing-inspection" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/18/a5/b60d21ac674192f8ab0ba4e9fd860690f9b4a6e51ca5df118733b487d8d6/pydantic-2.13.4.tar.gz", hash = "sha256:c40756b57adaa8b1efeeced5c196f3f3b7c435f90e84ea7f443901bec8099ef6", size = 844775, upload-time = "2026-05-06T13:43:05.343Z" }
@@ -6880,7 +6909,8 @@ resolution-markers = [
     "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version != '3.11.*'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/71/70/23b021c950c2addd24ec408e9ab05d59b035b39d97cdc1130e1bce647bb6/pydantic_core-2.41.5.tar.gz", hash = "sha256:08daa51ea16ad373ffd5e7606252cc32f07bc72b28284b6bc9c6df804816476e", size = 460952, upload-time = "2025-11-04T13:43:49.098Z" }
 wheels = [
@@ -7015,7 +7045,7 @@ resolution-markers = [
     "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
 ]
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9d/56/921726b776ace8d8f5db44c4ef961006580d91dc52b803c489fafd1aa249/pydantic_core-2.46.4.tar.gz", hash = "sha256:62f875393d7f270851f20523dd2e29f082bcc82292d66db2b64ea71f64b6e1c1", size = 471464, upload-time = "2026-05-06T13:37:06.98Z" }
 wheels = [
@@ -7133,7 +7163,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "pydantic", version = "2.13.4", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.12' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/41/d3/3be31542180c0300b6860129ff1e3a428f3ef580727616ce22462626129b/pydantic_extra_types-2.11.2.tar.gz", hash = "sha256:3a2b83b61fe920925688e7838b59caa90a45637d1dbba2b1364b8d1f7ff72a0a", size = 203929, upload-time = "2026-04-05T20:50:51.556Z" }
 wheels = [
@@ -7183,7 +7214,7 @@ name = "pyjwt"
 version = "2.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/02/a5/5197bfd06417837ac079921c66fa6393f1dea3557272a263cebfef69e432/pyjwt-2.15.0.tar.gz", hash = "sha256:b11c5f9791d7bf51c2b39a81ed669f6b2dbbd669df2942f6c60167e9e3d1abe4", size = 120513, upload-time = "2026-09-23T16:56:00.689Z" }
 wheels = [
@@ -7285,7 +7316,8 @@ name = "pyre-extensions"
 version = "0.0.32"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "typing-inspect" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a7/53/5bc2532536e921c48366ad1047c1344ccef6afa5e84053f0f6e20a453767/pyre_extensions-0.0.32.tar.gz", hash = "sha256:5396715f14ea56c4d5fd0a88c57ca7e44faa468f905909edd7de4ad90ed85e55", size = 10852, upload-time = "2024-11-22T19:26:44.152Z" }
@@ -7343,7 +7375,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backports-asyncio-runner", marker = "python_full_version < '3.11'" },
     { name = "pytest" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/90/2c/8af215c0f776415f3590cac4f9086ccefd6fd463befeae41cd4d3f193e5a/pytest_asyncio-1.3.0.tar.gz", hash = "sha256:d7f52f36d231b80ee124cd216ffb19369aa168fc10095013c6b014a34d3ee9e5", size = 50087, upload-time = "2025-11-10T16:07:47.256Z" }
 wheels = [
@@ -7685,7 +7718,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
     { name = "rpds-py" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/22/f5/df4e9027acead3ecc63e50fe1e36aca1523e1719559c499951bb4b53188f/referencing-0.37.0.tar.gz", hash = "sha256:44aefc3142c5b842538163acb373e24cce6632bd54bdb01b21ad5863489f50d8", size = 78036, upload-time = "2025-10-13T15:30:48.871Z" }
 wheels = [
@@ -7848,7 +7882,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "rich" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/ba/dae9e3096651042754da419a4042bc1c75e07d615f9b15066d738838e4df/rich_toolkit-0.19.7.tar.gz", hash = "sha256:133c0915872da91d4c25d85342d5ec1dfacc69b63448af1a08a0d4b4f23ef46e", size = 195877, upload-time = "2026-02-24T16:06:20.555Z" }
 wheels = [
@@ -8898,7 +8933,8 @@ version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-sglang') or (python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/eb/e3/7c1dc7381d9f8ab7d854328ebfa884e62cb3f3d8549ddfd37c7814f42afa/starlette-1.3.1.tar.gz", hash = "sha256:05d0213193f2fbaae60e2ecb593b4add4262ad4e46536b54abe36f11a71724e0", size = 2703240, upload-time = "2026-06-12T09:23:11.602Z" }
 wheels = [
@@ -9031,7 +9067,8 @@ dependencies = [
     { name = "torch" },
     { name = "torch-c-dlpack-ext", marker = "python_full_version < '3.14'" },
     { name = "tqdm" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "z3-solver" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e6/27/6e363f48f878389078e2899756b8fecc326388b585122fd7f8a86590dfab/tilelang-0.1.8.tar.gz", hash = "sha256:da967821698eb7a79a76d27fbe25e314a3273f2b12ba4833e981658139d0e6d9", size = 93247335, upload-time = "2026-02-16T14:03:28.706Z" }
@@ -9069,7 +9106,8 @@ dependencies = [
     { name = "torch" },
     { name = "torch-c-dlpack-ext", marker = "python_full_version < '3.14'" },
     { name = "tqdm" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "z3-solver" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/56/70/5051f65821baa30a3d61fc48f8ba10c776490315e8c90f82559b92089756/tilelang-0.1.9.tar.gz", hash = "sha256:287f727c913bb648fcf6c1968809ba3390e55eeed257a5c6bb9a80bc05966af4", size = 93395292, upload-time = "2026-04-22T09:19:11.988Z" }
@@ -9285,7 +9323,8 @@ dependencies = [
     { name = "setuptools" },
     { name = "sympy" },
     { name = "triton", marker = "sys_platform == 'linux'" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ac/f2/c1690994afe461aae2d0cac62251e6802a703dec0a6c549c02ecd0de92a9/torch-2.11.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2c0d7fcfbc0c4e8bb5ebc3907cbc0c6a0da1b8f82b1fc6e14e914fa0b9baf74e", size = 80526521, upload-time = "2026-03-23T18:12:06.86Z" },
@@ -9648,9 +9687,47 @@ wheels = [
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform == 'emscripten' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.14' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.13.*' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.12.*' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version >= '3.12' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version == '3.11.*' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+]
 sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391, upload-time = "2025-08-25T13:49:26.313Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614, upload-time = "2025-08-25T13:49:24.86Z" },
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.16.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.11' and sys_platform == 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version < '3.11' and sys_platform != 'darwin' and extra != 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm'",
+    "python_full_version < '3.11' and sys_platform == 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version < '3.11' and sys_platform != 'darwin' and extra == 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+    "python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang' and extra != 'extra-7-vec-inf-vllm'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz", hash = "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5", size = 113555, upload-time = "2026-07-02T08:40:05.92Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl", hash = "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8", size = 45571, upload-time = "2026-07-02T08:40:04.659Z" },
 ]
 
 [[package]]
@@ -9659,7 +9736,8 @@ version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mypy-extensions" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/dc/74/1789779d91f1961fa9438e9a8710cdae6bd138c80d7303996933d117264a/typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78", size = 13825, upload-time = "2023-05-24T20:25:47.612Z" }
 wheels = [
@@ -9671,7 +9749,8 @@ name = "typing-inspection"
 version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464", size = 75949, upload-time = "2025-10-01T02:14:41.687Z" }
 wheels = [
@@ -9703,7 +9782,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "h11" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5e/da/6eee1ff8b6cbeed47eeb5229749168e81eb4b7b999a1a15a7176e51410c9/uvicorn-0.44.0.tar.gz", hash = "sha256:6c942071b68f07e178264b9152f1f16dfac5da85880c4ce06366a96d70d4f31e", size = 86947, upload-time = "2026-04-06T09:23:22.826Z" }
 wheels = [
@@ -9889,18 +9968,19 @@ wheels = [
 
 [[package]]
 name = "virtualenv"
-version = "21.7.13"
+version = "21.14.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "distlib" },
     { name = "filelock" },
+    { name = "packaging" },
     { name = "platformdirs" },
     { name = "python-discovery" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/50/c9b84eb106d0db420b9878dac0a386c5791726f127ce20b06897f6e3a1e9/virtualenv-21.7.13.tar.gz", hash = "sha256:0355558b6f33619aab31347e43643b0ebc97f61ea3acf617b2b69e1f8a843d11", size = 5360306, upload-time = "2026-09-18T04:35:49.354Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/aa/bff50daee0488e16d611258a9b6c5a1d0c9e128f8ca424e9f4e1c0444ef2/virtualenv-21.14.13.tar.gz", hash = "sha256:de5307ba4b9a0001d9c8ea02832d38f63ca432880f416c1bface61c4323fd905", size = 5570301, upload-time = "2026-10-22T20:10:16.952Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/ce/e74453531b0c49a58d0e8a4f9bab4495705859fee4a4f7de27d58f4a791a/virtualenv-21.7.13-py3-none-any.whl", hash = "sha256:1bea5af7463f59c4719db48fe739579a2a4f569c96f26c086edda85c96da9f59", size = 5328680, upload-time = "2026-09-18T04:35:47.194Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/a9/c10d8a44a29fb94a18b43fdf11f38caca53ae7c9406f11a72b1cb8f624f1/virtualenv-21.14.13-py3-none-any.whl", hash = "sha256:5fbb04138a4861580b78ba9110d529a26bc48fcc93c8ec36bc0202eeed96a788", size = 5557094, upload-time = "2026-10-22T20:10:15.096Z" },
 ]
 
 [[package]]
@@ -9977,7 +10057,8 @@ dependencies = [
     { name = "torchvision" },
     { name = "tqdm" },
     { name = "transformers", version = "5.9.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-vllm') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
     { name = "watchfiles" },
     { name = "xgrammar", version = "0.2.1", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'aarch64' or platform_machine == 'arm64' or platform_machine == 'ppc64le' or platform_machine == 's390x' or platform_machine == 'x86_64'" },
 ]
@@ -10020,7 +10101,8 @@ dependencies = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "sentry-sdk" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/60/bb/eb579bf9abac70934a014a9d4e45346aab307994f3021d201bebe5fa25ec/wandb-0.25.1.tar.gz", hash = "sha256:b2a95cd777ecbe7499599a43158834983448a0048329bc7210ef46ca18d21994", size = 43983308, upload-time = "2026-03-10T23:51:44.227Z" }
 wheels = [
@@ -10375,7 +10457,8 @@ dependencies = [
     { name = "torch", marker = "extra == 'extra-7-vec-inf-sglang'" },
     { name = "transformers", version = "5.6.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-vec-inf-sglang'" },
     { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-extensions", marker = "extra == 'extra-7-vec-inf-sglang'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a0/54/7e593fc41ffcaf5ac7c0379e0aec0cf03e53a742d1a91f64c6c7e79a6ac1/xgrammar-0.2.0.tar.gz", hash = "sha256:c4f0238a89869343171d43d069b8c5da874f3c2c25f408f20cd5987219a6adef", size = 2421093, upload-time = "2026-05-01T18:33:54.474Z" }
 wheels = [
@@ -10440,7 +10523,8 @@ dependencies = [
     { name = "torch", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
     { name = "transformers", version = "5.9.0", source = { registry = "https://pypi.org/simple" }, marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
     { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
-    { name = "typing-extensions", marker = "extra != 'extra-7-vec-inf-sglang' or extra == 'extra-7-vec-inf-vllm'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
+    { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra != 'extra-7-vec-inf-sglang') or (extra == 'extra-7-vec-inf-sglang' and extra == 'extra-7-vec-inf-vllm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d8/ea/6394caddd078d33772070eefaaf77cb0a826a3047b908b688dece7d040b5/xgrammar-0.2.1.tar.gz", hash = "sha256:4c48c251b75d211e9ffa7f4f4ac8b5b0164f89fd5f0d1883ad7ff4554922030d", size = 2427065, upload-time = "2026-05-17T21:39:26.576Z" }
 wheels = [
