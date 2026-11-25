@@ -1023,9 +1023,13 @@ class PerformanceMetricsCollector:
         dict[str, float]
             Parsed metrics as key-value pairs
         """
-        key_metrics = KEY_METRICS
+        key_metrics = dict(KEY_METRICS)
+        # The V1 engine exports prefix cache hits and queries as counters
+        key_metrics["vllm:prefix_cache_hits_total"] = "prefix_cache_hits"
+        key_metrics["vllm:prefix_cache_queries_total"] = "prefix_cache_queries"
 
         if self.enabled_prefix_caching:
+            # Hit rate gauges, only exported by the V0 engine
             key_metrics["vllm:gpu_prefix_cache_hit_rate"] = "gpu_prefix_cache_hit_rate"
             key_metrics["vllm:cpu_prefix_cache_hit_rate"] = "cpu_prefix_cache_hit_rate"
 
@@ -1044,6 +1048,12 @@ class PerformanceMetricsCollector:
                     parsed[key_metrics[metric_name]] = float(parts[1])
                 except (ValueError, IndexError):
                     continue
+
+        queries = parsed.get("prefix_cache_queries", 0.0)
+        if "gpu_prefix_cache_hit_rate" not in parsed and queries > 0:
+            parsed["gpu_prefix_cache_hit_rate"] = (
+                parsed.get("prefix_cache_hits", 0.0) / queries
+            )
         return parsed
 
     def fetch_metrics(self) -> Union[dict[str, float], str]:

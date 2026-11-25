@@ -248,9 +248,7 @@ And you will see the performance metrics streamed to your console, note that the
 │ Generation Throughput   │ 34.2 tokens/s   │
 │ Requests Running        │ 1 reqs          │
 │ Requests Waiting        │ 0 reqs          │
-│ Requests Swapped        │ 0 reqs          │
 │ GPU Cache Usage         │ 0.1%            │
-│ CPU Cache Usage         │ 0.0%            │
 │ Avg Request Latency     │ 2.6 s           │
 │ Total Prompt Tokens     │ 441 tokens      │
 │ Total Generation Tokens │ 1748 tokens     │

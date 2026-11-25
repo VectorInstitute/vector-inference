@@ -34,8 +34,12 @@ KEY_METRICS = {
     "vllm:request_success_total": "successful_requests_total",
     "vllm:num_requests_running": "requests_running",
     "vllm:num_requests_waiting": "requests_waiting",
-    "vllm:num_requests_swapped": "requests_swapped",
+    # KV cache usage as vLLM 0.10+ exports it
+    "vllm:kv_cache_usage_perc": "gpu_cache_usage",
+    # Only exported by older vLLM: the old name of the KV cache gauge (removed
+    # in 0.12) and two V0-engine metrics (V0 was removed in 0.11)
     "vllm:gpu_cache_usage_perc": "gpu_cache_usage",
+    "vllm:num_requests_swapped": "requests_swapped",
     "vllm:cpu_cache_usage_perc": "cpu_cache_usage",
 }
 
