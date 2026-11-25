@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from vec_inf.client._client_vars import SRC_DIR
+from vec_inf.client._client_vars import KEY_METRICS, SRC_DIR
 from vec_inf.client._exceptions import (
     MissingRequiredFieldsError,
     ModelConfigurationError,
@@ -1064,6 +1064,62 @@ vllm:gpu_cache_usage_perc{engine="0",model_name="test-model"} 0.123
         assert parsed["request_latency_count"] == 2.0
         assert parsed["requests_running"] == 1.0
         assert parsed["requests_waiting"] == 0.0
+
+    @patch("vec_inf.client._helper.ModelStatusMonitor")
+    def test_parse_metrics_current_vllm_names(
+        self, mock_status_monitor, mock_status_response
+    ):
+        """Test the KV cache and prefix cache metrics current vLLM exports."""
+        mock_status_monitor.return_value.process_model_status.return_value = (
+            mock_status_response
+        )
+        collector = PerformanceMetricsCollector("12345")
+
+        parsed = collector._parse_metrics("""\
+vllm:num_requests_running{engine="0",model_name="test-model"} 3.0
+vllm:num_requests_waiting{engine="0",model_name="test-model"} 12.0
+vllm:kv_cache_usage_perc{engine="0",model_name="test-model"} 0.75
+vllm:prefix_cache_queries_total{engine="0",model_name="test-model"} 400.0
+vllm:prefix_cache_hits_total{engine="0",model_name="test-model"} 100.0
+""")
+
+        assert parsed["gpu_cache_usage"] == 0.75
+        assert parsed["gpu_prefix_cache_hit_rate"] == pytest.approx(0.25)
+        assert "requests_swapped" not in parsed
+        assert "cpu_cache_usage" not in parsed
+
+    @patch("vec_inf.client._helper.ModelStatusMonitor")
+    def test_parse_metrics_no_prefix_hit_rate_before_lookups(
+        self, mock_status_monitor, mock_status_response
+    ):
+        """Test no prefix cache hit rate is reported before any lookups."""
+        mock_status_monitor.return_value.process_model_status.return_value = (
+            mock_status_response
+        )
+        collector = PerformanceMetricsCollector("12345")
+
+        parsed = collector._parse_metrics("""\
+vllm:prefix_cache_queries_total{engine="0",model_name="test-model"} 0.0
+vllm:prefix_cache_hits_total{engine="0",model_name="test-model"} 0.0
+""")
+
+        assert "gpu_prefix_cache_hit_rate" not in parsed
+
+    @patch("vec_inf.client._helper.ModelStatusMonitor")
+    @patch("vec_inf.client._helper.utils.read_slurm_log")
+    def test_parse_metrics_does_not_change_key_metrics(
+        self, mock_read_slurm_log, mock_status_monitor, mock_status_response
+    ):
+        """Test parsing with prefix caching enabled leaves KEY_METRICS unchanged."""
+        mock_status_monitor.return_value.process_model_status.return_value = (
+            mock_status_response
+        )
+        mock_read_slurm_log.return_value = {"enable_prefix_caching": True}
+        before = dict(KEY_METRICS)
+
+        PerformanceMetricsCollector("12345")._parse_metrics("")
+
+        assert before == KEY_METRICS
 
     @patch("vec_inf.client._helper.ModelStatusMonitor")
     @patch("vec_inf.client._helper.requests.get")

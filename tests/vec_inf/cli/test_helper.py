@@ -306,6 +306,31 @@ class TestMetricsResponseFormatter:
         assert formatter.enabled_prefix_caching is True
         assert isinstance(formatter.table, Table)
         assert len(formatter.table.rows) > 0
+        labels = list(formatter.table.columns[0]._cells)
+        assert "Requests Swapped" in labels
+        assert "CPU Cache Usage" in labels
+        assert "CPU Prefix Cache Hit Rate" in labels
+
+    def test_format_metrics_v1_engine(self):
+        """Test rows for metrics the vLLM V1 engine does not export are left out."""
+        metrics = {
+            "requests_running": 3,
+            "requests_waiting": 12,
+            "gpu_cache_usage": 0.75,
+            "gpu_prefix_cache_hit_rate": 0.25,
+        }
+
+        formatter = MetricsResponseFormatter(metrics)
+        formatter.format_metrics()
+
+        rows = dict(
+            zip(formatter.table.columns[0]._cells, formatter.table.columns[1]._cells)
+        )
+        assert rows["GPU Cache Usage"] == "75.0%"
+        assert rows["GPU Prefix Cache Hit Rate"] == "25.0%"
+        assert "Requests Swapped" not in rows
+        assert "CPU Cache Usage" not in rows
+        assert "CPU Prefix Cache Hit Rate" not in rows
 
     def test_format_metrics_with_latency(self):
         """Test formatting metrics with latency information."""

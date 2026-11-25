@@ -395,30 +395,34 @@ class MetricsResponseFormatter:
             "Requests Waiting",
             f"{self.metrics.get('requests_waiting', 0):.0f} reqs",
         )
-        self.table.add_row(
-            "Requests Swapped",
-            f"{self.metrics.get('requests_swapped', 0):.0f} reqs",
-        )
+        # Swapped requests and CPU cache only exist on the vLLM V0 engine
+        if "requests_swapped" in self.metrics:
+            self.table.add_row(
+                "Requests Swapped",
+                f"{self.metrics['requests_swapped']:.0f} reqs",
+            )
 
         # Cache usage metrics
         self.table.add_row(
             "GPU Cache Usage",
             f"{self.metrics.get('gpu_cache_usage', 0) * 100:.1f}%",
         )
-        self.table.add_row(
-            "CPU Cache Usage",
-            f"{self.metrics.get('cpu_cache_usage', 0) * 100:.1f}%",
-        )
+        if "cpu_cache_usage" in self.metrics:
+            self.table.add_row(
+                "CPU Cache Usage",
+                f"{self.metrics['cpu_cache_usage'] * 100:.1f}%",
+            )
 
         if self.enabled_prefix_caching:
             self.table.add_row(
                 "GPU Prefix Cache Hit Rate",
                 f"{self.metrics.get('gpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
             )
-            self.table.add_row(
-                "CPU Prefix Cache Hit Rate",
-                f"{self.metrics.get('cpu_prefix_cache_hit_rate', 0) * 100:.1f}%",
-            )
+            if "cpu_prefix_cache_hit_rate" in self.metrics:
+                self.table.add_row(
+                    "CPU Prefix Cache Hit Rate",
+                    f"{self.metrics['cpu_prefix_cache_hit_rate'] * 100:.1f}%",
+                )
 
         # Show average latency if available
         if "avg_request_latency" in self.metrics:
